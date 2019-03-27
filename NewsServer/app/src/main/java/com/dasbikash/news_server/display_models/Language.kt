@@ -11,28 +11,11 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.display_models;
+package com.dasbikash.news_server.display_models
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 
-public class NewsCategoryEntry implements Serializable{
-
-    private List<Integer> entries=new ArrayList<>();
-
-    public NewsCategoryEntry() {
-    }
-
-    public NewsCategoryEntry(List<Integer> entries) {
-        this.entries = entries;
-    }
-
-    public List<Integer> getEntries() {
-        return entries;
-    }
-
-    public void setEntries(List<Integer> entries) {
-        this.entries = entries;
-    }
-}
+@Entity
+data class Language (@PrimaryKey val id: Int,val name: String)

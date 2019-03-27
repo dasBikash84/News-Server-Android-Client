@@ -30,7 +30,7 @@ public interface NewsCategoryDao {
     @Query("SELECT * FROM NewsCategory")
     public List<NewsCategory> findAll();
 
-    @Query("SELECT * FROM NewsCategory where mId=:id")
+    @Query("SELECT * FROM NewsCategory where id=:id")
     public NewsCategory findById(int id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

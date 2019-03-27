@@ -38,7 +38,7 @@ public interface NewsPaperDao {
     @Query("SELECT * FROM Newspaper")
     public List<Newspaper> findAll();
 
-    @Query("SELECT * FROM Newspaper WHERE mId=:id")
+    @Query("SELECT * FROM Newspaper WHERE id=:id")
     public Newspaper findById(int id);
 
     @Update

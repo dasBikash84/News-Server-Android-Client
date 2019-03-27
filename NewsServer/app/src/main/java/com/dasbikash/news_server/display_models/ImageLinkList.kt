@@ -11,26 +11,9 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.display_models;
+package com.dasbikash.news_server.display_models
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable
+import java.util.ArrayList
 
-public class ImageLinkList {
-    private List<String> imageLinks = new ArrayList<>();
-
-    public ImageLinkList() {
-    }
-
-    public ImageLinkList(List<String> imageLinks) {
-        this.imageLinks = imageLinks;
-    }
-
-    public List<String> getImageLinks() {
-        return imageLinks;
-    }
-
-    public void setImageLinks(List<String> imageLinks) {
-        this.imageLinks = imageLinks;
-    }
-}
+data class ImageLinkList(val imageLinks: List<String> = ArrayList()): Serializable

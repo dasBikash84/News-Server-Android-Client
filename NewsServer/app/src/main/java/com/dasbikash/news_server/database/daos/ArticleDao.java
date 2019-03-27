@@ -27,10 +27,10 @@ import androidx.room.Query;
 @Dao
 public interface ArticleDao {
 
-    @Query("SELECT * FROM Article WHERE mPageId=:pageId")
+    @Query("SELECT * FROM Article WHERE pageId=:pageId")
     public List<Article> findAllByPageId(int pageId);
 
-    @Query("SELECT * FROM Article WHERE mId=:id")
+    @Query("SELECT * FROM Article WHERE id=:id")
     public Article findId(int id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -11,39 +11,16 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.display_models;
+package com.dasbikash.news_server.display_models
 
-import androidx.room.Entity;
-import androidx.room.Ignore;
-import androidx.room.PrimaryKey;
+import java.util.Objects
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 
 @Entity
-public class Language {
-    @PrimaryKey
-    private int mId;
-    private String mName;
-
-    public Language() {
-    }
-    @Ignore
-    public Language(int id, String name) {
-        mId = id;
-        mName = name;
-    }
-
-    public int getId() {
-        return mId;
-    }
-
-    public String getName() {
-        return mName;
-    }
-
-    public void setId(int id) {
-        mId = id;
-    }
-
-    public void setName(String name) {
-        mName = name;
-    }
-}
+data class Country (
+        @PrimaryKey val name: String,
+        val countryCode: String,
+        val timeZone: String
+)

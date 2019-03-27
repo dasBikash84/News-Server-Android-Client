@@ -39,25 +39,25 @@ public interface PageDao {
 
     //find all by NewsPaper (including in-actives)
 
-    @Query("SELECT * FROM Page WHERE mNewsPaperId=:newsPaperId")
+    @Query("SELECT * FROM Page WHERE newsPaperId=:newsPaperId")
     public List<Page> findAllByNewsPaperId(int newsPaperId);
 
     //find one by PageId
 
-    @Query("SELECT * FROM Page WHERE mId=:pageId AND mActive=true")
+    @Query("SELECT * FROM Page WHERE id=:pageId AND active=true")
     public Page findById(int pageId);
 
     //find all by Newspaper (only actives)
 
-    @Query("SELECT * FROM Page WHERE mNewsPaperId=:newsPaperId AND mActive=true")
+    @Query("SELECT * FROM Page WHERE newsPaperId=:newsPaperId AND active=true")
     public List<Page> findAllActiveByNewsPaperId(int newsPaperId);
 
     //find all top level page by NewsPaperId
 
-    @Query("SELECT * FROM Page WHERE mNewsPaperId=:newsPaperId AND mParentPageId="+Page.TOP_LEVEL_PAGE_PARENT_ID+" AND mActive=true")
+    @Query("SELECT * FROM Page WHERE newsPaperId=:newsPaperId AND parentPageId="+ 0 +" AND active=true")
     public List<Page> findAllTopLevelPageByNewsPaperId(int newsPaperId);
 
     //find all child pages for top level page
-    @Query("SELECT * FROM Page WHERE mParentPageId=:parentPageId AND mActive=true")
+    @Query("SELECT * FROM Page WHERE parentPageId=:parentPageId AND active=true")
     public List<Page> findChildrenByParentPageId(int parentPageId);
 }

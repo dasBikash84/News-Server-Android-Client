@@ -28,7 +28,7 @@ public interface LanguageDao {
     @Query("SELECT * FROM Language")
     public List<Language> findAll();
 
-    @Query("SELECT * FROM Language where mId=:id")
+    @Query("SELECT * FROM Language where id=:id")
     public Language findById(int id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

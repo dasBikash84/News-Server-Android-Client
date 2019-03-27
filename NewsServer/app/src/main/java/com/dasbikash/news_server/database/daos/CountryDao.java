@@ -28,7 +28,7 @@ public interface CountryDao {
     @Query("SELECT * FROM Country")
     public List<Country> findAll();
 
-    @Query("SELECT * FROM Country where mName=:name")
+    @Query("SELECT * FROM Country where name=:name")
     public Country findByName(String name);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
