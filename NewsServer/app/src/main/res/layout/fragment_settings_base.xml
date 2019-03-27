@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2019 www.dasbikash.org. All rights reserved.
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/progress_bar_holder"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:gravity="center"
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@android:color/transparent"
+            android:indeterminate="true"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="?android:dividerHorizontal"
+        android:showDividers="middle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:id="@+id/settings_item_image_download_on_data_network_block">
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:textAlignment="textStart"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="normal"
+                android:text="@string/settings_item_image_download_on_data_network_text"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/settings_item_image_download_on_data_network"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:background="@android:color/white"
+                android:textAllCaps="false"
+                android:stateListAnimator="@null"/>
+            <Switch
+                android:id="@+id/settings_item_image_download_on_data_network"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:paddingRight="8dp"
+                android:layout_gravity="right"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:id="@+id/settings_item_show_drawer_menu_on_start_block">
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:textAlignment="textStart"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="normal"
+                android:text="@string/settings_item_show_drawer_menu_on_start_text"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/settings_item_show_drawer_menu_on_start"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:background="@android:color/white"
+                android:textAllCaps="false"
+                android:stateListAnimator="@null"/>
+            <Switch
+                android:id="@+id/settings_item_show_drawer_menu_on_start"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:paddingRight="8dp"
+                android:layout_gravity="right"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+            android:id="@+id/settings_item_clear_cached_data"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:textAlignment="textStart"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:text="@string/settings_item_clear_cached_data_text"
+            android:paddingLeft="8dp"
+            android:background="@android:color/white"
+            android:textAllCaps="false"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/settings_item_customize_newspaper_views"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:textAlignment="textStart"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:text="@string/settings_item_customize_newspaper_views_text"
+            android:paddingLeft="8dp"
+            android:background="@android:color/white"
+            android:textAllCaps="false"/>
+        <Button
+            android:id="@+id/settings_item_customize_home_pages"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:textAlignment="textStart"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:text="@string/settings_item_customize_home_pages_text"
+            android:paddingLeft="8dp"
+            android:background="@android:color/white"
+            android:textAllCaps="false"/>
+        <Button
+            android:id="@+id/settings_item_customize_feature_groups"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:textAlignment="textStart"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:text="@string/settings_item_customize_feature_groups_text"
+            android:paddingLeft="8dp"
+            android:background="@android:color/white"
+            android:textAllCaps="false"/>
+        <Button
+            android:id="@+id/settings_item_customize_notifications"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:textAlignment="textStart"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:text="@string/settings_item_customize_notifications_text"
+            android:paddingLeft="8dp"
+            android:background="@android:color/white"
+            android:textAllCaps="false"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/settings_item_deleted_saved_articles"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:textAlignment="textStart"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:text="@string/settings_item_deleted_saved_articles_text"
+            android:paddingLeft="8dp"
+            android:background="@android:color/white"
+            android:textAllCaps="false"/>
+        <Button
+            android:id="@+id/settings_item_reset_to_factory"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:textAlignment="textStart"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:text="@string/settings_item_reset_to_factory_text"
+            android:paddingLeft="8dp"
+            android:background="@android:color/white"
+            android:textAllCaps="false"/>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
