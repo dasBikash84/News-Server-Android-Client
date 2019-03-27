@@ -43,7 +43,7 @@ public interface NewsCategoryDao {
     public void addNewsCategories(NewsCategory... newsCategories);
 
     @Update
-    public void updateNewsCategory(NewsCategory newsCategory);
+    public void save(NewsCategory newsCategory);
 
     @Delete
     public void deleteNewsCategory(NewsCategory newsCategory);

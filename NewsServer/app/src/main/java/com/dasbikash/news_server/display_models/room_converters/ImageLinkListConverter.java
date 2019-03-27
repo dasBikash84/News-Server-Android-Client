@@ -28,7 +28,7 @@ public class ImageLinkListConverter {
         StringBuilder stringBuilder = new StringBuilder("");
 
         for (int i = 0; i < imageLinkList.getImageLinks().size(); i++) {
-            stringBuilder.append(i);
+            stringBuilder.append(imageLinkList.getImageLinks().get(i));
             if (i!= imageLinkList.getImageLinks().size()-1){
                 stringBuilder.append(DATA_BRIDGE);
             }

@@ -27,7 +27,7 @@ public class NewsCategoryEntryConverter {
     public static String fromNewsCategoryEntry(NewsCategoryEntry entry){
         StringBuilder stringBuilder = new StringBuilder("");
         for (int i = 0; i < entry.getEntries().size(); i++) {
-            stringBuilder.append(i);
+            stringBuilder.append(entry.getEntries().get(i));
             if (i!= entry.getEntries().size()-1){
                 stringBuilder.append(DATA_BRIDGE);
             }

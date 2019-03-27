@@ -35,29 +35,38 @@ public interface PageDao {
     public void addPages(List<Page> pages);
 
     @Update
-    public void updatePage(Page page);
+    public void save(Page page);
+
+    //find one by PageId
+
+    @Query("SELECT * FROM Page WHERE id=:pageId AND active")
+    public Page findById(int pageId);
 
     //find all by NewsPaper (including in-actives)
 
     @Query("SELECT * FROM Page WHERE newsPaperId=:newsPaperId")
     public List<Page> findAllByNewsPaperId(int newsPaperId);
 
-    //find one by PageId
-
-    @Query("SELECT * FROM Page WHERE id=:pageId AND active=true")
-    public Page findById(int pageId);
-
     //find all by Newspaper (only actives)
 
-    @Query("SELECT * FROM Page WHERE newsPaperId=:newsPaperId AND active=true")
-    public List<Page> findAllActiveByNewsPaperId(int newsPaperId);
+    @Query("SELECT * FROM Page WHERE newsPaperId=:newsPaperId AND active")
+    public List<Page> findAllActivePagesByNewsPaperId(int newsPaperId);
 
-    //find all top level page by NewsPaperId
+    //find all top level page by NewsPaperId(only actives)
 
-    @Query("SELECT * FROM Page WHERE newsPaperId=:newsPaperId AND parentPageId="+ 0 +" AND active=true")
-    public List<Page> findAllTopLevelPageByNewsPaperId(int newsPaperId);
+    @Query("SELECT * FROM Page WHERE newsPaperId=:newsPaperId AND parentPageId="+ Page.TOP_LEVEL_PAGE_PARENT_ID +" AND active")
+    public List<Page> findAllActiveTopLevelPagesByNewsPaperId(int newsPaperId);
 
-    //find all child pages for top level page
-    @Query("SELECT * FROM Page WHERE parentPageId=:parentPageId AND active=true")
+    //find all top level page by NewsPaperId(including in-actives)
+
+    @Query("SELECT * FROM Page WHERE newsPaperId=:newsPaperId AND parentPageId="+ Page.TOP_LEVEL_PAGE_PARENT_ID)
+    public List<Page> findAllTopLevelPagesByNewsPaperId(int newsPaperId);
+
+    //find all child pages for top level page(only actives)
+    @Query("SELECT * FROM Page WHERE parentPageId=:parentPageId AND active")
+    public List<Page> findActiveChildrenByParentPageId(int parentPageId);
+
+    //find all child pages for top level page(including in-actives)
+    @Query("SELECT * FROM Page WHERE parentPageId=:parentPageId")
     public List<Page> findChildrenByParentPageId(int parentPageId);
 }

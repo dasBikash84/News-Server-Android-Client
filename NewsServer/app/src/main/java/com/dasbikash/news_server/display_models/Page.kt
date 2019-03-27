@@ -31,7 +31,7 @@ import androidx.room.PrimaryKey
 )
 data class Page(
         @PrimaryKey val id: Int, val newsPaperId: Int, val parentPageId: Int,
-        val title: String, val active: Boolean, val favourite: Boolean)
+        val title: String, var active: Boolean, var favourite: Boolean=false)
     : Serializable {
 
     val isTopLevelPage: Boolean
@@ -39,7 +39,7 @@ data class Page(
         get() = parentPageId == TOP_LEVEL_PAGE_PARENT_ID
 
     companion object {
-        @JvmStatic
-        public val TOP_LEVEL_PAGE_PARENT_ID = 0
+        @JvmField
+        val TOP_LEVEL_PAGE_PARENT_ID = 0
     }
 }

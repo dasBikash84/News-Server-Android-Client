@@ -44,4 +44,7 @@ public interface ArticleDao {
 
     @Delete
     public void deleteArticle(Article article);
+
+    @Query("SELECT COUNT(*) FROM Article WHERE pageId=:pageId")
+    public int getArticleCountByPageId(int pageId);
 }
