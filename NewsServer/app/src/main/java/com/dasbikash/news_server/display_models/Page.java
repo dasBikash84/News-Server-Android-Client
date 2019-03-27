@@ -18,16 +18,21 @@ import java.io.Serializable;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Ignore;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 @Entity(foreignKeys = {
         @ForeignKey(entity = Newspaper.class,
                     parentColumns = "mId",
                     childColumns = "mId")
+},
+indices = {
+        @Index("mNewsPaperId"),
+        @Index("mParentPageId")
 })
 public final class Page implements Serializable{
 
-    private static int TOP_LEVEL_PAGE_PARENT_ID = 0;
+    public static final int TOP_LEVEL_PAGE_PARENT_ID = 0;
 
     @PrimaryKey
     private int mId;
