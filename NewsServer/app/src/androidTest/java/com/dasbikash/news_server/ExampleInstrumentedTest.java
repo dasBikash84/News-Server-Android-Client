@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import static org.junit.Assert.*;
@@ -59,10 +60,14 @@ public class ExampleInstrumentedTest {
     public void realtimeDbTest(){
         HashMap<String,Boolean> map =
                 new HashMap<>();
-        map.put("bikashdaseee@gmail,com",true);
-        map.put("bikash2daseee@gmail,com",true);
-        map.put("bikash3daseee@gmail,com",true);
-        Task<Void> task = mReference.child("admin_list").setValue(map);
+        map.put("bikashdaseee@gmail.com",true);
+        map.put("bikash2daseee@gmail.com",true);
+        map.put("bikash3daseee@gmail.com",true);
+        Task<Void> task = mReference.child("admin_list").setValue(Arrays.asList(
+                "bikashdaseee@gmail.com",
+                "bikash2daseee@gmail.com",
+                "bikash3daseee@gmail.com"
+        ));
         while (!task.isComplete());
     }
 }
