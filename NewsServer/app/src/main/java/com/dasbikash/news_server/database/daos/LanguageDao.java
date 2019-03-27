@@ -15,6 +15,8 @@ package com.dasbikash.news_server.database.daos;
 
 import com.dasbikash.news_server.display_models.Language;
 
+import java.util.List;
+
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
@@ -24,7 +26,7 @@ import androidx.room.Query;
 public interface LanguageDao {
 
     @Query("SELECT * FROM Language")
-    public Iterable<Language> findAll();
+    public List<Language> findAll();
 
     @Query("SELECT * FROM Language where mId=:id")
     public Language findById(int id);
@@ -33,7 +35,7 @@ public interface LanguageDao {
     public void addLanguage(Language language);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addLanguages(Iterable<Language> languages);
+    public void addLanguages(List<Language> languages);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void addLanguages(Language... languages);

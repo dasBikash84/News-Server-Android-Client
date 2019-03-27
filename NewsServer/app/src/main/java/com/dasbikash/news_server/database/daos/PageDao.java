@@ -15,11 +15,15 @@ package com.dasbikash.news_server.database.daos;
 
 import com.dasbikash.news_server.display_models.Page;
 
+import java.util.List;
+
+import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
+@Dao
 public interface PageDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void addPage(Page page);
@@ -28,7 +32,7 @@ public interface PageDao {
     public void addPages(Page... pages);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addPages(Iterable<Page> pages);
+    public void addPages(List<Page> pages);
 
     @Update
     public void updatePage(Page page);
@@ -36,7 +40,7 @@ public interface PageDao {
     //find all by NewsPaper (including in-actives)
 
     @Query("SELECT * FROM Page WHERE mNewsPaperId=:newsPaperId")
-    public Iterable<Page> findAllByNewsPaperId(int newsPaperId);
+    public List<Page> findAllByNewsPaperId(int newsPaperId);
 
     //find one by PageId
 
@@ -46,14 +50,14 @@ public interface PageDao {
     //find all by Newspaper (only actives)
 
     @Query("SELECT * FROM Page WHERE mNewsPaperId=:newsPaperId AND mActive=true")
-    public Iterable<Page> findAllActiveByNewsPaperId(int newsPaperId);
+    public List<Page> findAllActiveByNewsPaperId(int newsPaperId);
 
     //find all top level page by NewsPaperId
 
-    @Query("SELECT * FROM Page WHERE mNewsPaperId=:newsPaperId AND mParentPageId="+Page.TOP_LEVEL_PAGE_PARENT_ID+" AND mActive=ture")
-    public Iterable<Page> findAllTopLevelPageByNewsPaperId(int newsPaperId);
+    @Query("SELECT * FROM Page WHERE mNewsPaperId=:newsPaperId AND mParentPageId="+Page.TOP_LEVEL_PAGE_PARENT_ID+" AND mActive=true")
+    public List<Page> findAllTopLevelPageByNewsPaperId(int newsPaperId);
 
     //find all child pages for top level page
     @Query("SELECT * FROM Page WHERE mParentPageId=:parentPageId AND mActive=true")
-    public Iterable<Page> findChildrenByParentPageId(int parentPageId);
+    public List<Page> findChildrenByParentPageId(int parentPageId);
 }

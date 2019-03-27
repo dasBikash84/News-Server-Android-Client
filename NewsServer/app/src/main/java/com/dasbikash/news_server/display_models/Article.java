@@ -17,12 +17,16 @@ import java.io.Serializable;
 
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 @Entity(foreignKeys = {
         @ForeignKey(entity = Page.class,
                     parentColumns = "mId",
                     childColumns = "mPageId")
+},indices = {
+        @Index(value = "mPageId", name = "page_id_index")
 })
 public final class Article implements Serializable{
     @PrimaryKey
@@ -36,6 +40,7 @@ public final class Article implements Serializable{
     public Article() {
     }
 
+    @Ignore
     public Article(int id, int pageId, String title,
                    long lastModificationTS, boolean savedLocally,
                    ImageLinkList imageLinkList) {

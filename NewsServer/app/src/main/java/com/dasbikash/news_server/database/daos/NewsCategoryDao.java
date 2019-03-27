@@ -15,6 +15,8 @@ package com.dasbikash.news_server.database.daos;
 
 import com.dasbikash.news_server.display_models.NewsCategory;
 
+import java.util.List;
+
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -26,7 +28,7 @@ import androidx.room.Update;
 public interface NewsCategoryDao {
 
     @Query("SELECT * FROM NewsCategory")
-    public Iterable<NewsCategory> findAll();
+    public List<NewsCategory> findAll();
 
     @Query("SELECT * FROM NewsCategory where mId=:id")
     public NewsCategory findById(int id);
@@ -35,7 +37,7 @@ public interface NewsCategoryDao {
     public void addNewsCategory(NewsCategory newsCategory);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addNewsCategories(Iterable<NewsCategory> newsCategories);
+    public void addNewsCategories(List<NewsCategory> newsCategories);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void addNewsCategories(NewsCategory... newsCategories);

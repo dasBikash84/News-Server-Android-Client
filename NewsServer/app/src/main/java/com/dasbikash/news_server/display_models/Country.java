@@ -13,12 +13,15 @@
 
 package com.dasbikash.news_server.display_models;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity
 public class Country {
     @PrimaryKey
+    @NonNull
     private String mName;
     private String mCountryCode;
     private String mTimeZone;
@@ -26,7 +29,8 @@ public class Country {
     public Country() {
     }
 
-    public Country(String name, String countryCode, int continentId, String timeZone) {
+    @Ignore
+    public Country(String name, String countryCode, String timeZone) {
         mName = name;
         mCountryCode = countryCode;
         mTimeZone = timeZone;
@@ -42,5 +46,26 @@ public class Country {
 
     public String getTimeZone() {
         return mTimeZone;
+    }
+
+    public void setName(String name) {
+        mName = name;
+    }
+
+    public void setCountryCode(String countryCode) {
+        mCountryCode = countryCode;
+    }
+
+    public void setTimeZone(String timeZone) {
+        mTimeZone = timeZone;
+    }
+
+    @Override
+    public String toString() {
+        return "Country{" +
+                "mName='" + mName + '\'' +
+                ", mCountryCode='" + mCountryCode + '\'' +
+                ", mTimeZone='" + mTimeZone + '\'' +
+                '}';
     }
 }

@@ -26,7 +26,7 @@ import androidx.room.Query;
 public interface CountryDao {
 
     @Query("SELECT * FROM Country")
-    public Iterable<Country> findAll();
+    public List<Country> findAll();
 
     @Query("SELECT * FROM Country where mName=:name")
     public Country findByName(String name);
@@ -35,7 +35,7 @@ public interface CountryDao {
     public void addCountry(Country country);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addCountries(Iterable<Country> countries);
+    public void addCountries(List<Country> countries);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void addCountries(Country... countries);

@@ -14,6 +14,7 @@
 package com.dasbikash.news_server.display_models;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity
@@ -24,7 +25,7 @@ public class Language {
 
     public Language() {
     }
-
+    @Ignore
     public Language(int id, String name) {
         mId = id;
         mName = name;
@@ -36,5 +37,13 @@ public class Language {
 
     public String getName() {
         return mName;
+    }
+
+    public void setId(int id) {
+        mId = id;
+    }
+
+    public void setName(String name) {
+        mName = name;
     }
 }

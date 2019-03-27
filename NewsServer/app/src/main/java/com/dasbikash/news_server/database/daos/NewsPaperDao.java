@@ -15,6 +15,8 @@ package com.dasbikash.news_server.database.daos;
 
 import com.dasbikash.news_server.display_models.Newspaper;
 
+import java.util.List;
+
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
@@ -25,7 +27,7 @@ import androidx.room.Update;
 public interface NewsPaperDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addNewsPapers(Iterable<Newspaper> newspapers);
+    public void addNewsPapers(List<Newspaper> newspapers);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void addNewsPapers(Newspaper... newspapers);
@@ -34,7 +36,7 @@ public interface NewsPaperDao {
     public void addNewsPaper(Newspaper newspaper);
 
     @Query("SELECT * FROM Newspaper")
-    public Iterable<Newspaper> findAll();
+    public List<Newspaper> findAll();
 
     @Query("SELECT * FROM Newspaper WHERE mId=:id")
     public Newspaper findById(int id);

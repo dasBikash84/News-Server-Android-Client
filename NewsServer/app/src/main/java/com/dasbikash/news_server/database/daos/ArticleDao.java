@@ -16,6 +16,8 @@ package com.dasbikash.news_server.database.daos;
 import com.dasbikash.news_server.display_models.Article;
 import com.dasbikash.news_server.display_models.Country;
 
+import java.util.List;
+
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -26,7 +28,7 @@ import androidx.room.Query;
 public interface ArticleDao {
 
     @Query("SELECT * FROM Article WHERE mPageId=:pageId")
-    public Iterable<Article> findAllByPageId(int pageId);
+    public List<Article> findAllByPageId(int pageId);
 
     @Query("SELECT * FROM Article WHERE mId=:id")
     public Article findId(int id);
@@ -35,7 +37,7 @@ public interface ArticleDao {
     public void addArticle(Article article);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addArticles(Iterable<Article> articles);
+    public void addArticles(List<Article> articles);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void addArticles(Article... articles);

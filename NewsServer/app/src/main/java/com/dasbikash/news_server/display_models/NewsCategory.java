@@ -16,6 +16,7 @@ package com.dasbikash.news_server.display_models;
 import java.io.Serializable;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity
@@ -26,7 +27,11 @@ public class NewsCategory implements Serializable{
     private boolean mActive;
     private NewsCategoryEntry mNewsCategoryEntry;
 
-    private NewsCategory(int id, String title, boolean active, NewsCategoryEntry newsCategoryEntry) {
+    public NewsCategory() {
+    }
+
+    @Ignore
+    public NewsCategory(int id, String title, boolean active, NewsCategoryEntry newsCategoryEntry) {
         mId = id;
         mTitle = title;
         mActive = active;

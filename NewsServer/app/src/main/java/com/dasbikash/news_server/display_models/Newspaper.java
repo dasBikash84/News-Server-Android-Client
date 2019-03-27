@@ -17,6 +17,9 @@ import java.io.Serializable;
 
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.PrimaryKey;
 
 @Entity(foreignKeys = {
         @ForeignKey(entity = Country.class,
@@ -25,8 +28,12 @@ import androidx.room.ForeignKey;
         @ForeignKey(entity = Language.class,
                     parentColumns = "mId",
                     childColumns = "mLanguageId")
+},indices = {
+        @Index(value = "mCountryName",name = "country_name_index"),
+        @Index(value = "mLanguageId",name = "language_id_index")
 })
 public class Newspaper implements Serializable{
+    @PrimaryKey
     private int mId;
     private String mName;
     private String mCountryName;
@@ -36,6 +43,7 @@ public class Newspaper implements Serializable{
     public Newspaper() {
     }
 
+    @Ignore
     public Newspaper(int id, String name, String countryName, int languageId, boolean active) {
         mId = id;
         mName = name;
@@ -62,5 +70,25 @@ public class Newspaper implements Serializable{
 
     public boolean isActive() {
         return mActive;
+    }
+
+    public void setId(int id) {
+        mId = id;
+    }
+
+    public void setName(String name) {
+        mName = name;
+    }
+
+    public void setCountryName(String countryName) {
+        mCountryName = countryName;
+    }
+
+    public void setLanguageId(int languageId) {
+        mLanguageId = languageId;
+    }
+
+    public void setActive(boolean active) {
+        mActive = active;
     }
 }
