@@ -14,7 +14,6 @@
 package com.dasbikash.news_server.display_models.room_converters;
 
 import com.dasbikash.news_server.display_models.ImageLinkList;
-import com.dasbikash.news_server.display_models.NewsCategoryEntry;
 
 import androidx.room.TypeConverter;
 

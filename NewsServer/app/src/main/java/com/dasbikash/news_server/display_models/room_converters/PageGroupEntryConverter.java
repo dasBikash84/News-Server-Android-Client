@@ -13,18 +13,16 @@
 
 package com.dasbikash.news_server.display_models.room_converters;
 
-import com.dasbikash.news_server.display_models.NewsCategoryEntry;
-
-import java.util.ArrayList;
+import com.dasbikash.news_server.display_models.PageGroupEntry;
 
 import androidx.room.TypeConverter;
 
-public class NewsCategoryEntryConverter {
+public class PageGroupEntryConverter {
 
     private static String DATA_BRIDGE = ",";
 
     @TypeConverter
-    public static String fromNewsCategoryEntry(NewsCategoryEntry entry){
+    public static String fromNewsCategoryEntry(PageGroupEntry entry){
         StringBuilder stringBuilder = new StringBuilder("");
         for (int i = 0; i < entry.getEntries().size(); i++) {
             stringBuilder.append(entry.getEntries().get(i));
@@ -36,8 +34,8 @@ public class NewsCategoryEntryConverter {
     }
 
     @TypeConverter
-    public static NewsCategoryEntry toNewsCategoryEntry(String entryListString){
-        NewsCategoryEntry entry = new NewsCategoryEntry();
+    public static PageGroupEntry toNewsCategoryEntry(String entryListString){
+        PageGroupEntry entry = new PageGroupEntry();
 
         if (entryListString!=null){
             for (String entryStr : entryListString.split(DATA_BRIDGE)){

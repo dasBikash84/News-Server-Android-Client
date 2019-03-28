@@ -17,6 +17,7 @@ import com.dasbikash.news_server.display_models.Page;
 
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
@@ -25,6 +26,9 @@ import androidx.room.Update;
 
 @Dao
 public interface PageDao {
+
+    public static final int MOST_VISITED_PAGE_LIST_LENGTH = 10;
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void addPage(Page page);
 
@@ -36,6 +40,11 @@ public interface PageDao {
 
     @Update
     public void save(Page page);
+
+    //find most visited page list
+
+    @Query("SELECT * FROM Page ORDER BY visitCount DESC LIMIT "+MOST_VISITED_PAGE_LIST_LENGTH)
+    public LiveData<List<Page>> getMostVisitedPageList();
 
     //find one by PageId
 
@@ -69,4 +78,10 @@ public interface PageDao {
     //find all child pages for top level page(including in-actives)
     @Query("SELECT * FROM Page WHERE parentPageId=:parentPageId")
     public List<Page> findChildrenByParentPageId(int parentPageId);
+
+    //find list of favourite pages
+
+    @Query("SELECT * FROM Page WHERE favourite ORDER BY title ASC")
+    public LiveData<List<Page>> getFavouritePageList();
+
 }

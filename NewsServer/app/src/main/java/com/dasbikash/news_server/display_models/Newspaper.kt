@@ -33,5 +33,5 @@ data class Newspaper (
     val name: String,
     val countryName: String,
     val languageId: Int,
-    var isActive: Boolean
+    var active: Boolean
 ): Serializable

@@ -22,14 +22,14 @@ import com.dasbikash.news_server.database.NewsServerDatabase;
 import com.dasbikash.news_server.database.daos.ArticleDao;
 import com.dasbikash.news_server.database.daos.CountryDao;
 import com.dasbikash.news_server.database.daos.LanguageDao;
-import com.dasbikash.news_server.database.daos.NewsCategoryDao;
+import com.dasbikash.news_server.database.daos.PageGroupDao;
 import com.dasbikash.news_server.database.daos.NewsPaperDao;
 import com.dasbikash.news_server.database.daos.PageDao;
 import com.dasbikash.news_server.display_models.Article;
 import com.dasbikash.news_server.display_models.Country;
 import com.dasbikash.news_server.display_models.Language;
-import com.dasbikash.news_server.display_models.NewsCategory;
-import com.dasbikash.news_server.display_models.NewsCategoryEntry;
+import com.dasbikash.news_server.display_models.PageGroup;
+import com.dasbikash.news_server.display_models.PageGroupEntry;
 import com.dasbikash.news_server.display_models.Newspaper;
 import com.dasbikash.news_server.display_models.Page;
 
@@ -64,7 +64,7 @@ public class RoomDatabaseInstrumentedTest {
     private LanguageDao mLanguageDao;
     private NewsPaperDao mNewsPaperDao;
     private PageDao mPageDao;
-    private NewsCategoryDao mNewsCategoryDao;
+    private PageGroupDao mPageGroupDao;
     private ArticleDao mArticleDao;
 
     private Country mCountry;
@@ -72,7 +72,7 @@ public class RoomDatabaseInstrumentedTest {
     private Newspaper mNewspaper;
     private Page mPage;
     private Page page2;
-    private NewsCategory mNewsCategory;
+    private PageGroup mPageGroup;
     private Article mArticle;
 
 
@@ -81,17 +81,17 @@ public class RoomDatabaseInstrumentedTest {
         mCountry = new Country("Bangladesh","BD","Asia/Dhaka");
         mLanguage = new Language(1,"Bangla-Bangladesh");
         mNewspaper = new Newspaper(1,"প্রথম আলো",mCountry.getName(),mLanguage.getId(),true);
-        mPage = new Page(1,mNewspaper.getId(),0,"সর্বশেষ",true,false);
-        page2 = new Page(2,mNewspaper.getId(),1,"বাংলাদেশ",true,false);
+        mPage = new Page(1,mNewspaper.getId(),0,"সর্বশেষ",true,false,0);
+        page2 = new Page(2,mNewspaper.getId(),1,"বাংলাদেশ",true,false,0);
 
-        mNewsCategory = new NewsCategory(1,"Cat 1",true,
-                new NewsCategoryEntry(new ArrayList<>(Arrays.asList(mPage.getId(),page2.getId()))));
+        mPageGroup = new PageGroup(1,"Cat 1",true,
+                new PageGroupEntry(new ArrayList<>(Arrays.asList(mPage.getId(),page2.getId()))));
 
         mCountryDao.addCountry(mCountry);
         mLanguageDao.addLanguage(mLanguage);
         mNewsPaperDao.addNewsPaper(mNewspaper);
         mPageDao.addPage(mPage);
-        mNewsCategoryDao.addNewsCategory(mNewsCategory);
+        mPageGroupDao.addPageGroup(mPageGroup);
 
     }
 
@@ -106,7 +106,7 @@ public class RoomDatabaseInstrumentedTest {
         mLanguageDao = mDatabase.getLanguageDao();
         mNewsPaperDao = mDatabase.getNewsPaperDao();
         mPageDao = mDatabase.getPageDao();
-        mNewsCategoryDao = mDatabase.getNewsCategoryDao();
+        mPageGroupDao = mDatabase.getPageGroupDao();
         mArticleDao = mDatabase.getArticleDao();
 
         dataBootStrap();
@@ -156,7 +156,7 @@ public class RoomDatabaseInstrumentedTest {
         //assertThat(mPage, equalTo(mPageDao.findById(mNewspaper.getId())));
         //assertThat(mPage, equalTo(mPageDao.findAllActiveTopLevelPagesByNewsPaperId(mNewspaper.getId()).get(0)));
 
-        Page page2 = new Page(2,mNewspaper.getId(),1,"বাংলাদেশ",true,false);
+        Page page2 = new Page(2,mNewspaper.getId(),1,"বাংলাদেশ",true,false,0);
         mPage.setActive(true);
         mPageDao.addPages(Arrays.asList(mPage,page2));
         assertThat(page2, equalTo(mPageDao.findActiveChildrenByParentPageId(mPage.getId()).get(0)));
@@ -166,22 +166,22 @@ public class RoomDatabaseInstrumentedTest {
 
     @Test
     public void testNewsCategoryClass(){
-        //Log.d(TAG, "testNewsCategoryClass: "+mNewsCategoryDao.findAll());
-        assertThat(mPage.getId(), equalTo(mNewsCategoryDao.findAll().get(0).getNewsCategoryEntry().getEntries().get(0)));
-        assertThat(page2.getId(), equalTo(mNewsCategoryDao.findAll().get(0).getNewsCategoryEntry().getEntries().get(1)));
-        assertThat(mPage.getId(), equalTo(mNewsCategoryDao.findById(mNewsCategory.getId()).getNewsCategoryEntry().getEntries().get(0)));
-        assertThat(page2.getId(), equalTo(mNewsCategoryDao.findById(mNewsCategory.getId()).getNewsCategoryEntry().getEntries().get(1)));
+        //Log.d(TAG, "testNewsCategoryClass: "+mPageGroupDao.findAll());
+        //assertThat(mPage.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getPageGroupEntry().getEntries().get(0)));
+        //assertThat(page2.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getPageGroupEntry().getEntries().get(1)));
+        assertThat(mPage.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getPageGroupEntry().getEntries().get(0)));
+        assertThat(page2.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getPageGroupEntry().getEntries().get(1)));
 
-        Page page3 = new Page(3,mNewspaper.getId(),1,"আন্তর্জাতিক",true,false);
-        Log.d(TAG, "testNewsCategoryClass: "+mNewsCategoryDao.findAll());
-        mNewsCategory.getNewsCategoryEntry().getEntries().add(page3.getId());
-        mNewsCategoryDao.save(mNewsCategory);
-        assertThat(mPage.getId(), equalTo(mNewsCategoryDao.findAll().get(0).getNewsCategoryEntry().getEntries().get(0)));
-        assertThat(page2.getId(), equalTo(mNewsCategoryDao.findAll().get(0).getNewsCategoryEntry().getEntries().get(1)));
-        assertThat(page3.getId(), equalTo(mNewsCategoryDao.findAll().get(0).getNewsCategoryEntry().getEntries().get(2)));
-        assertThat(mPage.getId(), equalTo(mNewsCategoryDao.findById(mNewsCategory.getId()).getNewsCategoryEntry().getEntries().get(0)));
-        assertThat(page2.getId(), equalTo(mNewsCategoryDao.findById(mNewsCategory.getId()).getNewsCategoryEntry().getEntries().get(1)));
-        assertThat(page3.getId(), equalTo(mNewsCategoryDao.findById(mNewsCategory.getId()).getNewsCategoryEntry().getEntries().get(2)));
+        Page page3 = new Page(3,mNewspaper.getId(),1,"আন্তর্জাতিক",true,false,0);
+        Log.d(TAG, "testNewsCategoryClass: "+ mPageGroupDao.findAll());
+        mPageGroup.getPageGroupEntry().getEntries().add(page3.getId());
+        mPageGroupDao.save(mPageGroup);
+        //assertThat(mPage.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getPageGroupEntry().getEntries().get(0)));
+        //assertThat(page2.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getPageGroupEntry().getEntries().get(1)));
+        //assertThat(page3.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getPageGroupEntry().getEntries().get(2)));
+        assertThat(mPage.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getPageGroupEntry().getEntries().get(0)));
+        assertThat(page2.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getPageGroupEntry().getEntries().get(1)));
+        assertThat(page3.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getPageGroupEntry().getEntries().get(2)));
     }
 
 

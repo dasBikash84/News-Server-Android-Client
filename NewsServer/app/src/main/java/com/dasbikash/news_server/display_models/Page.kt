@@ -31,7 +31,7 @@ import androidx.room.PrimaryKey
 )
 data class Page(
         @PrimaryKey val id: Int, val newsPaperId: Int, val parentPageId: Int,
-        val title: String, var active: Boolean, var favourite: Boolean=false)
+        val title: String, var active: Boolean, var favourite: Boolean=false,var visitCount:Int=0)
     : Serializable {
 
     val isTopLevelPage: Boolean

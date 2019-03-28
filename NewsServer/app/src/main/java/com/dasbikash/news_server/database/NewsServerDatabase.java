@@ -18,17 +18,17 @@ import android.content.Context;
 import com.dasbikash.news_server.database.daos.ArticleDao;
 import com.dasbikash.news_server.database.daos.CountryDao;
 import com.dasbikash.news_server.database.daos.LanguageDao;
-import com.dasbikash.news_server.database.daos.NewsCategoryDao;
+import com.dasbikash.news_server.database.daos.PageGroupDao;
 import com.dasbikash.news_server.database.daos.NewsPaperDao;
 import com.dasbikash.news_server.database.daos.PageDao;
 import com.dasbikash.news_server.display_models.Article;
 import com.dasbikash.news_server.display_models.Country;
 import com.dasbikash.news_server.display_models.Language;
-import com.dasbikash.news_server.display_models.NewsCategory;
+import com.dasbikash.news_server.display_models.PageGroup;
 import com.dasbikash.news_server.display_models.Newspaper;
 import com.dasbikash.news_server.display_models.Page;
 import com.dasbikash.news_server.display_models.room_converters.ImageLinkListConverter;
-import com.dasbikash.news_server.display_models.room_converters.NewsCategoryEntryConverter;
+import com.dasbikash.news_server.display_models.room_converters.PageGroupEntryConverter;
 
 import androidx.room.Database;
 import androidx.room.Room;
@@ -36,11 +36,11 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
 @Database(entities = {Country.class,Language.class,Newspaper.class,
-                        Page.class,NewsCategory.class,Article.class},
+                        Page.class, PageGroup.class,Article.class},
         version = 1,exportSchema = false)
 @TypeConverters({
         ImageLinkListConverter.class,
-        NewsCategoryEntryConverter.class
+        PageGroupEntryConverter.class
 })
 public abstract class NewsServerDatabase extends RoomDatabase {
 
@@ -48,7 +48,7 @@ public abstract class NewsServerDatabase extends RoomDatabase {
 
     private static volatile NewsServerDatabase INSTANCE;
 
-    static NewsServerDatabase getDatabase(final Context context) {
+    public static NewsServerDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (NewsServerDatabase.class) {
                 if (INSTANCE == null) {
@@ -66,6 +66,6 @@ public abstract class NewsServerDatabase extends RoomDatabase {
     public abstract LanguageDao getLanguageDao();
     public abstract NewsPaperDao getNewsPaperDao();
     public abstract PageDao getPageDao();
-    public abstract NewsCategoryDao getNewsCategoryDao();
+    public abstract PageGroupDao getPageGroupDao();
     public abstract ArticleDao getArticleDao();
 }

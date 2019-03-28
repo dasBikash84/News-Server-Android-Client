@@ -14,6 +14,14 @@
 package com.dasbikash.news_server.display_models
 
 import java.io.Serializable
-import java.util.ArrayList
 
-data class NewsCategoryEntry(val entries: List<Int> = ArrayList()): Serializable
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity
+data class PageGroup  (
+    @PrimaryKey val id: Int,
+    val title: String,
+    val isActive: Boolean,
+    val pageGroupEntry: PageGroupEntry
+): Serializable

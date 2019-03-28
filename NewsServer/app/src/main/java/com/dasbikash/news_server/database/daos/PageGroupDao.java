@@ -13,10 +13,11 @@
 
 package com.dasbikash.news_server.database.daos;
 
-import com.dasbikash.news_server.display_models.NewsCategory;
+import com.dasbikash.news_server.display_models.PageGroup;
 
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -25,26 +26,26 @@ import androidx.room.Query;
 import androidx.room.Update;
 
 @Dao
-public interface NewsCategoryDao {
+public interface PageGroupDao {
 
-    @Query("SELECT * FROM NewsCategory")
-    public List<NewsCategory> findAll();
+    @Query("SELECT * FROM PageGroup")
+    public LiveData<List<PageGroup>> findAll();
 
-    @Query("SELECT * FROM NewsCategory where id=:id")
-    public NewsCategory findById(int id);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addNewsCategory(NewsCategory newsCategory);
+    @Query("SELECT * FROM PageGroup where id=:id")
+    public PageGroup findById(int id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addNewsCategories(List<NewsCategory> newsCategories);
+    public void addPageGroup(PageGroup pageGroup);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addNewsCategories(NewsCategory... newsCategories);
+    public void addPageGroups(List<PageGroup> newsCategories);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    public void addPageGroups(PageGroup... newsCategories);
 
     @Update
-    public void save(NewsCategory newsCategory);
+    public void save(PageGroup pageGroup);
 
     @Delete
-    public void deleteNewsCategory(NewsCategory newsCategory);
+    public void deleteNewsCategory(PageGroup pageGroup);
 }

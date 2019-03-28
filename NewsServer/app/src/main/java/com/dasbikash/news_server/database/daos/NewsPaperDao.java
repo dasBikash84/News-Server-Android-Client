@@ -17,6 +17,7 @@ import com.dasbikash.news_server.display_models.Newspaper;
 
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
@@ -37,6 +38,9 @@ public interface NewsPaperDao {
 
     @Query("SELECT * FROM Newspaper")
     public List<Newspaper> findAll();
+
+    @Query("SELECT * FROM Newspaper WHERE active")
+    public LiveData<List<Newspaper>> findAllActive();
 
     @Query("SELECT * FROM Newspaper WHERE id=:id")
     public Newspaper findById(int id);
