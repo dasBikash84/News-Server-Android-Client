@@ -13,39 +13,16 @@
 
 package com.dasbikash.news_server.database.daos;
 
-import com.dasbikash.news_server.display_models.entity.PageGroup;
+import com.dasbikash.news_server.display_models.entity.Language;
 
 import java.util.List;
 
-import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
-import androidx.room.Query;
-import androidx.room.Update;
 
 @Dao
-public interface PageGroupDao {
-
-    @Query("SELECT * FROM PageGroup")
-    public LiveData<List<PageGroup>> findAll();
-
-    @Query("SELECT * FROM PageGroup where id=:id")
-    public PageGroup findById(int id);
-
+public interface LanguageBackEndDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addPageGroup(PageGroup pageGroup);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addPageGroups(List<PageGroup> newsCategories);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addPageGroups(PageGroup... newsCategories);
-
-    @Update
-    public void save(PageGroup pageGroup);
-
-    @Delete
-    public void deleteNewsCategory(PageGroup pageGroup);
+    public void addLanguages(List<Language> languages);
 }

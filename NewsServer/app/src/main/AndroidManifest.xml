@@ -20,8 +20,25 @@
         tools:targetApi="m">
         <uses-library android:name="android.test.runner"
             android:required="false" />
-        <activity android:name=".views.HomeActivity"></activity>
-        <activity
+        <activity android:name=".views.HomeActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="www.dasbikash.com"
+                    android:pathPrefix="/news_server"
+                    android:scheme="http" />
+            </intent-filter>
+        </activity>
+        <!--<activity
             android:name=".old_app.this_view.ArticleListActivity"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -65,7 +82,7 @@
             android:name=".old_app.this_utility.CheckConfigIntegrity"
             android:enabled="true"
             android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+            android:permission="android.permission.BIND_JOB_SERVICE" />-->
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"

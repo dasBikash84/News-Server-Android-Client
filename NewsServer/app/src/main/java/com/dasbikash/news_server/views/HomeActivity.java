@@ -13,17 +13,78 @@
 
 package com.dasbikash.news_server.views;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
+import android.view.MenuItem;
 
 import com.dasbikash.news_server.R;
+import com.dasbikash.news_server.views.interfaces.NavigationHost;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements NavigationHost {
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_home);
+
+        setUpBottomNavigationView();
+
+        if(getSupportFragmentManager().findFragmentById(R.id.main_frame) == null){
+            navigateTo(new InitFragment(),false);
+        }
+    }
+
+    private void setUpBottomNavigationView() {
+
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(menuItem -> {
+            switch (menuItem.getItemId()){
+                case R.id.bottom_menu_item_home:
+                    navigateTo(new HomeFragment(),false);
+                    return true;
+                case R.id.bottom_menu_item_page_group:
+                    navigateTo(new PageGroupFragment(),false);
+                    return true;
+                case R.id.bottom_menu_item_favourites:
+                    navigateTo(new FavouritesFragment(),false);
+                    return true;
+                case R.id.bottom_menu_item_settings:
+                    navigateTo(new SettingsFragment(),false);
+                    return true;
+                case R.id.bottom_menu_item_more:
+                    navigateTo(new MoreFragment(),false);
+                    return true;
+            }
+            return false;
+        });
+    }
+
+    /**
+     * Trigger a navigation to the specified fragment, optionally adding a transaction to the back
+     * stack to make this navigation reversible.
+     *
+     * @param fragment
+     * @param addToBackstack
+     */
+    @Override
+    public void navigateTo(Fragment fragment, boolean addToBackstack) {
+
+        FragmentTransaction transaction =
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.main_frame, fragment);
+
+        if (addToBackstack) {
+            transaction.addToBackStack(null);
+        }
+
+        transaction.commit();
     }
 }

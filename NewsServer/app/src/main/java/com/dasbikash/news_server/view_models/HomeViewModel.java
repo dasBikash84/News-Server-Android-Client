@@ -15,9 +15,9 @@ package com.dasbikash.news_server.view_models;
 
 import android.app.Application;
 
-import com.dasbikash.news_server.display_models.Newspaper;
-import com.dasbikash.news_server.display_models.Page;
-import com.dasbikash.news_server.display_models.PageGroup;
+import com.dasbikash.news_server.display_models.entity.Newspaper;
+import com.dasbikash.news_server.display_models.entity.Page;
+import com.dasbikash.news_server.display_models.entity.PageGroup;
 import com.dasbikash.news_server.repositories.HomeViewmodelRepo;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class HomeViewModel extends AndroidViewModel {
         super(application);
         mApplication = application;
         mHomeViewmodelRepo = new HomeViewmodelRepo(mApplication);
-        mMostVisitedPages = mHomeViewmodelRepo.getMostVisitedPageList();
+        //mMostVisitedPages = mHomeViewmodelRepo.getMostVisitedPageList();
         mFavouritePages = mHomeViewmodelRepo.getFavouritePageList();
         mActiveNewspapers = mHomeViewmodelRepo.getAllActiveNewsPapers();
         mPageGroups = mHomeViewmodelRepo.getAllPageGroups();

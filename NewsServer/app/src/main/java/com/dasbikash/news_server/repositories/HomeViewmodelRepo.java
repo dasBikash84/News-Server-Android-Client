@@ -16,9 +16,10 @@ package com.dasbikash.news_server.repositories;
 import android.content.Context;
 
 import com.dasbikash.news_server.database.NewsServerDatabase;
-import com.dasbikash.news_server.display_models.Newspaper;
-import com.dasbikash.news_server.display_models.Page;
-import com.dasbikash.news_server.display_models.PageGroup;
+import com.dasbikash.news_server.database.daos.NewsPaperFrontEndDao;
+import com.dasbikash.news_server.display_models.entity.Newspaper;
+import com.dasbikash.news_server.display_models.entity.Page;
+import com.dasbikash.news_server.display_models.entity.PageGroup;
 
 import java.util.List;
 
@@ -28,13 +29,16 @@ public final class HomeViewmodelRepo {
 
     private NewsServerDatabase mDatabase;
 
+    private NewsPaperFrontEndDao mNewsPaperDao;
+
     public HomeViewmodelRepo(final Context context) {
         mDatabase = NewsServerDatabase.getDatabase(context);
+        mNewsPaperDao = mDatabase.mNewsPaperFrontEndDao();
     }
 
     //All active newspaper
     public LiveData<List<Newspaper>> getAllActiveNewsPapers(){
-        return mDatabase.getNewsPaperDao().findAllActive();
+        return mDatabase.mNewsPaperFrontEndDao().findAllActive();
     }
 
     //All corresponding top level pages.
@@ -47,14 +51,14 @@ public final class HomeViewmodelRepo {
         return mDatabase.getPageDao().findActiveChildrenByParentPageId(page.getId());
     }
 
-    //List of most visited pages in descending order
+    /*//List of most visited pages in descending order
     public LiveData<List<Page>> getMostVisitedPageList(){
         return mDatabase.getPageDao().getMostVisitedPageList();
-    }
+    }*/
 
     //find list of favourite pages in ascending title order
     public LiveData<List<Page>> getFavouritePageList(){
-        return mDatabase.getPageDao().getFavouritePageList();
+        return null;//mDatabase.getPageDao().getFavouritePageList();
     }
 
     //All saved page group data
