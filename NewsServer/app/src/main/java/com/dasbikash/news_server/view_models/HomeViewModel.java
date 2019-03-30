@@ -18,7 +18,7 @@ import android.app.Application;
 import com.dasbikash.news_server.display_models.entity.Newspaper;
 import com.dasbikash.news_server.display_models.entity.Page;
 import com.dasbikash.news_server.display_models.entity.PageGroup;
-import com.dasbikash.news_server.repositories.HomeViewmodelRepo;
+import com.dasbikash.news_server.repositories.HomeViewModelRepo;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ import androidx.lifecycle.LiveData;
 public class HomeViewModel extends AndroidViewModel {
 
     private Application mApplication;
-    private HomeViewmodelRepo mHomeViewmodelRepo;
+    private HomeViewModelRepo mHomeViewModelRepo;
     private LiveData<List<Page>> mMostVisitedPages;
     private LiveData<List<Page>> mFavouritePages;
     private LiveData<List<Newspaper>> mActiveNewspapers;
@@ -38,11 +38,11 @@ public class HomeViewModel extends AndroidViewModel {
     public HomeViewModel(@NonNull Application application) {
         super(application);
         mApplication = application;
-        mHomeViewmodelRepo = new HomeViewmodelRepo(mApplication);
-        //mMostVisitedPages = mHomeViewmodelRepo.getMostVisitedPageList();
-        mFavouritePages = mHomeViewmodelRepo.getFavouritePageList();
-        mActiveNewspapers = mHomeViewmodelRepo.getAllActiveNewsPapers();
-        mPageGroups = mHomeViewmodelRepo.getAllPageGroups();
+        mHomeViewModelRepo = new HomeViewModelRepo(mApplication);
+        //mMostVisitedPages = mHomeViewModelRepo.getMostVisitedPageList();
+        mFavouritePages = mHomeViewModelRepo.getFavouritePageList();
+        mActiveNewspapers = mHomeViewModelRepo.getAllActiveNewsPapers();
+        mPageGroups = mHomeViewModelRepo.getAllPageGroups();
     }
 
     /**
@@ -67,7 +67,7 @@ public class HomeViewModel extends AndroidViewModel {
     //Top level pages for newspaper
     public List<Page> getTopLevelPagesForNewspaper(Newspaper newspaper){
         if (newspaper!=null) {
-            return mHomeViewmodelRepo.getTopLevelPagesForNewspaper(newspaper);
+            return mHomeViewModelRepo.getTopLevelPagesForNewspaper(newspaper);
         }
         return null;
     }
@@ -75,7 +75,7 @@ public class HomeViewModel extends AndroidViewModel {
     //Top level pages for newspaper
     public List<Page> getActiveChildrenPagesForPage(Page page){
         if (page!=null) {
-            return mHomeViewmodelRepo.getActiveChildrenPagesForPage(page);
+            return mHomeViewModelRepo.getActiveChildrenPagesForPage(page);
         }
         return null;
     }
@@ -86,5 +86,13 @@ public class HomeViewModel extends AndroidViewModel {
 
     public LiveData<List<PageGroup>> getPageGroups() {
         return mPageGroups;
+    }
+
+    public boolean isSettingsDataLoaded() {
+        return mHomeViewModelRepo.isSettingsDataLoaded();
+    }
+
+    public boolean isGlobalSettingsUpdated() {
+        return mHomeViewModelRepo.isGlobalSettingsUpdated();
     }
 }

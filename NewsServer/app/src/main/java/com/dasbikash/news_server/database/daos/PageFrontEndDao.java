@@ -24,6 +24,11 @@ import androidx.room.Query;
 @Dao
 public interface PageFrontEndDao {
 
+
+    @Query("SELECT COUNT(*) FROM Page")
+    public int getCount();
+
+
     //find one by PageId
 
     @Query("SELECT * FROM Page WHERE id=:pageId AND active")

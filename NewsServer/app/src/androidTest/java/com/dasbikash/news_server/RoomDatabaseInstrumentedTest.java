@@ -87,7 +87,7 @@ public class RoomDatabaseInstrumentedTest {
 
         /*mCountryBackEndDao.addCountry(mCountry);
         mLanguageFrontEndDao.addLanguage(mLanguage);
-        mNewsPaperFrontEndDao.addNewsPaper(mNewspaper);
+        getNewsPaperFrontEndDao.addNewsPaper(mNewspaper);
         mPageFrontEndDao.addPage(mPage);
         mPageGroupDao.addPageGroup(mPageGroup);*/
 
@@ -102,7 +102,7 @@ public class RoomDatabaseInstrumentedTest {
 
         /*mCountryBackEndDao = mDatabase.getCountryDao();
         mLanguageFrontEndDao = mDatabase.getLanguageDao();
-        mNewsPaperFrontEndDao = mDatabase.mNewsPaperFrontEndDao();
+        getNewsPaperFrontEndDao = mDatabase.getNewsPaperFrontEndDao();
         mPageFrontEndDao = mDatabase.getPageDao();
         mPageGroupDao = mDatabase.getPageGroupDao();
         mArticleBackEndDao = mDatabase.getArticleDao();*/
@@ -129,14 +129,14 @@ public class RoomDatabaseInstrumentedTest {
 
     @Test
     public void testNewsPaperClass(){
-        assertThat(mNewspaper, equalTo(mNewsPaperFrontEndDao.findAll().get(0)));
-        assertThat(mNewspaper, equalTo(mNewsPaperFrontEndDao.findById(mNewspaper.getId())));
+        assertThat(mNewspaper, equalTo(getNewsPaperFrontEndDao.findAll().get(0)));
+        assertThat(mNewspaper, equalTo(getNewsPaperFrontEndDao.findById(mNewspaper.getId())));
         mNewspaper.setActive(false);
-        //assertThat(mNewspaper, equalTo(mNewsPaperFrontEndDao.findById(mNewspaper.getId())));
-        mNewsPaperFrontEndDao.updateNewsPapers(mNewspaper);
+        //assertThat(mNewspaper, equalTo(getNewsPaperFrontEndDao.findById(mNewspaper.getId())));
+        getNewsPaperFrontEndDao.updateNewsPapers(mNewspaper);
         mNewspaper.setActive(true);
-        mNewsPaperFrontEndDao.addNewsPaper(mNewspaper);
-        assertThat(mNewspaper, equalTo(mNewsPaperFrontEndDao.findById(mNewspaper.getId())));
+        getNewsPaperFrontEndDao.addNewsPaper(mNewspaper);
+        assertThat(mNewspaper, equalTo(getNewsPaperFrontEndDao.findById(mNewspaper.getId())));
     }
 
     @Test

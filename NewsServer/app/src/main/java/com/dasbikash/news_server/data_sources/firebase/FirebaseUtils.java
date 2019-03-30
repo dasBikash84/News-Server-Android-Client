@@ -11,25 +11,20 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.database.daos;
+package com.dasbikash.news_server.data_sources.firebase;
 
-import com.dasbikash.news_server.display_models.entity.Newspaper;
+import com.dasbikash.news_server.utils.ToDoUtils;
+import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.List;
+public class FirebaseUtils {
 
-import androidx.lifecycle.LiveData;
-import androidx.room.Dao;
-import androidx.room.Query;
+    private FirebaseDatabase mFirebaseDatabase;
 
-@Dao
-public interface NewsPaperFrontEndDao {
+    public FirebaseUtils() {
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+    }
 
-    @Query("SELECT * FROM Newspaper WHERE active")
-    public LiveData<List<Newspaper>> findAllActive();
-
-    @Query("SELECT * FROM Newspaper WHERE id=:id AND active")
-    public Newspaper findById(int id);
-
-    @Query("SELECT COUNT(*) FROM Newspaper")
-    public int getCount();
+    public long getServerGlobalSettingsUpdateTime() {
+        return 0;
+    }
 }

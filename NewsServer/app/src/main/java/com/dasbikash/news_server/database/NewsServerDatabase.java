@@ -17,6 +17,7 @@ import android.content.Context;
 
 import com.dasbikash.news_server.database.daos.ArticleBackEndDao;
 import com.dasbikash.news_server.database.daos.CountryBackEndDao;
+import com.dasbikash.news_server.database.daos.CountryFrontEndDao;
 import com.dasbikash.news_server.database.daos.LanguageFrontEndDao;
 import com.dasbikash.news_server.database.daos.PageGroupDao;
 import com.dasbikash.news_server.database.daos.NewsPaperFrontEndDao;
@@ -70,14 +71,17 @@ public abstract class NewsServerDatabase extends RoomDatabase {
         return INSTANCE;
     }
 
-    public abstract NewsPaperFrontEndDao mNewsPaperFrontEndDao();
+    public abstract CountryFrontEndDao getCountryFrontEndDao();
+    public abstract LanguageFrontEndDao getLanguageFrontEndDao();
+    public abstract NewsPaperFrontEndDao getNewsPaperFrontEndDao();
+    public abstract PageFrontEndDao getPageFrontEndDao();
 
 
-    public abstract CountryBackEndDao getCountryDao();
+    /*public abstract CountryBackEndDao getCountryDao();
     public abstract LanguageFrontEndDao getLanguageDao();
     public abstract PageFrontEndDao getPageDao();
     public abstract PageGroupDao getPageGroupDao();
-    public abstract ArticleBackEndDao getArticleDao();
+    public abstract ArticleBackEndDao getArticleDao();*/
 
     public abstract UserPreferenceDataDao getUserPreferenceDataDao();
 }

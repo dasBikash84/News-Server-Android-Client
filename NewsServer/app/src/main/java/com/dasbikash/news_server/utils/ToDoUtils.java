@@ -11,14 +11,22 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views.interfaces;
+package com.dasbikash.news_server.utils;
 
-import androidx.fragment.app.Fragment;
+public class ToDoUtils {
+    public static void workToDo(String message){
+        throw new ToDoExp(message);
+    }
+    public static void workToDo(){
+        throw new ToDoExp();
+    }
 
-public interface NavigationHost {
-    /**
-     * Trigger a navigation to the specified fragment, optionally adding a transaction to the back
-     * stack to make this navigation reversible.
-     */
-    void navigateTo(Fragment fragment, boolean addToBackstack);
+    private static class ToDoExp extends RuntimeException{
+        ToDoExp() {
+            super("Work not implemented.");
+        }
+        ToDoExp(String message) {
+            super(message);
+        }
+    }
 }

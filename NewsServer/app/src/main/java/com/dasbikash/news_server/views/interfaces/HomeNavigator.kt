@@ -11,25 +11,13 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.database.daos;
+package com.dasbikash.news_server.views.interfaces
 
-import com.dasbikash.news_server.display_models.entity.Newspaper;
+interface HomeNavigator {
 
-import java.util.List;
-
-import androidx.lifecycle.LiveData;
-import androidx.room.Dao;
-import androidx.room.Query;
-
-@Dao
-public interface NewsPaperFrontEndDao {
-
-    @Query("SELECT * FROM Newspaper WHERE active")
-    public LiveData<List<Newspaper>> findAllActive();
-
-    @Query("SELECT * FROM Newspaper WHERE id=:id AND active")
-    public Newspaper findById(int id);
-
-    @Query("SELECT COUNT(*) FROM Newspaper")
-    public int getCount();
+    fun loadHomeFragment()
+    fun loadPageGroupFragment()
+    fun loadFavouritesFragment()
+    fun loadSettingsFragment()
+    fun loadMoreFragment()
 }
