@@ -1,0 +1,4 @@
+'Bangladesh','BD','Asia/Dhaka'
+'India','IND','Asia/Calcutta'
+'United Kingdom','UK','Europe/London'
+'Pakistan','PAK','Asia/Karachi'

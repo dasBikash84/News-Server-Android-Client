@@ -15,29 +15,25 @@ package com.dasbikash.news_server.data_sources.data_services;
 
 import android.content.Context;
 
-import com.dasbikash.news_server.data_sources.firebase.FirebaseUtils;
+import com.dasbikash.news_server.data_sources.firebase.FirebaseRealtimeDBUtils;
 import com.dasbikash.news_server.database.NewsServerDatabase;
 import com.dasbikash.news_server.utils.SharedPreferenceUtils;
 
 public class DataService {
 
     private NewsServerDatabase mDatabase;
-    private FirebaseUtils mFirebaseUtils;
     private Context mContext;
 
     public DataService(final Context context) {
         mDatabase = NewsServerDatabase.getDatabase(context);
-        mFirebaseUtils = new FirebaseUtils();
         mContext = context;
     }
 
-    public boolean isGlobalSettingsUpdated() {
-        long localGlobalSettingsUpdateTime = getLocalGlobalSettingsUpdateTime();
-        long serverGlobalSettingsUpdateTime = mFirebaseUtils.getServerGlobalSettingsUpdateTime();
-        return serverGlobalSettingsUpdateTime > localGlobalSettingsUpdateTime;
+    public long getLocalAppSettingsUpdateTime() {
+        return SharedPreferenceUtils.getAppSettingsUpdateTimestamp(mContext);
     }
 
-    private long getLocalGlobalSettingsUpdateTime() {
-        return SharedPreferenceUtils.getGlobalSettingsUpdateTimestamp(mContext);
+    public long getServerAppSettingsUpdateTime() {
+        return FirebaseRealtimeDBUtils.INSTANCE.getServerAppSettingsUpdateTime();
     }
 }

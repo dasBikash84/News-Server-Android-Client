@@ -14,7 +14,13 @@
 package com.dasbikash.news_server;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.dasbikash.news_server.display_models.entity.Country;
+import com.dasbikash.news_server.display_models.entity.Language;
+import com.dasbikash.news_server.display_models.entity.Newspaper;
+import com.dasbikash.news_server.display_models.entity.Page;
+import com.dasbikash.news_server.utils.AppSettingsBootStrap;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -28,6 +34,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import static org.junit.Assert.*;
 
@@ -39,13 +46,16 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
 
+    public static final String TAG = "DbTest";
+
     private FirebaseDatabase mDatabase;
     private DatabaseReference mReference;
-
+    private Context appContext = InstrumentationRegistry.getTargetContext();
+    
     @Test
     public void useAppContext() {
         // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
+        
 
         assertEquals("com.dasbikash.news_server", appContext.getPackageName());
     }
@@ -69,5 +79,50 @@ public class ExampleInstrumentedTest {
                 "bikash3daseee@gmail.com"
         ));
         while (!task.isComplete());
+    }
+    
+    /*@Test
+    public void testFileReader(){
+        for (Iterator<String> it = new AppSettingsBootStrap(appContext).loadDataFromSqlFile(R.raw.country_data); it.hasNext(); ) {
+            String line = it.next();
+            Log.d(TAG, "testFileReader: "+line);
+
+        }
+    }*/
+    /*@Test
+    public void testCountrylistReader(){
+        for (Country country :
+                new AppSettingsBootStrap(appContext).getCountries()) {
+            Log.d(TAG, "testCountrylistReader: "+country);
+        }
+    }
+    @Test
+    public void testLanguageListReader(){
+        for (Language language :
+                new AppSettingsBootStrap(appContext).getLanguages()) {
+            Log.d(TAG, "testLanguageListReader: "+language);
+        }
+    }
+    @Test
+    public void testNewspaperListReader(){
+        for (Newspaper newspaper :
+                new AppSettingsBootStrap(appContext).getNewspapers()) {
+            Log.d(TAG, "testNewspaperListReader: "+newspaper);
+        }
+    }
+    @Test
+    public void testPageListReader(){
+        for (Page page :
+                new AppSettingsBootStrap(appContext).getPages()) {
+            Log.d(TAG, "testNewspaperListReader: "+page);
+        }
+    }
+    @Test
+    public void testPageGroupReader(){
+        Log.d(TAG, "testPageGroupReader: "+new AppSettingsBootStrap(appContext).getPageGroupData());
+    }*/
+    @Test
+    public void testLoadSetingsData(){
+        AppSettingsBootStrap.getInstance(appContext).loadData();//new AppSettingsBootStrap(appContext).loadData();
     }
 }

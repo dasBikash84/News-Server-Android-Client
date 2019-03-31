@@ -52,22 +52,6 @@ public final class HomeViewModelRepo {
         mDataService = new DataService(context);
     }
 
-    public int getCountryCount() {
-        return mCountryFrontEndDao.getCount();
-    }
-
-    public int getLanguageCount() {
-        return mLanguageFrontEndDao.getCount();
-    }
-
-    public int getNewsPaperCount() {
-        return mNewsPaperFrontEndDao.getCount();
-    }
-
-    public int getPageCount() {
-        return mPageFrontEndDao.getCount();
-    }
-
     //All active newspaper
     public LiveData<List<Newspaper>> getAllActiveNewsPapers() {
         return mDatabase.getNewsPaperFrontEndDao().findAllActive();
@@ -100,12 +84,30 @@ public final class HomeViewModelRepo {
         return null;//mDatabase.getPageGroupDao().findAll();
     }
 
-    public boolean isGlobalSettingsUpdated() {
-        return mDataService.isGlobalSettingsUpdated();
+    public boolean isAppSettingsUpdated() {
+        long localAppSettingsUpdateTime = mDataService.getLocalAppSettingsUpdateTime();
+        long serverAppSettingsUpdateTime = mDataService.getServerAppSettingsUpdateTime();
+        return serverAppSettingsUpdateTime > localAppSettingsUpdateTime;
     }
 
     public boolean isSettingsDataLoaded() {
         return getLanguageCount()>0 && getCountryCount()>0 &&
                 getNewsPaperCount()>0 && getPageCount()>0;
+    }
+
+    private int getCountryCount() {
+        return mCountryFrontEndDao.getCount();
+    }
+
+    private int getLanguageCount() {
+        return mLanguageFrontEndDao.getCount();
+    }
+
+    private int getNewsPaperCount() {
+        return mNewsPaperFrontEndDao.getCount();
+    }
+
+    private int getPageCount() {
+        return mPageFrontEndDao.getCount();
     }
 }

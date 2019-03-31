@@ -82,8 +82,8 @@ public class RoomDatabaseInstrumentedTest {
         //mPage = new Page(1,mNewspaper.getId(),0,"সর্বশেষ",true,false,0);
         //page2 = new Page(2,mNewspaper.getId(),1,"বাংলাদেশ",true,false,0);
 
-        mPageGroup = new PageGroup(1,"Cat 1",true,
-                new IntDataList(new ArrayList<>(Arrays.asList(mPage.getId(),page2.getId()))));
+       /* mPageGroup = new PageGroup(1,"Cat 1",true,
+                new IntDataList(new ArrayList<>(Arrays.asList(mPage.getId(),page2.getId()))));*/
 
         /*mCountryBackEndDao.addCountry(mCountry);
         mLanguageFrontEndDao.addLanguage(mLanguage);
@@ -165,21 +165,21 @@ public class RoomDatabaseInstrumentedTest {
     @Test
     public void testNewsCategoryClass(){
         //Log.d(TAG, "testNewsCategoryClass: "+mPageGroupDao.findAll());
-        //assertThat(mPage.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getIntDataList().getEntries().get(0)));
-        //assertThat(page2.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getIntDataList().getEntries().get(1)));
-        assertThat(mPage.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getIntDataList().getEntries().get(0)));
-        assertThat(page2.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getIntDataList().getEntries().get(1)));
+        //assertThat(mPage.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getPageList().getEntries().get(0)));
+        //assertThat(page2.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getPageList().getEntries().get(1)));
+        assertThat(mPage.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getPageList().getEntries().get(0)));
+        assertThat(page2.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getPageList().getEntries().get(1)));
 
         Page page3 = new Page(3,mNewspaper.getId(),1,"আন্তর্জাতিক",true,false,0);
         Log.d(TAG, "testNewsCategoryClass: "+ mPageGroupDao.findAll());
-        mPageGroup.getIntDataList().getEntries().add(page3.getId());
+        mPageGroup.getPageList().getEntries().add(page3.getId());
         mPageGroupDao.save(mPageGroup);
-        //assertThat(mPage.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getIntDataList().getEntries().get(0)));
-        //assertThat(page2.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getIntDataList().getEntries().get(1)));
-        //assertThat(page3.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getIntDataList().getEntries().get(2)));
-        assertThat(mPage.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getIntDataList().getEntries().get(0)));
-        assertThat(page2.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getIntDataList().getEntries().get(1)));
-        assertThat(page3.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getIntDataList().getEntries().get(2)));
+        //assertThat(mPage.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getPageList().getEntries().get(0)));
+        //assertThat(page2.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getPageList().getEntries().get(1)));
+        //assertThat(page3.getId(), equalTo(mPageGroupDao.findAll().getValue().get(0).getPageList().getEntries().get(2)));
+        assertThat(mPage.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getPageList().getEntries().get(0)));
+        assertThat(page2.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getPageList().getEntries().get(1)));
+        assertThat(page3.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getPageList().getEntries().get(2)));
     }*/
 
     @Test
@@ -201,6 +201,10 @@ public class RoomDatabaseInstrumentedTest {
         Log.d(TAG, "testUserPreferenceDataTable read data: "+dao.findAll().get(0));
     }
 
+    @Test
+    public void showTs(){
+        Log.d(TAG, "showTs: "+System.currentTimeMillis());
+    }
 
 
 }

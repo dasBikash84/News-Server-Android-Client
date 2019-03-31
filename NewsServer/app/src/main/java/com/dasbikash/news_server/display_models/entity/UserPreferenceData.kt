@@ -15,7 +15,6 @@ package com.dasbikash.news_server.display_models.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.dasbikash.news_server.display_models.mapped_embedded.IntDataList
 
 @Entity
 data class UserPreferenceData(

@@ -107,7 +107,7 @@ public class InitFragment extends Fragment {
             //Tasks to be done during init app settings loading
             // 1. Check if settings data loaded or not. If not jump to 3
             // 2. Check if settings have been updated or not. If not jump to 4.
-            if (!isSettingsDataLoaded() || isGlobalSettingsUpdated()){
+            if (!isSettingsDataLoaded() || isAppSettingsUpdated()){
                 loadSettingsData();
             }
             //4. Check if signed in or not. If not exit.
@@ -128,9 +128,9 @@ public class InitFragment extends Fragment {
             ToDoUtils.workToDo("Load settings data from remote DB");
         }
 
-        private boolean isGlobalSettingsUpdated() {
+        private boolean isAppSettingsUpdated() {
             //ToDoUtils.workToDo("Check if NewsPaper structure data has been updated or not");
-            return mViewModel.isGlobalSettingsUpdated();
+            return mViewModel.isAppSettingsUpdated();
         }
 
         private boolean isSettingsDataLoaded() {

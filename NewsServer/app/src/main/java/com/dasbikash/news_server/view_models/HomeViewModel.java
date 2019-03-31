@@ -92,7 +92,7 @@ public class HomeViewModel extends AndroidViewModel {
         return mHomeViewModelRepo.isSettingsDataLoaded();
     }
 
-    public boolean isGlobalSettingsUpdated() {
-        return mHomeViewModelRepo.isGlobalSettingsUpdated();
+    public boolean isAppSettingsUpdated() {
+        return mHomeViewModelRepo.isAppSettingsUpdated();
     }
 }

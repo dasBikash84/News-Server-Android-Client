@@ -23,6 +23,6 @@ import com.dasbikash.news_server.display_models.mapped_embedded.IntDataList
 data class PageGroup  (
     @PrimaryKey val id: Int,
     val title: String,
-    val isActive: Boolean,
-    val intDataList: IntDataList
+    var active: Boolean=true,
+    val pageList: List<Int>?=null
 ): Serializable

@@ -18,24 +18,19 @@ import android.content.SharedPreferences;
 
 import com.dasbikash.news_server.R;
 
-import java.util.ResourceBundle;
-
 public class SharedPreferenceUtils {
-
-    private static final String GLOBAL_SETTINGS_UPDATE_TIME_STAMP =
-            "com.dasbikash.news_server.utils.SharedPreferenceUtils.GLOBAL_SETTINGS_UPDATE_TIME_STAMP";
 
     public static void saveGlobalSettingsUpdateTimestamp(Context context,long time){
         SharedPreferences sharedPref = context.getSharedPreferences(
-                context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                context.getString(R.string.SP_FILE_KEY), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putLong(GLOBAL_SETTINGS_UPDATE_TIME_STAMP, time);
+        editor.putLong(context.getString(R.string.APP_SETTINGS_UPDATE_TIME_STAMP_SP_KEY), time);
         editor.apply();
     }
 
-    public static long getGlobalSettingsUpdateTimestamp(Context context){
+    public static long getAppSettingsUpdateTimestamp(Context context){
         SharedPreferences sharedPref = context.getSharedPreferences(
-                context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        return sharedPref.getLong(GLOBAL_SETTINGS_UPDATE_TIME_STAMP,0L);
+                context.getString(R.string.SP_FILE_KEY), Context.MODE_PRIVATE);
+        return sharedPref.getLong(context.getString(R.string.APP_SETTINGS_UPDATE_TIME_STAMP_SP_KEY),0L);
     }
 }

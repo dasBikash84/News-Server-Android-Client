@@ -34,7 +34,7 @@ data class Page(
         val newsPaperId: Int,
         val parentPageId: Int,
         val title: String,
-        var active: Boolean
+        var active: Boolean = false
 ): Serializable {
 
     val isTopLevelPage: Boolean

@@ -1,0 +1,53 @@
+{
+    "page_groups" : [ {
+      "active" : true,
+      "id" : 1,
+      "pageList" : [ 146, 9, 385, 816,251,576 ],
+      "title" : "Sports"
+    }, {
+      "active" : true,
+      "id" : 2,
+      "pageList" : [ 148, 14, 584,541,278 ],
+      "title" : "Lifestyle"
+    } , {
+      "active" : true,
+      "id" : 3,
+      "pageList" : [ 186,872,690,313,604 ],
+      "title" : "Cricket"
+    }, {
+      "active" : true,
+      "id" : 4,
+      "pageList" : [ 23,595,811,647,367 ],
+      "title" : "Politics"
+    }, {
+      "active" : true,
+      "id" : 5,
+      "pageList" : [ 183,61,310,700,252,235,764 ],
+      "title" : "Editorial"
+    }, {
+      "active" : true,
+      "id" : 6,
+      "pageList" : [ 173,503,53,250,640,757 ],
+      "title" : "Business"
+    }, {
+      "active" : true,
+      "id" : 7,
+      "pageList" : [ 10,531,530,277,258,554 ],
+      "title" : "Entertainment"
+    }, {
+      "active" : true,
+      "id" : 8,
+      "pageList" : [ 583,149,338,108,625 ],
+      "title" : "Travel"
+    }, {
+      "active" : true,
+      "id" : 9,
+      "pageList" : [ 706,115,334,553,201 ],
+      "title" : "Food"
+    }, {
+      "active" : true,
+      "id" : 10,
+      "pageList" : [ 613,200,542,335,105,703 ],
+      "title" : "Style & Fashion"
+    } ]
+}

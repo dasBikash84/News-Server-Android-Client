@@ -16,4 +16,4 @@ package com.dasbikash.news_server.display_models.mapped_embedded
 import java.io.Serializable
 import java.util.ArrayList
 
-data class IntDataList(val entries: List<Int> = ArrayList()): Serializable
+data class IntDataList(val entries: List<Int> = ArrayList<Int>()): Serializable

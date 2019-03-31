@@ -11,20 +11,19 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.data_sources.firebase;
+package com.dasbikash.news_server.data_sources.firebase
 
-import com.dasbikash.news_server.utils.ToDoUtils;
-import com.google.firebase.database.FirebaseDatabase;
+import com.dasbikash.news_server.utils.ToDoUtils
+import com.google.firebase.database.FirebaseDatabase
 
-public class FirebaseUtils {
 
-    private FirebaseDatabase mFirebaseDatabase;
+object FirebaseRealtimeDBUtils {
 
-    public FirebaseUtils() {
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
-    }
+    private val mFirebaseDatabase = FirebaseDatabase.getInstance()
 
-    public long getServerGlobalSettingsUpdateTime() {
-        return 0;
-    }
+    val serverAppSettingsUpdateTime: Long
+        get() {
+            ToDoUtils.workToDo()
+            return 0
+        }
 }
