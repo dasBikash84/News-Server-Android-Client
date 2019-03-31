@@ -80,49 +80,8 @@ public class ExampleInstrumentedTest {
         ));
         while (!task.isComplete());
     }
-    
-    /*@Test
-    public void testFileReader(){
-        for (Iterator<String> it = new AppSettingsBootStrap(appContext).loadDataFromSqlFile(R.raw.country_data); it.hasNext(); ) {
-            String line = it.next();
-            Log.d(TAG, "testFileReader: "+line);
-
-        }
-    }*/
-    /*@Test
-    public void testCountrylistReader(){
-        for (Country country :
-                new AppSettingsBootStrap(appContext).getCountries()) {
-            Log.d(TAG, "testCountrylistReader: "+country);
-        }
-    }
-    @Test
-    public void testLanguageListReader(){
-        for (Language language :
-                new AppSettingsBootStrap(appContext).getLanguages()) {
-            Log.d(TAG, "testLanguageListReader: "+language);
-        }
-    }
-    @Test
-    public void testNewspaperListReader(){
-        for (Newspaper newspaper :
-                new AppSettingsBootStrap(appContext).getNewspapers()) {
-            Log.d(TAG, "testNewspaperListReader: "+newspaper);
-        }
-    }
-    @Test
-    public void testPageListReader(){
-        for (Page page :
-                new AppSettingsBootStrap(appContext).getPages()) {
-            Log.d(TAG, "testNewspaperListReader: "+page);
-        }
-    }
-    @Test
-    public void testPageGroupReader(){
-        Log.d(TAG, "testPageGroupReader: "+new AppSettingsBootStrap(appContext).getPageGroupData());
-    }*/
     @Test
     public void testLoadSetingsData(){
-        AppSettingsBootStrap.getInstance(appContext).loadData();//new AppSettingsBootStrap(appContext).loadData();
+        AppSettingsBootStrap.INSTANCE.loadData(appContext);//new AppSettingsBootStrap(appContext).loadData();
     }
 }
