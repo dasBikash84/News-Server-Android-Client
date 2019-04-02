@@ -17,7 +17,8 @@ import android.content.Context;
 import android.util.Log;
 
 import com.dasbikash.news_server.database.NewsServerDatabase;
-import com.dasbikash.news_server.database.daos.ArticleBackEndDao;
+import com.dasbikash.news_server.database.daos.ArticleDao;
+import com.dasbikash.news_server.database.daos.CountryDao;
 import com.dasbikash.news_server.database.daos.LanguageDao;
 import com.dasbikash.news_server.database.daos.NewsPaperDao;
 import com.dasbikash.news_server.database.daos.PageDao;
@@ -55,12 +56,12 @@ public class RoomDatabaseInstrumentedTest {
 
     private NewsServerDatabase mDatabase;
 
-    //private CountryBackEndDao mCountryBackEndDao;
+    private CountryDao mCountryDao;
     private LanguageDao mLanguageDao;
     private NewsPaperDao mNewsPaperDao;
     private PageDao mPageDao;
     private PageGroupDao mPageGroupDao;
-    private ArticleBackEndDao mArticleBackEndDao;
+    private ArticleDao mArticleDao;
 
     private Country mCountry;
     private Language mLanguage;
@@ -70,26 +71,6 @@ public class RoomDatabaseInstrumentedTest {
     private PageGroup mPageGroup;
     private Article mArticle;
 
-
-    private void dataBootStrap(){
-
-        mCountry = new Country("Bangladesh","BD","Asia/Dhaka");
-        mLanguage = new Language(1,"Bangla-Bangladesh");
-        mNewspaper = new Newspaper(1,"প্রথম আলো",mCountry.getName(),mLanguage.getId(),true);
-        //mPage = new Page(1,mNewspaper.getId(),0,"সর্বশেষ",true,false,0);
-        //page2 = new Page(2,mNewspaper.getId(),1,"বাংলাদেশ",true,false,0);
-
-       /* mPageGroup = new PageGroup(1,"Cat 1",true,
-                new IntDataList(new ArrayList<>(Arrays.asList(mPage.getId(),page2.getId()))));*/
-
-        /*mCountryBackEndDao.addCountry(mCountry);
-        mLanguageDao.addLanguage(mLanguage);
-        getNewsPaperDao.addNewsPaper(mNewspaper);
-        mPageDao.addPage(mPage);
-        mPageGroupDao.addPageGroup(mPageGroup);*/
-
-    }
-
     @Before
     public void createDb() {
 
@@ -97,14 +78,28 @@ public class RoomDatabaseInstrumentedTest {
 
         mDatabase = Room.inMemoryDatabaseBuilder(context, NewsServerDatabase.class).build();
 
-        /*mCountryBackEndDao = mDatabase.getCountryDao();
+        mCountryDao = mDatabase.getCountryDao();
         mLanguageDao = mDatabase.getLanguageDao();
-        getNewsPaperDao = mDatabase.getNewsPaperDao();
+        mNewsPaperDao = mDatabase.getNewsPaperDao();
         mPageDao = mDatabase.getPageDao();
-        mPageGroupDao = mDatabase.getPageGroupDao();
-        mArticleBackEndDao = mDatabase.getArticleDao();*/
+        mArticleDao = mDatabase.getArticleDao();
+        dataBootStrap();
+    }
 
-        //dataBootStrap();
+
+    private void dataBootStrap(){
+
+        mCountry = new Country("Bangladesh","BD","Asia/Dhaka");
+        mLanguage = new Language(1,"Bangla-Bangladesh");
+        mNewspaper = new Newspaper(1,"প্রথম আলো",mCountry.getName(),mLanguage.getId(),true);
+        mPage = new Page(1,mNewspaper.getId(),0,"সর্বশেষ",true);
+        mArticle = new Article(1,mPage.getId(),"Article 1",45432435L,Arrays.asList("image1","Image 2","Image 3"));
+
+        mLanguageDao.addLanguages(Arrays.asList(mLanguage));
+        mCountryDao.addCountries(Arrays.asList(mCountry));
+        mNewsPaperDao.addNewsPapers(Arrays.asList(mNewspaper));
+        mPageDao.addPages(Arrays.asList(mPage));
+        mArticleDao.addArticles(Arrays.asList(mArticle));
     }
 
     @After
@@ -196,6 +191,14 @@ public class RoomDatabaseInstrumentedTest {
         dao.add(data);
 
         Log.d(TAG, "testUserPreferenceDataTable read data: "+dao.findAll().get(0));
+    }
+
+    @Test
+    public void testArticleTable(){
+
+        Log.d(TAG, "testArticleTable In data: "+mArticle.toString());
+
+        Log.d(TAG, "testArticleTable: "+mArticleDao.findId(1).toString());
     }
 
     @Test

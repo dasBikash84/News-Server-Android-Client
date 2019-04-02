@@ -15,6 +15,7 @@ package com.dasbikash.news_server.database;
 
 import android.content.Context;
 
+import com.dasbikash.news_server.database.daos.ArticleDao;
 import com.dasbikash.news_server.database.daos.CountryDao;
 import com.dasbikash.news_server.database.daos.LanguageDao;
 import com.dasbikash.news_server.database.daos.NewsPaperDao;
@@ -30,9 +31,8 @@ import com.dasbikash.news_server.display_models.entity.Page;
 import com.dasbikash.news_server.display_models.entity.PageGroup;
 import com.dasbikash.news_server.display_models.entity.UserPreferenceData;
 import com.dasbikash.news_server.display_models.room_converters.DateConverter;
-import com.dasbikash.news_server.display_models.room_converters.ImageLinkListConverter;
-import com.dasbikash.news_server.display_models.room_converters.IntDataListConverter;
 import com.dasbikash.news_server.display_models.room_converters.IntListConverter;
+import com.dasbikash.news_server.display_models.room_converters.StringListConverter;
 
 import androidx.room.Database;
 import androidx.room.Room;
@@ -44,10 +44,11 @@ import androidx.room.TypeConverters;
         UserPreferenceData.class, ArticleVisitHistory.class},
         version = 1,exportSchema = false)
 @TypeConverters({
-        ImageLinkListConverter.class,
-        IntDataListConverter.class,
+        //ImageLinkListConverter.class,
+        //IntDataListConverter.class,
         DateConverter.class,
-        IntListConverter.class
+        IntListConverter.class,
+        StringListConverter.class
 })
 public abstract class NewsServerDatabase extends RoomDatabase {
 
@@ -74,6 +75,7 @@ public abstract class NewsServerDatabase extends RoomDatabase {
     public abstract NewsPaperDao getNewsPaperDao();
     public abstract PageDao getPageDao();
     public abstract PageGroupDao getPageGroupDao();
+    public abstract ArticleDao getArticleDao();
 
 
     public abstract UserPreferenceDataDao getUserPreferenceDataDao();

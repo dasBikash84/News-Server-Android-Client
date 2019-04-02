@@ -13,39 +13,45 @@
 
 package com.dasbikash.news_server.display_models.room_converters;
 
-import com.dasbikash.news_server.display_models.mapped_embedded.ImageLinkList;
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.room.TypeConverter;
 
-public class ImageLinkListConverter {
+public class StringListConverter {
 
     private static String DATA_BRIDGE = "@#@#@#";
 
     @TypeConverter
-    public static String fromImageLinkList(ImageLinkList imageLinkList){
+    public static String fromIntList(List<String> entry){
 
         StringBuilder stringBuilder = new StringBuilder("");
 
-        for (int i = 0; i < imageLinkList.getImageLinks().size(); i++) {
-            stringBuilder.append(imageLinkList.getImageLinks().get(i));
-            if (i!= imageLinkList.getImageLinks().size()-1){
+        for (int i = 0; i < entry.size(); i++) {
+            stringBuilder.append(entry.get(i));
+            if (i!= entry.size()-1){
                 stringBuilder.append(DATA_BRIDGE);
             }
         }
+
         return stringBuilder.toString();
     }
 
     @TypeConverter
-    public static ImageLinkList toImageLinkList(String imageLinkListString){
+    public static List<String> toIntList(String entryListString){
 
-        ImageLinkList imageLinkList = new ImageLinkList();
+        List<String> entry = new ArrayList<>();
 
-        if (imageLinkListString!=null){
-            for (String entryStr : imageLinkListString.split(DATA_BRIDGE)){
-                imageLinkList.getImageLinks().add(entryStr);
+        if (entryListString!=null){
+            for (String entryStr : entryListString.split(DATA_BRIDGE)){
+                try {
+                    entry.add(entryStr);
+                }catch (NumberFormatException e){
+                    e.printStackTrace();
+                }
             }
         }
 
-        return imageLinkList;
+        return entry;
     }
 }

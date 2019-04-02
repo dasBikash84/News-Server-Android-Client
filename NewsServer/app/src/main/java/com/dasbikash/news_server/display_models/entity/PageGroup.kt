@@ -13,11 +13,9 @@
 
 package com.dasbikash.news_server.display_models.entity
 
-import java.io.Serializable
-
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.dasbikash.news_server.display_models.mapped_embedded.IntDataList
+import java.io.Serializable
 
 @Entity
 class PageGroup  (): Serializable{

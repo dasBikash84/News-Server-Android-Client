@@ -13,21 +13,14 @@
 
 package com.dasbikash.news_server.data_sources.firebase
 
-import android.os.Handler
 import android.os.Looper
-import androidx.annotation.MainThread
-import com.dasbikash.news_server.display_models.entity.*
-import com.dasbikash.news_server.exceptions.DataNotFoundException
+import com.dasbikash.news_server.display_models.entity.DefaultAppSettings
 import com.dasbikash.news_server.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server.exceptions.OnMainThreadException
 import com.dasbikash.news_server.exceptions.RemoteDbException
 import com.dasbikash.news_server.utils.NetConnectivityUtility
 import com.google.firebase.database.*
-import io.reactivex.Observable
-import io.reactivex.ObservableOnSubscribe
-import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 
 
 object FirebaseRealtimeDBUtils {

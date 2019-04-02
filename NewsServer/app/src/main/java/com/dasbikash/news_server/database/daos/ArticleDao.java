@@ -11,9 +11,26 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.display_models.mapped_embedded
+package com.dasbikash.news_server.database.daos;
 
-import java.io.Serializable
-import java.util.ArrayList
+import com.dasbikash.news_server.display_models.entity.Article;
 
-data class IntDataList(val entries: List<Int> = ArrayList<Int>()): Serializable
+import java.util.List;
+
+import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
+import androidx.room.Query;
+
+@Dao
+public interface ArticleDao {
+
+    @Query("SELECT * FROM Article WHERE pageId=:pageId")
+    public List<Article> findAllByPageId(int pageId);
+
+    @Query("SELECT * FROM Article WHERE id=:id")
+    public Article findId(int id);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    public void addArticles(List<Article> articles);
+}

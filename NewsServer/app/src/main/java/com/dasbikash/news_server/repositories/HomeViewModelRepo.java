@@ -18,21 +18,8 @@ import android.util.Log;
 
 import com.dasbikash.news_server.data_sources.data_services.DataService;
 import com.dasbikash.news_server.database.NewsServerDatabase;
-import com.dasbikash.news_server.database.daos.CountryDao;
-import com.dasbikash.news_server.database.daos.LanguageDao;
-import com.dasbikash.news_server.database.daos.NewsPaperDao;
-import com.dasbikash.news_server.database.daos.PageDao;
-import com.dasbikash.news_server.database.daos.PageGroupDao;
 import com.dasbikash.news_server.display_models.entity.DefaultAppSettings;
-import com.dasbikash.news_server.display_models.entity.Newspaper;
-import com.dasbikash.news_server.display_models.entity.Page;
-import com.dasbikash.news_server.display_models.entity.PageGroup;
 import com.dasbikash.news_server.utils.SharedPreferenceUtils;
-import com.dasbikash.news_server.utils.ToDoUtils;
-
-import java.util.List;
-
-import androidx.lifecycle.LiveData;
 
 public final class HomeViewModelRepo {
 

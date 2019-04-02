@@ -13,13 +13,11 @@
 
 package com.dasbikash.news_server.display_models.entity
 
-import java.io.Serializable
-
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.dasbikash.news_server.display_models.mapped_embedded.ImageLinkList
+import java.io.Serializable
 
 @Entity(
         foreignKeys = [
@@ -29,11 +27,29 @@ import com.dasbikash.news_server.display_models.mapped_embedded.ImageLinkList
             Index(value = ["pageId"], name = "article_page_id_index")
         ]
 )
-data class Article  (
+class Article (): Serializable{
+
     @PrimaryKey
-    val id: Int,
-    val pageId: Int,
-    val title: String,
-    val lastModificationTS: Long,
-    val imageLinkList: ImageLinkList
-): Serializable
+    var id: Int?=0
+    var pageId: Int?=0
+    var title: String?=null
+    var lastModificationTS: Long?=0
+    var imageLinkList: List<String>?=ArrayList()
+
+    constructor(
+            id: Int,pageId: Int,title: String,
+            lastModificationTS: Long,
+            imageLinkList:List<String>):this(){
+        this.id=id
+        this.pageId=pageId
+        this.title = title
+        this.lastModificationTS=lastModificationTS
+        this.imageLinkList = imageLinkList
+    }
+
+    override fun toString(): String {
+        return "Article(id=$id, pageId=$pageId, title=$title, lastModificationTS=$lastModificationTS, imageLinkList=$imageLinkList)"
+    }
+
+
+}

@@ -17,12 +17,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.NetConnectivityUtility
-import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
 import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.google.android.material.bottomnavigation.BottomNavigationView

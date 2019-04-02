@@ -13,8 +13,6 @@
 
 package com.dasbikash.news_server.display_models.room_converters;
 
-import com.dasbikash.news_server.display_models.mapped_embedded.IntDataList;
-
 import java.util.ArrayList;
 import java.util.List;
 
