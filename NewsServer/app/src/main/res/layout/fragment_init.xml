@@ -40,6 +40,19 @@
             android:paddingEnd="60dp"
             android:layout_width="match_parent"
             android:layout_height="32dp"/>
+        <TextView
+            android:id="@+id/no_internet_message"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/data_load_progress"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="60dp"
+            android:paddingEnd="60dp"
+            android:text="@string/no_internet_message"
+            android:textSize="14sp"
+            android:visibility="invisible"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

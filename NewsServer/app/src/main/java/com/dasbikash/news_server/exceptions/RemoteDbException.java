@@ -11,18 +11,18 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.database.daos;
+package com.dasbikash.news_server.exceptions;
 
-import com.dasbikash.news_server.display_models.entity.Page;
+public class RemoteDbException extends RuntimeException {
 
-import java.util.List;
+    public RemoteDbException() {
+    }
 
-import androidx.room.Dao;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
+    public RemoteDbException(String message) {
+        super(message);
+    }
 
-@Dao
-public interface PageBackEndDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addPages(List<Page> pages);
+    public RemoteDbException(Throwable cause) {
+        super(cause);
+    }
 }

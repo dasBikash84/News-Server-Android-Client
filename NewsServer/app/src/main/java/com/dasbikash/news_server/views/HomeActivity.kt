@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.utils.NetConnectivityUtility
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
 import com.dasbikash.news_server.views.interfaces.NavigationHost
@@ -33,19 +34,24 @@ class HomeActivity : AppCompatActivity(),
         findViewById(R.id.bottomNavigationView) as BottomNavigationView
     }
 
-    lateinit var mViewModel: ViewModel
+    //lateinit var mViewModel: ViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
         setUpBottomNavigationView()
-        mViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
+        initApp()
+        //mViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
 
         if (supportFragmentManager.findFragmentById(R.id.main_frame) == null) {
             mBottomNavigationView.visibility = View.INVISIBLE
             loadInitFragment()
         }
+    }
+
+    private fun initApp() {
+        NetConnectivityUtility.initialize(applicationContext)
     }
 
     private fun setUpBottomNavigationView() {

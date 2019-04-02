@@ -18,10 +18,9 @@ import android.util.Log;
 
 import com.dasbikash.news_server.database.NewsServerDatabase;
 import com.dasbikash.news_server.database.daos.ArticleBackEndDao;
-import com.dasbikash.news_server.database.daos.CountryBackEndDao;
-import com.dasbikash.news_server.database.daos.LanguageFrontEndDao;
-import com.dasbikash.news_server.database.daos.NewsPaperFrontEndDao;
-import com.dasbikash.news_server.database.daos.PageFrontEndDao;
+import com.dasbikash.news_server.database.daos.LanguageDao;
+import com.dasbikash.news_server.database.daos.NewsPaperDao;
+import com.dasbikash.news_server.database.daos.PageDao;
 import com.dasbikash.news_server.database.daos.PageGroupDao;
 import com.dasbikash.news_server.database.daos.UserPreferenceDataDao;
 import com.dasbikash.news_server.display_models.entity.Article;
@@ -31,7 +30,6 @@ import com.dasbikash.news_server.display_models.entity.Newspaper;
 import com.dasbikash.news_server.display_models.entity.Page;
 import com.dasbikash.news_server.display_models.entity.PageGroup;
 import com.dasbikash.news_server.display_models.entity.UserPreferenceData;
-import com.dasbikash.news_server.display_models.mapped_embedded.IntDataList;
 
 import org.junit.After;
 import org.junit.Before;
@@ -39,7 +37,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import androidx.room.Room;
@@ -58,10 +55,10 @@ public class RoomDatabaseInstrumentedTest {
 
     private NewsServerDatabase mDatabase;
 
-    private CountryBackEndDao mCountryBackEndDao;
-    private LanguageFrontEndDao mLanguageFrontEndDao;
-    private NewsPaperFrontEndDao mNewsPaperFrontEndDao;
-    private PageFrontEndDao mPageFrontEndDao;
+    //private CountryBackEndDao mCountryBackEndDao;
+    private LanguageDao mLanguageDao;
+    private NewsPaperDao mNewsPaperDao;
+    private PageDao mPageDao;
     private PageGroupDao mPageGroupDao;
     private ArticleBackEndDao mArticleBackEndDao;
 
@@ -86,9 +83,9 @@ public class RoomDatabaseInstrumentedTest {
                 new IntDataList(new ArrayList<>(Arrays.asList(mPage.getId(),page2.getId()))));*/
 
         /*mCountryBackEndDao.addCountry(mCountry);
-        mLanguageFrontEndDao.addLanguage(mLanguage);
-        getNewsPaperFrontEndDao.addNewsPaper(mNewspaper);
-        mPageFrontEndDao.addPage(mPage);
+        mLanguageDao.addLanguage(mLanguage);
+        getNewsPaperDao.addNewsPaper(mNewspaper);
+        mPageDao.addPage(mPage);
         mPageGroupDao.addPageGroup(mPageGroup);*/
 
     }
@@ -101,9 +98,9 @@ public class RoomDatabaseInstrumentedTest {
         mDatabase = Room.inMemoryDatabaseBuilder(context, NewsServerDatabase.class).build();
 
         /*mCountryBackEndDao = mDatabase.getCountryDao();
-        mLanguageFrontEndDao = mDatabase.getLanguageDao();
-        getNewsPaperFrontEndDao = mDatabase.getNewsPaperFrontEndDao();
-        mPageFrontEndDao = mDatabase.getPageDao();
+        mLanguageDao = mDatabase.getLanguageDao();
+        getNewsPaperDao = mDatabase.getNewsPaperDao();
+        mPageDao = mDatabase.getPageDao();
         mPageGroupDao = mDatabase.getPageGroupDao();
         mArticleBackEndDao = mDatabase.getArticleDao();*/
 
@@ -123,42 +120,42 @@ public class RoomDatabaseInstrumentedTest {
 
     @Test
     public void testLanguageClass(){
-        List<Language> languages = mLanguageFrontEndDao.findAll();
+        List<Language> languages = mLanguageDao.findAll();
         assertThat(mLanguage, equalTo(languages.get(0)));
     }
 
     @Test
     public void testNewsPaperClass(){
-        assertThat(mNewspaper, equalTo(getNewsPaperFrontEndDao.findAll().get(0)));
-        assertThat(mNewspaper, equalTo(getNewsPaperFrontEndDao.findById(mNewspaper.getId())));
+        assertThat(mNewspaper, equalTo(getNewsPaperDao.findAll().get(0)));
+        assertThat(mNewspaper, equalTo(getNewsPaperDao.findById(mNewspaper.getId())));
         mNewspaper.setActive(false);
-        //assertThat(mNewspaper, equalTo(getNewsPaperFrontEndDao.findById(mNewspaper.getId())));
-        getNewsPaperFrontEndDao.updateNewsPapers(mNewspaper);
+        //assertThat(mNewspaper, equalTo(getNewsPaperDao.findById(mNewspaper.getId())));
+        getNewsPaperDao.updateNewsPapers(mNewspaper);
         mNewspaper.setActive(true);
-        getNewsPaperFrontEndDao.addNewsPaper(mNewspaper);
-        assertThat(mNewspaper, equalTo(getNewsPaperFrontEndDao.findById(mNewspaper.getId())));
+        getNewsPaperDao.addNewsPaper(mNewspaper);
+        assertThat(mNewspaper, equalTo(getNewsPaperDao.findById(mNewspaper.getId())));
     }
 
     @Test
     public void testPageClass(){
-        assertThat(mPage, equalTo(mPageFrontEndDao.findAllActivePagesByNewsPaperId(mNewspaper.getId()).get(0)));
-        assertThat(mPage, equalTo(mPageFrontEndDao.findAllTopLevelPagesByNewsPaperId(mNewspaper.getId()).get(0)));
-        assertThat(mPage, equalTo(mPageFrontEndDao.findAllActiveTopLevelPagesByNewsPaperId(mNewspaper.getId()).get(0)));
-        assertThat(mPage, equalTo(mPageFrontEndDao.findAllByNewsPaperId(mNewspaper.getId()).get(0)));
-        assertThat(mPage, equalTo(mPageFrontEndDao.findById(mNewspaper.getId())));
+        assertThat(mPage, equalTo(mPageDao.findAllActivePagesByNewsPaperId(mNewspaper.getId()).get(0)));
+        assertThat(mPage, equalTo(mPageDao.findAllTopLevelPagesByNewsPaperId(mNewspaper.getId()).get(0)));
+        assertThat(mPage, equalTo(mPageDao.findAllActiveTopLevelPagesByNewsPaperId(mNewspaper.getId()).get(0)));
+        assertThat(mPage, equalTo(mPageDao.findAllByNewsPaperId(mNewspaper.getId()).get(0)));
+        assertThat(mPage, equalTo(mPageDao.findById(mNewspaper.getId())));
         mPage.setActive(false);
-        mPageFrontEndDao.save(mPage);
-        //assertThat(mPage, equalTo(mPageFrontEndDao.findAllActivePagesByNewsPaperId(mNewspaper.getId()).get(0)));
-        assertThat(mPage, equalTo(mPageFrontEndDao.findAllTopLevelPagesByNewsPaperId(mNewspaper.getId()).get(0)));
-        assertThat(mPage, equalTo(mPageFrontEndDao.findAllByNewsPaperId(mNewspaper.getId()).get(0)));
-        //assertThat(mPage, equalTo(mPageFrontEndDao.findById(mNewspaper.getId())));
-        //assertThat(mPage, equalTo(mPageFrontEndDao.findAllActiveTopLevelPagesByNewsPaperId(mNewspaper.getId()).get(0)));
+        mPageDao.save(mPage);
+        //assertThat(mPage, equalTo(mPageDao.findAllActivePagesByNewsPaperId(mNewspaper.getId()).get(0)));
+        assertThat(mPage, equalTo(mPageDao.findAllTopLevelPagesByNewsPaperId(mNewspaper.getId()).get(0)));
+        assertThat(mPage, equalTo(mPageDao.findAllByNewsPaperId(mNewspaper.getId()).get(0)));
+        //assertThat(mPage, equalTo(mPageDao.findById(mNewspaper.getId())));
+        //assertThat(mPage, equalTo(mPageDao.findAllActiveTopLevelPagesByNewsPaperId(mNewspaper.getId()).get(0)));
 
         Page page2 = new Page(2,mNewspaper.getId(),1,"বাংলাদেশ",true,false,0);
         mPage.setActive(true);
-        mPageFrontEndDao.addPages(Arrays.asList(mPage,page2));
-        assertThat(page2, equalTo(mPageFrontEndDao.findActiveChildrenByParentPageId(mPage.getId()).get(0)));
-        assertThat(page2, equalTo(mPageFrontEndDao.findChildrenByParentPageId(mPage.getId()).get(0)));
+        mPageDao.addPages(Arrays.asList(mPage,page2));
+        assertThat(page2, equalTo(mPageDao.findActiveChildrenByParentPageId(mPage.getId()).get(0)));
+        assertThat(page2, equalTo(mPageDao.findChildrenByParentPageId(mPage.getId()).get(0)));
 
     }
 

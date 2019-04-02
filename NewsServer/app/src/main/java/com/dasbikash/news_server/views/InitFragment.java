@@ -13,38 +13,111 @@
 
 package com.dasbikash.news_server.views;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.os.AsyncTask;
-import android.os.Build;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.dasbikash.news_server.R;
-import com.dasbikash.news_server.utils.ToDoUtils;
+import com.dasbikash.news_server.exceptions.DataNotFoundException;
+import com.dasbikash.news_server.exceptions.NoInternertConnectionException;
+import com.dasbikash.news_server.exceptions.OnMainThreadException;
+import com.dasbikash.news_server.exceptions.RemoteDbException;
+import com.dasbikash.news_server.utils.NetConnectivityUtility;
 import com.dasbikash.news_server.view_models.HomeViewModel;
 import com.dasbikash.news_server.views.interfaces.HomeNavigator;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class InitFragment extends Fragment {
 
+    private static final String TAG = "InitFragment";
+    private static final long RETRY_DELAY_FOR_REMOTE_ERROR_INC_VALUE = 3000L;
+
     private HomeNavigator mHomeNavigator;
     private ProgressBar mProgressBar;
+    private TextView mNoInternetMessage;
+
+    private long mRetryDelayForRemoteDBError = 0L;
+    private long mRetryCountForRemoteDBError = 0L;
 
     private HomeViewModel mViewModel;
+
+    private AtomicBoolean mLoadSettingsDataOnNetConnection = new AtomicBoolean(false);
+
+    private CompositeDisposable mDisposable = new CompositeDisposable();
+
+    private final BroadcastReceiver mNetConAvailableBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mLoadSettingsDataOnNetConnection.get()) {
+                mLoadSettingsDataOnNetConnection.set(false);
+                initSettingsDataLoading(0L);
+            }
+        }
+    };
+
+    enum DataLoadingStatus {
+
+        WAITING_FOR_NETWORK_INIT(false, 0),
+        STARTING_SETTINGS_DATA_LOADING(true, 0),
+        NEED_TO_READ_DATA_FROM_SERVER(true, 20),
+        SETTINGS_DATA_LOADED(true, 75),
+        USER_SETTINGS_GOING_TO_BE_LOADED(true, 80),
+        EXIT(true, 100);
+
+        private boolean setProgressbarDeterminate;
+        private int progressBarValue;
+
+        boolean isSetProgressbarDeterminate() {
+            return setProgressbarDeterminate;
+        }
+
+        int getProgressBarValue() {
+            return progressBarValue;
+        }
+
+        DataLoadingStatus(boolean setProgressbarDeterminate, int progressBarValue) {
+            this.setProgressbarDeterminate = setProgressbarDeterminate;
+            this.progressBarValue = progressBarValue;
+        }
+
+        @Override
+        public String toString() {
+            return "DataLoadingStatus{" +
+                    "setProgressbarDeterminate=" + setProgressbarDeterminate +
+                    ", progressBarValue=" + progressBarValue +
+                    '}';
+        }
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_init, container, false);
         mProgressBar = view.findViewById(R.id.data_load_progress);
-        mViewModel = (HomeViewModel) ViewModelProviders.of((HomeActivity)getActivity()).get(HomeViewModel.class);
+        mNoInternetMessage = view.findViewById(R.id.no_internet_message);
+        mViewModel = (HomeViewModel) ViewModelProviders.of((HomeActivity) getActivity()).get(HomeViewModel.class);
         return view;
     }
 
@@ -56,7 +129,112 @@ public class InitFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        new LoadSettingsData(mHomeNavigator, mProgressBar, mViewModel).execute();
+        registerBrodcastReceivers();
+        initSettingsDataLoading(0L);
+    }
+
+    private void initSettingsDataLoading(long initDelay) {
+
+        mNoInternetMessage.setVisibility(View.INVISIBLE);
+
+        //mProgressBar.setVisibility(View.VISIBLE);
+        mProgressBar.setIndeterminate(true);
+        ;
+
+        mDisposable.add(
+                getDataLoadingStatusObservable(initDelay)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(new DisposableObserver<DataLoadingStatus>() {
+                            @Override
+                            public void onNext(DataLoadingStatus loadingStatus) {
+                                Log.d(TAG, "onNext: " + loadingStatus);
+                                if (loadingStatus.isSetProgressbarDeterminate()) {
+                                    mProgressBar.setIndeterminate(false);
+                                    mProgressBar.setProgress(loadingStatus.progressBarValue);
+                                    if (loadingStatus.progressBarValue == 100) {
+                                        mHomeNavigator.loadHomeFragment();
+                                    }
+                                } else {
+                                    mProgressBar.setIndeterminate(true);
+                                }
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                Log.d(TAG, "onError: " + e.getClass().getCanonicalName());
+                                doOnError(e);
+                            }
+
+                            @Override
+                            public void onComplete() {
+
+                            }
+                        })
+        );
+    }
+
+    private Observable<DataLoadingStatus> getDataLoadingStatusObservable(long initDelay) {
+        return Observable.create(new ObservableOnSubscribe<DataLoadingStatus>() {
+            @Override
+            public void subscribe(ObservableEmitter<DataLoadingStatus> emitter) throws Exception {
+
+                SystemClock.sleep(initDelay);
+
+                //wait for network connection
+                emitter.onNext(DataLoadingStatus.WAITING_FOR_NETWORK_INIT);
+
+                while (!NetConnectivityUtility.INSTANCE.isInitialize()) ;
+
+                //Initialization started
+                emitter.onNext(DataLoadingStatus.STARTING_SETTINGS_DATA_LOADING);
+
+                if (!mViewModel.isSettingsDataLoaded() ||
+                        mViewModel.isAppSettingsUpdated()) {
+                    // going to load app data
+                    emitter.onNext(DataLoadingStatus.NEED_TO_READ_DATA_FROM_SERVER);
+                    mViewModel.loadAppSettings();
+                }
+
+                //App data loaded
+                emitter.onNext(DataLoadingStatus.SETTINGS_DATA_LOADED);
+
+                //Check if user settings need to be checked
+                SystemClock.sleep(1000);
+                //checkIfLoggedIn()
+                //checkIfSettingsUpdated()
+                emitter.onNext(DataLoadingStatus.USER_SETTINGS_GOING_TO_BE_LOADED);
+                //loadUserSettings()
+                SystemClock.sleep(3000);
+                //Settings data loading finished
+                emitter.onNext(DataLoadingStatus.EXIT);
+                Log.d(TAG, "subscribe: ");
+            }
+        });
+    }
+
+    private void doOnError(Throwable throwable) {
+        if (throwable instanceof NoInternertConnectionException) {
+            mLoadSettingsDataOnNetConnection.set(true);
+            mProgressBar.setIndeterminate(true);
+            mNoInternetMessage.setVisibility(View.VISIBLE);
+        } else if (throwable instanceof DataNotFoundException ||
+                throwable instanceof RemoteDbException) {
+            mRetryCountForRemoteDBError++;
+            mRetryDelayForRemoteDBError +=
+                    RETRY_DELAY_FOR_REMOTE_ERROR_INC_VALUE *
+                    mRetryCountForRemoteDBError;
+            initSettingsDataLoading(mRetryDelayForRemoteDBError);
+        } else if (throwable instanceof OnMainThreadException) {
+            throw new OnMainThreadException();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mDisposable.clear();
+        unregisterBrodcastReceivers();
     }
 
     @Override
@@ -65,77 +243,14 @@ public class InitFragment extends Fragment {
         mHomeNavigator = (HomeNavigator) context;
     }
 
-    private static class LoadSettingsData extends AsyncTask<Void,Integer,Void>{
 
-        private HomeNavigator mHomeNavigator;
-        private ProgressBar mProgressBar;
-        private int mProgressValue=0;
-        private HomeViewModel mViewModel;
+    private void registerBrodcastReceivers() {
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mNetConAvailableBroadcastReceiver,
+                NetConnectivityUtility.INSTANCE.getIntentFilterForNetworkAvailableBroadcastReceiver());
+    }
 
-        public LoadSettingsData(HomeNavigator homeNavigator, ProgressBar progressBar, HomeViewModel viewModel) {
-            mHomeNavigator = homeNavigator;
-            mProgressBar = progressBar;
-            mViewModel = viewModel;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mProgressBar.setIndeterminate(true);
-        }
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            mHomeNavigator.loadHomeFragment();
-        }
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-            int value = values[0] + mProgressBar.getProgress();
-            if (mProgressBar.isIndeterminate()) mProgressBar.setIndeterminate(false);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                mProgressBar.setProgress(value,true);
-            } else {
-                mProgressBar.setProgress(value);
-            }
-
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            //Tasks to be done during init app settings loading
-            // 1. Check if settings data loaded or not. If not jump to 3
-            // 2. Check if settings have been updated or not. If not jump to 4.
-            if (!isSettingsDataLoaded() || isAppSettingsUpdated()){
-                loadSettingsData();
-            }
-            //4. Check if signed in or not. If not exit.
-            //5. Check if personal settings have been modified or not. If not exit.
-            //6. Load personal settings.
-
-            return null;
-
-        }
-
-        private void loadSettingsData() {
-
-            //3. Load settings data
-            //   => Load country and language data.
-            //   => Load Newspaper info.
-            //   => Load page info.
-            //   => Load page group info.
-            ToDoUtils.workToDo("Load settings data from remote DB");
-        }
-
-        private boolean isAppSettingsUpdated() {
-            //ToDoUtils.workToDo("Check if NewsPaper structure data has been updated or not");
-            return mViewModel.isAppSettingsUpdated();
-        }
-
-        private boolean isSettingsDataLoaded() {
-            return mViewModel.isSettingsDataLoaded();
-        }
+    private void unregisterBrodcastReceivers() {
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mNetConAvailableBroadcastReceiver);
     }
 
 }

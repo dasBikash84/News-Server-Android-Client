@@ -11,21 +11,18 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.database.daos;
+package com.dasbikash.news_server.exceptions;
 
-import com.dasbikash.news_server.display_models.entity.Country;
+public class NoInternertConnectionException extends RuntimeException {
 
-import java.util.List;
+    public NoInternertConnectionException() {
+    }
 
-import androidx.room.Dao;
-import androidx.room.Query;
+    public NoInternertConnectionException(String message) {
+        super(message);
+    }
 
-@Dao
-public interface CountryFrontEndDao {
-
-    @Query("SELECT * FROM Country")
-    public List<Country> findAll();
-
-    @Query("SELECT COUNT(*) FROM Country")
-    public int getCount();
+    public NoInternertConnectionException(Throwable cause) {
+        super(cause);
+    }
 }

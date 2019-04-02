@@ -40,9 +40,9 @@ public class HomeViewModel extends AndroidViewModel {
         mApplication = application;
         mHomeViewModelRepo = new HomeViewModelRepo(mApplication);
         //mMostVisitedPages = mHomeViewModelRepo.getMostVisitedPageList();
-        mFavouritePages = mHomeViewModelRepo.getFavouritePageList();
+        /*mFavouritePages = mHomeViewModelRepo.getFavouritePageList();
         mActiveNewspapers = mHomeViewModelRepo.getAllActiveNewsPapers();
-        mPageGroups = mHomeViewModelRepo.getAllPageGroups();
+        mPageGroups = mHomeViewModelRepo.getAllPageGroups();*/
     }
 
     /**
@@ -56,7 +56,7 @@ public class HomeViewModel extends AndroidViewModel {
         super.onCleared();
     }
 
-    public LiveData<List<Page>> getMostVisitedPages() {
+   /* public LiveData<List<Page>> getMostVisitedPages() {
         return mMostVisitedPages;
     }
 
@@ -86,7 +86,7 @@ public class HomeViewModel extends AndroidViewModel {
 
     public LiveData<List<PageGroup>> getPageGroups() {
         return mPageGroups;
-    }
+    }*/
 
     public boolean isSettingsDataLoaded() {
         return mHomeViewModelRepo.isSettingsDataLoaded();
@@ -94,5 +94,9 @@ public class HomeViewModel extends AndroidViewModel {
 
     public boolean isAppSettingsUpdated() {
         return mHomeViewModelRepo.isAppSettingsUpdated();
+    }
+
+    public void loadAppSettings() {
+        mHomeViewModelRepo.loadAppSettings();
     }
 }

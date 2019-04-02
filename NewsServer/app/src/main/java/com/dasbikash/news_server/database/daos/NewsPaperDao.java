@@ -13,16 +13,28 @@
 
 package com.dasbikash.news_server.database.daos;
 
-import com.dasbikash.news_server.display_models.entity.Language;
+import com.dasbikash.news_server.display_models.entity.Newspaper;
 
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
+import androidx.room.Query;
 
 @Dao
-public interface LanguageBackEndDao {
+public interface NewsPaperDao {
+
+    @Query("SELECT * FROM Newspaper WHERE active")
+    public LiveData<List<Newspaper>> findAllActive();
+
+    @Query("SELECT * FROM Newspaper WHERE id=:id AND active")
+    public Newspaper findById(int id);
+
+    @Query("SELECT COUNT(*) FROM Newspaper")
+    public int getCount();
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addLanguages(List<Language> languages);
+    public void addNewsPapers(List<Newspaper> newspapers);
 }

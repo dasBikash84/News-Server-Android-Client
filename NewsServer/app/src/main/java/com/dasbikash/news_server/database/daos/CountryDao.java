@@ -13,23 +13,24 @@
 
 package com.dasbikash.news_server.database.daos;
 
-import com.dasbikash.news_server.display_models.entity.Newspaper;
+import com.dasbikash.news_server.display_models.entity.Country;
 
 import java.util.List;
 
-import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 @Dao
-public interface NewsPaperFrontEndDao {
+public interface CountryDao {
 
-    @Query("SELECT * FROM Newspaper WHERE active")
-    public LiveData<List<Newspaper>> findAllActive();
+    @Query("SELECT * FROM Country")
+    public List<Country> findAll();
 
-    @Query("SELECT * FROM Newspaper WHERE id=:id AND active")
-    public Newspaper findById(int id);
-
-    @Query("SELECT COUNT(*) FROM Newspaper")
+    @Query("SELECT COUNT(*) FROM Country")
     public int getCount();
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    public void addCountries(List<Country> countries);
 }

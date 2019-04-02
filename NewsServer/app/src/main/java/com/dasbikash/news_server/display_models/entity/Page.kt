@@ -29,20 +29,35 @@ import androidx.room.PrimaryKey
             Index("newsPaperId"), Index("parentPageId")
         ]
 )
-data class Page(
-        @PrimaryKey val id: Int,
-        val newsPaperId: Int,
-        val parentPageId: Int,
-        val title: String,
-        var active: Boolean = false
-): Serializable {
+class Page(): Serializable {
 
     val isTopLevelPage: Boolean
         @Ignore
         get() = parentPageId == TOP_LEVEL_PAGE_PARENT_ID
 
+    @PrimaryKey
+    var id: Int = 0
+    var newsPaperId: Int?=null
+    var parentPageId: Int?=null
+    var title: String?=null
+    var active: Boolean = false
+
     companion object {
         @JvmField
         val TOP_LEVEL_PAGE_PARENT_ID = 0
+    }
+
+    constructor(
+            id: Int,newsPaperId: Int,parentPageId: Int,title: String,active: Boolean = false
+    ):this(){
+        this.id = id
+        this.newsPaperId = newsPaperId
+        this.parentPageId = parentPageId
+        this.title = title
+        this.active=active
+    }
+
+    override fun toString(): String {
+        return "Page(id=$id, newsPaperId=$newsPaperId, parentPageId=$parentPageId, title=$title, active=$active)"
     }
 }

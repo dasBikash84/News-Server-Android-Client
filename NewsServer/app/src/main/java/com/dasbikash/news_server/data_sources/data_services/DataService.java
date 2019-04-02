@@ -17,7 +17,7 @@ import android.content.Context;
 
 import com.dasbikash.news_server.data_sources.firebase.FirebaseRealtimeDBUtils;
 import com.dasbikash.news_server.database.NewsServerDatabase;
-import com.dasbikash.news_server.utils.SharedPreferenceUtils;
+import com.dasbikash.news_server.display_models.entity.DefaultAppSettings;
 
 public class DataService {
 
@@ -29,11 +29,11 @@ public class DataService {
         mContext = context;
     }
 
-    public long getLocalAppSettingsUpdateTime() {
-        return SharedPreferenceUtils.getAppSettingsUpdateTimestamp(mContext);
+    public Long getServerAppSettingsUpdateTime() {
+        return FirebaseRealtimeDBUtils.INSTANCE.getServerAppSettingsUpdateTime();
     }
 
-    public long getServerAppSettingsUpdateTime() {
-        return FirebaseRealtimeDBUtils.INSTANCE.getServerAppSettingsUpdateTime();
+    public DefaultAppSettings getServerAppSettings() {
+        return FirebaseRealtimeDBUtils.INSTANCE.getServerAppSettingsData();
     }
 }

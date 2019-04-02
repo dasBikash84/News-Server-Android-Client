@@ -18,7 +18,18 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 @Entity
-data class Language (
-        @PrimaryKey val id: Int,
-        val name: String
-)
+class Language constructor(){
+
+    @PrimaryKey
+    var id: Int = 0
+    var name: String? = null
+
+    constructor(id: Int, name: String?):this() {
+        this.id = id
+        this.name = name
+    }
+
+    override fun toString(): String {
+        return "Language(id=$id, name=$name)"
+    }
+}

@@ -11,18 +11,11 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.database.daos;
+package com.dasbikash.news_server.application;
 
-import com.dasbikash.news_server.display_models.entity.Newspaper;
+import android.app.Application;
+import android.content.ContentProvider;
+import android.content.Context;
+import android.os.Build;
 
-import java.util.List;
-
-import androidx.room.Dao;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
-
-@Dao
-public interface NewsPaperBackEndDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addNewsPapers(List<Newspaper> newspapers);
-}
+public class NewsServerApplication extends Application {}

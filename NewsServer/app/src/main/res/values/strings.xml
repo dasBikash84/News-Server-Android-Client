@@ -142,4 +142,5 @@
     <string name="ic_home_favourites">Favourites</string>
     <string name="ic_home_page_groups">Page Groups</string>
     <string name="app_logo_on_initial_data_loading_page">App logo on Initial data loading page</string>
+    <string name="no_internet_message">No internet connection! Please enable network connection.</string>
 </resources>

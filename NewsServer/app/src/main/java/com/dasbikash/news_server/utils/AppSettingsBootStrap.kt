@@ -82,10 +82,7 @@ object AppSettingsBootStrap {
             val page = Page(Integer.parseInt(datam[0]),
                     Integer.parseInt(datam[1]),
                     Integer.parseInt(datam[2]),
-                    datam[3], false)
-            if (page.parentPageId == 0) {
-                page.active = true
-            }
+                    datam[3], true)
 
             pages.add(page)
         }

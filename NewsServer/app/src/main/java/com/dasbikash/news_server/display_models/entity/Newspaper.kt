@@ -27,10 +27,25 @@ import androidx.room.PrimaryKey
         indices = [
             Index(value = ["countryName"], name = "country_name_index"),
             Index(value = ["languageId"], name = "language_id_index")])
-data class Newspaper (
-    @PrimaryKey val id: Int,
-    val name: String,
-    val countryName: String,
-    val languageId: Int,
+class Newspaper() : Serializable {
+
+    @PrimaryKey
+    var id: Int = 0
+    var name: String ? =null
+    var countryName: String? = null
+    var languageId: Int? = null
     var active: Boolean=true
-): Serializable
+
+    constructor(id: Int,name: String,countryName: String,
+                languageId: Int,active: Boolean ):this(){
+        this.id = id
+        this.name = name
+        this.countryName = countryName
+        this.languageId = languageId
+        this.active = active
+    }
+
+    override fun toString(): String {
+        return "Newspaper(id=$id, name=$name, countryName=$countryName, languageId=$languageId, active=$active)"
+    }
+}

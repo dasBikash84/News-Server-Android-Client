@@ -18,14 +18,19 @@ import com.dasbikash.news_server.display_models.entity.Language;
 import java.util.List;
 
 import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 @Dao
-public interface LanguageFrontEndDao {
+public interface LanguageDao {
 
     @Query("SELECT * FROM Language")
     public List<Language> findAll();
 
     @Query("SELECT COUNT(*) FROM Language")
     public int getCount();
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    public void addLanguages(List<Language> languages);
 }

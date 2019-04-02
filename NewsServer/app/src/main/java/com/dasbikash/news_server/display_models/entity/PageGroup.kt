@@ -20,9 +20,22 @@ import androidx.room.PrimaryKey
 import com.dasbikash.news_server.display_models.mapped_embedded.IntDataList
 
 @Entity
-data class PageGroup  (
-    @PrimaryKey val id: Int,
-    val title: String,
-    var active: Boolean=true,
-    val pageList: List<Int>?=null
-): Serializable
+class PageGroup  (): Serializable{
+    @PrimaryKey
+    var id: Int = 0
+    var title: String? = null
+    var active: Boolean=true
+    var pageList: List<Int>?=null
+
+    constructor(id: Int,title: String,
+                active: Boolean,pageList: List<Int>):this(){
+        this.id = id
+        this.title =title
+        this.active = active
+        this.pageList = pageList
+    }
+
+    override fun toString(): String {
+        return "PageGroup(id=$id, title=$title, active=$active, pageList=$pageList)"
+    }
+}

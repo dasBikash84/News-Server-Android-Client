@@ -19,10 +19,12 @@ import java.util.List;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 @Dao
-public interface PageFrontEndDao {
+public interface PageDao {
 
 
     @Query("SELECT COUNT(*) FROM Page")
@@ -66,5 +68,9 @@ public interface PageFrontEndDao {
 
     //@Query("SELECT * FROM Page WHERE favourite ORDER BY title ASC")
     //public LiveData<List<Page>> getFavouritePageList();
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    public void addPages(List<Page> pages);
 
 }

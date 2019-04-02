@@ -35,17 +35,9 @@ public interface PageGroupDao {
     public PageGroup findById(int id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addPageGroup(PageGroup pageGroup);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void addPageGroups(List<PageGroup> newsCategories);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addPageGroups(PageGroup... newsCategories);
+    @Query("SELECT COUNT(*) FROM PageGroup")
+    public int getCount();
 
-    @Update
-    public void save(PageGroup pageGroup);
-
-    @Delete
-    public void deleteNewsCategory(PageGroup pageGroup);
 }

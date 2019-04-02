@@ -11,28 +11,18 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.display_models.entity
+package com.dasbikash.news_server.exceptions;
 
-import java.util.Objects
-import androidx.room.Entity
-import androidx.room.Ignore
-import androidx.room.PrimaryKey
+public class DataNotFoundException extends RuntimeException {
 
-@Entity
-class Country (){
-
-    @PrimaryKey
-    var name: String = ""
-    var countryCode: String?=null
-    var timeZone: String?=null
-
-    constructor(name:String,countryCode:String,timeZone: String):this(){
-        this.name = name
-        this.countryCode = countryCode
-        this.timeZone = timeZone
+    public DataNotFoundException() {
     }
 
-    override fun toString(): String {
-        return "Country(name=$name, countryCode=$countryCode, timeZone=$timeZone)"
+    public DataNotFoundException(String message) {
+        super(message);
+    }
+
+    public DataNotFoundException(Throwable cause) {
+        super(cause);
     }
 }

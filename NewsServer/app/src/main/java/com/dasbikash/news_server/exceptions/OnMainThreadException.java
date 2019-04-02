@@ -11,18 +11,18 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.database.daos;
+package com.dasbikash.news_server.exceptions;
 
-import com.dasbikash.news_server.display_models.entity.Country;
+public class OnMainThreadException extends RuntimeException {
 
-import java.util.List;
+    public OnMainThreadException() {
+    }
 
-import androidx.room.Dao;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
+    public OnMainThreadException(String message) {
+        super(message);
+    }
 
-@Dao
-public interface CountryBackEndDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addCountries(List<Country> countries);
+    public OnMainThreadException(Throwable cause) {
+        super(cause);
+    }
 }

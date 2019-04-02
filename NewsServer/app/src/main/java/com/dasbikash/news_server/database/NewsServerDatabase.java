@@ -15,21 +15,19 @@ package com.dasbikash.news_server.database;
 
 import android.content.Context;
 
-import com.dasbikash.news_server.database.daos.ArticleBackEndDao;
-import com.dasbikash.news_server.database.daos.CountryBackEndDao;
-import com.dasbikash.news_server.database.daos.CountryFrontEndDao;
-import com.dasbikash.news_server.database.daos.LanguageFrontEndDao;
+import com.dasbikash.news_server.database.daos.CountryDao;
+import com.dasbikash.news_server.database.daos.LanguageDao;
+import com.dasbikash.news_server.database.daos.NewsPaperDao;
+import com.dasbikash.news_server.database.daos.PageDao;
 import com.dasbikash.news_server.database.daos.PageGroupDao;
-import com.dasbikash.news_server.database.daos.NewsPaperFrontEndDao;
-import com.dasbikash.news_server.database.daos.PageFrontEndDao;
 import com.dasbikash.news_server.database.daos.UserPreferenceDataDao;
 import com.dasbikash.news_server.display_models.entity.Article;
 import com.dasbikash.news_server.display_models.entity.ArticleVisitHistory;
 import com.dasbikash.news_server.display_models.entity.Country;
 import com.dasbikash.news_server.display_models.entity.Language;
-import com.dasbikash.news_server.display_models.entity.PageGroup;
 import com.dasbikash.news_server.display_models.entity.Newspaper;
 import com.dasbikash.news_server.display_models.entity.Page;
+import com.dasbikash.news_server.display_models.entity.PageGroup;
 import com.dasbikash.news_server.display_models.entity.UserPreferenceData;
 import com.dasbikash.news_server.display_models.room_converters.DateConverter;
 import com.dasbikash.news_server.display_models.room_converters.ImageLinkListConverter;
@@ -71,17 +69,12 @@ public abstract class NewsServerDatabase extends RoomDatabase {
         return INSTANCE;
     }
 
-    public abstract CountryFrontEndDao getCountryFrontEndDao();
-    public abstract LanguageFrontEndDao getLanguageFrontEndDao();
-    public abstract NewsPaperFrontEndDao getNewsPaperFrontEndDao();
-    public abstract PageFrontEndDao getPageFrontEndDao();
-
-
-    /*public abstract CountryBackEndDao getCountryDao();
-    public abstract LanguageFrontEndDao getLanguageDao();
-    public abstract PageFrontEndDao getPageDao();
+    public abstract CountryDao getCountryDao();
+    public abstract LanguageDao getLanguageDao();
+    public abstract NewsPaperDao getNewsPaperDao();
+    public abstract PageDao getPageDao();
     public abstract PageGroupDao getPageGroupDao();
-    public abstract ArticleBackEndDao getArticleDao();*/
+
 
     public abstract UserPreferenceDataDao getUserPreferenceDataDao();
 }
