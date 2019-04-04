@@ -13,12 +13,11 @@
 
 package com.dasbikash.news_server.display_models.entity
 
-import java.io.Serializable
-
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.io.Serializable
 
 @Entity(
         foreignKeys = [
@@ -27,25 +26,11 @@ import androidx.room.PrimaryKey
         indices = [
             Index(value = ["countryName"], name = "country_name_index"),
             Index(value = ["languageId"], name = "language_id_index")])
-class Newspaper() : Serializable {
-
-    @PrimaryKey
-    var id: Int = 0
-    var name: String ? =null
-    var countryName: String? = null
-    var languageId: Int? = null
-    var active: Boolean=true
-
-    constructor(id: Int,name: String,countryName: String,
-                languageId: Int,active: Boolean ):this(){
-        this.id = id
-        this.name = name
-        this.countryName = countryName
-        this.languageId = languageId
-        this.active = active
-    }
-
-    override fun toString(): String {
-        return "Newspaper(id=$id, name=$name, countryName=$countryName, languageId=$languageId, active=$active)"
-    }
-}
+data class Newspaper(
+        @PrimaryKey
+        var id: String="",
+        var name: String?=null,
+        var countryName: String?=null,
+        var languageId: String?=null,
+        var active: Boolean=true
+) : Serializable

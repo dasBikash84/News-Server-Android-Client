@@ -14,6 +14,7 @@
 package com.dasbikash.news_server.data_sources.firebase
 
 import android.os.Looper
+import android.util.Log
 import com.dasbikash.news_server.display_models.entity.DefaultAppSettings
 import com.dasbikash.news_server.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server.exceptions.OnMainThreadException
@@ -27,25 +28,25 @@ object FirebaseRealtimeDBUtils {
 
     private val TAG = "FirebaseRealtimeDBUtils"
 
-    private val APP_SETTINGS_NODE = "app_settings"
-    /*private val COUNTRIES_NODE = "countries"
-    private val LANGUAGES_NODE = "languages"
-    private val NEWSPAPERS_NODE = "newspapers"
-    private val PAGES_NODE = "pages"
-    private val PAGE_GROUPS_NODE = "page_groups"*/
-    private val SETTINGS_UPDATE_TIME_NODE = "update_time"
+    val APP_SETTINGS_NODE = "app_settings"
+    val COUNTRIES_NODE = "countries"
+    val LANGUAGES_NODE = "languages"
+    val NEWSPAPERS_NODE = "newspapers"
+    val PAGES_NODE = "pages"
+    val PAGE_GROUPS_NODE = "page_groups"
+    val SETTINGS_UPDATE_TIME_NODE = "update_time"
 
 
     private val mFirebaseDatabase = FirebaseDatabase.getInstance()
     val mRootReference = FirebaseDatabase.getInstance().reference
 
-    private val mAppSettingsReference: DatabaseReference = mRootReference.child(APP_SETTINGS_NODE)
-    /*private val mCountriesSettingsReference: DatabaseReference = mAppSettingsReference.child(COUNTRIES_NODE)
-    private val mLanguagesSettingsReference: DatabaseReference = mAppSettingsReference.child(LANGUAGES_NODE)
-    private val mNewspaperSettingsReference: DatabaseReference = mAppSettingsReference.child(NEWSPAPERS_NODE)
-    private val mPagesSettingsReference: DatabaseReference = mAppSettingsReference.child(PAGES_NODE)
-    private val mPageGroupsSettingsReference: DatabaseReference = mAppSettingsReference.child(PAGE_GROUPS_NODE)*/
-    private val mSettingsUpdateTimeReference: DatabaseReference = mAppSettingsReference.child(SETTINGS_UPDATE_TIME_NODE)
+    val mAppSettingsReference: DatabaseReference = mRootReference.child(APP_SETTINGS_NODE)
+    val mCountriesSettingsReference: DatabaseReference = mAppSettingsReference.child(COUNTRIES_NODE)
+    val mLanguagesSettingsReference: DatabaseReference = mAppSettingsReference.child(LANGUAGES_NODE)
+    val mNewspaperSettingsReference: DatabaseReference = mAppSettingsReference.child(NEWSPAPERS_NODE)
+    val mPagesSettingsReference: DatabaseReference = mAppSettingsReference.child(PAGES_NODE)
+    val mPageGroupsSettingsReference: DatabaseReference = mAppSettingsReference.child(PAGE_GROUPS_NODE)
+    val mSettingsUpdateTimeReference: DatabaseReference = mAppSettingsReference.child(SETTINGS_UPDATE_TIME_NODE)
 
     fun getServerAppSettingsUpdateTime() : Long {
 
@@ -98,19 +99,25 @@ object FirebaseRealtimeDBUtils {
         var data:DefaultAppSettings? = null
         val waitFlag = AtomicBoolean(true)
 
+        Log.d(TAG,"getServerAppSettingsData:")
+
         mAppSettingsReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
                 data = null
+                Log.d(TAG,"onCancelled Error:"+error.details)
                 waitFlag.set(false)
             }
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     try {
+                        Log.d(TAG,"Data:"+dataSnapshot.value)
                         data = dataSnapshot.getValue(DefaultAppSettings::class.java)!!
                     }catch (ex:Exception){
+                        Log.d(TAG,"onDataChange Error:"+ex.message)
                         ex.printStackTrace()
                     }
+                    Log.d(TAG,"onDataChange:")
                     waitFlag.set(false)
                 }
             }

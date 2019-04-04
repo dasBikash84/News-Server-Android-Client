@@ -18,8 +18,16 @@ import android.util.Log;
 
 import com.dasbikash.news_server.data_sources.data_services.DataService;
 import com.dasbikash.news_server.database.NewsServerDatabase;
+import com.dasbikash.news_server.display_models.entity.Country;
 import com.dasbikash.news_server.display_models.entity.DefaultAppSettings;
+import com.dasbikash.news_server.display_models.entity.Language;
+import com.dasbikash.news_server.display_models.entity.Newspaper;
+import com.dasbikash.news_server.display_models.entity.Page;
+import com.dasbikash.news_server.display_models.entity.PageGroup;
 import com.dasbikash.news_server.utils.SharedPreferenceUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class HomeViewModelRepo {
 
@@ -57,7 +65,7 @@ public final class HomeViewModelRepo {
         return mDatabase.getPageDao().getMostVisitedPageList();
     }*/
 
-    //find list of favourite pages in ascending title order
+    //find list of favourite pages in ascending name order
     /*public LiveData<List<Page>> getFavouritePageList() {
         return null;//mDatabase.getPageDao().getFavouritePageList();
     }
@@ -128,10 +136,28 @@ public final class HomeViewModelRepo {
         Log.d(TAG, "loadAppSettings: ");
         DefaultAppSettings appSettings =
                 mDataService.getServerAppSettings();
-        mDatabase.getLanguageDao().addLanguages(appSettings.getLanguages());
-        mDatabase.getCountryDao().addCountries(appSettings.getCountries());
-        mDatabase.getNewsPaperDao().addNewsPapers(appSettings.getNewspapers());
-        mDatabase.getPageDao().addPages(appSettings.getPages());
-        mDatabase.getPageGroupDao().addPageGroups(appSettings.getPage_groups());
+
+        List<Language> languages = new ArrayList<>(appSettings.getLanguages().values());
+        mDatabase.getLanguageDao().addLanguages(languages);
+        Log.d(TAG, "loadAppSettings: languages"+languages);
+
+        ArrayList<Country> countries = new ArrayList<>(appSettings.getCountries().values());
+        mDatabase.getCountryDao().addCountries(countries);
+        Log.d(TAG, "loadAppSettings: countries"+countries);
+
+        ArrayList<Newspaper> newspapers = new ArrayList<>(appSettings.getNewspapers().values());
+        mDatabase.getNewsPaperDao().addNewsPapers(newspapers);
+        Log.d(TAG, "loadAppSettings: newspapers"+newspapers);
+
+        ArrayList<Page> pages = new ArrayList<>(appSettings.getPages().values());
+        mDatabase.getPageDao().addPages(pages);
+        Log.d(TAG, "loadAppSettings: pages"+pages);
+
+        ArrayList<PageGroup> newsCategories = new ArrayList<>(appSettings.getPage_groups().values());
+        mDatabase.getPageGroupDao().addPageGroups(newsCategories);
+        Log.d(TAG, "loadAppSettings: newsCategories"+newsCategories);
+
+        ArrayList<Long> settingUpdateTimes = new ArrayList<>(appSettings.getUpdate_time().values());
+        SharedPreferenceUtils.saveGlobalSettingsUpdateTimestamp(mContext,settingUpdateTimes.get(settingUpdateTimes.size()-1));
     }
 }

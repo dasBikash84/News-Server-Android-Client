@@ -18,22 +18,10 @@ import androidx.room.PrimaryKey
 import java.io.Serializable
 
 @Entity
-class PageGroup  (): Serializable{
-    @PrimaryKey
-    var id: Int = 0
-    var title: String? = null
-    var active: Boolean=true
-    var pageList: List<Int>?=null
-
-    constructor(id: Int,title: String,
-                active: Boolean,pageList: List<Int>):this(){
-        this.id = id
-        this.title =title
-        this.active = active
-        this.pageList = pageList
-    }
-
-    override fun toString(): String {
-        return "PageGroup(id=$id, title=$title, active=$active, pageList=$pageList)"
-    }
-}
+data class PageGroup  (
+        @PrimaryKey
+        var id: String="",
+        var name: String?=null,
+        var active: Boolean=true,
+        var pageList: List<String>?=null
+): Serializable

@@ -13,13 +13,11 @@
 
 package com.dasbikash.news_server.display_models.entity
 
-import java.io.Serializable
-
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.io.Serializable
 
 @Entity(
         foreignKeys = [
@@ -29,35 +27,16 @@ import androidx.room.PrimaryKey
             Index("newsPaperId"), Index("parentPageId")
         ]
 )
-class Page(): Serializable {
-
-    val isTopLevelPage: Boolean
-        @Ignore
-        get() = parentPageId == TOP_LEVEL_PAGE_PARENT_ID
-
-    @PrimaryKey
-    var id: Int = 0
-    var newsPaperId: Int?=null
-    var parentPageId: Int?=null
-    var title: String?=null
-    var active: Boolean = false
-
+data class Page(
+        @PrimaryKey
+        var id: String="",
+        var newsPaperId: String?=null,
+        var parentPageId: String?=null,
+        var name: String?=null,
+        var active: Boolean = false
+): Serializable{
     companion object {
         @JvmField
-        val TOP_LEVEL_PAGE_PARENT_ID = 0
-    }
-
-    constructor(
-            id: Int,newsPaperId: Int,parentPageId: Int,title: String,active: Boolean = false
-    ):this(){
-        this.id = id
-        this.newsPaperId = newsPaperId
-        this.parentPageId = parentPageId
-        this.title = title
-        this.active=active
-    }
-
-    override fun toString(): String {
-        return "Page(id=$id, newsPaperId=$newsPaperId, parentPageId=$parentPageId, title=$title, active=$active)"
+        val TOP_LEVEL_PAGE_PARENT_ID = "PAGE_ID_0"
     }
 }

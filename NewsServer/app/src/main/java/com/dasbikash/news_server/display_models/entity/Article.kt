@@ -27,29 +27,12 @@ import java.io.Serializable
             Index(value = ["pageId"], name = "article_page_id_index")
         ]
 )
-class Article (): Serializable{
-
+data class Article (
     @PrimaryKey
-    var id: Int?=0
-    var pageId: Int?=0
-    var title: String?=null
-    var lastModificationTS: Long?=0
-    var imageLinkList: List<String>?=ArrayList()
+    var id: String,
+    var pageId: String?,
+    var title: String?,
+    var lastModificationTS: Long?,
+    var imageLinkList: List<String>?
 
-    constructor(
-            id: Int,pageId: Int,title: String,
-            lastModificationTS: Long,
-            imageLinkList:List<String>):this(){
-        this.id=id
-        this.pageId=pageId
-        this.title = title
-        this.lastModificationTS=lastModificationTS
-        this.imageLinkList = imageLinkList
-    }
-
-    override fun toString(): String {
-        return "Article(id=$id, pageId=$pageId, title=$title, lastModificationTS=$lastModificationTS, imageLinkList=$imageLinkList)"
-    }
-
-
-}
+): Serializable

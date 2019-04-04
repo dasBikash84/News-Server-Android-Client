@@ -14,8 +14,5 @@
 package com.dasbikash.news_server.application;
 
 import android.app.Application;
-import android.content.ContentProvider;
-import android.content.Context;
-import android.os.Build;
 
 public class NewsServerApplication extends Application {}

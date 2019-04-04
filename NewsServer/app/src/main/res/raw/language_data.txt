@@ -1,4 +1,4 @@
-1,'Bangla-Bangladesh'
-2,'Bangla-India'
-3,'English-UK'
-4,'English-US'
+'LANG_ID_1','Bangla-Bangladesh'
+'LANG_ID_2','Bangla-India'
+'LANG_ID_3','English-UK'
+'LANG_ID_4','English-US'

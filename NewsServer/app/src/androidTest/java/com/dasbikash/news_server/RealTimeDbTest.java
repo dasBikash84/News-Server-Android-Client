@@ -14,17 +14,16 @@
 package com.dasbikash.news_server;
 
 import android.content.Context;
-import android.os.SystemClock;
 import android.util.Log;
 
-import com.dasbikash.news_server.data_sources.firebase.FirebaseRealtimeDBUtils;
 import com.dasbikash.news_server.display_models.entity.Country;
-import com.dasbikash.news_server.display_models.entity.DefaultAppSettings;
 import com.dasbikash.news_server.display_models.entity.Language;
 import com.dasbikash.news_server.display_models.entity.Newspaper;
 import com.dasbikash.news_server.display_models.entity.Page;
 import com.dasbikash.news_server.display_models.entity.PageGroup;
-import com.dasbikash.news_server.utils.AppSettingsBootStrap;
+import com.dasbikash.news_server.utils.AppSettingsBootStrapFromRTDb;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -35,14 +34,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 
 import static org.junit.Assert.assertEquals;
 
@@ -97,78 +95,7 @@ public class RealTimeDbTest {
 
     @Test
     public void loadSetingsDataToRealTimeDb(){
-        AppSettingsBootStrap.INSTANCE.loadData(appContext);//new AppSettingsBootStrap(appContext).loadData();
-    }
-
-    private Observable<DataSnapshot> getDataSnapshotObservableForRef(DatabaseReference reference){
-        return Observable.create(new ObservableOnSubscribe<DataSnapshot>() {
-            @Override
-            public void subscribe(ObservableEmitter<DataSnapshot> emitter) throws Exception {
-
-                reference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        emitter.onNext(dataSnapshot);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        throw databaseError.toException();
-                    }
-                });
-
-            }
-        })
-        .observeOn(Schedulers.io())
-        .subscribeOn(Schedulers.io());
-    }
-
-    private void showDataAtDbReference(DatabaseReference reference){
-        getDataSnapshotObservableForRef(reference)
-                .subscribe(new Consumer<DataSnapshot>() {
-                    @Override
-                    public void accept(DataSnapshot dataSnapshot) throws Exception {
-                        if (dataSnapshot.hasChildren()){
-                            for (DataSnapshot snapshot:
-                                    dataSnapshot.getChildren()
-                                 ) {
-                                Log.d(TAG, reference.getKey()+": "+snapshot.getValue().toString());
-                            }
-                        }else {
-                            Log.d(TAG, reference.getKey()+": "+dataSnapshot.getValue().toString());
-                        }
-                    }
-                });
-    }
-
-    @Test
-    public void readCountriesData(){
-        showDataAtDbReference(mCountriesSettingsReference);
-        SystemClock.sleep(5000);
-    }
-
-    @Test
-    public void readLanguagesData(){
-        showDataAtDbReference(mLanguagesSettingsReference);
-        SystemClock.sleep(5000);
-    }
-
-    @Test
-    public void readNewspaperData(){
-        showDataAtDbReference(mNewspaperSettingsReference);
-        SystemClock.sleep(5000);
-    }
-
-    @Test
-    public void readPagesData(){
-        showDataAtDbReference(mPagesSettingsReference);
-        SystemClock.sleep(5000);
-    }
-
-    @Test
-    public void readPageGroupsData(){
-        showDataAtDbReference(mPageGroupsSettingsReference);
-        SystemClock.sleep(5000);
+        AppSettingsBootStrapFromRTDb.INSTANCE.loadAppSettingsData(appContext);
     }
 
     @Test
@@ -178,19 +105,6 @@ public class RealTimeDbTest {
                     @Override
                     public void accept(Long aLong) throws Exception {
                         Log.d(TAG, "Time: "+aLong);
-                    }
-
-                });
-        SystemClock.sleep(5000);*/
-    }
-
-    @Test
-    public void readLanguageData(){
-       /* FirebaseRealtimeDBUtils.INSTANCE.getLanguageSettingsData().
-                subscribe(new Consumer<ArrayList<Language>>() {
-                    @Override
-                    public void accept(ArrayList<Language> languages) throws Exception {
-                        Log.d(TAG, "Time: "+languages);
                     }
 
                 });
@@ -221,7 +135,7 @@ public class RealTimeDbTest {
 //                            Log.d(TAG, "page: "+page);
 //                        }
 //                        for (PageGroup pageGroup :
-//                                defaultAppSettings.getPage_groups()) {
+//                                defaultAppSettings.getPageGroups()) {
 //                            Log.d(TAG, "pageGroup: "+pageGroup);
 //                        }
 //                    }
@@ -229,5 +143,236 @@ public class RealTimeDbTest {
 //                });
 //        SystemClock.sleep(7000);
 //    }
+
+    @Test
+    public void writeCountryData(){
+        HashMap<String,Country> countryHashMap =
+        AppSettingsBootStrapFromRTDb.INSTANCE.getCountries(appContext);
+
+        Task<Void> task = mCountriesSettingsReference.setValue(countryHashMap)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()){
+
+                }else {
+                    Log.d(TAG, "onComplete Error: "+task.getException().getMessage());
+                }
+            }
+        });
+        while (!task.isComplete());
+    }
+
+    @Test
+    public void readCountryData(){
+        AtomicBoolean waitFlag = new AtomicBoolean(false);
+        mCountriesSettingsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: "+dataSnapshot);
+                for (DataSnapshot snapshot :
+                        dataSnapshot.getChildren()) {
+                    Log.d(TAG, "key:"+snapshot.getKey());
+                    Log.d(TAG, "Country: "+snapshot.getValue(Country.class));
+                }
+                waitFlag.set(true);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        while(!waitFlag.get());
+    }
+
+    @Test
+    public void writeLanguageData(){
+        HashMap<String,Language> languageHashMap =
+                AppSettingsBootStrapFromRTDb.INSTANCE.getLanguages(appContext);
+
+        Log.d(TAG, "writeLanguageData: "+languageHashMap);
+
+        Task<Void> task = mLanguagesSettingsReference.setValue(languageHashMap)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()){
+
+                        }else {
+                            Log.d(TAG, "onComplete Error: "+task.getException().getMessage());
+                        }
+                    }
+                });
+        while (!task.isComplete());
+    }
+
+    @Test
+    public void readLanguageData(){
+
+        AtomicBoolean waitFlag = new AtomicBoolean(false);
+
+        mLanguagesSettingsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: "+dataSnapshot);
+                for (DataSnapshot snapshot :
+                        dataSnapshot.getChildren()) {
+                    Log.d(TAG, "key:"+snapshot.getKey());
+                    Log.d(TAG, "Language: "+snapshot.getValue(Language.class));
+                }
+                waitFlag.set(true);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        while(!waitFlag.get());
+    }
+
+    @Test
+    public void writeNewspaperData(){
+        HashMap<String,Newspaper> newspaperHashMap =
+                AppSettingsBootStrapFromRTDb.INSTANCE.getNewspapers(appContext);
+
+        Log.d(TAG, "writeNewspaperData: "+newspaperHashMap);
+
+        Task<Void> task = mNewspaperSettingsReference.setValue(newspaperHashMap)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()){
+
+                        }else {
+                            Log.d(TAG, "onComplete Error: "+ Arrays.asList(task.getException().getStackTrace()));
+                        }
+                    }
+                });
+        while (!task.isComplete());
+    }
+
+    @Test
+    public void readNewspaperData(){
+
+        AtomicBoolean waitFlag = new AtomicBoolean(false);
+
+        mNewspaperSettingsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: "+dataSnapshot);
+                for (DataSnapshot snapshot :
+                        dataSnapshot.getChildren()) {
+                    Log.d(TAG, "key:"+snapshot.getKey());
+                    Log.d(TAG, "Newspaper: "+snapshot.getValue(Newspaper.class));
+                }
+                waitFlag.set(true);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        while(!waitFlag.get());
+    }
+
+    @Test
+    public void writePageData(){
+        HashMap<String,Page> pageHashMap =
+                AppSettingsBootStrapFromRTDb.INSTANCE.getPages(appContext);
+
+        Log.d(TAG, "writePageData: "+pageHashMap);
+
+        Task<Void> task = mPagesSettingsReference.setValue(pageHashMap)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()){
+
+                        }else {
+                            Log.d(TAG, "onComplete Error: "+ Arrays.asList(task.getException().getStackTrace()));
+                        }
+                    }
+                });
+        while (!task.isComplete());
+    }
+
+    @Test
+    public void readPageData(){
+
+        AtomicBoolean waitFlag = new AtomicBoolean(false);
+
+        mPagesSettingsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: "+dataSnapshot);
+                for (DataSnapshot snapshot :
+                        dataSnapshot.getChildren()) {
+                    Log.d(TAG, "key:"+snapshot.getKey());
+                    Log.d(TAG, "Page: "+snapshot.getValue(Page.class));
+                }
+                waitFlag.set(true);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        while(!waitFlag.get());
+    }
+
+    @Test
+    public void writePageGroupData(){
+        HashMap<String,PageGroup> pageGroupHashMap =
+                AppSettingsBootStrapFromRTDb.INSTANCE.getPageGroupData(appContext);
+
+        Log.d(TAG, "writePageGroupData: "+pageGroupHashMap);
+
+        Task<Void> task = mPageGroupsSettingsReference.setValue(pageGroupHashMap)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()){
+
+                        }else {
+                            Log.d(TAG, "onComplete Error: "+ Arrays.asList(task.getException().getStackTrace()));
+                        }
+                    }
+                });
+        while (!task.isComplete());
+    }
+
+    @Test
+    public void readPageGroupData(){
+
+        AtomicBoolean waitFlag = new AtomicBoolean(false);
+
+        mPageGroupsSettingsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: "+dataSnapshot);
+                for (DataSnapshot snapshot :
+                        dataSnapshot.getChildren()) {
+                    Log.d(TAG, "key:"+snapshot.getKey());
+                    Log.d(TAG, "PageGroup: "+snapshot.getValue(PageGroup.class));
+                }
+                waitFlag.set(true);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        while(!waitFlag.get());
+    }
+
 
 }

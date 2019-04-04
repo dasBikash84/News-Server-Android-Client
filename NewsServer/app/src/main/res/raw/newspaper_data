@@ -1,18 +1,18 @@
-1,'The Guardian','United Kingdom',3
-2,'প্রথম আলো','Bangladesh',1
-3,'আনন্দবাজার পত্রিকা','India',2
-4,'The Daily Star','Bangladesh',3
-5,'The Indian Express','India',3
-6,'দৈনিক ইত্তেফাক','Bangladesh',1
-7,'The Times of India','India',3
-8,'Daily Mirror','United Kingdom',3
-9,'Dhaka Tribune','Bangladesh',3
-10,'বাংলাদেশ প্রতিদিন','Bangladesh',1
-11,'Dawn','Pakistan',3
-12,'কালের কণ্ঠ','Bangladesh',1
-13,'যুগান্তর','Bangladesh',1
-14,'The Financial Express','Bangladesh',3
-15,'বণিক বার্তা','Bangladesh',1
-16,'ভোরের কাগজ','Bangladesh',1
-17,'New Age','Bangladesh',3
-18,'Daily Sun','Bangladesh',3
+'NP_ID_1','The Guardian','United Kingdom','LANG_ID_3'
+'NP_ID_2','প্রথম আলো','Bangladesh','LANG_ID_1'
+'NP_ID_3','আনন্দবাজার পত্রিকা','India','LANG_ID_2'
+'NP_ID_4','The Daily Star','Bangladesh','LANG_ID_3'
+'NP_ID_5','The Indian Express','India','LANG_ID_3'
+'NP_ID_6','দৈনিক ইত্তেফাক','Bangladesh','LANG_ID_1'
+'NP_ID_7','The Times of India','India','LANG_ID_3'
+'NP_ID_8','Daily Mirror','United Kingdom','LANG_ID_3'
+'NP_ID_9','Dhaka Tribune','Bangladesh','LANG_ID_3'
+'NP_ID_10','বাংলাদেশ প্রতিদিন','Bangladesh','LANG_ID_1'
+'NP_ID_11','Dawn','Pakistan','LANG_ID_3'
+'NP_ID_12','কালের কণ্ঠ','Bangladesh','LANG_ID_1'
+'NP_ID_13','যুগান্তর','Bangladesh','LANG_ID_1'
+'NP_ID_14','The Financial Express','Bangladesh','LANG_ID_3'
+'NP_ID_15','বণিক বার্তা','Bangladesh','LANG_ID_1'
+'NP_ID_16','ভোরের কাগজ','Bangladesh','LANG_ID_1'
+'NP_ID_17','New Age','Bangladesh','LANG_ID_3'
+'NP_ID_18','Daily Sun','Bangladesh','LANG_ID_3'

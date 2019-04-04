@@ -90,10 +90,10 @@ public class RoomDatabaseInstrumentedTest {
     private void dataBootStrap(){
 
         mCountry = new Country("Bangladesh","BD","Asia/Dhaka");
-        mLanguage = new Language(1,"Bangla-Bangladesh");
-        mNewspaper = new Newspaper(1,"প্রথম আলো",mCountry.getName(),mLanguage.getId(),true);
-        mPage = new Page(1,mNewspaper.getId(),0,"সর্বশেষ",true);
-        mArticle = new Article(1,mPage.getId(),"Article 1",45432435L,Arrays.asList("image1","Image 2","Image 3"));
+//        mLanguage = new Language(1,"Bangla-Bangladesh");
+//        mNewspaper = new Newspaper(1,"প্রথম আলো",mCountry.getName(),mLanguage.getId(),true);
+        //mPage = new Page(1,mNewspaper.getId(),0,"সর্বশেষ",true);
+//        mArticle = new Article(1,mPage.getId(),"Article 1",45432435L,Arrays.asList("image1","Image 2","Image 3"));
 
         mLanguageDao.addLanguages(Arrays.asList(mLanguage));
         mCountryDao.addCountries(Arrays.asList(mCountry));

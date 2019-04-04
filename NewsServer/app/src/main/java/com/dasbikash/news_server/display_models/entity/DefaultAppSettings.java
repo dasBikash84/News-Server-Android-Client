@@ -13,57 +13,66 @@
 
 package com.dasbikash.news_server.display_models.entity;
 
-import java.util.List;
+import java.util.HashMap;
 
 public class DefaultAppSettings {
 
-    private List<Country> countries;
-    private List<Language> languages;
-    private List<Newspaper> newspapers;
-    private List<Page> pages;
-    private List<PageGroup> page_groups;
+    private HashMap<String,Country> countries;
+    private HashMap<String, Language> languages;
+    private HashMap<String, Newspaper> newspapers;
+    private HashMap<String, Page> pages;
+    private HashMap<String, PageGroup> page_groups;
+    private HashMap<String,Long> update_time;
 
     public DefaultAppSettings() {
     }
 
-    public List<Country> getCountries() {
+    public HashMap<String, Country> getCountries() {
         return countries;
     }
 
-    public void setCountries(List<Country> countries) {
+    public void setCountries(HashMap<String, Country> countries) {
         this.countries = countries;
     }
 
-    public List<Language> getLanguages() {
+    public HashMap<String, Language> getLanguages() {
         return languages;
     }
 
-    public void setLanguages(List<Language> languages) {
+    public void setLanguages(HashMap<String, Language> languages) {
         this.languages = languages;
     }
 
-    public List<Newspaper> getNewspapers() {
+    public HashMap<String, Newspaper> getNewspapers() {
         return newspapers;
     }
 
-    public void setNewspapers(List<Newspaper> newspapers) {
+    public void setNewspapers(HashMap<String, Newspaper> newspapers) {
         this.newspapers = newspapers;
     }
 
-    public List<Page> getPages() {
+    public HashMap<String, Page> getPages() {
         return pages;
     }
 
-    public void setPages(List<Page> pages) {
+    public void setPages(HashMap<String, Page> pages) {
         this.pages = pages;
     }
 
-    public List<PageGroup> getPage_groups() {
+    public HashMap<String, PageGroup> getPage_groups() {
         return page_groups;
     }
 
-    public void setPage_groups(List<PageGroup> page_groups) {
+    public void setPage_groups(HashMap<String, PageGroup> page_groups) {
         this.page_groups = page_groups;
+    }
+
+    public HashMap<String, Long> getUpdate_time() {
+        return update_time;
+    }
+
+    public void setUpdate_time(HashMap<String, Long> update_time) {
+        this.update_time = update_time;
     }
 
     @Override
@@ -73,7 +82,7 @@ public class DefaultAppSettings {
                 ", languages=" + languages +
                 ", newspapers=" + newspapers +
                 ", pages=" + pages +
-                ", page_groups=" + page_groups +
+                ", pageGroups=" + page_groups +
                 '}';
     }
 }

@@ -32,7 +32,7 @@ public interface PageDao {
 
     //find one by PageId
 
-    @Query("SELECT * FROM Page WHERE id=:pageId AND active")
+    /*@Query("SELECT * FROM Page WHERE id=:pageId AND active")
     public Page findById(int pageId);
 
     //find all by NewsPaper (including in-actives)
@@ -48,7 +48,7 @@ public interface PageDao {
     //find all top level page by NewsPaperId(only actives)
 
     @Query("SELECT * FROM Page WHERE newsPaperId=:newsPaperId AND parentPageId="+ Page.TOP_LEVEL_PAGE_PARENT_ID +" AND active")
-    public List<Page> findAllActiveTopLevelPagesByNewsPaperId(int newsPaperId);
+    public List<Page> findAllActiveTopLevelPagesByNewsPaperId(String newsPaperId);
 
     //find all top level page by NewsPaperId(including in-actives)
 
@@ -61,11 +61,11 @@ public interface PageDao {
 
     //find all child pages for top level page(including in-actives)
     @Query("SELECT * FROM Page WHERE parentPageId=:parentPageId")
-    public List<Page> findChildrenByParentPageId(int parentPageId);
+    public List<Page> findChildrenByParentPageId(int parentPageId);*/
 
     //find list of favourite pages
 
-    //@Query("SELECT * FROM Page WHERE favourite ORDER BY title ASC")
+    //@Query("SELECT * FROM Page WHERE favourite ORDER BY name ASC")
     //public LiveData<List<Page>> getFavouritePageList();
 
 

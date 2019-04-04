@@ -21,6 +21,8 @@ import com.dasbikash.news_server.display_models.entity.DefaultAppSettings;
 
 public class DataService {
 
+    public static final String DB_ID_PREFIX = "DB_ID_";
+
     private NewsServerDatabase mDatabase;
     private Context mContext;
 

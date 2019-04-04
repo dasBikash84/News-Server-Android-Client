@@ -13,26 +13,13 @@
 
 package com.dasbikash.news_server.display_models.entity
 
-import java.util.Objects
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import java.io.Serializable
 
 @Entity
-class Country (){
-
-    @PrimaryKey
-    var name: String = ""
-    var countryCode: String?=null
+data class Country (
+    @PrimaryKey var name: String="",
+    var countryCode: String?=null,
     var timeZone: String?=null
-
-    constructor(name:String,countryCode:String,timeZone: String):this(){
-        this.name = name
-        this.countryCode = countryCode
-        this.timeZone = timeZone
-    }
-
-    override fun toString(): String {
-        return "Country(name=$name, countryCode=$countryCode, timeZone=$timeZone)"
-    }
-}
+):Serializable
