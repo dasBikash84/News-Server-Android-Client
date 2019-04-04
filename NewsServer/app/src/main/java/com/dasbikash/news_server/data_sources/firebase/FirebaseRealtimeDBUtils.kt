@@ -37,7 +37,6 @@ object FirebaseRealtimeDBUtils {
     val SETTINGS_UPDATE_TIME_NODE = "update_time"
 
 
-    private val mFirebaseDatabase = FirebaseDatabase.getInstance()
     val mRootReference = FirebaseDatabase.getInstance().reference
 
     val mAppSettingsReference: DatabaseReference = mRootReference.child(APP_SETTINGS_NODE)

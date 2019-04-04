@@ -30,71 +30,68 @@ object AppSettingsBootStrapFromRTDb {
 
     private val TAG = "DbTest"
 
-    private fun loadDataFromSqlFile(context: Context, @RawRes rawResId: Int): Iterator<String>? {
-        return FileLineIterator.getFileLineIteratorFromRawResource(context, rawResId)
-    }
-
     fun getCountries(context: Context): HashMap<String,Country> {
-        val countries = ArrayList<Country>()
-        val countryData = loadDataFromSqlFile(context, R.raw.country_data)
-        while (countryData!!.hasNext()) {
-            val datam = getStrings(countryData.next())
-            countries.add(Country(datam[0], datam[1], datam[2]))
-        }
+
+        val reader = BufferedReader(InputStreamReader(context.resources.openRawResource(R.raw.country_data)))
+        val gson = Gson()
+        val countries = gson.fromJson(reader, Countries::class.java)
+
         val countryMap: HashMap<String,Country> = HashMap();
-        for (country in countries){
+        for (country in countries.countries){
             countryMap.put(country.name,country)
         }
+
+        Log.d(TAG,"pageGroupMap Data: "+countryMap)
+
         return countryMap
+
+
     }
 
     fun getLanguages(context: Context): HashMap<String,Language> {
-        val languages = ArrayList<Language>()
-        val languageData = loadDataFromSqlFile(context, R.raw.language_data)
-        while (languageData!!.hasNext()) {
-            val datam = getStrings(languageData.next())
-            languages.add(Language(datam[0], datam[1]))
-        }
+
+        val reader = BufferedReader(InputStreamReader(context.resources.openRawResource(R.raw.language_data)))
+        val gson = Gson()
+        val languages = gson.fromJson(reader, Languages::class.java)
+
         val languageMap: HashMap<String,Language> = HashMap();
-        for (language in languages){
+        for (language in languages.languages){
             languageMap.put(language.id,language)
         }
+
+        Log.d(TAG,"languageMap Data: "+languageMap)
+
         return languageMap
     }
 
     fun getNewspapers(context: Context): HashMap<String,Newspaper> {
-        val newspapers = ArrayList<Newspaper>()
 
-        val newsPaperData = loadDataFromSqlFile(context, R.raw.newspaper_data)
-        while (newsPaperData!!.hasNext()) {
-            val datam = getStrings(newsPaperData.next())
-            newspapers.add(Newspaper(datam[0], datam[1], datam[2], datam[3], true))
-        }
+        val reader = BufferedReader(InputStreamReader(context.resources.openRawResource(R.raw.newspaper_data)))
+        val gson = Gson()
+        val newspapers = gson.fromJson(reader, Newspapers::class.java)
+
         val newspaperMap: HashMap<String,Newspaper> = HashMap();
-        for (newsPaper in newspapers){
-            newspaperMap.put(newsPaper.id,newsPaper)
+        for (newspaper in newspapers.newspapers){
+            newspaperMap.put(newspaper.id,newspaper)
         }
-//        Log.d(TAG,"NP data:"+newspaperMap)
+
+        Log.d(TAG,"newspaperMap Data: "+newspaperMap)
+
         return newspaperMap
     }
 
     fun getPages(context: Context): HashMap<String,Page> {
-        val pages = ArrayList<Page>()
 
-        val pageData = loadDataFromSqlFile(context, R.raw.page_data)
-
-        while (pageData!!.hasNext()) {
-            val datam = getStrings(pageData.next())
-
-            val page = Page(datam[0],datam[1],datam[2],datam[3], true)
-
-            pages.add(page)
-        }
+        val reader = BufferedReader(InputStreamReader(context.resources.openRawResource(R.raw.page_data)))
+        val gson = Gson()
+        val pages = gson.fromJson(reader, PageList::class.java)
 
         val pageMap: HashMap<String,Page> = HashMap();
-        for (page in pages){
+        for (page in pages.pages){
             pageMap.put(page.id,page)
         }
+
+        Log.d(TAG,"pageMap Data: "+pageMap)
 
         return pageMap
 
@@ -174,10 +171,6 @@ object AppSettingsBootStrapFromRTDb {
         while (!task.isComplete);
     }
 
-    private fun getStrings(countryData: String): Array<String> {
-        return countryData.replace("'", "").split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-    }
-
     private class PageGroups {
         internal val pageGroups: List<PageGroup> = ArrayList()
 
@@ -185,6 +178,35 @@ object AppSettingsBootStrapFromRTDb {
             return "PageGroups{" +
                     "page_groups=" + pageGroups +
                     '}'.toString()
+        }
+    }
+
+    private class Countries {
+        internal val countries: List<Country> = ArrayList()
+        override fun toString(): String {
+            return "Countries(countries=$countries)"
+        }
+    }
+
+    private class Languages {
+        internal val languages: List<Language> = ArrayList()
+        override fun toString(): String {
+            return "Languages(languages=$languages)"
+        }
+
+    }
+
+    private class Newspapers {
+        internal val newspapers: List<Newspaper> = ArrayList()
+        override fun toString(): String {
+            return "Newspapers(newspapers=$newspapers)"
+        }
+    }
+
+    private class PageList {
+        internal val pages: List<Page> = ArrayList()
+        override fun toString(): String {
+            return "PageList(pages=$pages)"
         }
     }
 }

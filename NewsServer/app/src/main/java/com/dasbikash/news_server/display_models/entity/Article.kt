@@ -34,5 +34,4 @@ data class Article (
     var title: String?,
     var lastModificationTS: Long?,
     var imageLinkList: List<String>?
-
 ): Serializable
