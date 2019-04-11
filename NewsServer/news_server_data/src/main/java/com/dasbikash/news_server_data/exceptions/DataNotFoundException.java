@@ -11,4 +11,18 @@
  * limitations under the License.
  */
 
-include ':app', ':news_server_data'
+package com.dasbikash.news_server_data.exceptions;
+
+public class DataNotFoundException extends RuntimeException {
+
+    public DataNotFoundException() {
+    }
+
+    public DataNotFoundException(String message) {
+        super(message);
+    }
+
+    public DataNotFoundException(Throwable cause) {
+        super(cause);
+    }
+}

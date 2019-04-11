@@ -58,49 +58,26 @@ dependencies {
     //implementation 'com.google.android.gms:play-services-ads:17.1.2'
     implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha04'
 
-    //implementation 'org.kie.modules:org-apache-commons-io-main:6.5.0.Final'
-
-    //implementation 'cn.bluemobi.dylan:photoview:1.4'
-
-    //implementation 'org.kie.modules:org-apache-commons-net:6.5.0.Final'
-
-    //implementation 'com.google.android.material:material:1.1.0-alpha04'
-    implementation 'com.google.firebase:firebase-core:16.0.8'
-    implementation 'com.google.firebase:firebase-database:16.1.0'
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-core:1.9.5'
-
-    // Core library
-    androidTestImplementation 'androidx.test:core:1.1.0'
-
     // AndroidJUnitRunner and JUnit Rules
     androidTestImplementation 'androidx.test:runner:1.1.1'
+
     androidTestImplementation 'androidx.test:rules:1.1.1'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:1.9.5'
+    androidTestImplementation 'androidx.test:core:1.1.0'
+
     implementation 'io.reactivex.rxjava2:rxjava:2.2.6'
-    def room_version = "2.1.0-alpha06"
-    implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
 
-    // For Kotlin use kapt instead of annotationProcessor
-    kapt "androidx.room:room-compiler:$room_version"
-
-    // For Kotlin use kapt instead of annotationProcessor
-
-    // optional - Kotlin Extensions and Coroutines support for Room
-    implementation "androidx.room:room-ktx:$room_version"
-
-    // optional - RxJava support for Room
-
-    //implementation "androidx.room:room-rxjava2:$room_version"
-
-    // Test helpers
-    testImplementation "androidx.room:room-testing:$room_version"
     def archLifecycleVersion = '1.1.1'
     implementation "android.arch.lifecycle:extensions:$archLifecycleVersion"
     annotationProcessor "android.arch.lifecycle:compiler:$archLifecycleVersion"
-    implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
-    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+
+    implementation project(":news_server_data")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 apply plugin: 'com.google.gms.google-services'
+repositories {
+    mavenCentral()
+}

@@ -11,4 +11,23 @@
  * limitations under the License.
  */
 
-include ':app', ':news_server_data'
+package com.dasbikash.news_server_data.database.daos
+
+import com.dasbikash.news_server_data.display_models.entity.Page
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+
+@Dao
+internal interface PageDao {
+
+
+    @get:Query("SELECT COUNT(*) FROM Page")
+    val count: Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun addPages(pages: List<Page>)
+
+}

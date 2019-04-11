@@ -11,4 +11,24 @@
  * limitations under the License.
  */
 
-include ':app', ':news_server_data'
+package com.dasbikash.news_server_data.database.daos
+
+import com.dasbikash.news_server_data.display_models.entity.Country
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+
+@Dao
+internal interface CountryDao {
+
+    @get:Query("SELECT COUNT(*) FROM Country")
+    val count: Int
+
+    @Query("SELECT * FROM Country")
+    fun findAll(): List<Country>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun addCountries(countries: List<Country>)
+}

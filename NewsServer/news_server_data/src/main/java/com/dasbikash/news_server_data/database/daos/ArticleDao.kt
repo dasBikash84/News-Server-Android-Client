@@ -11,4 +11,24 @@
  * limitations under the License.
  */
 
-include ':app', ':news_server_data'
+package com.dasbikash.news_server_data.database.daos
+
+import com.dasbikash.news_server_data.display_models.entity.Article
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+
+@Dao
+internal interface ArticleDao {
+
+    @Query("SELECT * FROM Article WHERE pageId=:pageId")
+    fun findAllByPageId(pageId: Int): List<Article>
+
+    @Query("SELECT * FROM Article WHERE id=:id")
+    fun findId(id: Int): Article
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun addArticles(articles: List<Article>)
+}

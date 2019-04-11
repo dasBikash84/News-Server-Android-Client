@@ -11,4 +11,26 @@
  * limitations under the License.
  */
 
-include ':app', ':news_server_data'
+package com.dasbikash.news_server_data.display_models.room_converters
+
+import java.util.Calendar
+import java.util.Date
+
+import androidx.room.TypeConverter
+
+object DateConverter {
+
+    @TypeConverter
+    @JvmStatic
+    fun fromDate(date: Date): Long {
+        return date.time
+    }
+
+    @TypeConverter
+    @JvmStatic
+    fun toDate(timeStamp: Long?): Date {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = timeStamp!!
+        return calendar.time
+    }
+}

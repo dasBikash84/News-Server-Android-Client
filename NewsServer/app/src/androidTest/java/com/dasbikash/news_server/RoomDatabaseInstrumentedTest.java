@@ -24,14 +24,12 @@ import com.dasbikash.news_server.database.daos.LanguageDao;
 import com.dasbikash.news_server.database.daos.NewsPaperDao;
 import com.dasbikash.news_server.database.daos.PageDao;
 import com.dasbikash.news_server.database.daos.PageGroupDao;
-import com.dasbikash.news_server.database.daos.UserPreferenceDataDao;
 import com.dasbikash.news_server.display_models.entity.Article;
 import com.dasbikash.news_server.display_models.entity.Country;
 import com.dasbikash.news_server.display_models.entity.Language;
 import com.dasbikash.news_server.display_models.entity.Newspaper;
 import com.dasbikash.news_server.display_models.entity.Page;
 import com.dasbikash.news_server.display_models.entity.PageGroup;
-import com.dasbikash.news_server.display_models.entity.UserPreferenceData;
 import com.dasbikash.news_server.utils.SharedPreferenceUtils;
 
 import org.junit.After;

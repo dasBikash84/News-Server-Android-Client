@@ -11,4 +11,18 @@
  * limitations under the License.
  */
 
-include ':app', ':news_server_data'
+package com.dasbikash.news_server_data.exceptions;
+
+public class NoInternertConnectionException extends Exception {
+
+    public NoInternertConnectionException() {
+    }
+
+    public NoInternertConnectionException(String message) {
+        super(message);
+    }
+
+    public NoInternertConnectionException(Throwable cause) {
+        super(cause);
+    }
+}

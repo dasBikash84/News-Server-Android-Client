@@ -15,12 +15,12 @@ package com.dasbikash.news_server.view_models;
 
 import android.app.Application;
 
-import com.dasbikash.news_server.display_models.entity.Newspaper;
-import com.dasbikash.news_server.display_models.entity.Page;
-import com.dasbikash.news_server.display_models.entity.PageGroup;
-import com.dasbikash.news_server.exceptions.NoInternertConnectionException;
-import com.dasbikash.news_server.exceptions.OnMainThreadException;
-import com.dasbikash.news_server.repositories.HomeViewModelRepo;
+import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException;
+import com.dasbikash.news_server_data.exceptions.OnMainThreadException;
+import com.dasbikash.news_server_data.display_models.entity.Newspaper;
+import com.dasbikash.news_server_data.display_models.entity.Page;
+import com.dasbikash.news_server_data.display_models.entity.PageGroup;
+import com.dasbikash.news_server_data.repositories.HomeViewModelRepo;
 
 import java.util.List;
 

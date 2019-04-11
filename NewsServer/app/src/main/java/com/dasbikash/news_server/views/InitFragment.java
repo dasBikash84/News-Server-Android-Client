@@ -27,12 +27,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dasbikash.news_server.R;
-import com.dasbikash.news_server.exceptions.DataNotFoundException;
-import com.dasbikash.news_server.exceptions.NoInternertConnectionException;
-import com.dasbikash.news_server.exceptions.OnMainThreadException;
-import com.dasbikash.news_server.exceptions.RemoteDbException;
-import com.dasbikash.news_server.utils.ExceptionUtils;
-import com.dasbikash.news_server.utils.NetConnectivityUtility;
+import com.dasbikash.news_server_data.exceptions.DataNotFoundException;
+import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException;
+import com.dasbikash.news_server_data.exceptions.OnMainThreadException;
+import com.dasbikash.news_server_data.exceptions.RemoteDbException;
+import com.dasbikash.news_server_data.utills.ExceptionUtils;
+import com.dasbikash.news_server_data.utills.NetConnectivityUtility;
 import com.dasbikash.news_server.view_models.HomeViewModel;
 import com.dasbikash.news_server.views.interfaces.HomeNavigator;
 

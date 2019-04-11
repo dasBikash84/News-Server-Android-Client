@@ -11,4 +11,17 @@
  * limitations under the License.
  */
 
-include ':app', ':news_server_data'
+package com.dasbikash.news_server_data.display_models.entity
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import java.io.Serializable
+
+@Entity
+data class PageGroup  (
+        @PrimaryKey
+        var id: String="",
+        var name: String?=null,
+        var active: Boolean=true,
+        var pageList: List<String>?=null
+): Serializable

@@ -11,4 +11,18 @@
  * limitations under the License.
  */
 
-include ':app', ':news_server_data'
+package com.dasbikash.news_server_data.exceptions;
+
+public class RemoteDbException extends RuntimeException {
+
+    public RemoteDbException() {
+    }
+
+    public RemoteDbException(String message) {
+        super(message);
+    }
+
+    public RemoteDbException(Throwable cause) {
+        super(cause);
+    }
+}

@@ -11,4 +11,12 @@
  * limitations under the License.
  */
 
-include ':app', ':news_server_data'
+package com.dasbikash.news_server_data.data_sources
+
+import android.content.Context
+import com.dasbikash.news_server_data.display_models.entity.DefaultAppSettings
+
+internal interface UserSettingsDataService{
+    fun getUserSettingsUpdateTime(context: Context): Long
+    fun getUserSettings(context: Context): DefaultAppSettings
+}

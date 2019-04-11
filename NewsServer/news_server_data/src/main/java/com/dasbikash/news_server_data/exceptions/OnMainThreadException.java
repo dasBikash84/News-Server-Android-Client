@@ -11,4 +11,18 @@
  * limitations under the License.
  */
 
-include ':app', ':news_server_data'
+package com.dasbikash.news_server_data.exceptions;
+
+public class OnMainThreadException extends Exception {
+
+    public OnMainThreadException() {
+    }
+
+    public OnMainThreadException(String message) {
+        super(message);
+    }
+
+    public OnMainThreadException(Throwable cause) {
+        super(cause);
+    }
+}

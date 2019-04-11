@@ -11,4 +11,15 @@
  * limitations under the License.
  */
 
-include ':app', ':news_server_data'
+package com.dasbikash.news_server_data.display_models.entity
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity
+data class UserPreferenceData(
+        @PrimaryKey(autoGenerate = true) var id:Int,
+        val favouritePages: List<Int>?=null,
+        val inActiveNewsPapers: List<Int>?=null,
+        val inActivePages: List<Int>?=null
+)

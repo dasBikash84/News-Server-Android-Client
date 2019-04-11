@@ -18,7 +18,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.utils.NetConnectivityUtility
+import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
 import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.google.android.material.bottomnavigation.BottomNavigationView
