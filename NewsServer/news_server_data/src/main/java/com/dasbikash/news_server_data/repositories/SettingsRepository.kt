@@ -21,6 +21,7 @@ import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.display_models.entity.*
+import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException
 
 class SettingsRepository(context: Context) {
@@ -41,12 +42,6 @@ class SettingsRepository(context: Context) {
         mDatabase = NewsServerDatabase.getDatabase(context)
     }
 
-    fun isAppSettingsUpdated(): Boolean {
-        val localAppSettingsUpdateTime = getLocalAppSettingsUpdateTime()
-        val serverAppSettingsUpdateTime = getServerAppSettingsUpdateTime()
-        return serverAppSettingsUpdateTime > localAppSettingsUpdateTime
-    }
-
     private fun getLocalAppSettingsUpdateTime(): Long {
         val appSettingsUpdateTimestamp = SharedPreferenceUtils.getAppSettingsUpdateTimestamp(mContext)
         Log.d(TAG, "getLocalAppSettingsUpdateTime: $appSettingsUpdateTimestamp")
@@ -58,12 +53,6 @@ class SettingsRepository(context: Context) {
         Log.d(TAG, "getServerAppSettingsUpdateTime: $serverAppSettingsUpdateTime")
         SharedPreferenceUtils.saveGlobalSettingsUpdateTimestamp(mContext, serverAppSettingsUpdateTime)
         return serverAppSettingsUpdateTime
-    }
-
-    fun isSettingsDataLoaded(): Boolean {
-        return getLanguageCount() > 0 && getCountryCount() > 0 &&
-                getNewsPaperCount() > 0 && getPageCount() > 0 &&
-                getPageGroupCount() > 0
     }
 
     private fun getCountryCount(): Int {
@@ -97,7 +86,7 @@ class SettingsRepository(context: Context) {
     }
 
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-    @Throws(OnMainThreadException::class)/*, NoInternertConnectionException*/
+    @Throws(OnMainThreadException::class, NoInternertConnectionException::class)
     fun loadAppSettings() {
         Log.d(TAG, "loadAppSettings: ")
         val appSettings = mAppSettingsDataService.getAppSettings(mContext)
@@ -124,6 +113,18 @@ class SettingsRepository(context: Context) {
 
         val settingUpdateTimes = ArrayList(appSettings.update_time?.values)
         SharedPreferenceUtils.saveGlobalSettingsUpdateTimestamp(mContext, settingUpdateTimes[settingUpdateTimes.size - 1])
+    }
+
+    fun isAppSettingsUpdated(): Boolean {
+        val localAppSettingsUpdateTime = getLocalAppSettingsUpdateTime()
+        val serverAppSettingsUpdateTime = getServerAppSettingsUpdateTime()
+        return serverAppSettingsUpdateTime > localAppSettingsUpdateTime
+    }
+
+    fun isSettingsDataLoaded(): Boolean {
+        return getLanguageCount() > 0 && getCountryCount() > 0 &&
+                getNewsPaperCount() > 0 && getPageCount() > 0 &&
+                getPageGroupCount() > 0
     }
 
 
