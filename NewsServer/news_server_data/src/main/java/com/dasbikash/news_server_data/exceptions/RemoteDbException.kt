@@ -11,18 +11,13 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.exceptions;
+package com.dasbikash.news_server_data.exceptions
 
-public class OnMainThreadException extends Exception {
+class RemoteDbException : RuntimeException {
 
-    public OnMainThreadException() {
-    }
+    constructor() {}
 
-    public OnMainThreadException(String message) {
-        super(message);
-    }
+    constructor(message: String) : super(message) {}
 
-    public OnMainThreadException(Throwable cause) {
-        super(cause);
-    }
+    constructor(cause: Throwable) : super(cause) {}
 }

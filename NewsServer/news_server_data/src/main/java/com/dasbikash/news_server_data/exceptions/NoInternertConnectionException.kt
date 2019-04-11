@@ -11,18 +11,13 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.exceptions;
+package com.dasbikash.news_server_data.exceptions
 
-public class RemoteDbException extends RuntimeException {
+class NoInternertConnectionException : Exception {
 
-    public RemoteDbException() {
-    }
+    constructor() {}
 
-    public RemoteDbException(String message) {
-        super(message);
-    }
+    constructor(message: String) : super(message) {}
 
-    public RemoteDbException(Throwable cause) {
-        super(cause);
-    }
+    constructor(cause: Throwable) : super(cause) {}
 }

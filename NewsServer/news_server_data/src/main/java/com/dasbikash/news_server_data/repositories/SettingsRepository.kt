@@ -96,32 +96,33 @@ class SettingsRepository(context: Context) {
         return count
     }
 
+    @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     @Throws(OnMainThreadException::class)/*, NoInternertConnectionException*/
     fun loadAppSettings() {
         Log.d(TAG, "loadAppSettings: ")
         val appSettings = mAppSettingsDataService.getAppSettings(mContext)
 
-        val languages = ArrayList(appSettings.languages.values)
+        val languages = ArrayList(appSettings.languages?.values)
         mDatabase.languageDao.addLanguages(languages)
         Log.d(TAG, "loadAppSettings: languages$languages")
 
-        val countries = ArrayList(appSettings.countries.values)
+        val countries = ArrayList(appSettings.countries?.values)
         mDatabase.countryDao.addCountries(countries)
         Log.d(TAG, "loadAppSettings: countries$countries")
 
-        val newspapers = ArrayList(appSettings.newspapers.values)
+        val newspapers = ArrayList(appSettings.newspapers?.values)
         mDatabase.newsPaperDao.addNewsPapers(newspapers)
         Log.d(TAG, "loadAppSettings: newspapers$newspapers")
 
-        val pages = ArrayList(appSettings.pages.values)
+        val pages = ArrayList(appSettings.pages?.values)
         mDatabase.pageDao.addPages(pages)
         Log.d(TAG, "loadAppSettings: pages$pages")
 
-        val newsCategories = ArrayList(appSettings.page_groups.values)
+        val newsCategories = ArrayList(appSettings.page_groups?.values)
         mDatabase.pageGroupDao.addPageGroups(newsCategories)
         Log.d(TAG, "loadAppSettings: newsCategories$newsCategories")
 
-        val settingUpdateTimes = ArrayList(appSettings.update_time.values)
+        val settingUpdateTimes = ArrayList(appSettings.update_time?.values)
         SharedPreferenceUtils.saveGlobalSettingsUpdateTimestamp(mContext, settingUpdateTimes[settingUpdateTimes.size - 1])
     }
 

@@ -30,8 +30,8 @@ internal object SharedPreferenceUtils {
     /**
      * Supports Long,Int,Float,String and Boolean data storing
      * */
-    @JvmStatic
-    fun <T : Any> saveData(context: Context, data: T, key: String) {
+    //@JvmStatic
+    private fun <T : Any> saveData(context: Context, data: T, key: String) {
 
         val sharedPref = context.getSharedPreferences(
                 SP_FILE_KEY, Context.MODE_PRIVATE)
@@ -53,8 +53,8 @@ internal object SharedPreferenceUtils {
      * Supports Long,Int,Float,String and Boolean data storing
      * Has to provide default data of esired type
      * */
-    @JvmStatic
-    fun getData(context: Context, defaultValue: Any, key: String): Any {
+    //@JvmStatic
+    private fun getData(context: Context, defaultValue: Any, key: String): Any {
 
         val sharedPref =
                 context.getSharedPreferences(SP_FILE_KEY, Context.MODE_PRIVATE)
@@ -74,7 +74,7 @@ internal object SharedPreferenceUtils {
     }
 
     fun getAppSettingsUpdateTimestamp(context: Context): Long {
-        return getData(context, 0L, context.getString(R.string.APP_SETTINGS_UPDATE_TIME_STAMP_SP_KEY)) as Long
+        return getData(context, DEFAULT_LONG, context.getString(R.string.APP_SETTINGS_UPDATE_TIME_STAMP_SP_KEY)) as Long
     }
 
 

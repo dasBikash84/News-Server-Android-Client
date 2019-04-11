@@ -11,18 +11,13 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.exceptions;
+package com.dasbikash.news_server_data.exceptions
 
-public class NoInternertConnectionException extends Exception {
+class OnMainThreadException : Exception {
 
-    public NoInternertConnectionException() {
-    }
+    constructor() {}
 
-    public NoInternertConnectionException(String message) {
-        super(message);
-    }
+    constructor(message: String) : super(message) {}
 
-    public NoInternertConnectionException(Throwable cause) {
-        super(cause);
-    }
+    constructor(cause: Throwable) : super(cause) {}
 }
