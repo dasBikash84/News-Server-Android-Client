@@ -16,7 +16,9 @@ package com.dasbikash.news_server.repositories;
 import android.content.Context;
 import android.util.Log;
 
-import com.dasbikash.news_server.data_sources.data_services.SettingsDataService;
+import com.dasbikash.news_server.data_sources.AppSettingsDataService;
+import com.dasbikash.news_server.data_sources.DataServiceImplProvider;
+import com.dasbikash.news_server.data_sources.UserSettingsDataService;
 import com.dasbikash.news_server.database.NewsServerDatabase;
 import com.dasbikash.news_server.display_models.entity.Country;
 import com.dasbikash.news_server.display_models.entity.DefaultAppSettings;
@@ -37,47 +39,20 @@ public final class HomeViewModelRepo {
 
     private NewsServerDatabase mDatabase;
 
-    private SettingsDataService mSettingsDataService;
+//    private SettingsDataService mSettingsDataService;
     private Context mContext;
+
+    private AppSettingsDataService mAppSettingsDataService;
+    private UserSettingsDataService mUserSettingsDataService;
 
 
     public HomeViewModelRepo(final Context context) {
         mDatabase = NewsServerDatabase.getDatabase(context);
-        mSettingsDataService = new SettingsDataService(context);
+//        mSettingsDataService = new SettingsDataService(context);
+        mAppSettingsDataService = DataServiceImplProvider.getAppSettingsDataServiceImpl();
+        mUserSettingsDataService = DataServiceImplProvider.getUserSettingsDataServiceImpl();
         mContext = context;
     }
-
-    //All active newspaper
-    /*public LiveData<List<Newspaper>> getAllActiveNewsPapers() {
-        return mDatabase.getNewsPaperDao().findAllActive();
-    }
-
-    //All corresponding top level pages.
-    public List<Page> getTopLevelPagesForNewspaper(Newspaper newspaper) {
-        return mPageDao.findAllActiveTopLevelPagesByNewsPaperId(newspaper.getId());
-    }
-
-    //All corresponding children pages
-    public List<Page> getActiveChildrenPagesForPage(Page page) {
-        return mPageDao.findActiveChildrenByParentPageId(page.getId());
-    }*/
-
-    /*//List of most visited pages in descending order
-    public LiveData<List<Page>> getMostVisitedPageList(){
-        return mDatabase.getPageDao().getMostVisitedPageList();
-    }*/
-
-    //find list of favourite pages in ascending name order
-    /*public LiveData<List<Page>> getFavouritePageList() {
-        return null;//mDatabase.getPageDao().getFavouritePageList();
-    }
-
-    //All saved page group data
-
-    public LiveData<List<PageGroup>> getAllPageGroups() {
-        ToDoUtils.workToDo();
-        return null;//mDatabase.getPageGroupDao().findAll();
-    }*/
 
     public boolean isAppSettingsUpdated() {
         long localAppSettingsUpdateTime = getLocalAppSettingsUpdateTime();
@@ -86,15 +61,15 @@ public final class HomeViewModelRepo {
     }
 
     private long getLocalAppSettingsUpdateTime() {
-        long appSettingsUpdateTimestamp = SharedPreferenceUtils.getAppSettingsUpdateTimestamp(mContext);
+        long appSettingsUpdateTimestamp = SharedPreferenceUtils.INSTANCE.getAppSettingsUpdateTimestamp(mContext);
         Log.d(TAG, "getLocalAppSettingsUpdateTime: "+appSettingsUpdateTimestamp);
         return appSettingsUpdateTimestamp;
     }
 
     private long getServerAppSettingsUpdateTime() {
-        Long serverAppSettingsUpdateTime = mSettingsDataService.getServerAppSettingsUpdateTime();
+        Long serverAppSettingsUpdateTime = mAppSettingsDataService.getAppSettingsUpdateTime(mContext);
         Log.d(TAG, "getServerAppSettingsUpdateTime: "+serverAppSettingsUpdateTime);
-        SharedPreferenceUtils.saveGlobalSettingsUpdateTimestamp(mContext,serverAppSettingsUpdateTime);
+        SharedPreferenceUtils.INSTANCE.saveGlobalSettingsUpdateTimestamp(mContext,serverAppSettingsUpdateTime);
         return serverAppSettingsUpdateTime;
     }
 
@@ -138,7 +113,8 @@ public final class HomeViewModelRepo {
             throws OnMainThreadException, NoInternertConnectionException {
         Log.d(TAG, "loadAppSettings: ");
         DefaultAppSettings appSettings =
-                mSettingsDataService.getServerAppSettings();
+                mAppSettingsDataService.getAppSettings(mContext);
+//                mSettingsDataService.getServerAppSettings();
 
         List<Language> languages = new ArrayList<>(appSettings.getLanguages().values());
         mDatabase.getLanguageDao().addLanguages(languages);
@@ -161,6 +137,6 @@ public final class HomeViewModelRepo {
         Log.d(TAG, "loadAppSettings: newsCategories"+newsCategories);
 
         ArrayList<Long> settingUpdateTimes = new ArrayList<>(appSettings.getUpdate_time().values());
-        SharedPreferenceUtils.saveGlobalSettingsUpdateTimestamp(mContext,settingUpdateTimes.get(settingUpdateTimes.size()-1));
+        SharedPreferenceUtils.INSTANCE.saveGlobalSettingsUpdateTimestamp(mContext,settingUpdateTimes.get(settingUpdateTimes.size()-1));
     }
 }

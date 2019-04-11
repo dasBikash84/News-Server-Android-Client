@@ -107,11 +107,13 @@ object NetConnectivityUtility : BroadcastReceiver() {
             return mCurrentNetworkType == NETWORK_TYPE.MOBILE
         }
 
+    @JvmStatic
     val isConnected: Boolean
         get() {
             return mCurrentNetworkType != NETWORK_TYPE.DC
         }
 
+    @JvmStatic
     val isInitialize: Boolean
         get() {
             return mCurrentNetworkType != NETWORK_TYPE.UN_INITIALIZED

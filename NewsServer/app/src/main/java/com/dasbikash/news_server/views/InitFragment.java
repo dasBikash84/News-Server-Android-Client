@@ -191,7 +191,8 @@ public class InitFragment extends Fragment {
                 //wait for network connection
                 emitter.onNext(DataLoadingStatus.WAITING_FOR_NETWORK_INIT);
 
-                while (!NetConnectivityUtility.INSTANCE.isInitialize()) ;
+                //noinspection StatementWithEmptyBody
+                while (!NetConnectivityUtility.isInitialize());
 
                 //Initialization started
                 emitter.onNext(DataLoadingStatus.STARTING_SETTINGS_DATA_LOADING);

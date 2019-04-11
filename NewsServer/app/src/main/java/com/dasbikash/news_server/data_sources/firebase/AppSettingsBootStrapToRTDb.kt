@@ -11,23 +11,20 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.utils
+package com.dasbikash.news_server.data_sources.firebase
 
 import android.content.Context
 import android.util.Log
-import androidx.annotation.RawRes
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.data_sources.firebase.FirebaseRealtimeDBUtils
 import com.dasbikash.news_server.display_models.entity.*
 import com.google.firebase.database.ServerValue
 import com.google.gson.Gson
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.lang.reflect.Field
 import java.util.*
 import kotlin.collections.HashMap
 
-object AppSettingsBootStrapFromRTDb {
+object AppSettingsBootStrapToRTDb {
 
     private val TAG = "DbTest"
 
@@ -35,7 +32,7 @@ object AppSettingsBootStrapFromRTDb {
 
         val reader = BufferedReader(InputStreamReader(context.resources.openRawResource(R.raw.country_data)))
         val gson = Gson()
-        val countries = gson.fromJson(reader, Countries::class.java)
+        val countries = gson.fromJson(reader, AppSettingsBootStrapToRTDb.Countries::class.java)
 
         val countryMap: HashMap<String,Country> = HashMap();
         for (country in countries.countries){
@@ -50,7 +47,7 @@ object AppSettingsBootStrapFromRTDb {
 
         val reader = BufferedReader(InputStreamReader(context.resources.openRawResource(R.raw.language_data)))
         val gson = Gson()
-        val languages = gson.fromJson(reader, Languages::class.java)
+        val languages = gson.fromJson(reader, AppSettingsBootStrapToRTDb.Languages::class.java)
 
         val languageMap: HashMap<String,Language> = HashMap();
         for (language in languages.languages){
@@ -66,7 +63,7 @@ object AppSettingsBootStrapFromRTDb {
 
         val reader = BufferedReader(InputStreamReader(context.resources.openRawResource(R.raw.newspaper_data)))
         val gson = Gson()
-        val newspapers = gson.fromJson(reader, Newspapers::class.java)
+        val newspapers = gson.fromJson(reader, AppSettingsBootStrapToRTDb.Newspapers::class.java)
 
         val newspaperMap: HashMap<String,Newspaper> = HashMap();
         for (newspaper in newspapers.newspapers){
@@ -78,13 +75,13 @@ object AppSettingsBootStrapFromRTDb {
         return newspaperMap
     }
 
-    fun getPages(context: Context): HashMap<String,ServerPage> {
+    fun getPages(context: Context): HashMap<String, ServerPage> {
 
         val reader = BufferedReader(InputStreamReader(context.resources.openRawResource(R.raw.page_data_full)))
         val gson = Gson()
-        val pages = gson.fromJson(reader, PageList::class.java)
+        val pages = gson.fromJson(reader, AppSettingsBootStrapToRTDb.PageList::class.java)
 
-        val pageMap: HashMap<String,ServerPage> = HashMap();
+        val pageMap: HashMap<String, ServerPage> = HashMap();
         for (page in pages.pages){
             pageMap.put(page.id,page)
         }
@@ -98,7 +95,7 @@ object AppSettingsBootStrapFromRTDb {
     fun getPageGroupData(context: Context): HashMap<String,PageGroup> {
         val reader = BufferedReader(InputStreamReader(context.resources.openRawResource(R.raw.page_group_data)))
         val gson = Gson()
-        val pageGroups = gson.fromJson(reader, PageGroups::class.java)
+        val pageGroups = gson.fromJson(reader, AppSettingsBootStrapToRTDb.PageGroups::class.java)
 
         val pageGroupMap: HashMap<String,PageGroup> = HashMap();
         for (pageGroup in pageGroups.pageGroups){

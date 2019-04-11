@@ -21,7 +21,7 @@ import com.dasbikash.news_server.display_models.entity.Language;
 import com.dasbikash.news_server.display_models.entity.Newspaper;
 import com.dasbikash.news_server.display_models.entity.Page;
 import com.dasbikash.news_server.display_models.entity.PageGroup;
-import com.dasbikash.news_server.utils.AppSettingsBootStrapFromRTDb;
+import com.dasbikash.news_server.data_sources.firebase.AppSettingsBootStrapToRTDb;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -95,7 +95,7 @@ public class RealTimeDbTest {
 
     @Test
     public void loadSetingsDataToRealTimeDb(){
-        AppSettingsBootStrapFromRTDb.INSTANCE.loadAppSettingsDataToServer(appContext);
+        AppSettingsBootStrapToRTDb.INSTANCE.loadAppSettingsDataToServer(appContext);
     }
 
     @Test
@@ -147,7 +147,7 @@ public class RealTimeDbTest {
     @Test
     public void writeCountryData(){
         HashMap<String,Country> countryHashMap =
-        AppSettingsBootStrapFromRTDb.INSTANCE.getCountries(appContext);
+        AppSettingsBootStrapToRTDb.INSTANCE.getCountries(appContext);
 
         Task<Void> task = mCountriesSettingsReference.setValue(countryHashMap)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -189,7 +189,7 @@ public class RealTimeDbTest {
     @Test
     public void writeLanguageData(){
         HashMap<String,Language> languageHashMap =
-                AppSettingsBootStrapFromRTDb.INSTANCE.getLanguages(appContext);
+                AppSettingsBootStrapToRTDb.INSTANCE.getLanguages(appContext);
 
         Log.d(TAG, "writeLanguageData: "+languageHashMap);
 
@@ -236,7 +236,7 @@ public class RealTimeDbTest {
     @Test
     public void writeNewspaperData(){
         HashMap<String,Newspaper> newspaperHashMap =
-                AppSettingsBootStrapFromRTDb.INSTANCE.getNewspapers(appContext);
+                AppSettingsBootStrapToRTDb.INSTANCE.getNewspapers(appContext);
 
         Log.d(TAG, "writeNewspaperData: "+newspaperHashMap);
 
@@ -282,8 +282,8 @@ public class RealTimeDbTest {
 
     @Test
     public void writePageData(){
-        HashMap<String, AppSettingsBootStrapFromRTDb.ServerPage> pageHashMap =
-                AppSettingsBootStrapFromRTDb.INSTANCE.getPages(appContext);
+        HashMap<String, AppSettingsBootStrapToRTDb.ServerPage> pageHashMap =
+                AppSettingsBootStrapToRTDb.INSTANCE.getPages(appContext);
 
         Log.d(TAG, "writePageData: "+pageHashMap);
 
@@ -330,7 +330,7 @@ public class RealTimeDbTest {
     @Test
     public void writePageGroupData(){
         HashMap<String,PageGroup> pageGroupHashMap =
-                AppSettingsBootStrapFromRTDb.INSTANCE.getPageGroupData(appContext);
+                AppSettingsBootStrapToRTDb.INSTANCE.getPageGroupData(appContext);
 
         Log.d(TAG, "writePageGroupData: "+pageGroupHashMap);
 

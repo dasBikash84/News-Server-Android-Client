@@ -14,6 +14,7 @@
 package com.dasbikash.news_server;
 
 import android.content.Context;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.dasbikash.news_server.database.NewsServerDatabase;
@@ -31,6 +32,7 @@ import com.dasbikash.news_server.display_models.entity.Newspaper;
 import com.dasbikash.news_server.display_models.entity.Page;
 import com.dasbikash.news_server.display_models.entity.PageGroup;
 import com.dasbikash.news_server.display_models.entity.UserPreferenceData;
+import com.dasbikash.news_server.utils.SharedPreferenceUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -40,7 +42,6 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.util.Arrays;
 
-import androidx.room.Room;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -70,26 +71,28 @@ public class RoomDatabaseInstrumentedTest {
     private Page page2;
     private PageGroup mPageGroup;
     private Article mArticle;
+    Context context;
 
     @Before
     public void createDb() {
 
-        Context context = ApplicationProvider.getApplicationContext();
 
-        mDatabase = Room.inMemoryDatabaseBuilder(context, NewsServerDatabase.class).build();
+        context = ApplicationProvider.getApplicationContext();
+
+       /* mDatabase = Room.inMemoryDatabaseBuilder(context, NewsServerDatabase.class).build();
 
         mCountryDao = mDatabase.getCountryDao();
         mLanguageDao = mDatabase.getLanguageDao();
         mNewsPaperDao = mDatabase.getNewsPaperDao();
         mPageDao = mDatabase.getPageDao();
         mArticleDao = mDatabase.getArticleDao();
-        dataBootStrap();
+        dataBootStrap();*/
     }
 
 
-    private void dataBootStrap(){
+    private void dataBootStrap() {
 
-        mCountry = new Country("Bangladesh","BD","Asia/Dhaka");
+        mCountry = new Country("Bangladesh", "BD", "Asia/Dhaka");
 //        mLanguage = new Language(1,"Bangla-Bangladesh");
 //        mNewspaper = new Newspaper(1,"প্রথম আলো",mCountry.getName(),mLanguage.getId(),true);
         //mPage = new Page(1,mNewspaper.getId(),0,"সর্বশেষ",true);
@@ -104,7 +107,42 @@ public class RoomDatabaseInstrumentedTest {
 
     @After
     public void closeDb() throws IOException {
-        mDatabase.close();
+        //mDatabase.close();
+    }
+
+    @Test
+    public void  testForString() {
+        SharedPreferenceUtils.saveData(context, "Test String", "test_string");
+        SystemClock.sleep(1000);
+        Log.d(TAG, SharedPreferenceUtils.getData(context, "", "test_string").toString());
+    }
+
+    @Test
+    public void  testForLong() {
+        SharedPreferenceUtils.saveData(context, 1245L, "test_long");
+        SystemClock.sleep(1000);
+        Log.d(TAG, "" + (Long) SharedPreferenceUtils.getData(context, 0L, "test_long"));
+    }
+
+    @Test
+    public void  testForInt() {
+        SharedPreferenceUtils.saveData(context, 12413125, "test_int");
+        SystemClock.sleep(1000);
+        Log.d(TAG, "" + (Integer) SharedPreferenceUtils.getData(context, 0, "test_int"));
+    }
+
+    @Test
+    public void  testForFloat() {
+        SharedPreferenceUtils.saveData(context, 123.23F, "test_Float");
+        SystemClock.sleep(1000);
+        Log.d(TAG, "" + (Float) SharedPreferenceUtils.getData(context, 0F, "test_Float"));
+    }
+
+    @Test
+    public void  testForBoolean() {
+        SharedPreferenceUtils.saveData(context, true, "test_Boolean");
+        SystemClock.sleep(1000);
+        Log.d(TAG, "" + (Boolean) SharedPreferenceUtils.getData(context, false, "test_Boolean"));
     }
 
     /*@Test
@@ -174,37 +212,37 @@ public class RoomDatabaseInstrumentedTest {
         assertThat(page3.getId(), equalTo(mPageGroupDao.findById(mPageGroup.getId()).getPageList().getEntries().get(2)));
     }*/
 
-    @Test
-    public void testUserPreferenceDataTable(){
+    /*@Test
+    public void testUserPreferenceDataTable() {
         UserPreferenceDataDao dao = mDatabase.getUserPreferenceDataDao();
 
         UserPreferenceData data =
                 new UserPreferenceData(
                         1,
-                        Arrays.asList(1,2,3),
-                        Arrays.asList(4,5,6),
-                        Arrays.asList(7,8,9)
+                        Arrays.asList(1, 2, 3),
+                        Arrays.asList(4, 5, 6),
+                        Arrays.asList(7, 8, 9)
                 );
 
-        Log.d(TAG, "testUserPreferenceDataTable In data: "+data);
+        Log.d(TAG, "testUserPreferenceDataTable In data: " + data);
 
         dao.add(data);
 
-        Log.d(TAG, "testUserPreferenceDataTable read data: "+dao.findAll().get(0));
+        Log.d(TAG, "testUserPreferenceDataTable read data: " + dao.findAll().get(0));
     }
 
     @Test
-    public void testArticleTable(){
+    public void testArticleTable() {
 
-        Log.d(TAG, "testArticleTable In data: "+mArticle.toString());
+        Log.d(TAG, "testArticleTable In data: " + mArticle.toString());
 
-        Log.d(TAG, "testArticleTable: "+mArticleDao.findId(1).toString());
+        Log.d(TAG, "testArticleTable: " + mArticleDao.findId(1).toString());
     }
 
     @Test
-    public void showTs(){
-        Log.d(TAG, "showTs: "+System.currentTimeMillis());
-    }
+    public void showTs() {
+        Log.d(TAG, "showTs: " + System.currentTimeMillis());
+    }*/
 
 
 }
