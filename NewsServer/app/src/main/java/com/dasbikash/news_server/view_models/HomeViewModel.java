@@ -15,12 +15,12 @@ package com.dasbikash.news_server.view_models;
 
 import android.app.Application;
 
-import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException;
-import com.dasbikash.news_server_data.exceptions.OnMainThreadException;
 import com.dasbikash.news_server_data.display_models.entity.Newspaper;
 import com.dasbikash.news_server_data.display_models.entity.Page;
 import com.dasbikash.news_server_data.display_models.entity.PageGroup;
-import com.dasbikash.news_server_data.repositories.HomeViewModelRepo;
+import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException;
+import com.dasbikash.news_server_data.exceptions.OnMainThreadException;
+import com.dasbikash.news_server_data.repositories.SettingsRepository;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ import androidx.lifecycle.LiveData;
 public class HomeViewModel extends AndroidViewModel {
 
     private Application mApplication;
-    private HomeViewModelRepo mHomeViewModelRepo;
+    private SettingsRepository mSettingsRepository;
     private LiveData<List<Page>> mMostVisitedPages;
     private LiveData<List<Page>> mFavouritePages;
     private LiveData<List<Newspaper>> mActiveNewspapers;
@@ -40,11 +40,11 @@ public class HomeViewModel extends AndroidViewModel {
     public HomeViewModel(@NonNull Application application) {
         super(application);
         mApplication = application;
-        mHomeViewModelRepo = new HomeViewModelRepo(mApplication);
-        //mMostVisitedPages = mHomeViewModelRepo.getMostVisitedPageList();
-        /*mFavouritePages = mHomeViewModelRepo.getFavouritePageList();
-        mActiveNewspapers = mHomeViewModelRepo.getAllActiveNewsPapers();
-        mPageGroups = mHomeViewModelRepo.getAllPageGroups();*/
+        mSettingsRepository = new SettingsRepository(mApplication);
+        //mMostVisitedPages = mSettingsRepository.getMostVisitedPageList();
+        /*mFavouritePages = mSettingsRepository.getFavouritePageList();
+        mActiveNewspapers = mSettingsRepository.getAllActiveNewsPapers();
+        mPageGroups = mSettingsRepository.getAllPageGroups();*/
     }
 
     /**
@@ -69,7 +69,7 @@ public class HomeViewModel extends AndroidViewModel {
     //Top level pages for newspaper
     public List<Page> getTopLevelPagesForNewspaper(Newspaper newspaper){
         if (newspaper!=null) {
-            return mHomeViewModelRepo.getTopLevelPagesForNewspaper(newspaper);
+            return mSettingsRepository.getTopLevelPagesForNewspaper(newspaper);
         }
         return null;
     }
@@ -77,7 +77,7 @@ public class HomeViewModel extends AndroidViewModel {
     //Top level pages for newspaper
     public List<Page> getActiveChildrenPagesForPage(Page page){
         if (page!=null) {
-            return mHomeViewModelRepo.getActiveChildrenPagesForPage(page);
+            return mSettingsRepository.getActiveChildrenPagesForPage(page);
         }
         return null;
     }
@@ -91,14 +91,14 @@ public class HomeViewModel extends AndroidViewModel {
     }*/
 
     public boolean isSettingsDataLoaded() {
-        return mHomeViewModelRepo.isSettingsDataLoaded();
+        return mSettingsRepository.isSettingsDataLoaded();
     }
 
     public boolean isAppSettingsUpdated() {
-        return mHomeViewModelRepo.isAppSettingsUpdated();
+        return mSettingsRepository.isAppSettingsUpdated();
     }
 
     public void loadAppSettings() throws OnMainThreadException, NoInternertConnectionException {
-        mHomeViewModelRepo.loadAppSettings();
+        mSettingsRepository.loadAppSettings();
     }
 }

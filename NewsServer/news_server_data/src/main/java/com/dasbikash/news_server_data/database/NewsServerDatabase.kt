@@ -58,12 +58,12 @@ internal abstract class NewsServerDatabase : RoomDatabase() {
         private val DATABASE_NAME = "news_server_database"
 
         @Volatile
-        private var INSTANCE: NewsServerDatabase? = null
+        private lateinit var INSTANCE: NewsServerDatabase
 
-        fun getDatabase(context: Context): NewsServerDatabase? {
-            if (INSTANCE == null) {
+        fun getDatabase(context: Context): NewsServerDatabase {
+            if (!::INSTANCE.isInitialized) {
                 synchronized(NewsServerDatabase::class.java) {
-                    if (INSTANCE == null) {
+                    if (!::INSTANCE.isInitialized) {
                         INSTANCE = Room.databaseBuilder(
                                 context.applicationContext,
                                 NewsServerDatabase::class.java, DATABASE_NAME)
