@@ -13,7 +13,7 @@
 
 package com.dasbikash.news_server.exceptions;
 
-public class OnMainThreadException extends RuntimeException {
+public class OnMainThreadException extends Exception {
 
     public OnMainThreadException() {
     }

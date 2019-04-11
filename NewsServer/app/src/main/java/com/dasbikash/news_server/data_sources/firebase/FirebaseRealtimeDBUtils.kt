@@ -19,6 +19,7 @@ import com.dasbikash.news_server.display_models.entity.DefaultAppSettings
 import com.dasbikash.news_server.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server.exceptions.OnMainThreadException
 import com.dasbikash.news_server.exceptions.RemoteDbException
+import com.dasbikash.news_server.utils.ExceptionUtils
 import com.dasbikash.news_server.utils.NetConnectivityUtility
 import com.google.firebase.database.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -47,6 +48,12 @@ object FirebaseRealtimeDBUtils {
     val mPageGroupsSettingsReference: DatabaseReference = mAppSettingsReference.child(PAGE_GROUPS_NODE)
     val mSettingsUpdateTimeReference: DatabaseReference = mAppSettingsReference.child(SETTINGS_UPDATE_TIME_NODE)
 
+     @Throws(NoInternertConnectionException::class,OnMainThreadException::class)
+    private fun checkRequestValidity() {
+        ExceptionUtils.thowExceptionIfOnMainThred()
+        ExceptionUtils.thowExceptionIfNoInternetConnection()
+    }
+    @JvmStatic
     fun getServerAppSettingsUpdateTime() : Long {
 
         val REMOTE_DB_ERROR_FLAG = -1L
@@ -82,15 +89,9 @@ object FirebaseRealtimeDBUtils {
         return data
     }
 
-    private fun checkRequestValidity() {
-        if (Thread.currentThread() == Looper.getMainLooper().thread) {
-            throw OnMainThreadException();
-        }
-        if (!NetConnectivityUtility.isConnected) {
-            throw NoInternertConnectionException();
-        }
-    }
 
+    @JvmStatic
+    @Throws(NoInternertConnectionException::class,OnMainThreadException::class)
     fun getServerAppSettingsData(): DefaultAppSettings {
 
         checkRequestValidity()

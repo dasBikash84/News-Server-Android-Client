@@ -23,6 +23,7 @@ import com.google.firebase.database.ServerValue
 import com.google.gson.Gson
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.lang.reflect.Field
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -42,10 +43,7 @@ object AppSettingsBootStrapFromRTDb {
         }
 
         Log.d(TAG,"pageGroupMap Data: "+countryMap)
-
         return countryMap
-
-
     }
 
     fun getLanguages(context: Context): HashMap<String,Language> {
@@ -80,13 +78,13 @@ object AppSettingsBootStrapFromRTDb {
         return newspaperMap
     }
 
-    fun getPages(context: Context): HashMap<String,Page> {
+    fun getPages(context: Context): HashMap<String,ServerPage> {
 
-        val reader = BufferedReader(InputStreamReader(context.resources.openRawResource(R.raw.page_data)))
+        val reader = BufferedReader(InputStreamReader(context.resources.openRawResource(R.raw.page_data_full)))
         val gson = Gson()
         val pages = gson.fromJson(reader, PageList::class.java)
 
-        val pageMap: HashMap<String,Page> = HashMap();
+        val pageMap: HashMap<String,ServerPage> = HashMap();
         for (page in pages.pages){
             pageMap.put(page.id,page)
         }
@@ -113,7 +111,7 @@ object AppSettingsBootStrapFromRTDb {
 
     }
 
-    fun loadAppSettingsData(context: Context) {
+    fun loadAppSettingsDataToServer(context: Context) {
 
         var task = FirebaseRealtimeDBUtils.mCountriesSettingsReference
                 .setValue(getCountries(context))
@@ -204,9 +202,27 @@ object AppSettingsBootStrapFromRTDb {
     }
 
     private class PageList {
-        internal val pages: List<Page> = ArrayList()
+        internal val pages: List<ServerPage> = ArrayList()
         override fun toString(): String {
             return "PageList(pages=$pages)"
+        }
+    }
+
+    data class ServerPage(
+            var id: String="",
+            var newsPaperId: String?=null,
+            var parentPageId: String?=null,
+            var name: String?=null,
+            var linkFormat:String? = null,
+            var linkVariablePartFormat:String? = "page_num",
+            var firstEditionDateString:String? = null,
+            var weekly:Boolean = false,
+            var weeklyPublicationDay:Int? = 0,
+            var active: Boolean = true
+    ){
+        companion object {
+            @JvmField
+            val TOP_LEVEL_PAGE_PARENT_ID = "PAGE_ID_0"
         }
     }
 }

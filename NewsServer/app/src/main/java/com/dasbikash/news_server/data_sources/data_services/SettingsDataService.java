@@ -18,24 +18,27 @@ import android.content.Context;
 import com.dasbikash.news_server.data_sources.firebase.FirebaseRealtimeDBUtils;
 import com.dasbikash.news_server.database.NewsServerDatabase;
 import com.dasbikash.news_server.display_models.entity.DefaultAppSettings;
+import com.dasbikash.news_server.exceptions.NoInternertConnectionException;
+import com.dasbikash.news_server.exceptions.OnMainThreadException;
 
-public class DataService {
+public class SettingsDataService {
 
     public static final String DB_ID_PREFIX = "DB_ID_";
 
     private NewsServerDatabase mDatabase;
     private Context mContext;
 
-    public DataService(final Context context) {
+    public SettingsDataService(final Context context) {
         mDatabase = NewsServerDatabase.getDatabase(context);
         mContext = context;
     }
 
     public Long getServerAppSettingsUpdateTime() {
-        return FirebaseRealtimeDBUtils.INSTANCE.getServerAppSettingsUpdateTime();
+        return FirebaseRealtimeDBUtils.getServerAppSettingsUpdateTime();
     }
 
-    public DefaultAppSettings getServerAppSettings() {
-        return FirebaseRealtimeDBUtils.INSTANCE.getServerAppSettingsData();
+    public DefaultAppSettings getServerAppSettings()
+            throws OnMainThreadException, NoInternertConnectionException {
+        return FirebaseRealtimeDBUtils.getServerAppSettingsData();
     }
 }

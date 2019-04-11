@@ -16,7 +16,7 @@ package com.dasbikash.news_server.repositories;
 import android.content.Context;
 import android.util.Log;
 
-import com.dasbikash.news_server.data_sources.data_services.DataService;
+import com.dasbikash.news_server.data_sources.data_services.SettingsDataService;
 import com.dasbikash.news_server.database.NewsServerDatabase;
 import com.dasbikash.news_server.display_models.entity.Country;
 import com.dasbikash.news_server.display_models.entity.DefaultAppSettings;
@@ -24,6 +24,8 @@ import com.dasbikash.news_server.display_models.entity.Language;
 import com.dasbikash.news_server.display_models.entity.Newspaper;
 import com.dasbikash.news_server.display_models.entity.Page;
 import com.dasbikash.news_server.display_models.entity.PageGroup;
+import com.dasbikash.news_server.exceptions.NoInternertConnectionException;
+import com.dasbikash.news_server.exceptions.OnMainThreadException;
 import com.dasbikash.news_server.utils.SharedPreferenceUtils;
 
 import java.util.ArrayList;
@@ -35,13 +37,13 @@ public final class HomeViewModelRepo {
 
     private NewsServerDatabase mDatabase;
 
-    private DataService mDataService;
+    private SettingsDataService mSettingsDataService;
     private Context mContext;
 
 
     public HomeViewModelRepo(final Context context) {
         mDatabase = NewsServerDatabase.getDatabase(context);
-        mDataService = new DataService(context);
+        mSettingsDataService = new SettingsDataService(context);
         mContext = context;
     }
 
@@ -90,7 +92,7 @@ public final class HomeViewModelRepo {
     }
 
     private long getServerAppSettingsUpdateTime() {
-        Long serverAppSettingsUpdateTime = mDataService.getServerAppSettingsUpdateTime();
+        Long serverAppSettingsUpdateTime = mSettingsDataService.getServerAppSettingsUpdateTime();
         Log.d(TAG, "getServerAppSettingsUpdateTime: "+serverAppSettingsUpdateTime);
         SharedPreferenceUtils.saveGlobalSettingsUpdateTimestamp(mContext,serverAppSettingsUpdateTime);
         return serverAppSettingsUpdateTime;
@@ -132,10 +134,11 @@ public final class HomeViewModelRepo {
         return count;
     }
 
-    public void loadAppSettings() {
+    public void loadAppSettings()
+            throws OnMainThreadException, NoInternertConnectionException {
         Log.d(TAG, "loadAppSettings: ");
         DefaultAppSettings appSettings =
-                mDataService.getServerAppSettings();
+                mSettingsDataService.getServerAppSettings();
 
         List<Language> languages = new ArrayList<>(appSettings.getLanguages().values());
         mDatabase.getLanguageDao().addLanguages(languages);

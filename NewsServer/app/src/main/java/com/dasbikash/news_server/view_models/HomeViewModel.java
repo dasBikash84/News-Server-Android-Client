@@ -18,6 +18,8 @@ import android.app.Application;
 import com.dasbikash.news_server.display_models.entity.Newspaper;
 import com.dasbikash.news_server.display_models.entity.Page;
 import com.dasbikash.news_server.display_models.entity.PageGroup;
+import com.dasbikash.news_server.exceptions.NoInternertConnectionException;
+import com.dasbikash.news_server.exceptions.OnMainThreadException;
 import com.dasbikash.news_server.repositories.HomeViewModelRepo;
 
 import java.util.List;
@@ -96,7 +98,7 @@ public class HomeViewModel extends AndroidViewModel {
         return mHomeViewModelRepo.isAppSettingsUpdated();
     }
 
-    public void loadAppSettings() {
+    public void loadAppSettings() throws OnMainThreadException, NoInternertConnectionException {
         mHomeViewModelRepo.loadAppSettings();
     }
 }

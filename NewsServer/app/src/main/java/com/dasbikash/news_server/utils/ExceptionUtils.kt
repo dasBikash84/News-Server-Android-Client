@@ -11,18 +11,24 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.exceptions;
+package com.dasbikash.news_server.utils
 
-public class NoInternertConnectionException extends Exception {
+import android.os.Looper
+import com.dasbikash.news_server.exceptions.NoInternertConnectionException
+import com.dasbikash.news_server.exceptions.OnMainThreadException
 
-    public NoInternertConnectionException() {
+object ExceptionUtils {
+
+    @JvmStatic
+    fun thowExceptionIfOnMainThred(){
+        if (Thread.currentThread() == Looper.getMainLooper().thread) {
+            throw OnMainThreadException()
+        }
     }
-
-    public NoInternertConnectionException(String message) {
-        super(message);
-    }
-
-    public NoInternertConnectionException(Throwable cause) {
-        super(cause);
+    @JvmStatic
+    fun thowExceptionIfNoInternetConnection(){
+        if (!NetConnectivityUtility.isConnected) {
+            throw NoInternertConnectionException();
+        }
     }
 }

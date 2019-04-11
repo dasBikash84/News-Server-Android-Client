@@ -18,6 +18,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.io.Serializable
+import java.util.*
 
 @Entity(
         foreignKeys = [
@@ -28,10 +29,13 @@ import java.io.Serializable
         ]
 )
 data class Article (
-    @PrimaryKey
+        @PrimaryKey
     var id: String,
-    var pageId: String?,
-    var title: String?,
-    var lastModificationTS: Long?,
-    var imageLinkList: List<String>?
+        var pageId: String?,
+        var title: String?,
+        var articleText:String?,
+        var modificationTS: Date?,
+        var publicationTS: Date?,
+        var imageLinkList: List<String>?,
+        var previewImageLink:String ?=null
 ): Serializable

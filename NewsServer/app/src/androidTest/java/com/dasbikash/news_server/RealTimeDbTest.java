@@ -95,7 +95,7 @@ public class RealTimeDbTest {
 
     @Test
     public void loadSetingsDataToRealTimeDb(){
-        AppSettingsBootStrapFromRTDb.INSTANCE.loadAppSettingsData(appContext);
+        AppSettingsBootStrapFromRTDb.INSTANCE.loadAppSettingsDataToServer(appContext);
     }
 
     @Test
@@ -282,7 +282,7 @@ public class RealTimeDbTest {
 
     @Test
     public void writePageData(){
-        HashMap<String,Page> pageHashMap =
+        HashMap<String, AppSettingsBootStrapFromRTDb.ServerPage> pageHashMap =
                 AppSettingsBootStrapFromRTDb.INSTANCE.getPages(appContext);
 
         Log.d(TAG, "writePageData: "+pageHashMap);
@@ -373,6 +373,5 @@ public class RealTimeDbTest {
 
         while(!waitFlag.get());
     }
-
 
 }

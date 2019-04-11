@@ -24,12 +24,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dasbikash.news_server.R;
 import com.dasbikash.news_server.exceptions.DataNotFoundException;
 import com.dasbikash.news_server.exceptions.NoInternertConnectionException;
 import com.dasbikash.news_server.exceptions.OnMainThreadException;
 import com.dasbikash.news_server.exceptions.RemoteDbException;
+import com.dasbikash.news_server.utils.ExceptionUtils;
 import com.dasbikash.news_server.utils.NetConnectivityUtility;
 import com.dasbikash.news_server.view_models.HomeViewModel;
 import com.dasbikash.news_server.views.interfaces.HomeNavigator;
@@ -114,22 +116,24 @@ public class InitFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_init, container, false);
-        mProgressBar = view.findViewById(R.id.data_load_progress);
-        mNoInternetMessage = view.findViewById(R.id.no_internet_message);
-        mViewModel = (HomeViewModel) ViewModelProviders.of((HomeActivity) getActivity()).get(HomeViewModel.class);
-        return view;
+        return inflater.inflate(R.layout.fragment_init, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mProgressBar = view.findViewById(R.id.data_load_progress);
+        mNoInternetMessage = view.findViewById(R.id.no_internet_message);
+        mViewModel = (HomeViewModel) ViewModelProviders.of((HomeActivity) getActivity()).get(HomeViewModel.class);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         registerBrodcastReceivers();
+
+//        mNoInternetMessage.setVisibility(View.GONE);
+
         initSettingsDataLoading(0L);
     }
 
@@ -137,9 +141,8 @@ public class InitFragment extends Fragment {
 
         mNoInternetMessage.setVisibility(View.INVISIBLE);
 
-        //mProgressBar.setVisibility(View.VISIBLE);
+        mProgressBar.setVisibility(View.VISIBLE);
         mProgressBar.setIndeterminate(true);
-        ;
 
         mDisposable.add(
                 getDataLoadingStatusObservable(initDelay)
@@ -152,9 +155,6 @@ public class InitFragment extends Fragment {
                                 if (loadingStatus.isSetProgressbarDeterminate()) {
                                     mProgressBar.setIndeterminate(false);
                                     mProgressBar.setProgress(loadingStatus.progressBarValue);
-                                    if (loadingStatus.progressBarValue == 100) {
-                                        mHomeNavigator.loadHomeFragment();
-                                    }
                                 } else {
                                     mProgressBar.setIndeterminate(true);
                                 }
@@ -163,12 +163,19 @@ public class InitFragment extends Fragment {
                             @Override
                             public void onError(Throwable e) {
                                 Log.d(TAG, "onError: " + e.getClass().getCanonicalName());
+                                Toast
+                                        .makeText(
+                                                getActivity(),
+                                                "onError: " + e.getClass().getCanonicalName(),
+                                                Toast.LENGTH_SHORT
+                                        )
+                                        .show();
                                 doOnError(e);
                             }
 
                             @Override
                             public void onComplete() {
-
+                                mHomeNavigator.loadHomeFragment();
                             }
                         })
         );
@@ -209,6 +216,7 @@ public class InitFragment extends Fragment {
                 //Settings data loading finished
                 emitter.onNext(DataLoadingStatus.EXIT);
                 Log.d(TAG, "subscribe: ");
+                emitter.onComplete();
             }
         });
     }
@@ -226,7 +234,7 @@ public class InitFragment extends Fragment {
                     mRetryCountForRemoteDBError;
             initSettingsDataLoading(mRetryDelayForRemoteDBError);
         } else if (throwable instanceof OnMainThreadException) {
-            throw new OnMainThreadException();
+            ExceptionUtils.thowExceptionIfOnMainThred();
         }
     }
 
@@ -245,6 +253,7 @@ public class InitFragment extends Fragment {
 
 
     private void registerBrodcastReceivers() {
+        //noinspection ConstantConditions
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mNetConAvailableBroadcastReceiver,
                 NetConnectivityUtility.INSTANCE.getIntentFilterForNetworkAvailableBroadcastReceiver());
     }
