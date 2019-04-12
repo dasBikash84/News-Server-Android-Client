@@ -13,12 +13,7 @@
 
 package com.dasbikash.news_server_data.display_models.entity
 
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Index
-import androidx.room.PrimaryKey
-import com.dasbikash.news_server_data.display_models.entity.Country
-import com.dasbikash.news_server_data.display_models.entity.Language
+import androidx.room.*
 import java.io.Serializable
 
 @Entity(
@@ -34,5 +29,6 @@ data class Newspaper(
         var name: String?=null,
         var countryName: String?=null,
         var languageId: String?=null,
-        var active: Boolean=true
+        @Ignore
+        var active: Boolean=false
 ) : Serializable

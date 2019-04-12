@@ -27,10 +27,10 @@ internal interface NewsPaperDao {
     @get:Query("SELECT COUNT(*) FROM Newspaper")
     val count: Int
 
-    @Query("SELECT * FROM Newspaper WHERE active")
+    @Query("SELECT * FROM Newspaper")
     fun findAllActive(): LiveData<List<Newspaper>>
 
-    @Query("SELECT * FROM Newspaper WHERE id=:id AND active")
+    @Query("SELECT * FROM Newspaper WHERE id=:id")
     fun findById(id: Int): Newspaper
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

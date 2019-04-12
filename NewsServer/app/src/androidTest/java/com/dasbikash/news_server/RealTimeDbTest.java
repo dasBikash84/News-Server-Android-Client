@@ -16,19 +16,7 @@ package com.dasbikash.news_server;
 import android.content.Context;
 import android.util.Log;
 
-import com.dasbikash.news_server.display_models.entity.Country;
-import com.dasbikash.news_server.display_models.entity.Language;
-import com.dasbikash.news_server.display_models.entity.Newspaper;
-import com.dasbikash.news_server.display_models.entity.Page;
-import com.dasbikash.news_server.display_models.entity.PageGroup;
-import com.dasbikash.news_server.data_sources.firebase.AppSettingsBootStrapToRTDb;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +40,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(AndroidJUnit4.class)
 public class RealTimeDbTest {
 
-    public static final String TAG = "DbTest";
+    /*public static final String TAG = "DbTest";
 
     private String APP_SETTINGS_NODE = "app_settings";
     private String COUNTRIES_NODE = "countries";
@@ -100,7 +88,7 @@ public class RealTimeDbTest {
 
     @Test
     public void readLastUpdateTime(){
-       /* FirebaseRealtimeDBUtils.INSTANCE.getServerAppSettingsUpdateTime().
+       *//* FirebaseRealtimeDBUtils.INSTANCE.getServerAppSettingsUpdateTime().
                 subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) throws Exception {
@@ -108,7 +96,7 @@ public class RealTimeDbTest {
                     }
 
                 });
-        SystemClock.sleep(5000);*/
+        SystemClock.sleep(5000);*//*
     }
 
 //    @Test
@@ -373,5 +361,5 @@ public class RealTimeDbTest {
 
         while(!waitFlag.get());
     }
-
+*/
 }

@@ -38,9 +38,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.dasbikash.news_server_data.display_models.room_converters.ArticleImageConverter
 
 @Database(entities = [Country::class, Language::class, Newspaper::class, Page::class, PageGroup::class, Article::class, UserPreferenceData::class, ArticleVisitHistory::class], version = 1, exportSchema = false)
-@TypeConverters(DateConverter::class, IntListConverter::class, StringListConverter::class)
+@TypeConverters(DateConverter::class, IntListConverter::class, StringListConverter::class,ArticleImageConverter::class)
 internal abstract class NewsServerDatabase : RoomDatabase() {
 
     abstract val countryDao: CountryDao

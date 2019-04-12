@@ -36,6 +36,7 @@ import com.dasbikash.news_server_data.utills.NetConnectivityUtility;
 import com.dasbikash.news_server.view_models.HomeViewModel;
 import com.dasbikash.news_server.views.interfaces.HomeNavigator;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import androidx.annotation.NonNull;
@@ -163,6 +164,8 @@ public class InitFragment extends Fragment {
                             @Override
                             public void onError(Throwable e) {
                                 Log.d(TAG, "onError: " + e.getClass().getCanonicalName());
+                                Log.d(TAG, "onError: " + Arrays.asList(e.getStackTrace()));
+                                e.printStackTrace();
                                 Toast
                                         .makeText(
                                                 getActivity(),

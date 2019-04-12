@@ -40,7 +40,7 @@ class SharedPreferenceUtilsTest {
     fun tearDown() {
     }
 
-    @Test
+    /*@Test
     fun testForString(){
         SharedPreferenceUtils.saveData(context = appContext,data = "Test String",key = "test_string")
         SystemClock.sleep(1000)
@@ -73,5 +73,5 @@ class SharedPreferenceUtilsTest {
         SharedPreferenceUtils.saveData(context = appContext,data = true,key = "test_Boolean")
         SystemClock.sleep(1000)
         Log.d(TAG,SharedPreferenceUtils.getData(appContext,defaultValue = false,key = "test_Boolean").toString())
-    }
+    }*/
 }

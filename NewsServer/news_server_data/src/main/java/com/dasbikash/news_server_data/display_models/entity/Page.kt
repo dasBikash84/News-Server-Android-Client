@@ -13,11 +13,9 @@
 
 package com.dasbikash.news_server_data.display_models.entity
 
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Index
-import androidx.room.PrimaryKey
+import androidx.room.*
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
+import com.google.firebase.database.Exclude
 import java.io.Serializable
 
 @Entity(
@@ -34,8 +32,16 @@ data class Page(
         var newsPaperId: String?=null,
         var parentPageId: String?=null,
         var name: String?=null,
-        var active: Boolean = false
+        @Ignore
+        var active: Boolean = false,
+        @Ignore
+        var linkFormat:String? = null
 ): Serializable{
+    @Exclude
+    var hasChild:Boolean = false
+    @Exclude
+    var hasData:Boolean = false
+
     companion object {
         @JvmField
         val TOP_LEVEL_PAGE_PARENT_ID = "PAGE_ID_0"

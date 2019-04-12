@@ -31,7 +31,7 @@ class SettingsRepository(context: Context) {
     private val mAppSettingsDataService: AppSettingsDataService
     private val mUserSettingsDataService: UserSettingsDataService
     private val mDatabase: NewsServerDatabase
-    private val mContext:Context
+    private val mContext: Context
 
     init {
         mAppSettingsDataService =
@@ -99,13 +99,44 @@ class SettingsRepository(context: Context) {
         mDatabase.countryDao.addCountries(countries)
         Log.d(TAG, "loadAppSettings: countries$countries")
 
-        val newspapers = ArrayList(appSettings.newspapers?.values)
+        val newspapers = mutableListOf<Newspaper>()
+        appSettings.newspapers?.values
+                ?.asSequence()
+                ?.filter { it.active }
+                ?.toCollection(newspapers)
+
         mDatabase.newsPaperDao.addNewsPapers(newspapers)
         Log.d(TAG, "loadAppSettings: newspapers$newspapers")
 
-        val pages = ArrayList(appSettings.pages?.values)
+        val dbPages = ArrayList(appSettings.pages?.values)
+//        Log.d(TAG, "loadAppSettings: pages: $dbPages")
+        val pages = mutableListOf<Page>()
+
+        dbPages.asSequence()
+                .filter { it.active && newspapers.filter { newspaper -> newspaper.id == it.newsPaperId }.count() != 0 }
+                .map {
+                    if (it.linkFormat != null) {
+                        it.hasData = true
+                    } else {
+                        it.hasData = false
+                    }
+                    it
+                }
+                .map {
+                    val thisPage = it
+                    thisPage.hasChild = false
+                    if (thisPage.parentPageId == Page.TOP_LEVEL_PAGE_PARENT_ID) {
+                        thisPage.hasChild =
+                                dbPages.filter { it.parentPageId == thisPage.id && it.active }
+                                        .count() > 0
+                    }
+                    thisPage
+                }
+                .toCollection(pages)
+
+//        Log.d(TAG, "loadAppSettings: pages: $pages")
         mDatabase.pageDao.addPages(pages)
-        Log.d(TAG, "loadAppSettings: pages$pages")
+        Log.d(TAG, "loadAppSettings: pages: $pages")
 
         val newsCategories = ArrayList(appSettings.page_groups?.values)
         mDatabase.pageGroupDao.addPageGroups(newsCategories)
@@ -126,7 +157,5 @@ class SettingsRepository(context: Context) {
                 getNewsPaperCount() > 0 && getPageCount() > 0 &&
                 getPageGroupCount() > 0
     }
-
-
 
 }
