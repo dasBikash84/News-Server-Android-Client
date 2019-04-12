@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 www.dasbikash.org. All rights reserved.
+ * Copyright 2019 das.bikash.dev@gmail.com. All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@ package com.dasbikash.news_server_data.data_sources.data_services.news_data_serv
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.display_models.entity.Article
 
-object SpringMVCNewsDataService: NewsDataService {
+internal object SpringMVCNewsDataService: NewsDataService {
 
     private val springMVCWebService
             = SpringMVCWebService.RETROFIT.create(SpringMVCWebService::class.java)
