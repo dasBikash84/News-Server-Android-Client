@@ -13,12 +13,12 @@
 
 package com.dasbikash.news_server_data.database.daos
 
-import com.dasbikash.news_server_data.display_models.entity.Page
-
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.dasbikash.news_server_data.display_models.entity.Newspaper
+import com.dasbikash.news_server_data.display_models.entity.Page
 
 @Dao
 internal interface PageDao {
@@ -29,5 +29,11 @@ internal interface PageDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addPages(pages: List<Page>)
+
+    @Query("DELETE FROM Page")
+    fun nukeTable()
+
+    @Query("SELECT * FROM Page WHERE parentPageId=${Page.TOP_LEVEL_PAGE_PARENT_ID} AND newsPaperId=:newspaperId")
+    fun getTopPagesByNewsPaperId(newspaperId: String):List<Page>
 
 }

@@ -13,13 +13,12 @@
 
 package com.dasbikash.news_server_data.database.daos
 
-import com.dasbikash.news_server_data.display_models.entity.PageGroup
-
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.dasbikash.news_server_data.display_models.entity.PageGroup
 
 @Dao
 internal interface PageGroupDao {
@@ -35,5 +34,8 @@ internal interface PageGroupDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addPageGroups(newsCategories: List<PageGroup>)
+
+    @Query("DELETE FROM PageGroup")
+    fun nukeTable()
 
 }

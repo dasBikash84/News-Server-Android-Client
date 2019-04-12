@@ -13,13 +13,12 @@
 
 package com.dasbikash.news_server_data.database.daos
 
-import com.dasbikash.news_server_data.display_models.entity.Newspaper
-
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.dasbikash.news_server_data.display_models.entity.Newspaper
 
 @Dao
 internal interface NewsPaperDao {
@@ -35,4 +34,7 @@ internal interface NewsPaperDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addNewsPapers(newspapers: List<Newspaper>)
+
+    @Query("DELETE FROM Newspaper")
+    fun nukeTable()
 }

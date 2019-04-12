@@ -13,9 +13,8 @@
 
 package com.dasbikash.news_server_data.display_models.room_converters
 
-import java.util.ArrayList
-
 import androidx.room.TypeConverter
+import java.util.*
 
 internal object StringListConverter {
 

@@ -21,12 +21,13 @@ internal interface NewsDataService {
         const val DEFAULT_ARTICLE_REQUEST_SIZE = 5
     }
 
-    //Need latest article from each top level page of any newspaper
-
+    //latest article from each top level page of any newspaper
     fun getLatestArticleByTopLevelPageId(topLevelPageId:String):Article
+
     //Latest articles from any page
     fun getLatestArticlesByPageId(pageId:String,
                                   articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>
+
     //Articles after last article ID
     fun getArticlesAfterLastId(pageId:String,lastArticleId:String,
                                articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>

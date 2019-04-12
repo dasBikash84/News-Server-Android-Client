@@ -18,11 +18,11 @@ import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.display_models.entity.DefaultAppSettings
 
 internal object SpringMVCAppSettingsDataService: AppSettingsDataService {
-    override fun getAppSettingsUpdateTime(context: Context): Long {
+    override fun getServerAppSettingsUpdateTime(context: Context): Long {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getAppSettings(context: Context): DefaultAppSettings {
+    override fun getRawAppSettings(context: Context): DefaultAppSettings {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

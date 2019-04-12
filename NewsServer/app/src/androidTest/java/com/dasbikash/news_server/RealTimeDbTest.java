@@ -13,24 +13,9 @@
 
 package com.dasbikash.news_server;
 
-import android.content.Context;
-import android.util.Log;
-
-
-
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import androidx.annotation.NonNull;
-import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Instrumented test, which will execute on an Android device.

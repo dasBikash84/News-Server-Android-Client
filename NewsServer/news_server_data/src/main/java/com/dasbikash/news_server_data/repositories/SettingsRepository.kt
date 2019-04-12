@@ -15,18 +15,16 @@ package com.dasbikash.news_server_data.repositories
 
 import android.content.Context
 import android.util.Log
-import com.dasbikash.news_server.utils.SharedPreferenceUtils
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.database.NewsServerDatabase
-import com.dasbikash.news_server_data.display_models.entity.*
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException
 
 class SettingsRepository(context: Context) {
 
-    private val TAG = "SettingsRepository"
+//    private val TAG = "SettingsRepository"
 
     private val mAppSettingsDataService: AppSettingsDataService
     private val mUserSettingsDataService: UserSettingsDataService
@@ -42,113 +40,32 @@ class SettingsRepository(context: Context) {
         mDatabase = NewsServerDatabase.getDatabase(context)
     }
 
-    private fun getLocalAppSettingsUpdateTime(): Long {
-        val appSettingsUpdateTimestamp = SharedPreferenceUtils.getAppSettingsUpdateTimestamp(mContext)
-        Log.d(TAG, "getLocalAppSettingsUpdateTime: $appSettingsUpdateTimestamp")
-        return appSettingsUpdateTimestamp
-    }
-
-    private fun getServerAppSettingsUpdateTime(): Long {
-        val serverAppSettingsUpdateTime = mAppSettingsDataService.getAppSettingsUpdateTime(mContext)
-        Log.d(TAG, "getServerAppSettingsUpdateTime: $serverAppSettingsUpdateTime")
-        SharedPreferenceUtils.saveGlobalSettingsUpdateTimestamp(mContext, serverAppSettingsUpdateTime)
-        return serverAppSettingsUpdateTime
-    }
-
-    private fun getCountryCount(): Int {
-        val count = mDatabase.countryDao.count
-        Log.d(TAG, "getCountryCount: $count")
-        return count
-    }
-
-    private fun getLanguageCount(): Int {
-        val count = mDatabase.languageDao.count
-        Log.d(TAG, "getLanguageCount: $count")
-        return count
-    }
-
-    private fun getNewsPaperCount(): Int {
-        val count = mDatabase.newsPaperDao.count
-        Log.d(TAG, "getNewsPaperCount: $count")
-        return count
-    }
-
-    private fun getPageCount(): Int {
-        val count = mDatabase.pageDao.count
-        Log.d(TAG, "getPageCount: $count")
-        return count
-    }
-
-    private fun getPageGroupCount(): Int {
-        val count = mDatabase.pageGroupDao.count
-        Log.d(TAG, "getPageGroupCount: $count")
-        return count
-    }
+    private fun getCountryCount(): Int = mDatabase.countryDao.count
+    private fun getLanguageCount(): Int = mDatabase.languageDao.count
+    private fun getNewsPaperCount(): Int = mDatabase.newsPaperDao.count
+    private fun getPageCount(): Int = mDatabase.pageDao.count
+    private fun getPageGroupCount(): Int = mDatabase.pageGroupDao.count
 
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     @Throws(OnMainThreadException::class, NoInternertConnectionException::class)
     fun loadAppSettings() {
-        Log.d(TAG, "loadAppSettings: ")
         val appSettings = mAppSettingsDataService.getAppSettings(mContext)
 
-        val languages = ArrayList(appSettings.languages?.values)
-        mDatabase.languageDao.addLanguages(languages)
-        Log.d(TAG, "loadAppSettings: languages$languages")
+        mDatabase.nukeAppSettings()
 
-        val countries = ArrayList(appSettings.countries?.values)
-        mDatabase.countryDao.addCountries(countries)
-        Log.d(TAG, "loadAppSettings: countries$countries")
-
-        val newspapers = mutableListOf<Newspaper>()
-        appSettings.newspapers?.values
-                ?.asSequence()
-                ?.filter { it.active }
-                ?.toCollection(newspapers)
-
-        mDatabase.newsPaperDao.addNewsPapers(newspapers)
-        Log.d(TAG, "loadAppSettings: newspapers$newspapers")
-
-        val dbPages = ArrayList(appSettings.pages?.values)
-//        Log.d(TAG, "loadAppSettings: pages: $dbPages")
-        val pages = mutableListOf<Page>()
-
-        dbPages.asSequence()
-                .filter { it.active && newspapers.filter { newspaper -> newspaper.id == it.newsPaperId }.count() != 0 }
-                .map {
-                    if (it.linkFormat != null) {
-                        it.hasData = true
-                    } else {
-                        it.hasData = false
-                    }
-                    it
-                }
-                .map {
-                    val thisPage = it
-                    thisPage.hasChild = false
-                    if (thisPage.parentPageId == Page.TOP_LEVEL_PAGE_PARENT_ID) {
-                        thisPage.hasChild =
-                                dbPages.filter { it.parentPageId == thisPage.id && it.active }
-                                        .count() > 0
-                    }
-                    thisPage
-                }
-                .toCollection(pages)
-
-//        Log.d(TAG, "loadAppSettings: pages: $pages")
-        mDatabase.pageDao.addPages(pages)
-        Log.d(TAG, "loadAppSettings: pages: $pages")
-
-        val newsCategories = ArrayList(appSettings.page_groups?.values)
-        mDatabase.pageGroupDao.addPageGroups(newsCategories)
-        Log.d(TAG, "loadAppSettings: newsCategories$newsCategories")
+        mDatabase.languageDao.addLanguages(ArrayList(appSettings.languages?.values))
+        mDatabase.countryDao.addCountries(ArrayList(appSettings.countries?.values))
+        mDatabase.newsPaperDao.addNewsPapers(ArrayList(appSettings.newspapers?.values))
+        mDatabase.pageDao.addPages(ArrayList(appSettings.pages?.values))
+        mDatabase.pageGroupDao.addPageGroups(ArrayList(appSettings.page_groups?.values))
 
         val settingUpdateTimes = ArrayList(appSettings.update_time?.values)
-        SharedPreferenceUtils.saveGlobalSettingsUpdateTimestamp(mContext, settingUpdateTimes[settingUpdateTimes.size - 1])
+        mAppSettingsDataService.saveLocalAppSettingsUpdateTime(mContext, settingUpdateTimes[settingUpdateTimes.size - 1])
     }
 
     fun isAppSettingsUpdated(): Boolean {
-        val localAppSettingsUpdateTime = getLocalAppSettingsUpdateTime()
-        val serverAppSettingsUpdateTime = getServerAppSettingsUpdateTime()
+        val localAppSettingsUpdateTime = mAppSettingsDataService.getLocalAppSettingsUpdateTime(mContext)
+        val serverAppSettingsUpdateTime = mAppSettingsDataService.getServerAppSettingsUpdateTime(mContext)
         return serverAppSettingsUpdateTime > localAppSettingsUpdateTime
     }
 

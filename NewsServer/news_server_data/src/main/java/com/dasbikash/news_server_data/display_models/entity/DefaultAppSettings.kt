@@ -14,7 +14,7 @@
 package com.dasbikash.news_server_data.display_models.entity
 
 
-import java.util.HashMap
+import java.util.*
 
 class DefaultAppSettings {
 

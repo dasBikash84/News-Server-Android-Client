@@ -13,11 +13,10 @@
 
 package com.dasbikash.news_server_data.database.daos
 
-import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
-
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
 
 @Dao
 internal interface UserPreferenceDataDao {
@@ -26,4 +25,7 @@ internal interface UserPreferenceDataDao {
 
     @Query("SELECT * from UserPreferenceData")
     fun findAll(): List<UserPreferenceData>
+
+    @Query("DELETE FROM UserPreferenceData")
+    fun nukeTable()
 }

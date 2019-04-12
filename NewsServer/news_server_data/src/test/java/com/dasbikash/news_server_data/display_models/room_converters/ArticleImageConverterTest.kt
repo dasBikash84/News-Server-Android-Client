@@ -16,8 +16,6 @@ package com.dasbikash.news_server_data.display_models.room_converters
 import com.dasbikash.news_server_data.display_models.entity.ArticleImage
 import org.junit.After
 import org.junit.Before
-
-import org.junit.Assert.*
 import org.junit.Test
 
 class ArticleImageConverterTest {

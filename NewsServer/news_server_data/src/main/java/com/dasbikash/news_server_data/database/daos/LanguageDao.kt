@@ -13,12 +13,8 @@
 
 package com.dasbikash.news_server_data.database.daos
 
+import androidx.room.*
 import com.dasbikash.news_server_data.display_models.entity.Language
-
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
 
 @Dao
 internal interface LanguageDao {
@@ -31,4 +27,7 @@ internal interface LanguageDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addLanguages(languages: List<Language>)
+
+    @Query("DELETE FROM Language")
+    fun nukeTable()
 }

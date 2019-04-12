@@ -13,12 +13,11 @@
 
 package com.dasbikash.news_server_data.database.daos
 
-import com.dasbikash.news_server_data.display_models.entity.Country
-
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.dasbikash.news_server_data.display_models.entity.Country
 
 @Dao
 internal interface CountryDao {
@@ -31,4 +30,7 @@ internal interface CountryDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addCountries(countries: List<Country>)
+
+    @Query("DELETE FROM Country")
+    fun nukeTable()
 }

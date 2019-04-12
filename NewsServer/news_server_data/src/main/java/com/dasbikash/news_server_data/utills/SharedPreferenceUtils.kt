@@ -73,7 +73,7 @@ internal object SharedPreferenceUtils {
         saveData(context, time, context.getString(R.string.APP_SETTINGS_UPDATE_TIME_STAMP_SP_KEY))
     }
 
-    fun getAppSettingsUpdateTimestamp(context: Context): Long {
+    fun getLocalAppSettingsUpdateTimestamp(context: Context): Long {
         return getData(context, DEFAULT_LONG, context.getString(R.string.APP_SETTINGS_UPDATE_TIME_STAMP_SP_KEY)) as Long
     }
 

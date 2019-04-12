@@ -14,7 +14,6 @@
 package com.dasbikash.news_server_data.display_models.entity
 
 import androidx.room.*
-import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.google.firebase.database.Exclude
 import java.io.Serializable
 
@@ -43,7 +42,7 @@ data class Page(
     var hasData:Boolean = false
 
     companion object {
-        @JvmField
-        val TOP_LEVEL_PAGE_PARENT_ID = "PAGE_ID_0"
+        //@JvmField
+        const val TOP_LEVEL_PAGE_PARENT_ID = "PAGE_ID_0"
     }
 }

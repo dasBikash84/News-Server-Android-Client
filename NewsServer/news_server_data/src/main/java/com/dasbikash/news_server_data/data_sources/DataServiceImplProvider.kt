@@ -14,9 +14,9 @@
 package com.dasbikash.news_server_data.data_sources
 
 import com.dasbikash.news_server.data_sources.data_services.app_settings_data_services.SpringMVCAppSettingsDataService
-import com.dasbikash.news_server_data.data_sources.data_services.user_settings_data_services.FirebaseUserSettingsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_services.FirebaseAppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc.SpringMVCNewsDataService
+import com.dasbikash.news_server_data.data_sources.data_services.user_settings_data_services.FirebaseUserSettingsDataService
 
 
 internal object DataServiceImplProvider {
@@ -29,8 +29,6 @@ internal object DataServiceImplProvider {
     private lateinit var userSettingsDataService: UserSettingsDataService
     private lateinit var newsDataService: NewsDataService
 
-
-    //@JvmStatic
     fun getAppSettingsDataServiceImpl(): AppSettingsDataService {
         if (!::appSettingsDataService.isInitialized) {
             initAppSettingsDataService()
@@ -38,7 +36,6 @@ internal object DataServiceImplProvider {
         return appSettingsDataService
     }
 
-    //@JvmStatic
     fun getUserSettingsDataServiceImpl(): UserSettingsDataService {
         if (!::userSettingsDataService.isInitialized) {
             initUserSettingsDataService()

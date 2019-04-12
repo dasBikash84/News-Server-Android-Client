@@ -16,14 +16,19 @@ package com.dasbikash.news_server_data.repositories
 import android.content.Context
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.NewsDataService
+import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.display_models.entity.Article
+import com.dasbikash.news_server_data.display_models.entity.Newspaper
+import com.dasbikash.news_server_data.display_models.entity.Page
 
 class NewsDataRepository (context: Context) {
     private val mContext:Context
     private val newsDataService:NewsDataService
+    private val newsServerDatabase:NewsServerDatabase
     init {
         mContext = context
         newsDataService = DataServiceImplProvider.getNewsDataServiceImpl()
+        newsServerDatabase = NewsServerDatabase.getDatabase(mContext)
     }
 
     fun getLatestArticleByTopLevelPageId(topLevelPageId:String): Article{
@@ -44,5 +49,9 @@ class NewsDataRepository (context: Context) {
             return newsDataService.getArticlesAfterLastId(pageId,lastArticleId,articleRequestSize = articleRequestSize)
         }
         return newsDataService.getArticlesAfterLastId(pageId,lastArticleId)
+    }
+
+    fun getTopPagesByNewsPaper(newspaper: Newspaper):List<Page>{
+        return newsServerDatabase.pageDao.getTopPagesByNewsPaperId(newspaper.id)
     }
 }

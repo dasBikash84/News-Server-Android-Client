@@ -14,11 +14,30 @@
 package com.dasbikash.news_server_data.data_sources
 
 import android.content.Context
+import com.dasbikash.news_server.utils.SharedPreferenceUtils
+import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_services.AppSettingsDataServiceUtils
 import com.dasbikash.news_server_data.display_models.entity.DefaultAppSettings
 
 
 internal interface AppSettingsDataService {
-    fun getAppSettingsUpdateTime(context: Context): Long
-    fun getAppSettings(context: Context): DefaultAppSettings
+
+    fun getServerAppSettingsUpdateTime(context: Context): Long
+
+    fun getRawAppSettings(context: Context): DefaultAppSettings
+
+    fun getAppSettings(context: Context):
+            DefaultAppSettings{
+        return AppSettingsDataServiceUtils
+                .processDefaultAppSettingsData(getRawAppSettings(context))
+    }
+
+    //Default implementations
+
+    fun getLocalAppSettingsUpdateTime(context: Context): Long{
+        return AppSettingsDataServiceUtils.getLocalAppSettingsUpdateTime(context)
+    }
+    fun saveLocalAppSettingsUpdateTime(context: Context, updateTime:Long){
+        return AppSettingsDataServiceUtils.saveLocalAppSettingsUpdateTime(context,updateTime)
+    }
 }
 

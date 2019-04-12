@@ -16,8 +16,6 @@ package com.dasbikash.news_server;
 import android.content.Context;
 import android.util.Log;
 
-
-import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc.SpringMVCNewsDataService;
 import com.dasbikash.news_server_data.repositories.NewsDataRepository;
 
 import org.junit.Before;
