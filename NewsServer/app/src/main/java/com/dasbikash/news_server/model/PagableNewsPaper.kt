@@ -11,13 +11,14 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.exceptions
+package com.dasbikash.news_server.model
 
-class OnMainThreadException : RuntimeException {
 
-    constructor() {}
+import com.dasbikash.news_server.custom_views.ViewPagerTitleScroller
+import com.dasbikash.news_server_data.display_models.entity.Newspaper
 
-    constructor(message: String) : super(message) {}
-
-    constructor(cause: Throwable) : super(cause) {}
+class PagableNewsPaper(val newspaper: Newspaper): ViewPagerTitleScroller.PageKey {
+    override fun getKeyString(): String {
+        return newspaper.name ?: ""
+    }
 }

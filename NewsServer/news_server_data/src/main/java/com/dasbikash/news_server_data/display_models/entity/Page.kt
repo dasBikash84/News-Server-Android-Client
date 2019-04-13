@@ -42,7 +42,7 @@ data class Page(
     var hasData:Boolean = false
 
     companion object {
-        //@JvmField
-        const val TOP_LEVEL_PAGE_PARENT_ID = "PAGE_ID_0"
+        @JvmField
+        val TOP_LEVEL_PAGE_PARENT_ID = "PAGE_ID_0"
     }
 }

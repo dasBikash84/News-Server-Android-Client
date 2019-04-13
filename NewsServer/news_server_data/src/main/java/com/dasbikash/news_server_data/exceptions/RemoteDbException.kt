@@ -13,7 +13,7 @@
 
 package com.dasbikash.news_server_data.exceptions
 
-class RemoteDbException : RuntimeException {
+class RemoteDbException : DataSourceException {
 
     constructor() {}
 

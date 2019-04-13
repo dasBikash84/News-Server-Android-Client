@@ -52,5 +52,9 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
         mSettingsRepository.loadAppSettings()
     }
 
+    fun getNewsPapers():List<Newspaper>{
+        return mSettingsRepository.getNewsPapers()
+    }
+
 
 }

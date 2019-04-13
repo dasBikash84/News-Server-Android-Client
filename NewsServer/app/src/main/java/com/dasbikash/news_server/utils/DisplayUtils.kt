@@ -11,13 +11,19 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.exceptions
+package com.dasbikash.news_server.utils
 
-class OnMainThreadException : RuntimeException {
+import android.content.Context
 
-    constructor() {}
+object DisplayUtils {
 
-    constructor(message: String) : super(message) {}
+    @JvmStatic
+    fun dpToPx(dp: Int,context: Context): Int {
+        return (dp * context.getResources().getDisplayMetrics().density) as Int
+    }
 
-    constructor(cause: Throwable) : super(cause) {}
+    @JvmStatic
+    fun pxToDp(px: Int,context: Context): Int {
+        return (px / context.getResources().getDisplayMetrics().density) as Int
+    }
 }

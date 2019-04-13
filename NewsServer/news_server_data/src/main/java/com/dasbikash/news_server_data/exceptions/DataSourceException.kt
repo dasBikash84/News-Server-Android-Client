@@ -11,23 +11,13 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views;
+package com.dasbikash.news_server_data.exceptions
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+open class DataSourceException : RuntimeException {
 
-import com.dasbikash.news_server.R;
+    constructor() {}
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+    constructor(message: String) : super(message) {}
 
-public class HomeFragment extends Fragment {
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home,container,false);
-    }
+    constructor(cause: Throwable) : super(cause) {}
 }
