@@ -14,21 +14,19 @@
 package com.dasbikash.news_server.view_models
 
 import android.app.Application
+import android.os.SystemClock
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import com.dasbikash.news_server_data.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
 import com.dasbikash.news_server_data.display_models.entity.PageGroup
-import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
-import com.dasbikash.news_server_data.exceptions.OnMainThreadException
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.SettingsRepository
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import java.util.*
+
 
 class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mApplication) {
     private val mSettingsRepository: SettingsRepository
@@ -38,7 +36,8 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
     private val mActiveNewspapers: LiveData<List<Newspaper>>? = null
     private val mPageGroups: LiveData<List<PageGroup>>? = null
 
-    val mArticleCountMap = mutableMapOf<Newspaper,LiveData<Int>>()
+    val mArticleCountForNewspaperMap = mutableMapOf<Newspaper,LiveData<Int>>()
+
     private val mNewspapers = mutableListOf<Newspaper>()
 
     private val disposable:CompositeDisposable = CompositeDisposable();
@@ -48,14 +47,20 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
         mSettingsRepository = RepositoryFactory.getSettingsRepository(mApplication)
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(mApplication)
 
+        //Create map of ArticleCountByNewspaper Livedata
         disposable.add(
             Observable.just(true)
                 .subscribeOn(Schedulers.io())
-                .map { readNewsPapers() }
+                .map {
+                    do {
+                        SystemClock.sleep(100)
+                    }while (getNewsPapers().value == null || getNewsPapers().value?.size==0)
+                    getNewsPapers().value
+                }
                 .map {
                     mNewspapers.addAll(it)
                     it.forEach {
-                        mArticleCountMap.put(it,mNewsDataRepository.getArticleCountByNewsPaper(it))
+                        mArticleCountForNewspaperMap.put(it,mNewsDataRepository.getArticleCountByNewsPaper(it))
                     }
                 }
                 .subscribe()
@@ -67,16 +72,8 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
         disposable.clear()
     }
 
-    fun getNewsPapers():List<Newspaper>{
-        return mNewspapers
-    }
-
-    private fun readNewsPapers():List<Newspaper>{
+    fun getNewsPapers():LiveData<List<Newspaper>>{
         return mSettingsRepository.getNewsPapers()
-    }
-
-    fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page> {
-        return mSettingsRepository.getTopPagesForNewspaper(newspaper)
     }
 
 

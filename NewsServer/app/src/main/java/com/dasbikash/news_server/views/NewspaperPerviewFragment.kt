@@ -30,12 +30,13 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.view_models.HomeViewModel
+import com.dasbikash.news_server_data.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
+import com.dasbikash.news_server_data.repositories.SettingsRepository
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
 class NewspaperPerviewFragment : Fragment() {
@@ -50,6 +51,7 @@ class NewspaperPerviewFragment : Fragment() {
 
     private val mDisposable = CompositeDisposable()
     lateinit var mArticleCountObservable:Observable<Int>
+    lateinit var mSettingsRepository:SettingsRepository
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_newspaper_page_list_preview_holder, container, false)
@@ -58,15 +60,18 @@ class NewspaperPerviewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        mSettingsRepository = RepositoryFactory.getSettingsRepository(activity!!)
+
         mNewspaper = arguments!!.getSerializable(ARG_NEWS_PAPAER) as Newspaper
-//        view.findViewById<TextView>(R.id.test_text).setText(mNewspaper.name)
         mPagePreviewList = view.findViewById(R.id.newspaper_page_preview_list)
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
 
+
+        //Create observable from ArticleCountForNewspaper Livedata
         mArticleCountObservable =
                 Observable.fromPublisher<Int> {
                     LiveDataReactiveStreams
-                            .toPublisher(this,mHomeViewModel.mArticleCountMap.get(mNewspaper)!!)
+                            .toPublisher(this,mHomeViewModel.mArticleCountForNewspaperMap.get(mNewspaper)!!)
                 }
 
         mListAdapter = PagePreviewListAdapter.getPagePreviewListAdapter(activity!!.applicationContext,mArticleCountObservable)
@@ -76,20 +81,14 @@ class NewspaperPerviewFragment : Fragment() {
             Observable.just(true)
                 .subscribeOn(Schedulers.io())
                 .map {
-//                    Log.d(TAG,"Np: ${mNewspaper.name}")
-                    mHomeViewModel
+                    mSettingsRepository
                             .getTopPagesForNewspaper(mNewspaper)
-                            .map {
-                                Log.d(TAG,"Np: ${mNewspaper.name},page: ${it.name}")
-                                it
-                            }
                             .sortedBy { it.id }
-                            .toCollection(mTopPageList)
-
+                            .toCollection(mutableListOf())
                 }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    mListAdapter.submitList(mTopPageList)
+                    mListAdapter.submitList(it)
                 })
         )
 

@@ -27,7 +27,7 @@ internal interface NewsPaperDao {
     val count: Int
 
     @Query("SELECT * FROM Newspaper")
-    fun findAll(): List<Newspaper>
+    fun findAll(): LiveData<List<Newspaper>>
 
     @Query("SELECT * FROM Newspaper WHERE id=:id")
     fun findById(id: Int): Newspaper

@@ -13,7 +13,6 @@
 
 package com.dasbikash.news_server.views
 
-import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -30,11 +29,7 @@ import com.dasbikash.news_server.custom_views.ViewPagerTitleScroller
 import com.dasbikash.news_server.model.PagableNewsPaper
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.observers.DisposableObserver
-import io.reactivex.schedulers.Schedulers
 
 class HomeFragment : Fragment() {
 
@@ -83,32 +78,24 @@ class HomeFragment : Fragment() {
             }
         })
 
+        mHomeViewModel
+                .getNewsPapers()
+                .observe(this,object : Observer<List<Newspaper>>{
+                    override fun onChanged(newspapers: List<Newspaper>?) {
+                        newspapers
+                                ?.map { PagableNewsPaper(it) }
+                                ?.forEach { mNewsPapers.add(it) }
 
-        mDisposable.add(
-                Observable.just(true)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            mHomeViewModel.getNewsPapers()
-                                    .map { PagableNewsPaper(it) }
-                                    .forEach { mNewsPapers.add(it) }
-                            mNewsPapers
+                        mViewPagerTitleScroller.initView(mNewsPapers.toList(), R.layout.view_page_label) {
+                            Log.d(TAG, "${it.keyString} clicked")
+                            mHomeViewPager.setCurrentItem(mNewsPapers.indexOf(it),true)
                         }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<List<PagableNewsPaper>>() {
-                            override fun onComplete() {
-                            }
-                            override fun onNext(t: List<PagableNewsPaper>) {
-                                mViewPagerTitleScroller.initView(t, R.layout.view_page_label) {
-                                    Log.d(TAG, "${it.keyString} clicked")
-                                    mHomeViewPager.setCurrentItem(mNewsPapers.indexOf(it),true)
-                                }
-                                mHomeViewPager.adapter = mFragmentStatePagerAdapter
-                                mHomeViewPager.setCurrentItem(0)
-                            }
-                            override fun onError(e: Throwable) {
-                            }
-                        })
-        )
+                        mHomeViewPager.adapter = mFragmentStatePagerAdapter
+                        mHomeViewPager.setCurrentItem(0)
+
+                    }
+
+                })
 
     }
 

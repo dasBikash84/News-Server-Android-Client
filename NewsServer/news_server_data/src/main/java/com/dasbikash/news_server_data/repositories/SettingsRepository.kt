@@ -77,7 +77,7 @@ class SettingsRepository internal constructor(context: Context) {
                 getPageGroupCount() > 0
     }
 
-    fun getNewsPapers():List<Newspaper>{
+    fun getNewsPapers():LiveData<List<Newspaper>>{
         return mDatabase.newsPaperDao.findAll()
     }
 
