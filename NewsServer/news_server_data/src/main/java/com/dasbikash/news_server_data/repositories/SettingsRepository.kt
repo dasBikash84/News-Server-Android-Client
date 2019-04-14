@@ -20,6 +20,7 @@ import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
+import com.dasbikash.news_server_data.display_models.entity.Page
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException
 
@@ -78,6 +79,10 @@ class SettingsRepository(context: Context) {
 
     fun getNewsPapers():List<Newspaper>{
         return mDatabase.newsPaperDao.findAll()
+    }
+
+    fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page> {
+        return mDatabase.pageDao.getTopPagesByNewsPaperId(newspaper.id)
     }
 
 }

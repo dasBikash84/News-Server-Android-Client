@@ -42,6 +42,7 @@ internal object AppSettingsDataServiceUtils {
 
             val inActiveNewspaperIds =
                     it.values.filter { !it.active }.map { it.id }.toCollection(mutableListOf<String>())
+
             Log.d(TAG,"inActiveNewspaperIds: ${inActiveNewspaperIds.size}")
 
 
@@ -65,6 +66,19 @@ internal object AppSettingsDataServiceUtils {
                             !inactiveTopPageIds.contains(it.parentPageId)
                         }
                         .forEach { filteredPageMap.put(it.id, it) }
+
+                filteredPageMap
+                        .values
+                        .filter {
+                            it.parentPageId == Page.TOP_LEVEL_PAGE_PARENT_ID
+                        }
+                        .forEach {
+                            val thisPage = it
+                            if (filteredPageMap.values.count {it.parentPageId == thisPage.id} > 0){
+                                thisPage.hasChild = true
+                            }
+                        }
+
                 defaultAppSettings.pages = filteredPageMap
                 Log.d(TAG,"filteredPageMap: ${filteredPageMap.size}")
 

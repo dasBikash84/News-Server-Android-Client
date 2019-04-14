@@ -13,31 +13,38 @@
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/top_page_child_list_preview"
-        android:layout_width="wrap_content"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/top_page_child_list_preview_scroller"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/vertical_list_element_spacing"
-        android:orientation="horizontal"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:overScrollMode="never"
+        android:scrollbars="horizontal"
         app:layout_constraintBottom_toTopOf="@id/child_less_top_page_preview"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent">
 
-    <com.google.android.material.card.MaterialCardView
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/top_page_child_list_preview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/vertical_list_element_spacing"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+    </androidx.core.widget.NestedScrollView>
+
+    <androidx.cardview.widget.CardView
         android:id="@+id/child_less_top_page_preview"
-        style="@style/Widget.MaterialComponents.CardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/vertical_list_element_spacing"
-        android:minHeight="160dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_page_child_list_preview">
+        app:layout_constraintTop_toBottomOf="@id/top_page_child_list_preview_scroller">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -46,7 +53,8 @@
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/child_less_top_page_title"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/article_preview_title_height"
+                app:layout_constraintBottom_toTopOf="@+id/child_less_top_page_article_preview_image"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -54,7 +62,8 @@
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/child_less_top_page_article_preview_image"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/article_preview_image_height"
+                app:layout_constraintBottom_toTopOf="@+id/child_less_top_page_article_title"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/child_less_top_page_title" />
@@ -62,21 +71,23 @@
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/child_less_top_page_article_title"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/article_preview_title_height"
+                app:layout_constraintBottom_toTopOf="@+id/child_less_top_page_article_time"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/child_less_top_page_article_preview_image" />
+                app:layout_constraintTop_toBottomOf="@+id/child_less_top_page_article_preview_image" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/child_less_top_page_article_time"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/article_preview_title_height"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/child_less_top_page_article_title" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

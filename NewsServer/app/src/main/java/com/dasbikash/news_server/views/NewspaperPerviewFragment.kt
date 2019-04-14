@@ -13,37 +13,82 @@
 
 package com.dasbikash.news_server.views
 
+import android.content.Context
 import android.os.Bundle
+import android.transition.Visibility
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
+import com.dasbikash.news_server_data.display_models.entity.Page
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 
-class NewspaperPerviewFragment :Fragment() {
+class NewspaperPerviewFragment : Fragment() {
 
-    private lateinit var mNewspaper:Newspaper
+    private lateinit var mNewspaper: Newspaper
+    private lateinit var mHomeViewModel: HomeViewModel
+
+    private lateinit var mPagePreviewList:RecyclerView//newspaper_page_preview_list
+    private lateinit var mListAdapter:PagePreviewListAdapter
+
+    private val mTopPageList = mutableListOf<Page>()
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_newspaper_page_list_preview_holder,container,false)
+        return inflater.inflate(R.layout.fragment_newspaper_page_list_preview_holder, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         mNewspaper = arguments!!.getSerializable(ARG_NEWS_PAPAER) as Newspaper
-        view.findViewById<TextView>(R.id.test_text).setText(mNewspaper.name)
+//        view.findViewById<TextView>(R.id.test_text).setText(mNewspaper.name)
+        mPagePreviewList = view.findViewById(R.id.newspaper_page_preview_list)
+        mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
+
+        mListAdapter = PagePreviewListAdapter.getPagePreviewListAdapter(activity!!.applicationContext)
+        mPagePreviewList.adapter = mListAdapter
+
+        Observable.just(true)
+                .subscribeOn(Schedulers.io())
+                .map {
+//                    Log.d(TAG,"Np: ${mNewspaper.name}")
+                    mHomeViewModel
+                            .getTopPagesForNewspaper(mNewspaper)
+                            .map {
+                                Log.d(TAG,"Np: ${mNewspaper.name},page: ${it.name}")
+                                it
+                            }
+                            .sortedBy { it.id }
+                            .toCollection(mTopPageList)
+
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    mListAdapter.submitList(mTopPageList)
+                })
 
     }
 
-    companion object{
+    companion object {
 
         val ARG_NEWS_PAPAER = "com.dasbikash.news_server.views.NewspaperPerviewFragment.ARG_NEWS_PAPAER"
+        val TAG = "NewspaperPerviewFragment"
 
-        fun getInstance(newspaper: Newspaper):NewspaperPerviewFragment{
+        fun getInstance(newspaper: Newspaper): NewspaperPerviewFragment {
             val args = Bundle()
             args.putSerializable(ARG_NEWS_PAPAER, newspaper)
             val fragment = NewspaperPerviewFragment()
@@ -52,5 +97,81 @@ class NewspaperPerviewFragment :Fragment() {
         }
     }
 
+
+}
+
+class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+    val childListArticlePreviewRV : RecyclerView
+    val selfArticlePreview:CardView
+    val selfPageTitle:TextView
+    val selfArticlePreviewImage:ImageView
+    val selfArticleTitle:TextView
+    val selfArticlePublicationTime:TextView
+
+    init {
+        childListArticlePreviewRV = itemView.findViewById(R.id.top_page_child_list_preview)
+        selfArticlePreview = itemView.findViewById(R.id.child_less_top_page_preview)
+        selfPageTitle = selfArticlePreview.findViewById(R.id.child_less_top_page_title)
+        selfArticlePreviewImage = selfArticlePreview.findViewById(R.id.child_less_top_page_article_preview_image)
+        selfArticleTitle = selfArticlePreview.findViewById(R.id.child_less_top_page_article_title)
+        selfArticlePublicationTime = selfArticlePreview.findViewById(R.id.child_less_top_page_article_time)
+    }
+
+    fun bind(page: Page){
+        childListArticlePreviewRV.visibility = View.GONE
+        selfArticlePreviewImage.visibility = View.GONE
+        selfArticleTitle.visibility = View.GONE
+        selfArticlePublicationTime.visibility = View.GONE
+
+        if (!page.hasChild) {
+            selfPageTitle.setText(page.name)
+            if(page.hasData){
+                //getDataOfLatestArticleAndDisplay
+
+            }
+        }else{
+            selfPageTitle.setText("Child pages will come here for page: ${page.name}")
+            //Make page list that has data
+
+            //fetch latest article data for all pages
+
+            //Init recyclerView with fetched article list
+
+        }
+
+
+
+    }
+
+
+}
+
+class PagePreviewListAdapter(diffCallback: DiffUtil.ItemCallback<Page>,val context: Context) :
+        ListAdapter<Page, PagePreviewHolder>(diffCallback) {
+
+    companion object{
+        fun getPagePreviewListAdapter(context: Context):PagePreviewListAdapter{
+            val diffCallback = object : DiffUtil.ItemCallback<Page>() {
+                override fun areItemsTheSame(oldItem: Page, newItem: Page): Boolean {
+                    return oldItem.id == newItem.id
+                }
+                override fun areContentsTheSame(oldItem: Page, newItem: Page): Boolean {
+                    return oldItem == newItem
+                }
+            }
+            return PagePreviewListAdapter(diffCallback,context)
+        }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagePreviewHolder {
+//        val view =  LayoutInflater.from(context).inflate(R.layout.view_page_label,parent,false)
+        val view =  LayoutInflater.from(context).inflate(R.layout.view_top_page_child_list_preview_holder,parent,false)
+        return PagePreviewHolder(view)//PagePreviewHolder(TextView(context))
+    }
+    override fun onBindViewHolder(holder: PagePreviewHolder, position: Int) {
+//        (holder.itemView as TextView).setText(getItem(position).name)
+        holder.bind(getItem(position))
+    }
 
 }

@@ -56,5 +56,9 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
         return mSettingsRepository.getNewsPapers()
     }
 
+    fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page> {
+        return mSettingsRepository.getTopPagesForNewspaper(newspaper)
+    }
+
 
 }

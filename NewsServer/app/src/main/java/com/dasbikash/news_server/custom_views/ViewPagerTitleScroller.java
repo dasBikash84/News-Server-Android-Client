@@ -155,7 +155,6 @@ public class ViewPagerTitleScroller extends RecyclerView {
             }else {
                 setTextColorToOffColor();
             }
-//            setTextColorToOffColor();
         }
 
         void setTextColorToOffColor(){
