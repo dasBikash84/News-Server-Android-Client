@@ -14,6 +14,7 @@
 package com.dasbikash.news_server_data.repositories
 
 import android.content.Context
+import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.database.NewsServerDatabase
@@ -21,7 +22,7 @@ import com.dasbikash.news_server_data.display_models.entity.Article
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
 
-class NewsDataRepository (context: Context) {
+class NewsDataRepository internal constructor(context: Context) {
     private val mContext:Context
     private val newsDataService:NewsDataService
     private val newsServerDatabase:NewsServerDatabase
@@ -53,5 +54,9 @@ class NewsDataRepository (context: Context) {
 
     fun getTopPagesByNewsPaper(newspaper: Newspaper):List<Page>{
         return newsServerDatabase.pageDao.getTopPagesByNewsPaperId(newspaper.id)
+    }
+
+    fun getArticleCountByNewsPaper(newsPaper: Newspaper): LiveData<Int>{
+        return newsServerDatabase.articleDao.getArticleCountByNewsPaperId(newsPaper.id)
     }
 }

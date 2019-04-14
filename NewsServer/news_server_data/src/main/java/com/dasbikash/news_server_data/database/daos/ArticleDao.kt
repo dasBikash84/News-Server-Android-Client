@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.database.daos
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -26,7 +27,10 @@ internal interface ArticleDao {
     fun findAllByPageId(pageId: Int): List<Article>
 
     @Query("SELECT * FROM Article WHERE id=:id")
-    fun findId(id: Int): Article
+    fun findById(id: Int): Article
+
+    @Query("SELECT COUNT(*) FROM Article WHERE newsPaperId=:newsPaperId")
+    fun getArticleCountByNewsPaperId(newsPaperId: String): LiveData<Int>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addArticles(articles: List<Article>)

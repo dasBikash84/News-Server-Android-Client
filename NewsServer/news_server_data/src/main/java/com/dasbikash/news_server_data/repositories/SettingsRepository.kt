@@ -24,7 +24,7 @@ import com.dasbikash.news_server_data.display_models.entity.Page
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException
 
-class SettingsRepository(context: Context) {
+class SettingsRepository internal constructor(context: Context) {
 
 //    private val TAG = "SettingsRepository"
 

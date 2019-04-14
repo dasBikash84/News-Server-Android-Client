@@ -15,7 +15,6 @@ package com.dasbikash.news_server.views
 
 import android.content.Context
 import android.os.Bundle
-import android.transition.Visibility
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -24,6 +23,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveDataReactiveStreams
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -34,6 +34,8 @@ import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
 class NewspaperPerviewFragment : Fragment() {
@@ -46,6 +48,8 @@ class NewspaperPerviewFragment : Fragment() {
 
     private val mTopPageList = mutableListOf<Page>()
 
+    private val mDisposable = CompositeDisposable()
+    lateinit var mArticleCountObservable:Observable<Int>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_newspaper_page_list_preview_holder, container, false)
@@ -59,10 +63,17 @@ class NewspaperPerviewFragment : Fragment() {
         mPagePreviewList = view.findViewById(R.id.newspaper_page_preview_list)
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
 
-        mListAdapter = PagePreviewListAdapter.getPagePreviewListAdapter(activity!!.applicationContext)
+        mArticleCountObservable =
+                Observable.fromPublisher<Int> {
+                    LiveDataReactiveStreams
+                            .toPublisher(this,mHomeViewModel.mArticleCountMap.get(mNewspaper)!!)
+                }
+
+        mListAdapter = PagePreviewListAdapter.getPagePreviewListAdapter(activity!!.applicationContext,mArticleCountObservable)
         mPagePreviewList.adapter = mListAdapter
 
-        Observable.just(true)
+        mDisposable.add(
+            Observable.just(true)
                 .subscribeOn(Schedulers.io())
                 .map {
 //                    Log.d(TAG,"Np: ${mNewspaper.name}")
@@ -80,13 +91,19 @@ class NewspaperPerviewFragment : Fragment() {
                 .subscribe({
                     mListAdapter.submitList(mTopPageList)
                 })
+        )
 
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mDisposable.clear()
     }
 
     companion object {
 
         val ARG_NEWS_PAPAER = "com.dasbikash.news_server.views.NewspaperPerviewFragment.ARG_NEWS_PAPAER"
-        val TAG = "NewspaperPerviewFragment"
+        val TAG = "NpPerviewFragment"
 
         fun getInstance(newspaper: Newspaper): NewspaperPerviewFragment {
             val args = Bundle()
@@ -100,7 +117,7 @@ class NewspaperPerviewFragment : Fragment() {
 
 }
 
-class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class PagePreviewHolder(itemView: View,articleCountObservable: Observable<Int>) : RecyclerView.ViewHolder(itemView) {
 
     val childListArticlePreviewRV : RecyclerView
     val selfArticlePreview:CardView
@@ -109,7 +126,12 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val selfArticleTitle:TextView
     val selfArticlePublicationTime:TextView
 
+    //val disposable:Disposable
+
     init {
+
+//        disposable = articleCountObservable.
+
         childListArticlePreviewRV = itemView.findViewById(R.id.top_page_child_list_preview)
         selfArticlePreview = itemView.findViewById(R.id.child_less_top_page_preview)
         selfPageTitle = selfArticlePreview.findViewById(R.id.child_less_top_page_title)
@@ -147,11 +169,13 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
 }
 
-class PagePreviewListAdapter(diffCallback: DiffUtil.ItemCallback<Page>,val context: Context) :
+class PagePreviewListAdapter(diffCallback: DiffUtil.ItemCallback<Page>,
+                             val context: Context,
+                             var articleCountObservable: Observable<Int>?) :
         ListAdapter<Page, PagePreviewHolder>(diffCallback) {
 
     companion object{
-        fun getPagePreviewListAdapter(context: Context):PagePreviewListAdapter{
+        fun getPagePreviewListAdapter(context: Context,articleCountObservable: Observable<Int>):PagePreviewListAdapter{
             val diffCallback = object : DiffUtil.ItemCallback<Page>() {
                 override fun areItemsTheSame(oldItem: Page, newItem: Page): Boolean {
                     return oldItem.id == newItem.id
@@ -160,18 +184,35 @@ class PagePreviewListAdapter(diffCallback: DiffUtil.ItemCallback<Page>,val conte
                     return oldItem == newItem
                 }
             }
-            return PagePreviewListAdapter(diffCallback,context)
+            return PagePreviewListAdapter(diffCallback,context,articleCountObservable)
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagePreviewHolder {
 //        val view =  LayoutInflater.from(context).inflate(R.layout.view_page_label,parent,false)
         val view =  LayoutInflater.from(context).inflate(R.layout.view_top_page_child_list_preview_holder,parent,false)
-        return PagePreviewHolder(view)//PagePreviewHolder(TextView(context))
+        return PagePreviewHolder(view,articleCountObservable!!)//PagePreviewHolder(TextView(context))
     }
     override fun onBindViewHolder(holder: PagePreviewHolder, position: Int) {
 //        (holder.itemView as TextView).setText(getItem(position).name)
         holder.bind(getItem(position))
+    }
+
+    override fun onViewRecycled(holder: PagePreviewHolder) {
+        super.onViewRecycled(holder)
+    }
+
+    override fun onViewAttachedToWindow(holder: PagePreviewHolder) {
+        super.onViewAttachedToWindow(holder)
+    }
+
+    override fun onViewDetachedFromWindow(holder: PagePreviewHolder) {
+        super.onViewDetachedFromWindow(holder)
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        articleCountObservable = null
     }
 
 }

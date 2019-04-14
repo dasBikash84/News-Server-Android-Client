@@ -16,6 +16,8 @@ package com.dasbikash.news_server.view_models
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import com.dasbikash.news_server_data.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
 import com.dasbikash.news_server_data.display_models.entity.PageGroup
@@ -23,6 +25,10 @@ import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.SettingsRepository
+import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
+import java.util.*
 
 class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mApplication) {
     private val mSettingsRepository: SettingsRepository
@@ -32,27 +38,40 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
     private val mActiveNewspapers: LiveData<List<Newspaper>>? = null
     private val mPageGroups: LiveData<List<PageGroup>>? = null
 
-    val isSettingsDataLoaded: Boolean
-        get() = mSettingsRepository.isSettingsDataLoaded()
+    val mArticleCountMap = mutableMapOf<Newspaper,LiveData<Int>>()
+    private val mNewspapers = mutableListOf<Newspaper>()
 
-    val isAppSettingsUpdated: Boolean
-        get() = mSettingsRepository.isAppSettingsUpdated()
+    private val disposable:CompositeDisposable = CompositeDisposable();
+
 
     init {
-        mSettingsRepository = SettingsRepository(mApplication)
-        mNewsDataRepository = NewsDataRepository(mApplication)
+        mSettingsRepository = RepositoryFactory.getSettingsRepository(mApplication)
+        mNewsDataRepository = RepositoryFactory.getNewsDataRepository(mApplication)
+
+        disposable.add(
+            Observable.just(true)
+                .subscribeOn(Schedulers.io())
+                .map { readNewsPapers() }
+                .map {
+                    mNewspapers.addAll(it)
+                    it.forEach {
+                        mArticleCountMap.put(it,mNewsDataRepository.getArticleCountByNewsPaper(it))
+                    }
+                }
+                .subscribe()
+        )
     }
 
     override fun onCleared() {
         super.onCleared()
-    }
-
-    @Throws(OnMainThreadException::class, NoInternertConnectionException::class)
-    fun loadAppSettings() {
-        mSettingsRepository.loadAppSettings()
+        disposable.clear()
     }
 
     fun getNewsPapers():List<Newspaper>{
+        return mNewspapers
+    }
+
+    private fun readNewsPapers():List<Newspaper>{
         return mSettingsRepository.getNewsPapers()
     }
 

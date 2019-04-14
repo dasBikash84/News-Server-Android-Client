@@ -11,17 +11,19 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.utils
+package com.dasbikash.news_server_data
 
 import android.content.Context
+import com.dasbikash.news_server_data.repositories.NewsDataRepository
+import com.dasbikash.news_server_data.repositories.SettingsRepository
 
-object DisplayUtils {
-
-    @JvmStatic
-    fun dpToPx(dp: Int,context: Context): Float =
-        (dp * context.getResources().getDisplayMetrics().density)
+object RepositoryFactory {
 
     @JvmStatic
-    fun pxToDp(px: Int,context: Context): Float =
-        (px / context.getResources().getDisplayMetrics().density)
+    fun getSettingsRepository(context: Context):
+            SettingsRepository = SettingsRepository(context)
+    @JvmStatic
+    fun getNewsDataRepository(context: Context):
+            NewsDataRepository = NewsDataRepository(context)
+
 }

@@ -29,14 +29,17 @@ import android.widget.Toast;
 import com.dasbikash.news_server.R;
 import com.dasbikash.news_server.view_models.HomeViewModel;
 import com.dasbikash.news_server.views.interfaces.HomeNavigator;
+import com.dasbikash.news_server_data.RepositoryFactory;
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException;
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException;
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException;
 import com.dasbikash.news_server_data.exceptions.RemoteDbException;
+import com.dasbikash.news_server_data.repositories.SettingsRepository;
 import com.dasbikash.news_server_data.utills.ExceptionUtils;
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import androidx.annotation.NonNull;
@@ -63,8 +66,6 @@ public class InitFragment extends Fragment {
 
     private long mRetryDelayForRemoteDBError = 0L;
     private long mRetryCountForRemoteDBError = 0L;
-
-    private HomeViewModel mViewModel;
 
     private AtomicBoolean mLoadSettingsDataOnNetConnection = new AtomicBoolean(false);
 
@@ -125,15 +126,12 @@ public class InitFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mProgressBar = view.findViewById(R.id.data_load_progress);
         mNoInternetMessage = view.findViewById(R.id.no_internet_message);
-        mViewModel = (HomeViewModel) ViewModelProviders.of((HomeActivity) getActivity()).get(HomeViewModel.class);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         registerBrodcastReceivers();
-
-//        mNoInternetMessage.setVisibility(View.GONE);
 
         initSettingsDataLoading(0L);
     }
@@ -200,11 +198,14 @@ public class InitFragment extends Fragment {
                 //Initialization started
                 emitter.onNext(DataLoadingStatus.STARTING_SETTINGS_DATA_LOADING);
 
-                if (!mViewModel.isSettingsDataLoaded() ||
-                        mViewModel.isAppSettingsUpdated()) {
+                SettingsRepository settingsRepo =
+                        RepositoryFactory.getSettingsRepository(Objects.requireNonNull(getActivity()));
+
+                if (!settingsRepo.isSettingsDataLoaded() ||
+                        settingsRepo.isAppSettingsUpdated()) {
                     // going to load app data
                     emitter.onNext(DataLoadingStatus.NEED_TO_READ_DATA_FROM_SERVER);
-                    mViewModel.loadAppSettings();
+                    settingsRepo.loadAppSettings();
                 }
 
                 //App data loaded
