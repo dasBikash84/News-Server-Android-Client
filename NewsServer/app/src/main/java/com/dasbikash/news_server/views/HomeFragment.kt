@@ -84,6 +84,7 @@ class HomeFragment : Fragment() {
                     override fun onChanged(newspapers: List<Newspaper>?) {
                         newspapers
                                 ?.map { PagableNewsPaper(it) }
+                                ?.sortedBy { it.newspaper.id }
                                 ?.forEach { mNewsPapers.add(it) }
 
                         mViewPagerTitleScroller.initView(mNewsPapers.toList(), R.layout.view_page_label) {

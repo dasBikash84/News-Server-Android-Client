@@ -30,20 +30,32 @@ import java.util.*
 )
 data class Article(
         @PrimaryKey
-        var id: String,
-        var pageId: String?,
-        var title: String?,
-        var articleText: String?,
+        var id: String="",
+        var pageId: String?=null,
+        @Expose(serialize = false, deserialize = false)
+        var newsPaperId: String?=null, //Have to fill after fetch from server
+        var title: String?=null,
+        var articleText: String?=null,
+        @Ignore
         var modificationTime: Long = 0L,
+        @Ignore
         var publicationTime: Long = 0L,
-        var imageLinkList: List<ArticleImage>?,
-        var previewImageLink: String? = null
+        @Expose(serialize = false, deserialize = false)
+        var publicationDate: Date ? = null, //have to fill after fetch from server
+        var imageLinkList: List<ArticleImage>? = mutableListOf(),
+        var previewImageLink: String? = null,
+        @Expose(serialize = false, deserialize = false)
+        private var created:Long = 0L
 ) : Serializable {
-    override fun toString(): String {
-        return "Article(id='$id', pageId=$pageId, title=$title, articleText=${articleText?.substring(0, 20)}, modificationTS=${getModificationTS()}, publicationTS=${getPublicationTS()}, imageLinkList=${imageLinkList?.size}, previewImageLink=${previewImageLink?.substring(20)})"
+
+    fun getCreated():Long{
+        return System.currentTimeMillis()
+    }
+    fun setCreated(time:Long){
+        created = time
     }
 
-    @Ignore
+    /*@Ignore
     @Expose(serialize = false, deserialize = false)
     private var modificationTS: Date? = null
 
@@ -72,5 +84,5 @@ data class Article(
         val date = Calendar.getInstance()
         date.timeInMillis = publicationTime
         return date.time
-    }
+    }*/
 }

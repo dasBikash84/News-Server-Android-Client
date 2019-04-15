@@ -36,7 +36,12 @@ internal interface PageDao {
     @Query("SELECT * FROM Page WHERE parentPageId = '${Page.TOP_LEVEL_PAGE_PARENT_ID}' AND newsPaperId=:newspaperId")
     fun getTopPagesByNewsPaperId(newspaperId: String):List<Page>
 
+    @Query("SELECT * FROM Page WHERE id = :pageId")
+    fun findById(pageId:String):Page
+
     @Query("SELECT * FROM Page WHERE parentPageId= :parentPageId")
     fun getChildPagesByTopLevelPageId(parentPageId: String):List<Page>
+
+
 
 }

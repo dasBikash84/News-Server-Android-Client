@@ -11,19 +11,9 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data
+package com.dasbikash.news_server.views.interfaces
 
-import android.content.Context
-import com.dasbikash.news_server_data.repositories.NewsDataRepository
-import com.dasbikash.news_server_data.repositories.SettingsRepository
-
-object RepositoryFactory {
-
-    @JvmStatic
-    fun getSettingsRepository(context: Context):
-            SettingsRepository = SettingsRepository.getInstance(context)
-    @JvmStatic
-    fun getNewsDataRepository(context: Context):
-            NewsDataRepository = NewsDataRepository.getInstance(context)
-
+interface BottomNavigationViewOwner {
+//    fun setBottomNavigationViewAccordingToScrollPosition(scrollY: Int)
+    fun showBottomNavigationView(show: Boolean)
 }

@@ -14,23 +14,30 @@
 package com.dasbikash.news_server.views
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
 import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class HomeActivity : AppCompatActivity(),
-        NavigationHost, HomeNavigator {
+        NavigationHost, HomeNavigator, BottomNavigationViewOwner {
+
+    override fun showBottomNavigationView(show: Boolean) {
+        when(show){
+            true -> mBottomNavigationView.visibility = View.VISIBLE
+            false -> mBottomNavigationView.visibility = View.GONE
+        }
+    }
 
     val mBottomNavigationView: BottomNavigationView by lazy {
         findViewById(R.id.bottomNavigationView) as BottomNavigationView
     }
-
-    //lateinit var mViewModel: ViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +45,6 @@ class HomeActivity : AppCompatActivity(),
 
         setUpBottomNavigationView()
         initApp()
-        //mViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
 
         if (supportFragmentManager.findFragmentById(R.id.main_frame) == null) {
             mBottomNavigationView.visibility = View.INVISIBLE
@@ -49,6 +55,7 @@ class HomeActivity : AppCompatActivity(),
     private fun initApp() {
         NetConnectivityUtility.initialize(applicationContext)
     }
+
 
     private fun setUpBottomNavigationView() {
         //mBottomNavigationView = findViewById(R.id.bottom_navigation)

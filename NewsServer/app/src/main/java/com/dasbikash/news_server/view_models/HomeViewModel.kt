@@ -36,9 +36,8 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
     private val mActiveNewspapers: LiveData<List<Newspaper>>? = null
     private val mPageGroups: LiveData<List<PageGroup>>? = null
 
-    val mArticleCountForNewspaperMap = mutableMapOf<Newspaper,LiveData<Int>>()
+//    val mArticleCountForNewspaperMap = mutableMapOf<Newspaper,LiveData<Int>>()
 
-    private val mNewspapers = mutableListOf<Newspaper>()
 
     private val disposable:CompositeDisposable = CompositeDisposable();
 
@@ -48,7 +47,7 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(mApplication)
 
         //Create map of ArticleCountByNewspaper Livedata
-        disposable.add(
+        /*disposable.add(
             Observable.just(true)
                 .subscribeOn(Schedulers.io())
                 .map {
@@ -64,7 +63,7 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
                     }
                 }
                 .subscribe()
-        )
+        )*/
     }
 
     override fun onCleared() {

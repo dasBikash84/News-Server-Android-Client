@@ -32,9 +32,15 @@ internal interface ArticleDao {
     @Query("SELECT COUNT(*) FROM Article WHERE newsPaperId=:newsPaperId")
     fun getArticleCountByNewsPaperId(newsPaperId: String): LiveData<Int>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun addArticles(articles: List<Article>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun addArticles(vararg articles: Article)
 
     @Query("DELETE FROM Article")
     fun nukeTable()
+
+    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationDate DESC,created DESC  LIMIT 1")
+    fun getLatestArticleByPageId(pageId: String):Article
 }

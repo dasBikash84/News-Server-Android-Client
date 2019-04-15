@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.repositories
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
@@ -24,7 +25,7 @@ import com.dasbikash.news_server_data.display_models.entity.Page
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException
 
-class SettingsRepository internal constructor(context: Context) {
+class SettingsRepository private constructor(context: Context) {
 
 //    private val TAG = "SettingsRepository"
 
@@ -87,6 +88,23 @@ class SettingsRepository internal constructor(context: Context) {
 
     fun getChildPagesForTopLevelPage(topLevelPage: Page):List<Page>{
         return mDatabase.pageDao.getChildPagesByTopLevelPageId(topLevelPage.id)
+    }
+
+    companion object{
+        @SuppressLint("StaticFieldLeak")
+        @Volatile
+        private lateinit var  INSTANCE:SettingsRepository
+
+        fun getInstance(context: Context):SettingsRepository{
+            if (!::INSTANCE.isInitialized) {
+                synchronized(SettingsRepository::class.java) {
+                    if (!::INSTANCE.isInitialized) {
+                        INSTANCE = SettingsRepository(context)
+                    }
+                }
+            }
+            return INSTANCE
+        }
     }
 
 }

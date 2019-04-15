@@ -13,16 +13,21 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc
 
+import android.util.Log
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.display_models.entity.Article
+import com.dasbikash.news_server_data.utills.ExceptionUtils
 
 internal object SpringMVCNewsDataService: NewsDataService {
+
+    private val TAG = "DataService"
 
     private val springMVCWebService
             = SpringMVCWebService.RETROFIT.create(SpringMVCWebService::class.java)
 
 
     override fun getLatestArticleByTopLevelPageId(topLevelPageId: String): Article {
+        ExceptionUtils.thowExceptionIfOnMainThred()
         return springMVCWebService
                 .getLatestArticleByTopLevelPageId(topLevelPageId)
                 .execute()
@@ -30,13 +35,22 @@ internal object SpringMVCNewsDataService: NewsDataService {
     }
 
     override fun getLatestArticlesByPageId(pageId: String, articleRequestSize: Int): List<Article> {
-        return springMVCWebService
-                .getLatestArticlesByPageId(pageId,articleRequestSize)
-                .execute()
-                .body()!!
+        ExceptionUtils.thowExceptionIfOnMainThred()
+        Log.d(TAG,"getLatestArticlesByPageId: article request from page: ${pageId} for ${articleRequestSize} articles")
+
+        val response = springMVCWebService.getLatestArticlesByPageId(pageId,articleRequestSize).execute()
+
+        if (response.isSuccessful){
+            Log.d(TAG,"getLatestArticlesByPageId: article found for page: ${pageId}")
+            return response.body()!!
+        }else{
+            Log.d(TAG,"getLatestArticlesByPageId: no article for page: ${pageId}")
+            return listOf()
+        }
     }
 
     override fun getArticlesAfterLastId(pageId:String,lastArticleId: String, articleRequestSize: Int): List<Article> {
+        ExceptionUtils.thowExceptionIfOnMainThred()
         return springMVCWebService
                 .getArticlesAfterLastId(pageId,lastArticleId,articleRequestSize)
                 .execute()

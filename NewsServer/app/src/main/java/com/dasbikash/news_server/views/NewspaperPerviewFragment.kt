@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server.views
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -22,6 +23,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveDataReactiveStreams
 import androidx.lifecycle.ViewModelProviders
@@ -30,14 +32,20 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.view_models.HomeViewModel
+import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server_data.RepositoryFactory
+import com.dasbikash.news_server_data.display_models.entity.Article
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
 import com.dasbikash.news_server_data.repositories.SettingsRepository
+import com.squareup.picasso.Picasso
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.fragment_newspaper_page_list_preview_holder.*
+import java.lang.StringBuilder
 
 class NewspaperPerviewFragment : Fragment() {
 
@@ -47,10 +55,7 @@ class NewspaperPerviewFragment : Fragment() {
     private lateinit var mPagePreviewList:RecyclerView//newspaper_page_preview_list
     private lateinit var mListAdapter:PagePreviewListAdapter
 
-    private val mTopPageList = mutableListOf<Page>()
-
     private val mDisposable = CompositeDisposable()
-    lateinit var mArticleCountObservable:Observable<Int>
     lateinit var mSettingsRepository:SettingsRepository
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -66,15 +71,23 @@ class NewspaperPerviewFragment : Fragment() {
         mPagePreviewList = view.findViewById(R.id.newspaper_page_preview_list)
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
 
+        (activity as BottomNavigationViewOwner)
+                .showBottomNavigationView(true)
 
-        //Create observable from ArticleCountForNewspaper Livedata
-        mArticleCountObservable =
-                Observable.fromPublisher<Int> {
-                    LiveDataReactiveStreams
-                            .toPublisher(this,mHomeViewModel.mArticleCountForNewspaperMap.get(mNewspaper)!!)
+        page_preview_scroller.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener{
+            override fun onScrollChange(v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
+                val remainingYOfRV = mPagePreviewList.height-scrollY-resources.displayMetrics.heightPixels
+                if (remainingYOfRV < resources.displayMetrics.heightPixels/5){
+                    (activity as BottomNavigationViewOwner)
+                            .showBottomNavigationView(false)
+                }else{
+                    (activity as BottomNavigationViewOwner)
+                            .showBottomNavigationView(true)
                 }
+            }
+        })
 
-        mListAdapter = PagePreviewListAdapter.getPagePreviewListAdapter(activity!!.applicationContext,mArticleCountObservable)
+        mListAdapter = PagePreviewListAdapter(activity!!.applicationContext)
         mPagePreviewList.adapter = mListAdapter
 
         mDisposable.add(
@@ -116,7 +129,39 @@ class NewspaperPerviewFragment : Fragment() {
 
 }
 
-class PagePreviewHolder(itemView: View,articleCountObservable: Observable<Int>) : RecyclerView.ViewHolder(itemView) {
+object PageDiffCallback:DiffUtil.ItemCallback<Page>(){
+    override fun areItemsTheSame(oldItem: Page, newItem: Page): Boolean {
+        return oldItem.id == newItem.id
+    }
+    override fun areContentsTheSame(oldItem: Page, newItem: Page): Boolean {
+        return oldItem == newItem
+    }
+}
+
+class PagePreviewListAdapter(val context: Context) :
+        ListAdapter<Page, PagePreviewHolder>(PageDiffCallback) {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagePreviewHolder {
+        val view =  LayoutInflater.from(context).inflate(R.layout.view_top_page_child_list_preview_holder,parent,false)
+        return PagePreviewHolder(view)
+    }
+    override fun onBindViewHolder(holder: PagePreviewHolder, position: Int) {
+        holder.disposable.clear()
+        holder.bind(getItem(position))
+    }
+
+    override fun onViewRecycled(holder: PagePreviewHolder) {
+        super.onViewRecycled(holder)
+        holder.disposable.clear()
+    }
+
+}
+
+class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+    companion object{
+        val TAG = "NpPerviewFragment"
+    }
 
     val childListArticlePreviewRV : RecyclerView
     val selfArticlePreview:CardView
@@ -125,13 +170,11 @@ class PagePreviewHolder(itemView: View,articleCountObservable: Observable<Int>) 
     val selfArticleTitle:TextView
     val selfArticlePublicationTime:TextView
 
-    //val disposable:Disposable
+    val disposable = CompositeDisposable()
 
     init {
-
-//        disposable = articleCountObservable.
-
         childListArticlePreviewRV = itemView.findViewById(R.id.top_page_child_list_preview)
+
         selfArticlePreview = itemView.findViewById(R.id.child_less_top_page_preview)
         selfPageTitle = selfArticlePreview.findViewById(R.id.child_less_top_page_title)
         selfArticlePreviewImage = selfArticlePreview.findViewById(R.id.child_less_top_page_article_preview_image)
@@ -139,103 +182,213 @@ class PagePreviewHolder(itemView: View,articleCountObservable: Observable<Int>) 
         selfArticlePublicationTime = selfArticlePreview.findViewById(R.id.child_less_top_page_article_time)
     }
 
+    @SuppressLint("CheckResult")
     fun bind(page: Page){
 
         childListArticlePreviewRV.visibility = View.GONE
 
+        selfPageTitle.visibility = View.GONE
         selfArticlePreviewImage.visibility = View.GONE
         selfArticleTitle.visibility = View.GONE
         selfArticlePublicationTime.visibility = View.GONE
 
         val settingsRepository = RepositoryFactory.getSettingsRepository(itemView.context)
+        val newsDataRepository = RepositoryFactory.getNewsDataRepository(itemView.context)
 
-        if (!page.hasChild) {
-            selfPageTitle.setText(page.name)
-            if(page.getHasData()){
-                //getDataOfLatestArticleAndDisplay
-
-            }
-        }else{
-            //selfPageTitle.setText("Child pages will come here for page: ${page.name}")
-            val pageListForDisplay = mutableListOf<Page>()
-            if (page.getHasData())   pageListForDisplay.add(page)
+        disposable.add(
             Observable.just(true)
-                    .subscribeOn(Schedulers.io())
-                    .map {
-                        settingsRepository
-                                .getChildPagesForTopLevelPage(page)
-                                .asSequence()
-                                .sortedBy {
-                                    it.id
-                                }
-                                .filter {
-                                    Log.d("NpPerviewFragment","${page.name}: ${it.name}: ${it.getHasData()}")
-                                    it.getHasData()
-                                }
-                                .forEach {
-                                    Log.d("NpPerviewFragment","${page.name}: ${it.name}")
-                                    pageListForDisplay.add(it)
-                                }
-                        Log.d("NpPerviewFragment",pageListForDisplay.toString())
+                .subscribeOn(Schedulers.io())
+                .map {
+                    Log.d(TAG,"Start for page ${page.name} Np: ${page.newsPaperId}")
+                    settingsRepository
+                            .getChildPagesForTopLevelPage(page)
+                            .asSequence()
+                            .filter { it.getHasData() }
+                            .sortedBy { it.id }
+                            .toCollection(mutableListOf<Page>())
+                }
+                .map {
+                    if (it.size>0){
+                        Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} has ${it.size} child pages")
+                        if (page.getHasData()) it.set(0,page)
+                        it
+                    }else{
+                        Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} has no child pages")
+                        page
                     }
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe({
-                        selfPageTitle.setText(pageListForDisplay.map { it.name+" | " }.toList().toString())
-                    })
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(object : DisposableObserver<Any>(){
+                    override fun onComplete() {
+                        Log.d(TAG,"onComplete for page ${page.name} Np: ${page.newsPaperId} L1")
+                    }
+                    override fun onNext(data: Any) {
+                        Log.d(TAG,"Display block for page ${page.name} Np: ${page.newsPaperId}")
+                        when(data){
+                            is Page ->{
+                                Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} own article display")
+                                data.apply {
+                                    if (getHasData()){
+                                        Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} has data")
+                                        disposable.add(
+                                                Observable.just(this)
+                                                        .subscribeOn(Schedulers.io())
+                                                        .map {
+                                                            newsDataRepository.getLatestArticleByPage(it)
+                                                        }
+                                                        .observeOn(AndroidSchedulers.mainThread())
+                                                        .subscribeWith(object : DisposableObserver<Article?>(){
+                                                            override fun onComplete() {
+                                                                Log.d(TAG,"onComplete for page ${page.name} Np: ${page.newsPaperId} L2")
+                                                            }
+                                                            override fun onNext(article: Article) {
 
-        }
+                                                                Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} has article title: ${article.title}")
 
+                                                                selfPageTitle.text = page.name
+                                                                selfArticleTitle.text = article.title
+                                                                selfArticlePublicationTime.text = article.publicationDate.toString()
 
+                                                                selfPageTitle.visibility = View.VISIBLE
+                                                                selfArticleTitle.visibility = View.VISIBLE
+                                                                selfArticlePublicationTime.visibility = View.VISIBLE
 
-    }
+                                                                article.previewImageLink?.let {
+                                                                    Picasso.get().load(it).into(selfArticlePreviewImage)
+                                                                    selfArticlePreviewImage.visibility = View.VISIBLE
+                                                                }
+                                                            }
+                                                            override fun onError(e: Throwable) {
+                                                                Log.d(TAG,e.message+" for page Np: ${page.newsPaperId} ${page.name} L2")
+                                                            }
+                                                        })
 
-
+                                        )
+                                    } else{
+                                        Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} has no data")
+                                    }
+                                }
+                            }
+                            is MutableList<*> ->{
+                                Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} child article display")
+                                /*val stringBuilder = StringBuilder()
+                                data.asSequence().filter { it is Page }.map { it as Page }.map { it.name}.forEach { stringBuilder.append(it+" | ") }
+                                selfPageTitle.text = stringBuilder.toString()
+                                Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} child page list: "+stringBuilder.toString())
+                                selfPageTitle.visibility = View.VISIBLE*/
+                                val articlePreviewListAdapter = ArticlePreviewListAdapter(itemView.context)
+                                childListArticlePreviewRV.adapter = articlePreviewListAdapter
+                                @Suppress("UNCHECKED_CAST")
+                                articlePreviewListAdapter.submitList(data as MutableList<Page>)
+                                childListArticlePreviewRV.visibility = View.VISIBLE
+                            }
+                        }
+                    }
+                    override fun onError(e: Throwable) {
+                        Log.d(TAG,e.message+" for page ${page.name} Np: ${page.newsPaperId} L1")
+                    }
+                })
+        )}
 }
 
-class PagePreviewListAdapter(diffCallback: DiffUtil.ItemCallback<Page>,
-                             val context: Context,
-                             var articleCountObservable: Observable<Int>?) :
-        ListAdapter<Page, PagePreviewHolder>(diffCallback) {
+//ListAdapter for child page article preview display
+//ViewHolder for child page article preview display
 
-    companion object{
-        fun getPagePreviewListAdapter(context: Context,articleCountObservable: Observable<Int>):PagePreviewListAdapter{
-            val diffCallback = object : DiffUtil.ItemCallback<Page>() {
-                override fun areItemsTheSame(oldItem: Page, newItem: Page): Boolean {
-                    return oldItem.id == newItem.id
-                }
-                override fun areContentsTheSame(oldItem: Page, newItem: Page): Boolean {
-                    return oldItem == newItem
-                }
-            }
-            return PagePreviewListAdapter(diffCallback,context,articleCountObservable)
-        }
-    }
+class ArticlePreviewListAdapter(val context: Context)
+    :ListAdapter<Page,ArticlePreviewHolder>(PageDiffCallback)
+{
+    val holders = mutableListOf<ArticlePreviewHolder>()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagePreviewHolder {
-//        val view =  LayoutInflater.from(context).inflate(R.layout.view_page_label,parent,false)
-        val view =  LayoutInflater.from(context).inflate(R.layout.view_top_page_child_list_preview_holder,parent,false)
-        return PagePreviewHolder(view,articleCountObservable!!)//PagePreviewHolder(TextView(context))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticlePreviewHolder {
+
+        val holder = ArticlePreviewHolder(
+                LayoutInflater.from(context).inflate(R.layout.view_article_preview_holder,parent,false)
+        )
+        holders.add(holder)
+
+        return holder
     }
-    override fun onBindViewHolder(holder: PagePreviewHolder, position: Int) {
-//        (holder.itemView as TextView).setText(getItem(position).name)
+    override fun onBindViewHolder(holder: ArticlePreviewHolder, position: Int) {
+        holder.disposable.clear()
         holder.bind(getItem(position))
     }
 
-    override fun onViewRecycled(holder: PagePreviewHolder) {
+    override fun onViewRecycled(holder: ArticlePreviewHolder) {
         super.onViewRecycled(holder)
-    }
-
-    override fun onViewAttachedToWindow(holder: PagePreviewHolder) {
-        super.onViewAttachedToWindow(holder)
-    }
-
-    override fun onViewDetachedFromWindow(holder: PagePreviewHolder) {
-        super.onViewDetachedFromWindow(holder)
+        holder.disposable.clear()
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        articleCountObservable = null
+        Log.d("NpPerviewFragment","ArticlePreviewListAdapter onDetachedFromRecyclerView")
+        holders.forEach { it.disposable.clear() }
     }
 
+}
+
+class ArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
+
+    companion object{
+        val TAG = "NpPerviewFragment"
+    }
+
+    val pageTitle:TextView
+    val articlePreviewImage:ImageView
+    val articleTitle:TextView
+    val articlePublicationTime:TextView
+
+    val disposable = CompositeDisposable()
+
+    init {
+        pageTitle = itemView.findViewById(R.id.page_title)
+        articlePreviewImage = itemView.findViewById(R.id.article_preview_image)
+        articleTitle = itemView.findViewById(R.id.article_title)
+        articlePublicationTime = itemView.findViewById(R.id.article_time)
+    }
+
+    fun bind(page: Page){
+
+        pageTitle.visibility = View.GONE
+        articlePreviewImage.visibility = View.GONE
+        articleTitle.visibility = View.GONE
+        articlePublicationTime.visibility = View.GONE
+
+
+        val newsDataRepository = RepositoryFactory.getNewsDataRepository(itemView.context)
+
+        disposable.add(
+                Observable.just(true)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            newsDataRepository.getLatestArticleByPage(page)
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<Article?>(){
+                            override fun onComplete() {
+                                Log.d(TAG,"onComplete for page ${page.name} Np: ${page.newsPaperId} L2")
+                            }
+                            override fun onNext(article: Article) {
+
+                                Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} has article title: ${article.title}")
+
+                                pageTitle.text = page.name
+                                articleTitle.text = article.title
+                                articlePublicationTime.text = article.publicationDate.toString()
+
+                                pageTitle.visibility = View.VISIBLE
+                                articleTitle.visibility = View.VISIBLE
+                                articlePublicationTime.visibility = View.VISIBLE
+
+                                article.previewImageLink?.let {
+                                    Picasso.get().load(it).into(articlePreviewImage)
+                                    articlePreviewImage.visibility = View.VISIBLE
+                                }
+                            }
+                            override fun onError(e: Throwable) {
+                                Log.d(TAG,e.message+" for page Np: ${page.newsPaperId} ${page.name} L2")
+                            }
+                        })
+        )
+
+    }
 }

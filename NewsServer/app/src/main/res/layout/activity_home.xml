@@ -26,6 +26,7 @@
         app:itemIconTint="@drawable/bottom_navigation_colors"
         app:itemTextColor="@drawable/bottom_navigation_colors"
         app:menu="@menu/home_bottom_navigation_menu"
+        app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
         />
 
 </FrameLayout>
