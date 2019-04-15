@@ -39,10 +39,22 @@ data class Page(
     @Exclude
     var hasChild:Boolean = false
     @Exclude
-    var hasData:Boolean = false
+    private var hasData:Boolean = false
+
+    fun getHasData():Boolean{
+        if (linkFormat != null){ //will be used during initial write by room
+            return true
+        }
+        return hasData //Wiil be used on application runtime
+    }
+
+    fun setHasData(hasData:Boolean){
+        this.hasData = hasData
+    }
+
+
 
     companion object {
-        @JvmField
-        val TOP_LEVEL_PAGE_PARENT_ID = "PAGE_ID_0"
+        const val TOP_LEVEL_PAGE_PARENT_ID = "PAGE_ID_0"
     }
 }

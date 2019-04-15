@@ -140,24 +140,48 @@ class PagePreviewHolder(itemView: View,articleCountObservable: Observable<Int>) 
     }
 
     fun bind(page: Page){
+
         childListArticlePreviewRV.visibility = View.GONE
+
         selfArticlePreviewImage.visibility = View.GONE
         selfArticleTitle.visibility = View.GONE
         selfArticlePublicationTime.visibility = View.GONE
 
+        val settingsRepository = RepositoryFactory.getSettingsRepository(itemView.context)
+
         if (!page.hasChild) {
             selfPageTitle.setText(page.name)
-            if(page.hasData){
+            if(page.getHasData()){
                 //getDataOfLatestArticleAndDisplay
 
             }
         }else{
-            selfPageTitle.setText("Child pages will come here for page: ${page.name}")
-            //Make page list that has data
-
-            //fetch latest article data for all pages
-
-            //Init recyclerView with fetched article list
+            //selfPageTitle.setText("Child pages will come here for page: ${page.name}")
+            val pageListForDisplay = mutableListOf<Page>()
+            if (page.getHasData())   pageListForDisplay.add(page)
+            Observable.just(true)
+                    .subscribeOn(Schedulers.io())
+                    .map {
+                        settingsRepository
+                                .getChildPagesForTopLevelPage(page)
+                                .asSequence()
+                                .sortedBy {
+                                    it.id
+                                }
+                                .filter {
+                                    Log.d("NpPerviewFragment","${page.name}: ${it.name}: ${it.getHasData()}")
+                                    it.getHasData()
+                                }
+                                .forEach {
+                                    Log.d("NpPerviewFragment","${page.name}: ${it.name}")
+                                    pageListForDisplay.add(it)
+                                }
+                        Log.d("NpPerviewFragment",pageListForDisplay.toString())
+                    }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe({
+                        selfPageTitle.setText(pageListForDisplay.map { it.name+" | " }.toList().toString())
+                    })
 
         }
 

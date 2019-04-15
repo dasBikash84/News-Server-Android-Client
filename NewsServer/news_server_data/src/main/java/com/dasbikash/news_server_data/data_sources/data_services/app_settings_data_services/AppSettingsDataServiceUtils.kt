@@ -73,9 +73,9 @@ internal object AppSettingsDataServiceUtils {
                             it.parentPageId == Page.TOP_LEVEL_PAGE_PARENT_ID
                         }
                         .forEach {
-                            val thisPage = it
-                            if (filteredPageMap.values.count {it.parentPageId == thisPage.id} > 0){
-                                thisPage.hasChild = true
+                            val topPage = it
+                            if (filteredPageMap.values.count {it.parentPageId == topPage.id} > 0){
+                                topPage.hasChild = true
                             }
                         }
 

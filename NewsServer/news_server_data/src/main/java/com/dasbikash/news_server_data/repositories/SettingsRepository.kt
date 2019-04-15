@@ -85,4 +85,8 @@ class SettingsRepository internal constructor(context: Context) {
         return mDatabase.pageDao.getTopPagesByNewsPaperId(newspaper.id)
     }
 
+    fun getChildPagesForTopLevelPage(topLevelPage: Page):List<Page>{
+        return mDatabase.pageDao.getChildPagesByTopLevelPageId(topLevelPage.id)
+    }
+
 }
