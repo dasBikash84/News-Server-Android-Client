@@ -30,4 +30,7 @@ internal interface LanguageDao {
 
     @Query("DELETE FROM Language")
     fun nukeTable()
+
+    @Query("SELECT * FROM Language WHERE id=:languageId")
+    fun findByNewspaperId(languageId: String): Language
 }

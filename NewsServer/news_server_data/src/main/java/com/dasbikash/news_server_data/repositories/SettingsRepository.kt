@@ -20,6 +20,7 @@ import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.database.NewsServerDatabase
+import com.dasbikash.news_server_data.display_models.entity.Language
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
@@ -88,6 +89,10 @@ class SettingsRepository private constructor(context: Context) {
 
     fun getChildPagesForTopLevelPage(topLevelPage: Page):List<Page>{
         return mDatabase.pageDao.getChildPagesByTopLevelPageId(topLevelPage.id)
+    }
+
+    fun getLanguageByNewspaper(newspaper: Newspaper): Language {
+        return mDatabase.languageDao.findByNewspaperId(newspaper.languageId!!)
     }
 
     companion object{

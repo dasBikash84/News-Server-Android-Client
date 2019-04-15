@@ -24,9 +24,6 @@ import com.dasbikash.news_server_data.display_models.entity.Article
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
 import com.dasbikash.news_server_data.utills.ExceptionUtils
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 
 class NewsDataRepository private constructor(context: Context) {
     private val mContext:Context
@@ -94,7 +91,7 @@ class NewsDataRepository private constructor(context: Context) {
         return null
     }
 
-    fun requestAndGetLatestArticleByPage(page: Page):Article{
+    /*fun requestAndGetLatestArticleByPage(page: Page):Article{
 
 
 
@@ -110,7 +107,7 @@ class NewsDataRepository private constructor(context: Context) {
                 }
                 .subscribe()
         return newsServerDatabase.articleDao.getLatestArticleByPageId(page.id)
-    }
+    }*/
 
 
     companion object{

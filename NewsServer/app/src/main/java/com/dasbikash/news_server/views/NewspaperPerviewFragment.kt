@@ -25,16 +25,17 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveDataReactiveStreams
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server_data.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.Article
+import com.dasbikash.news_server_data.display_models.entity.Language
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
 import com.dasbikash.news_server_data.repositories.SettingsRepository
@@ -45,11 +46,11 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_newspaper_page_list_preview_holder.*
-import java.lang.StringBuilder
 
 class NewspaperPerviewFragment : Fragment() {
 
     private lateinit var mNewspaper: Newspaper
+    private lateinit var mLanguage: Language
     private lateinit var mHomeViewModel: HomeViewModel
 
     private lateinit var mPagePreviewList:RecyclerView//newspaper_page_preview_list
@@ -87,13 +88,11 @@ class NewspaperPerviewFragment : Fragment() {
             }
         })
 
-        mListAdapter = PagePreviewListAdapter(activity!!.applicationContext)
-        mPagePreviewList.adapter = mListAdapter
-
         mDisposable.add(
             Observable.just(true)
                 .subscribeOn(Schedulers.io())
                 .map {
+                    mLanguage = mSettingsRepository.getLanguageByNewspaper(mNewspaper)
                     mSettingsRepository
                             .getTopPagesForNewspaper(mNewspaper)
                             .sortedBy { it.id }
@@ -101,6 +100,8 @@ class NewspaperPerviewFragment : Fragment() {
                 }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
+                    mListAdapter = PagePreviewListAdapter(activity!!.applicationContext,mLanguage)
+                    mPagePreviewList.adapter = mListAdapter
                     mListAdapter.submitList(it)
                 })
         )
@@ -138,12 +139,12 @@ object PageDiffCallback:DiffUtil.ItemCallback<Page>(){
     }
 }
 
-class PagePreviewListAdapter(val context: Context) :
+class PagePreviewListAdapter(val context: Context,val language: Language) :
         ListAdapter<Page, PagePreviewHolder>(PageDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagePreviewHolder {
         val view =  LayoutInflater.from(context).inflate(R.layout.view_top_page_child_list_preview_holder,parent,false)
-        return PagePreviewHolder(view)
+        return PagePreviewHolder(view,language)
     }
     override fun onBindViewHolder(holder: PagePreviewHolder, position: Int) {
         holder.disposable.clear()
@@ -157,7 +158,7 @@ class PagePreviewListAdapter(val context: Context) :
 
 }
 
-class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class PagePreviewHolder(itemView: View,val language: Language) : RecyclerView.ViewHolder(itemView) {
 
     companion object{
         val TAG = "NpPerviewFragment"
@@ -206,6 +207,7 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                             .filter { it.getHasData() }
                             .sortedBy { it.id }
                             .toCollection(mutableListOf<Page>())
+                    //if()
                 }
                 .map {
                     if (it.size>0){
@@ -234,27 +236,34 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                                                 Observable.just(this)
                                                         .subscribeOn(Schedulers.io())
                                                         .map {
-                                                            newsDataRepository.getLatestArticleByPage(it)
+                                                            val article = newsDataRepository.getLatestArticleByPage(it)
+                                                            article?.let {
+                                                                val dateString = DisplayUtils.getArticlePublicationDateString(article,language,itemView.context)
+                                                                return@map Pair(dateString,it)
+                                                            }
                                                         }
                                                         .observeOn(AndroidSchedulers.mainThread())
-                                                        .subscribeWith(object : DisposableObserver<Article?>(){
+                                                        .subscribeWith(object : DisposableObserver<Pair<String?,Article>>(){
                                                             override fun onComplete() {
                                                                 Log.d(TAG,"onComplete for page ${page.name} Np: ${page.newsPaperId} L2")
                                                             }
-                                                            override fun onNext(article: Article) {
+                                                            override fun onNext(articleData: Pair<String?,Article>) {
 
-                                                                Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} has article title: ${article.title}")
+                                                                Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} has article title: ${articleData.second.title}")
 
                                                                 selfPageTitle.text = page.name
-                                                                selfArticleTitle.text = article.title
-                                                                selfArticlePublicationTime.text = article.publicationDate.toString()
+                                                                selfArticleTitle.text = articleData.second.title
+                                                                selfArticlePublicationTime.text = articleData.first//publicationDate.toString()
 
                                                                 selfPageTitle.visibility = View.VISIBLE
                                                                 selfArticleTitle.visibility = View.VISIBLE
                                                                 selfArticlePublicationTime.visibility = View.VISIBLE
 
-                                                                article.previewImageLink?.let {
+                                                                articleData.second.previewImageLink?.let {
                                                                     Picasso.get().load(it).into(selfArticlePreviewImage)
+                                                                    selfArticlePreviewImage.visibility = View.VISIBLE
+                                                                } ?: let {
+                                                                    Picasso.get().load(R.drawable.app_big_logo).into(selfArticlePreviewImage)
                                                                     selfArticlePreviewImage.visibility = View.VISIBLE
                                                                 }
                                                             }
@@ -271,12 +280,7 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                             }
                             is MutableList<*> ->{
                                 Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} child article display")
-                                /*val stringBuilder = StringBuilder()
-                                data.asSequence().filter { it is Page }.map { it as Page }.map { it.name}.forEach { stringBuilder.append(it+" | ") }
-                                selfPageTitle.text = stringBuilder.toString()
-                                Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} child page list: "+stringBuilder.toString())
-                                selfPageTitle.visibility = View.VISIBLE*/
-                                val articlePreviewListAdapter = ArticlePreviewListAdapter(itemView.context)
+                                val articlePreviewListAdapter = ArticlePreviewListAdapter(itemView.context,language)
                                 childListArticlePreviewRV.adapter = articlePreviewListAdapter
                                 @Suppress("UNCHECKED_CAST")
                                 articlePreviewListAdapter.submitList(data as MutableList<Page>)
@@ -294,7 +298,7 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 //ListAdapter for child page article preview display
 //ViewHolder for child page article preview display
 
-class ArticlePreviewListAdapter(val context: Context)
+class ArticlePreviewListAdapter(val context: Context,val language: Language)
     :ListAdapter<Page,ArticlePreviewHolder>(PageDiffCallback)
 {
     val holders = mutableListOf<ArticlePreviewHolder>()
@@ -302,7 +306,8 @@ class ArticlePreviewListAdapter(val context: Context)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticlePreviewHolder {
 
         val holder = ArticlePreviewHolder(
-                LayoutInflater.from(context).inflate(R.layout.view_article_preview_holder,parent,false)
+                LayoutInflater.from(context).inflate(R.layout.view_article_preview_holder,parent,false),
+                language
         )
         holders.add(holder)
 
@@ -326,7 +331,7 @@ class ArticlePreviewListAdapter(val context: Context)
 
 }
 
-class ArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
+class ArticlePreviewHolder(itemView: View,val language: Language) : RecyclerView.ViewHolder(itemView){
 
     companion object{
         val TAG = "NpPerviewFragment"
@@ -360,27 +365,35 @@ class ArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
                 Observable.just(true)
                         .subscribeOn(Schedulers.io())
                         .map {
-                            newsDataRepository.getLatestArticleByPage(page)
+                            val article = newsDataRepository.getLatestArticleByPage(page)
+                            article?.let {
+                                val dateString = DisplayUtils.getArticlePublicationDateString(article,language,itemView.context)
+                                return@map Pair(dateString,it)
+                            }
+//                            return@map UInt
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Article?>(){
+                        .subscribeWith(object : DisposableObserver<Pair<String?,Article>>(){
                             override fun onComplete() {
                                 Log.d(TAG,"onComplete for page ${page.name} Np: ${page.newsPaperId} L2")
                             }
-                            override fun onNext(article: Article) {
+                            override fun onNext(articleData: Pair<String?,Article>) {
 
-                                Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} has article title: ${article.title}")
+                                Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} has article title: ${articleData.second.title}")
 
                                 pageTitle.text = page.name
-                                articleTitle.text = article.title
-                                articlePublicationTime.text = article.publicationDate.toString()
+                                articleTitle.text = articleData.second.title
+                                articlePublicationTime.text = articleData.first
 
                                 pageTitle.visibility = View.VISIBLE
                                 articleTitle.visibility = View.VISIBLE
                                 articlePublicationTime.visibility = View.VISIBLE
 
-                                article.previewImageLink?.let {
+                                articleData.second.previewImageLink?.let {
                                     Picasso.get().load(it).into(articlePreviewImage)
+                                    articlePreviewImage.visibility = View.VISIBLE
+                                } ?: let {
+                                    Picasso.get().load(R.drawable.app_big_logo).into(articlePreviewImage)
                                     articlePreviewImage.visibility = View.VISIBLE
                                 }
                             }

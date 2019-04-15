@@ -13,9 +13,10 @@
   -->
 
 <resources>
-    <color name="colorPrimary">#4682b4</color>
-    <color name="colorPrimaryDark2">#7ab1e6</color>
-    <color name="colorPrimaryDark">#005684</color>
+    <color name="colorPrimary">#673ab7</color>
+    <color name="titleScrollerBG">#7e57c2</color>
+    <color name="colorPrimaryLight">#d1c4e9</color>
+    <color name="colorPrimaryDark">#140078</color>
     <color name="colorAccent">#7ab1e6</color>
     <color name="navItem">#FFFFFF</color>
     <color name="ic_launcher_background">#FFFFFF</color>

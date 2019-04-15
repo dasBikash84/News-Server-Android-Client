@@ -14,8 +14,77 @@
 package com.dasbikash.news_server.utils
 
 import android.content.Context
+import android.util.Log
+import com.dasbikash.news_server.R
+import com.dasbikash.news_server_data.display_models.entity.Article
+import com.dasbikash.news_server_data.display_models.entity.Language
+import com.dasbikash.news_server_data.display_models.entity.Newspaper
+import java.text.SimpleDateFormat
 
 object DisplayUtils {
+
+    private val TWO_DAYS_IN_MS = (2 * 24 * 60 * 60 * 1000).toLong()
+    private val DAY_IN_MS = (24 * 60 * 60 * 1000).toLong()
+    private val TWO_HOURS_IN_MS = (2 * 60 * 60 * 1000).toLong()
+    private val HOUR_IN_MS = (60 * 60 * 1000).toLong()
+    private val TWO_MINUTES_IN_MS = (2 * 60 * 1000).toLong()
+    private val MINUTE_IN_MS = (60 * 1000).toLong()
+    private val SECOND_IN_MS: Long = 1000
+    val JUST_NOW_TIME_STRING = "Just now"
+    val JUST_NOW_TIME_STRING_BANGLA = "এইমাত্র পাওয়া"
+    val MINUTES_TIME_STRING = "minutes"
+    val MINUTE_TIME_STRING = "minute"
+    val MINUTE_TIME_STRING_BANGLA = "মিনিট"
+    val AGO_TIME_STRING = "ago"
+    val AGO_TIME_STRING_BANGLA = "আগে"
+    val HOURS_TIME_STRING = "hours"
+    val HOUR_TIME_STRING = "hour"
+    val HOUR_TIME_STRING_BANGLA = "ঘণ্টা"
+    val YESTERDAY_TIME_STRING = "Yesterday"
+    val YESTERDAY_TIME_STRING_BANGLA = "গতকাল"
+
+
+    private val BANGLA_UNICODE_ZERO: Char = 0x09E6.toChar()
+    private val BANGLA_UNICODE_NINE: Char = 0x09EF.toChar()
+    private val ENGLISH_UNICODE_ZERO: Char = 0x0030.toChar()
+    private val ENGLISH_UNICODE_NINE: Char = 0x0039.toChar()
+
+    private val MONTH_NAME_TABLE =  arrayOf(
+                                        arrayOf("জানুয়ারী", "Jan"),
+                                        arrayOf("জানুয়ারি", "Jan"),
+                                        arrayOf("ফেব্রুয়ারী", "Feb"),
+                                        arrayOf("ফেব্রুয়ারি", "Feb"),
+                                        arrayOf("মার্চ", "Mar"),
+                                        arrayOf("এপ্রিল", "Apr"),
+                                        arrayOf("মে", "May"),
+                                        arrayOf("জুন", "Jun"),
+                                        arrayOf("জুলাই", "Jul"),
+                                        arrayOf("আগস্ট", "Aug"),
+                                        arrayOf("আগষ্ট", "Aug"),
+                                        arrayOf("অগস্ট", "Aug"),
+                                        arrayOf("সেপ্টেম্বর", "Sep"),
+                                        arrayOf("অক্টোবর", "Oct"),
+                                        arrayOf("নভেম্বর", "Nov"),
+                                        arrayOf("ডিসেম্বর", "Dec")
+                                    )
+    private val DAY_NAME_TABLE = arrayOf(
+                                        arrayOf("শনিবার", "Sat"),
+                                        arrayOf("রবিবার", "Sun"),
+                                        arrayOf("সোমবার", "Mon"),
+                                        arrayOf("মঙ্গলবার", "Tue"),
+                                        arrayOf("বুধবার", "Wed"),
+                                        arrayOf("বৃহস্পতিবার", "Thu"),
+                                        arrayOf("শুক্রবার", "Fri")
+                                    )
+
+    private val AM_PM_MARKER_TABLE = arrayOf(
+                                        arrayOf("পূর্বাহ্ণ", "AM"),
+                                        arrayOf("অপরাহ্ণ", "PM"),
+                                        arrayOf("পূর্বাহ্ণ", "am"),
+                                        arrayOf("অপরাহ্ণ", "pm")
+                                    )
+
+    val TAG = "DisplayUtils"
 
     @JvmStatic
     fun dpToPx(dp: Int,context: Context): Float =
@@ -24,4 +93,117 @@ object DisplayUtils {
     @JvmStatic
     fun pxToDp(px: Int,context: Context): Float =
         (px / context.getResources().getDisplayMetrics().density)
+
+
+    fun getArticlePublicationDateString(article: Article, language: Language, context: Context): String? {
+
+        val simpleDateFormat = SimpleDateFormat(context.getResources().getString(R.string.display_date_format_short))
+
+        var diffTs = System.currentTimeMillis()
+        var publicationTimeString: String? = null
+
+        article.publicationDate?.let {
+
+            diffTs = diffTs - it.time
+
+            if (diffTs <= MINUTE_IN_MS) {
+                publicationTimeString = JUST_NOW_TIME_STRING
+            } else if (diffTs < HOUR_IN_MS) {
+                publicationTimeString = (diffTs / MINUTE_IN_MS).toInt().toString() + " " +
+                                        (if (diffTs > TWO_MINUTES_IN_MS) MINUTES_TIME_STRING else MINUTE_TIME_STRING) +
+                                        " " + AGO_TIME_STRING
+            } else if (diffTs < DAY_IN_MS) {
+                publicationTimeString = (diffTs / HOUR_IN_MS).toString() + " " +
+                                        (if (diffTs > TWO_HOURS_IN_MS) HOURS_TIME_STRING else HOUR_TIME_STRING) +
+                                        " " + AGO_TIME_STRING
+            } else if (diffTs < TWO_DAYS_IN_MS) {
+                publicationTimeString = YESTERDAY_TIME_STRING
+            } else {
+                publicationTimeString = simpleDateFormat.format(article.publicationDate?.time)
+            }
+        }
+
+        if (!language.name!!.contains("English") && !language.name!!.contains("english")){
+            return convertToBanglaTimeString(publicationTimeString!!)
+        }
+
+        return publicationTimeString
+    }
+
+    private fun convertToBanglaTimeString(publicationTimeString: String): String {
+
+        var publicationTimeString = publicationTimeString
+
+        if (publicationTimeString == JUST_NOW_TIME_STRING) return JUST_NOW_TIME_STRING_BANGLA
+        if (publicationTimeString == YESTERDAY_TIME_STRING) return YESTERDAY_TIME_STRING_BANGLA
+        if (publicationTimeString.contains(AGO_TIME_STRING)) {
+            publicationTimeString = publicationTimeString.replace(AGO_TIME_STRING, AGO_TIME_STRING_BANGLA)
+            if (publicationTimeString.contains(MINUTES_TIME_STRING)) {
+                publicationTimeString = publicationTimeString.replace(MINUTES_TIME_STRING, MINUTE_TIME_STRING_BANGLA)
+            } else {
+                publicationTimeString = publicationTimeString.replace(MINUTE_TIME_STRING, MINUTE_TIME_STRING_BANGLA)
+            }
+            if (publicationTimeString.contains(HOURS_TIME_STRING)) {
+                publicationTimeString = publicationTimeString.replace(HOURS_TIME_STRING, HOUR_TIME_STRING_BANGLA)
+            } else {
+                publicationTimeString = publicationTimeString.replace(HOUR_TIME_STRING, HOUR_TIME_STRING_BANGLA)
+            }
+            publicationTimeString = replaceEnglishDigits(publicationTimeString)
+            return publicationTimeString
+        }
+
+        return englishToBanglaDateString(publicationTimeString)
+    }
+
+    private fun replaceEnglishDigits(string: String): String {
+
+        val chars = string.toCharArray()
+
+        for (i in chars.indices) {
+            val ch = chars[i]
+            if (ch <= ENGLISH_UNICODE_NINE && ch >= ENGLISH_UNICODE_ZERO) {
+                chars[i] = (ch + BANGLA_UNICODE_ZERO.toInt() - ENGLISH_UNICODE_ZERO.toInt()).toChar()
+            }
+        }
+
+        return String(chars)
+    }
+
+    fun englishToBanglaDateString(dateString: String): String {
+        var dateString = dateString
+        dateString = replaceEnglishMonthName(dateString)
+        dateString = replaceEnglishDigits(dateString)
+        dateString = replaceEnglishDayName(dateString)
+        dateString = replaceAMPMMarkerEngToBan(dateString)
+        return dateString
+    }
+
+    private fun replaceAMPMMarkerEngToBan(str: String): String {
+        for (i in AM_PM_MARKER_TABLE.indices) {
+            if (str.contains(AM_PM_MARKER_TABLE[i][1])) {
+                return str.replace(AM_PM_MARKER_TABLE[i][1], AM_PM_MARKER_TABLE[i][0])
+            }
+        }
+        return str
+    }
+
+    private fun replaceEnglishMonthName(str: String): String {
+        for (i in MONTH_NAME_TABLE.indices) {
+            if (str.contains(MONTH_NAME_TABLE[i][1])) {
+                return str.replace(MONTH_NAME_TABLE[i][1], MONTH_NAME_TABLE[i][0])
+            }
+        }
+        return str
+    }
+
+    private fun replaceEnglishDayName(str: String): String {
+        for (i in DAY_NAME_TABLE.indices) {
+            if (str.contains(DAY_NAME_TABLE[i][1])) {
+                return str.replace(DAY_NAME_TABLE[i][1], DAY_NAME_TABLE[i][0])
+            }
+        }
+        return str
+    }
+
+
 }

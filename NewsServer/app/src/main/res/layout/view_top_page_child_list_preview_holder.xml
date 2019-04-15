@@ -15,7 +15,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="2dp"
+    android:background="@android:color/white">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/top_page_child_list_preview_scroller"
@@ -40,7 +42,9 @@
         android:id="@+id/child_less_top_page_preview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxHeight="@dimen/article_preview_height"
         android:layout_margin="@dimen/vertical_list_element_spacing"
+        android:background="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -48,12 +52,18 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@android:color/white">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/child_less_top_page_title"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/article_preview_title_height"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                android:gravity="center|center_vertical"
+                android:paddingTop="2dp"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
                 app:layout_constraintBottom_toTopOf="@+id/child_less_top_page_article_preview_image"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -62,7 +72,10 @@
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/child_less_top_page_article_preview_image"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/article_preview_image_height"
+                android:layout_height="160dp"
+                android:background="@android:color/white"
+                android:gravity="center"
+                android:padding="4dp"
                 app:layout_constraintBottom_toTopOf="@+id/child_less_top_page_article_title"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -71,7 +84,14 @@
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/child_less_top_page_article_title"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/article_preview_title_height"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                android:gravity="center"
+                android:maxHeight="40dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
                 app:layout_constraintBottom_toTopOf="@+id/child_less_top_page_article_time"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -80,7 +100,13 @@
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/child_less_top_page_article_time"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/article_preview_title_height"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                android:gravity="center"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
