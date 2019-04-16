@@ -60,6 +60,10 @@ public class InitFragment extends Fragment {
     private static final String TAG = "InitFragment";
     private static final long RETRY_DELAY_FOR_REMOTE_ERROR_INC_VALUE = 3000L;
 
+
+
+    private HomeViewModel mHomeViewModel;
+
     private HomeNavigator mHomeNavigator;
     private ProgressBar mProgressBar;
     private TextView mNoInternetMessage;
@@ -126,6 +130,7 @@ public class InitFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mProgressBar = view.findViewById(R.id.data_load_progress);
         mNoInternetMessage = view.findViewById(R.id.no_internet_message);
+        mHomeViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(HomeViewModel.class);
     }
 
     @Override
@@ -176,7 +181,11 @@ public class InitFragment extends Fragment {
 
                             @Override
                             public void onComplete() {
-                                mHomeNavigator.loadHomeFragment();
+                                mHomeViewModel
+                                        .getNewsPapers()
+                                        .observe(Objects.requireNonNull(getActivity()), newspapers -> {
+                                            mHomeNavigator.loadHomeFragment();
+                                        });
                             }
                         })
         );
@@ -212,12 +221,12 @@ public class InitFragment extends Fragment {
                 emitter.onNext(DataLoadingStatus.SETTINGS_DATA_LOADED);
 
                 //Check if user settings need to be checked
-                SystemClock.sleep(1000);
+                //SystemClock.sleep(1000);
                 //checkIfLoggedIn()
                 //checkIfSettingsUpdated()
                 emitter.onNext(DataLoadingStatus.USER_SETTINGS_GOING_TO_BE_LOADED);
                 //loadUserSettings()
-                SystemClock.sleep(3000);
+                //SystemClock.sleep(3000);
                 //Settings data loading finished
                 emitter.onNext(DataLoadingStatus.EXIT);
                 Log.d(TAG, "subscribe: ");
@@ -264,7 +273,7 @@ public class InitFragment extends Fragment {
     }
 
     private void unregisterBrodcastReceivers() {
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mNetConAvailableBroadcastReceiver);
+        LocalBroadcastManager.getInstance(Objects.requireNonNull(getActivity())).unregisterReceiver(mNetConAvailableBroadcastReceiver);
     }
 
 }

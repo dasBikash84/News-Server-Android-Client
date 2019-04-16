@@ -241,30 +241,40 @@ class PagePreviewHolder(itemView: View,val language: Language) : RecyclerView.Vi
                                                                 val dateString = DisplayUtils.getArticlePublicationDateString(article,language,itemView.context)
                                                                 return@map Pair(dateString,it)
                                                             }
+                                                            return@map Any()
                                                         }
                                                         .observeOn(AndroidSchedulers.mainThread())
-                                                        .subscribeWith(object : DisposableObserver<Pair<String?,Article>>(){
+                                                        .subscribeWith(object : DisposableObserver<Any>(){
                                                             override fun onComplete() {
                                                                 Log.d(TAG,"onComplete for page ${page.name} Np: ${page.newsPaperId} L2")
+//                                                                selfPageTitle.text = page.name
+//                                                                selfPageTitle.visibility = View.VISIBLE
                                                             }
-                                                            override fun onNext(articleData: Pair<String?,Article>) {
-
-                                                                Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} has article title: ${articleData.second.title}")
+                                                            override fun onNext(articleData: Any) {
 
                                                                 selfPageTitle.text = page.name
-                                                                selfArticleTitle.text = articleData.second.title
-                                                                selfArticlePublicationTime.text = articleData.first//publicationDate.toString()
-
                                                                 selfPageTitle.visibility = View.VISIBLE
-                                                                selfArticleTitle.visibility = View.VISIBLE
-                                                                selfArticlePublicationTime.visibility = View.VISIBLE
 
-                                                                articleData.second.previewImageLink?.let {
-                                                                    Picasso.get().load(it).into(selfArticlePreviewImage)
-                                                                    selfArticlePreviewImage.visibility = View.VISIBLE
-                                                                } ?: let {
-                                                                    Picasso.get().load(R.drawable.app_big_logo).into(selfArticlePreviewImage)
-                                                                    selfArticlePreviewImage.visibility = View.VISIBLE
+                                                                if (articleData is Pair<*, *>) {
+
+                                                                    val articleDataResult = articleData as Pair<String,Article>
+
+                                                                    Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} has article title: ${articleDataResult.second.title}")
+
+
+                                                                    selfArticleTitle.text = articleDataResult.second.title
+                                                                    selfArticlePublicationTime.text = articleDataResult.first//publicationDate.toString()
+
+                                                                    selfArticleTitle.visibility = View.VISIBLE
+                                                                    selfArticlePublicationTime.visibility = View.VISIBLE
+
+                                                                    articleDataResult.second.previewImageLink?.let {
+                                                                        Picasso.get().load(it).into(selfArticlePreviewImage)
+                                                                        selfArticlePreviewImage.visibility = View.VISIBLE
+                                                                    } ?: let {
+                                                                        Picasso.get().load(R.drawable.app_big_logo).into(selfArticlePreviewImage)
+                                                                        selfArticlePreviewImage.visibility = View.VISIBLE
+                                                                    }
                                                                 }
                                                             }
                                                             override fun onError(e: Throwable) {
@@ -351,6 +361,7 @@ class ArticlePreviewHolder(itemView: View,val language: Language) : RecyclerView
         articlePublicationTime = itemView.findViewById(R.id.article_time)
     }
 
+    @ExperimentalUnsignedTypes
     fun bind(page: Page){
 
         pageTitle.visibility = View.GONE
@@ -370,31 +381,38 @@ class ArticlePreviewHolder(itemView: View,val language: Language) : RecyclerView
                                 val dateString = DisplayUtils.getArticlePublicationDateString(article,language,itemView.context)
                                 return@map Pair(dateString,it)
                             }
-//                            return@map UInt
+                            return@map Any()
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Pair<String?,Article>>(){
+                        .subscribeWith(object : DisposableObserver<Any>(){
                             override fun onComplete() {
                                 Log.d(TAG,"onComplete for page ${page.name} Np: ${page.newsPaperId} L2")
+//                                pageTitle.text = page.name
+//                                pageTitle.visibility = View.VISIBLE
                             }
-                            override fun onNext(articleData: Pair<String?,Article>) {
-
-                                Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} has article title: ${articleData.second.title}")
+                            override fun onNext(articleData: Any) {
 
                                 pageTitle.text = page.name
-                                articleTitle.text = articleData.second.title
-                                articlePublicationTime.text = articleData.first
-
                                 pageTitle.visibility = View.VISIBLE
-                                articleTitle.visibility = View.VISIBLE
-                                articlePublicationTime.visibility = View.VISIBLE
 
-                                articleData.second.previewImageLink?.let {
-                                    Picasso.get().load(it).into(articlePreviewImage)
-                                    articlePreviewImage.visibility = View.VISIBLE
-                                } ?: let {
-                                    Picasso.get().load(R.drawable.app_big_logo).into(articlePreviewImage)
-                                    articlePreviewImage.visibility = View.VISIBLE
+                                if (articleData is Pair<*, *>) {
+
+                                    val articleDataResult = articleData as Pair<String,Article>
+
+                                    Log.d(TAG,"page ${page.name} Np: ${page.newsPaperId} has article title: ${articleDataResult.second.title}")
+
+                                    articleTitle.text = articleDataResult.second.title
+                                    articlePublicationTime.text = articleDataResult.first
+                                    articleTitle.visibility = View.VISIBLE
+                                    articlePublicationTime.visibility = View.VISIBLE
+
+                                    articleDataResult.second.previewImageLink?.let {
+                                        Picasso.get().load(it).into(articlePreviewImage)
+                                        articlePreviewImage.visibility = View.VISIBLE
+                                    } ?: let {
+                                        Picasso.get().load(R.drawable.app_big_logo).into(articlePreviewImage)
+                                        articlePreviewImage.visibility = View.VISIBLE
+                                    }
                                 }
                             }
                             override fun onError(e: Throwable) {

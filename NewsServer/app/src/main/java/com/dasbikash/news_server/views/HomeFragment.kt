@@ -29,7 +29,13 @@ import com.dasbikash.news_server.custom_views.ViewPagerTitleScroller
 import com.dasbikash.news_server.model.PagableNewsPaper
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.observers.DisposableObserver
+import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.android.synthetic.main.fragment_init.*
 
 class HomeFragment : Fragment() {
 
@@ -52,6 +58,8 @@ class HomeFragment : Fragment() {
         mViewPagerTitleScroller = view.findViewById(R.id.newspaper_name_scroller)
         mHomeViewPager = view.findViewById(R.id.home_view_pager)
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
+
+        data_load_progress.visibility = View.GONE
 
         val mFragmentStatePagerAdapter =  object : FragmentStatePagerAdapter(activity!!.supportFragmentManager){
             override fun getItemPosition(`object`: Any): Int {
@@ -82,18 +90,36 @@ class HomeFragment : Fragment() {
                 .getNewsPapers()
                 .observe(this,object : Observer<List<Newspaper>>{
                     override fun onChanged(newspapers: List<Newspaper>?) {
-                        newspapers
-                                ?.map { PagableNewsPaper(it) }
-                                ?.sortedBy { it.newspaper.id }
-                                ?.forEach { mNewsPapers.add(it) }
+                        mDisposable.add(
+                            Observable.just(true)
+                                    .subscribeOn(Schedulers.computation())
+                                    .map {
+                                        newspapers
+                                                ?.map { PagableNewsPaper(it) }
+                                                ?.sortedBy { it.newspaper.id }
+                                                ?.forEach { mNewsPapers.add(it) }
+                                        return@map mNewsPapers
+                                    }
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribeWith(object : DisposableObserver<MutableList<PagableNewsPaper>>(){
+                                        override fun onComplete() {
+                                        }
+                                        override fun onNext(t: MutableList<PagableNewsPaper>) {
 
-                        mViewPagerTitleScroller.initView(mNewsPapers.toList(), R.layout.view_page_label) {
-                            Log.d(TAG, "${it.keyString} clicked")
-                            mHomeViewPager.setCurrentItem(mNewsPapers.indexOf(it),true)
-                        }
-                        mHomeViewPager.adapter = mFragmentStatePagerAdapter
-                        mHomeViewPager.setCurrentItem(0)
-
+                                            mViewPagerTitleScroller.initView(mNewsPapers.toList(), R.layout.view_page_label) {
+                                                Log.d(TAG, "${it.keyString} clicked")
+                                                mHomeViewPager.setCurrentItem(mNewsPapers.indexOf(it),true)
+                                            }
+                                            mHomeViewPager.adapter = mFragmentStatePagerAdapter
+                                            mHomeViewPager.setCurrentItem(0)
+                                            splash_screen.visibility = View.GONE
+                                            mViewPagerTitleScroller.visibility = View.VISIBLE
+                                            mHomeViewPager.visibility = View.VISIBLE
+                                        }
+                                        override fun onError(e: Throwable) {
+                                        }
+                                    })
+                        )
                     }
 
                 })
