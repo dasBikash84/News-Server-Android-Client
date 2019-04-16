@@ -14,7 +14,6 @@
 package com.dasbikash.news_server.views
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -98,7 +97,7 @@ class NewspaperPerviewFragment : Fragment() {
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe({
-                            mListAdapter = TopPagePreviewListAdapter(activity!!.applicationContext/*,mLanguage*/, activity!!.supportFragmentManager)
+                            mListAdapter = TopPagePreviewListAdapter(/*,mLanguage*/ activity!!.supportFragmentManager)
                             mPagePreviewList.adapter = mListAdapter
                             mListAdapter.submitList(it)
                         })
@@ -126,7 +125,7 @@ class NewspaperPerviewFragment : Fragment() {
     }
 }
 
-class TopPagePreviewListAdapter(val context: Context, val fragmentManager: FragmentManager) :
+class TopPagePreviewListAdapter(val fragmentManager: FragmentManager) :
         ListAdapter<Page, PagePreviewHolder>(PageDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagePreviewHolder {
@@ -155,10 +154,8 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val disposable = CompositeDisposable()
 
     init {
-        //############################################################
-        //Two step Ramdom number generation used to ensure unique ID
-        //############################################################
-        itemView.id = Random(Random(System.nanoTime()).nextLong()).nextLong().toInt()
+        itemView.id = View.generateViewId()
+        Log.d(TAG,"itemView.id: ${itemView.id}")
     }
 
     @SuppressLint("CheckResult")
@@ -166,11 +163,13 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         val settingsRepository = RepositoryFactory.getSettingsRepository(itemView.context)
 
+        Log.d(TAG,"itemView.id: ${itemView.id}, itemId: ${itemId}")
+
         disposable.add(
                 Observable.just(true)
                         .subscribeOn(Schedulers.io())
                         .map {
-                            Log.d(TAG, "Start for page ${page.name} Np: ${page.newsPaperId}")
+//                            Log.d(TAG, "Start for page ${page.name} Np: ${page.newsPaperId}")
                             settingsRepository
                                     .getChildPagesForTopLevelPage(page)
                                     .asSequence()
@@ -189,16 +188,16 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<MutableList<*>>() {
                             override fun onComplete() {
-                                Log.d(TAG, "onComplete for page ${page.name} Np: ${page.newsPaperId} L1")
+//                                Log.d(TAG, "onComplete for page ${page.name} Np: ${page.newsPaperId} L1")
                             }
 
                             override fun onNext(data: MutableList<*>) {
-                                Log.d(TAG, "Display block for page ${page.name} Np: ${page.newsPaperId}")
+//                                Log.d(TAG, "Display block for page ${page.name} Np: ${page.newsPaperId}")
                                 when {
                                     data.size == 1 -> {
                                         fragmentManager
                                                 .beginTransaction()
-                                                .replace(
+                                                .add(
                                                         itemView.id,
                                                         FragmentArticlePreviewForPages.getInstanceForScreenFillPreview(data[0] as Page)
                                                 )
@@ -207,7 +206,7 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                                     data.size > 1 -> {
                                         fragmentManager
                                                 .beginTransaction()
-                                                .replace(
+                                                .add(
                                                         itemView.id,
                                                         FragmentArticlePreviewForPages.getInstanceForCustomWidthPreview((data as MutableList<Page>).toList())
                                                 )
@@ -220,7 +219,7 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                             }
 
                             override fun onError(e: Throwable) {
-                                Log.d(TAG, "Error: " + e.message + " for page ${page.name} Np: ${page.newsPaperId} L1")
+//                                Log.d(TAG, "Error: " + e.message + " for page ${page.name} Np: ${page.newsPaperId} L1")
                             }
                         })
         )
