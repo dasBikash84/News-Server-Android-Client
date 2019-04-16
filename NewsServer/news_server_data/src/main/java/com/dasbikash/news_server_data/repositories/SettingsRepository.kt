@@ -30,19 +30,8 @@ class SettingsRepository private constructor(context: Context) {
 
 //    private val TAG = "SettingsRepository"
 
-    private val mAppSettingsDataService: AppSettingsDataService
-    private val mUserSettingsDataService: UserSettingsDataService
-    private val mDatabase: NewsServerDatabase
-    private val mContext: Context
-
-    init {
-        mAppSettingsDataService =
-                DataServiceImplProvider.getAppSettingsDataServiceImpl()
-        mUserSettingsDataService =
-                DataServiceImplProvider.getUserSettingsDataServiceImpl()
-        mContext = context
-        mDatabase = NewsServerDatabase.getDatabase(context)
-    }
+    private val mAppSettingsDataService: AppSettingsDataService = DataServiceImplProvider.getAppSettingsDataServiceImpl()
+    private val mDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
 
     private fun getCountryCount(): Int = mDatabase.countryDao.count
     private fun getLanguageCount(): Int = mDatabase.languageDao.count
@@ -52,8 +41,8 @@ class SettingsRepository private constructor(context: Context) {
 
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     @Throws(OnMainThreadException::class, NoInternertConnectionException::class)
-    fun loadAppSettings() {
-        val appSettings = mAppSettingsDataService.getAppSettings(mContext)
+    fun loadAppSettings(context: Context) {
+        val appSettings = mAppSettingsDataService.getAppSettings(context)
 
         mDatabase.nukeAppSettings()
 
@@ -64,12 +53,12 @@ class SettingsRepository private constructor(context: Context) {
         mDatabase.pageGroupDao.addPageGroups(ArrayList(appSettings.page_groups?.values))
 
         val settingUpdateTimes = ArrayList(appSettings.update_time?.values)
-        mAppSettingsDataService.saveLocalAppSettingsUpdateTime(mContext, settingUpdateTimes[settingUpdateTimes.size - 1])
+        mAppSettingsDataService.saveLocalAppSettingsUpdateTime(context, settingUpdateTimes[settingUpdateTimes.size - 1])
     }
 
-    fun isAppSettingsUpdated(): Boolean {
-        val localAppSettingsUpdateTime = mAppSettingsDataService.getLocalAppSettingsUpdateTime(mContext)
-        val serverAppSettingsUpdateTime = mAppSettingsDataService.getServerAppSettingsUpdateTime(mContext)
+    fun isAppSettingsUpdated(context: Context): Boolean {
+        val localAppSettingsUpdateTime = mAppSettingsDataService.getLocalAppSettingsUpdateTime(context)
+        val serverAppSettingsUpdateTime = mAppSettingsDataService.getServerAppSettingsUpdateTime(context)
         return serverAppSettingsUpdateTime > localAppSettingsUpdateTime
     }
 
@@ -101,7 +90,6 @@ class SettingsRepository private constructor(context: Context) {
     }
 
     companion object{
-        @SuppressLint("StaticFieldLeak")
         @Volatile
         private lateinit var  INSTANCE:SettingsRepository
 

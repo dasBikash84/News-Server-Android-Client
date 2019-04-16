@@ -211,10 +211,10 @@ public class InitFragment extends Fragment {
                         RepositoryFactory.getSettingsRepository(Objects.requireNonNull(getActivity()));
 
                 if (!settingsRepo.isSettingsDataLoaded() ||
-                        settingsRepo.isAppSettingsUpdated()) {
+                        settingsRepo.isAppSettingsUpdated(getActivity())) {
                     // going to load app data
                     emitter.onNext(DataLoadingStatus.NEED_TO_READ_DATA_FROM_SERVER);
-                    settingsRepo.loadAppSettings();
+                    settingsRepo.loadAppSettings(getActivity());
                 }
 
                 //App data loaded
