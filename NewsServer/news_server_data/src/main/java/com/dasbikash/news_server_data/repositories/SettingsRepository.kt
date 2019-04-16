@@ -92,7 +92,12 @@ class SettingsRepository private constructor(context: Context) {
     }
 
     fun getLanguageByNewspaper(newspaper: Newspaper): Language {
-        return mDatabase.languageDao.findByNewspaperId(newspaper.languageId!!)
+        return mDatabase.languageDao.findByLanguageId(newspaper.languageId!!)
+    }
+
+    fun getLanguageByPage(page: Page): Language {
+        val newspaper = mDatabase.newsPaperDao.findById(page.newsPaperId!!)
+        return mDatabase.languageDao.findByLanguageId(newspaper.languageId!!)
     }
 
     companion object{

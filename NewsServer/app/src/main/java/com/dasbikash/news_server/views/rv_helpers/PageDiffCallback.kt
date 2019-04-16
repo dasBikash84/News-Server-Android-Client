@@ -11,26 +11,16 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.database.daos
+package com.dasbikash.news_server.views.rv_helpers
 
-import androidx.room.*
-import com.dasbikash.news_server_data.display_models.entity.Language
+import androidx.recyclerview.widget.DiffUtil
+import com.dasbikash.news_server_data.display_models.entity.Page
 
-@Dao
-internal interface LanguageDao {
-
-    @get:Query("SELECT COUNT(*) FROM Language")
-    val count: Int
-
-    @Query("SELECT * FROM Language")
-    fun findAll(): List<Language>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addLanguages(languages: List<Language>)
-
-    @Query("DELETE FROM Language")
-    fun nukeTable()
-
-    @Query("SELECT * FROM Language WHERE id=:languageId")
-    fun findByLanguageId(languageId: String): Language
+object PageDiffCallback: DiffUtil.ItemCallback<Page>(){
+    override fun areItemsTheSame(oldItem: Page, newItem: Page): Boolean {
+        return oldItem.id == newItem.id
+    }
+    override fun areContentsTheSame(oldItem: Page, newItem: Page): Boolean {
+        return oldItem == newItem
+    }
 }

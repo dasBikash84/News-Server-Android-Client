@@ -30,7 +30,7 @@ internal interface NewsPaperDao {
     fun findAll(): LiveData<List<Newspaper>>
 
     @Query("SELECT * FROM Newspaper WHERE id=:id")
-    fun findById(id: Int): Newspaper
+    fun findById(id: String): Newspaper
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addNewsPapers(newspapers: List<Newspaper>)
