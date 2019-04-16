@@ -22,7 +22,6 @@
         android:id="@+id/mPageListPreviewHolder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/standard_edge_margin"
         android:orientation="horizontal"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 </androidx.core.widget.NestedScrollView>
