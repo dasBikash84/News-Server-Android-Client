@@ -24,23 +24,23 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DisplayUtils
+import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.Article
 import com.dasbikash.news_server_data.display_models.entity.Language
 import com.dasbikash.news_server_data.display_models.entity.Page
 import com.squareup.picasso.Picasso
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
-import io.reactivex.schedulers.Schedulers
+import java.util.*
 
-class PagePreviewListAdapter(@LayoutRes val holderResId: Int) :
+class PagePreviewListAdapter(@LayoutRes val holderResId: Int, val homeViewModel: HomeViewModel) :
         ListAdapter<Page, ArticlePreviewHolder>(PageDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticlePreviewHolder {
         val view = LayoutInflater.from(parent.context).inflate(holderResId, parent, false)
-        return ArticlePreviewHolder(view)
+        return ArticlePreviewHolder(view, homeViewModel)
     }
 
     override fun onBindViewHolder(holder: ArticlePreviewHolder, position: Int) {
@@ -55,7 +55,7 @@ class PagePreviewListAdapter(@LayoutRes val holderResId: Int) :
 
 }
 
-class ArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : RecyclerView.ViewHolder(itemView) {
 
     companion object {
         val TAG = "ArticlePreviewHolder"
@@ -87,17 +87,18 @@ class ArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         articlePublicationTime.visibility = View.GONE
 
 
-        val newsDataRepository = RepositoryFactory.getNewsDataRepository(itemView.context)
         val settingsRepository = RepositoryFactory.getSettingsRepository(itemView.context)
 
+        val uuid = UUID.randomUUID()
+
         disposable.add(
-                Observable.just(true)
-                        .subscribeOn(Schedulers.io())
+
+                homeViewModel.getLatestArticleProvider(Pair(uuid, page))
+                        .filter { it.first == uuid }
                         .map {
                             language = settingsRepository.getLanguageByPage(page)
-                            val article = newsDataRepository.getLatestArticleByPage(page)
-                            article?.let {
-                                val dateString = DisplayUtils.getArticlePublicationDateString(article, language, itemView.context)
+                            it.second?.let {
+                                val dateString = DisplayUtils.getArticlePublicationDateString(it, language, itemView.context)
                                 return@map Pair(dateString, it)
                             }
                             return@map Any()
@@ -137,9 +138,8 @@ class ArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
                                     //Add click listner
                                     itemView.setOnClickListener(View.OnClickListener {
-                                        Log.d(TAG,"Article: ${mArticle.title} clicked")
+                                        Log.d(TAG, "Article: ${mArticle.title} clicked")
                                     })
-
                                 }
                             }
 

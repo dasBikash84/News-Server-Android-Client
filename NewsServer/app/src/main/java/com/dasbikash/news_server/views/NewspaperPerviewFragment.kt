@@ -44,11 +44,10 @@ import kotlin.random.Random
 class NewspaperPerviewFragment : Fragment() {
 
     private lateinit var mNewspaper: Newspaper
-    private lateinit var mLanguage: Language
     private lateinit var mHomeViewModel: HomeViewModel
 
-    private lateinit var mPagePreviewList: RecyclerView//newspaper_page_preview_list
-    private lateinit var mNestedScrollView: NestedScrollView//newspaper_page_preview_list
+    private lateinit var mPagePreviewList: RecyclerView
+    private lateinit var mNestedScrollView: NestedScrollView
     private lateinit var mListAdapter: TopPagePreviewListAdapter
 
 
@@ -72,6 +71,9 @@ class NewspaperPerviewFragment : Fragment() {
         (activity as BottomNavigationViewOwner)
                 .showBottomNavigationView(true)
 
+        mListAdapter = TopPagePreviewListAdapter(activity!!.supportFragmentManager)
+        mPagePreviewList.adapter = mListAdapter
+
         mNestedScrollView.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
             override fun onScrollChange(v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
                 val remainingYOfRV = mPagePreviewList.height - scrollY - resources.displayMetrics.heightPixels
@@ -89,7 +91,6 @@ class NewspaperPerviewFragment : Fragment() {
                 Observable.just(true)
                         .subscribeOn(Schedulers.io())
                         .map {
-                            mLanguage = mSettingsRepository.getLanguageByNewspaper(mNewspaper)
                             mSettingsRepository
                                     .getTopPagesForNewspaper(mNewspaper)
                                     .sortedBy { it.id }
@@ -97,8 +98,6 @@ class NewspaperPerviewFragment : Fragment() {
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe({
-                            mListAdapter = TopPagePreviewListAdapter(/*,mLanguage*/ activity!!.supportFragmentManager)
-                            mPagePreviewList.adapter = mListAdapter
                             mListAdapter.submitList(it)
                         })
         )
@@ -186,29 +185,29 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                             it
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<MutableList<*>>() {
+                        .subscribeWith(object : DisposableObserver<MutableList<Page>>() {
                             override fun onComplete() {
 //                                Log.d(TAG, "onComplete for page ${page.name} Np: ${page.newsPaperId} L1")
                             }
 
-                            override fun onNext(data: MutableList<*>) {
+                            override fun onNext(data: MutableList<Page>) {
 //                                Log.d(TAG, "Display block for page ${page.name} Np: ${page.newsPaperId}")
                                 when {
                                     data.size == 1 -> {
                                         fragmentManager
                                                 .beginTransaction()
-                                                .add(
+                                                .replace(
                                                         itemView.id,
-                                                        FragmentArticlePreviewForPages.getInstanceForScreenFillPreview(data[0] as Page)
+                                                        FragmentArticlePreviewForPages.getInstanceForScreenFillPreview(data[0])
                                                 )
                                                 .commit()
                                     }
                                     data.size > 1 -> {
                                         fragmentManager
                                                 .beginTransaction()
-                                                .add(
+                                                .replace(
                                                         itemView.id,
-                                                        FragmentArticlePreviewForPages.getInstanceForCustomWidthPreview((data as MutableList<Page>).toList())
+                                                        FragmentArticlePreviewForPages.getInstanceForCustomWidthPreview((data).toList())
                                                 )
                                                 .commit()
                                     }

@@ -10,29 +10,20 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/page_preview_scroller"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:overScrollMode="never"
+    android:scrollbars="vertical">
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/page_preview_scroller"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/newspaper_page_preview_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:overScrollMode="never"
-        android:scrollbars="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/newspaper_page_preview_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/vertical_list_element_spacing"
-                android:orientation="vertical"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                android:background="@color/colorPrimaryLight"/>
-    </androidx.core.widget.NestedScrollView>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/vertical_list_element_spacing"
+        android:background="@color/colorPrimaryLight"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+</androidx.core.widget.NestedScrollView>

@@ -19,8 +19,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.rv_helpers.PagePreviewListAdapter
 import com.dasbikash.news_server_data.display_models.entity.Page
 
@@ -53,7 +55,7 @@ class FragmentArticlePreviewForPages : Fragment() {
         /*Log.d("NpPerviewFragment", mPageList.map { "page: ${it.name} Np: ${it.newsPaperId} | " }.toList().toString()
                 + "mArticlePreviewResId: ${mArticlePreviewResId}")*/
 
-        val pagePreviewListAdapter = PagePreviewListAdapter(mArticlePreviewResId!!)
+        val pagePreviewListAdapter = PagePreviewListAdapter(mArticlePreviewResId!!,ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
 
         mPageListPreviewHolderRV.adapter = pagePreviewListAdapter
 

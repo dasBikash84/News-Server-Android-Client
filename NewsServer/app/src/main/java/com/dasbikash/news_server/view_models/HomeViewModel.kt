@@ -15,9 +15,11 @@ package com.dasbikash.news_server.view_models
 
 import android.app.Application
 import android.os.SystemClock
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.RepositoryFactory
+import com.dasbikash.news_server_data.display_models.entity.Article
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
 import com.dasbikash.news_server_data.display_models.entity.PageGroup
@@ -26,9 +28,15 @@ import com.dasbikash.news_server_data.repositories.SettingsRepository
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.random.Random
 
 
 class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mApplication) {
+
+    val TAG = "HomeViewModel"
+
     private val mSettingsRepository: SettingsRepository
     private val mNewsDataRepository:NewsDataRepository
     private val mMostVisitedPages: LiveData<List<Page>>? = null
@@ -36,34 +44,15 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
     private val mActiveNewspapers: LiveData<List<Newspaper>>? = null
     private val mPageGroups: LiveData<List<PageGroup>>? = null
 
-//    val mArticleCountForNewspaperMap = mutableMapOf<Newspaper,LiveData<Int>>()
-
-
     private val disposable:CompositeDisposable = CompositeDisposable();
+
+    private val MAX_PARALLEL_ARTICLE_REQUEST = 5
+    private var currentArticleRequestCount = AtomicInteger(0)
 
 
     init {
         mSettingsRepository = RepositoryFactory.getSettingsRepository(mApplication)
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(mApplication)
-
-        //Create map of ArticleCountByNewspaper Livedata
-        /*disposable.add(
-            Observable.just(true)
-                .subscribeOn(Schedulers.io())
-                .map {
-                    do {
-                        SystemClock.sleep(100)
-                    }while (getNewsPapers().value == null || getNewsPapers().value?.size==0)
-                    getNewsPapers().value
-                }
-                .map {
-                    mNewspapers.addAll(it)
-                    it.forEach {
-                        mArticleCountForNewspaperMap.put(it,mNewsDataRepository.getArticleCountByNewsPaper(it))
-                    }
-                }
-                .subscribe()
-        )*/
     }
 
     override fun onCleared() {
@@ -73,6 +62,25 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
 
     fun getNewsPapers():LiveData<List<Newspaper>>{
         return mSettingsRepository.getNewsPapers()
+    }
+
+    fun getLatestArticleProvider(requestPayload:Pair<UUID,Page>):Observable<Pair<UUID,Article?>>{
+        return Observable.just(requestPayload)
+                .subscribeOn(Schedulers.io())
+                .map {
+                    do {
+                        Log.d(TAG,"Waiting for page: ${it.second.name}")
+                        SystemClock.sleep(Random(System.currentTimeMillis()).nextLong(100L))
+                    }while (currentArticleRequestCount.get() >= MAX_PARALLEL_ARTICLE_REQUEST)
+                    Log.d(TAG,"Going to increment count for page: ${it.second.name}")
+                    currentArticleRequestCount.incrementAndGet()
+                    Log.d(TAG,"Request send for page: ${it.second.name}")
+                    val article = mNewsDataRepository.getLatestArticleByPage(it.second)
+                    Log.d(TAG,"Response received for page: ${it.second.name}")
+                    Log.d(TAG,"Going to decrement count for page: ${it.second.name}")
+                    currentArticleRequestCount.decrementAndGet()
+                    Pair(it.first,article)
+                }
     }
 
 

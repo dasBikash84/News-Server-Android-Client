@@ -13,30 +13,21 @@
 
 package com.dasbikash.news_server_data.repositories
 
-import android.annotation.SuppressLint
 import android.content.Context
-import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc.NewsDataServiceUtils
 import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.display_models.entity.Article
-import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 
 class NewsDataRepository private constructor(context: Context) {
-    private val mContext:Context
-    private val newsDataService:NewsDataService
-    private val newsServerDatabase:NewsServerDatabase
+
+    private val newsDataService: NewsDataService = DataServiceImplProvider.getNewsDataServiceImpl()
+    private val newsServerDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
 
     private val TAG = "DataService"
-
-    init {
-        mContext = context
-        newsDataService = DataServiceImplProvider.getNewsDataServiceImpl()
-        newsServerDatabase = NewsServerDatabase.getDatabase(mContext)
-    }
 
     /*fun getLatestArticleByTopLevelPageId(topLevelPageId:String): Article{
         return newsDataService.getLatestArticleByTopLevelPageId(topLevelPageId)
@@ -62,63 +53,40 @@ class NewsDataRepository private constructor(context: Context) {
         return newsServerDatabase.pageDao.getTopPagesByNewsPaperId(newspaper.id)
     }*/
 
-    fun getArticleCountByNewsPaper(newsPaper: Newspaper): LiveData<Int>{
-        return newsServerDatabase.articleDao.getArticleCountByNewsPaperId(newsPaper.id)
-    }
 
-    fun getLatestArticleByPage(page: Page):Article?{
+    fun getLatestArticleByPage(page: Page): Article? {
         ExceptionUtils.thowExceptionIfOnMainThred()
 
-        val article:Article? = newsServerDatabase.articleDao.getLatestArticleByPageId(page.id)
+        val article: Article? = newsServerDatabase.articleDao.getLatestArticleByPageId(page.id)
 
-        if (article!=null){
-            if (System.currentTimeMillis() - article.getCreated() < MIN_ARTICLE_REFRESH_INTERVAL){
+        if (article != null) {
+            if (System.currentTimeMillis() - article.getCreated() < MIN_ARTICLE_REFRESH_INTERVAL) {
                 return article
             }
         }
 
-        var latestArticle:Article? = null
-        newsDataService.getLatestArticlesByPageId(page.id,1).apply {
-            if (this.size>0){
+        var latestArticle: Article? = null
+        newsDataService.getLatestArticlesByPageId(page.id, 1).apply {
+            if (this.size > 0) {
                 latestArticle = this.first()
             }
         }
         latestArticle?.let {
-            NewsDataServiceUtils.processFetchedArticleData(it,page)
+            NewsDataServiceUtils.processFetchedArticleData(it, page)
             newsServerDatabase.articleDao.addArticles(it)
             return it
         }
         return null
     }
 
-    /*fun requestAndGetLatestArticleByPage(page: Page):Article{
+    companion object {
 
+        private val MIN_ARTICLE_REFRESH_INTERVAL = 5 * 60 * 1000L
 
-
-        Observable.just(true)
-                .subscribeOn(Schedulers.io())
-                .map {
-                    newsDataService.getLatestArticlesByPageId(page.id,1).first()
-                }
-                .map {
-                    newsServerDatabase.articleDao.addArticles(
-                            listOf(NewsDataServiceUtils.processFetchedArticleData(it,page))
-                    )
-                }
-                .subscribe()
-        return newsServerDatabase.articleDao.getLatestArticleByPageId(page.id)
-    }*/
-
-
-    companion object{
-
-        private val MIN_ARTICLE_REFRESH_INTERVAL = 60000L
-
-        @SuppressLint("StaticFieldLeak")
         @Volatile
-        private lateinit var  INSTANCE:NewsDataRepository
+        private lateinit var INSTANCE: NewsDataRepository
 
-        fun getInstance(context: Context):NewsDataRepository{
+        fun getInstance(context: Context): NewsDataRepository {
             if (!::INSTANCE.isInitialized) {
                 synchronized(NewsDataRepository::class.java) {
                     if (!::INSTANCE.isInitialized) {

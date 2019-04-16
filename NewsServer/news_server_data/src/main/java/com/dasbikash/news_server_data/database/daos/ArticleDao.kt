@@ -29,9 +29,6 @@ internal interface ArticleDao {
     @Query("SELECT * FROM Article WHERE id=:id")
     fun findById(id: Int): Article
 
-    @Query("SELECT COUNT(*) FROM Article WHERE newsPaperId=:newsPaperId")
-    fun getArticleCountByNewsPaperId(newsPaperId: String): LiveData<Int>
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun addArticles(articles: List<Article>)
 
