@@ -30,4 +30,5 @@
 
     <dimen name="article_preview_image_width">160dp</dimen>
     <dimen name="article_preview_pub_time_width">80dp</dimen>
+    <dimen name="standard_edge_margin">2dp</dimen>
 </resources>
