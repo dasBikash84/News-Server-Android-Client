@@ -18,10 +18,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import androidx.appcompat.widget.AppCompatEditText
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.dasbikash.news_server.R
@@ -40,10 +43,11 @@ import kotlinx.android.synthetic.main.fragment_init.*
 class HomeFragment : Fragment() {
 
     private lateinit var mViewPagerTitleScroller: ViewPagerTitleScroller
+    private lateinit var mHomeViewPager:ViewPager
+    private lateinit var mPageSearchTextBox:EditText
+    private lateinit var mPageSearchResultHolder:RecyclerView
 
     private lateinit var mHomeViewModel: HomeViewModel
-
-    private lateinit var mHomeViewPager:ViewPager
 
     private val mNewsPapers = mutableListOf<PagableNewsPaper>()
 
@@ -57,6 +61,10 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         mViewPagerTitleScroller = view.findViewById(R.id.newspaper_name_scroller)
         mHomeViewPager = view.findViewById(R.id.home_view_pager)
+        mPageSearchTextBox = view.findViewById(R.id.page_search_text_box)
+        mPageSearchResultHolder = view.findViewById(R.id.page_search_result_holder)
+
+
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
 
         data_load_progress.visibility = View.GONE
@@ -115,6 +123,7 @@ class HomeFragment : Fragment() {
                                             splash_screen.visibility = View.GONE
                                             mViewPagerTitleScroller.visibility = View.VISIBLE
                                             mHomeViewPager.visibility = View.VISIBLE
+                                            mPageSearchTextBox.visibility = View.VISIBLE
                                         }
                                         override fun onError(e: Throwable) {
                                         }

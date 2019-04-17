@@ -13,19 +13,29 @@
 
 package com.dasbikash.news_server.views
 
+import android.app.Activity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.utils.OptionsIntentBuilderUtility
 import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
 import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class HomeActivity : AppCompatActivity(),
         NavigationHost, HomeNavigator, BottomNavigationViewOwner {
+
+    lateinit var mToolbar: Toolbar
+    lateinit var mAppBar: AppBarLayout
 
     override fun showBottomNavigationView(show: Boolean) {
         when (show) {
@@ -41,15 +51,16 @@ class HomeActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
-
-        /*val toolbar: Toolbar = findViewById(R.id.app_bar)
-        setSupportActionBar(toolbar)*/
+        mAppBar = findViewById(R.id.app_bar_layout)
+        mToolbar = findViewById(R.id.app_bar)
+        setSupportActionBar(mToolbar)
 
         setUpBottomNavigationView()
         initApp()
 
         if (supportFragmentManager.findFragmentById(R.id.main_frame) == null) {
             mBottomNavigationView.visibility = View.INVISIBLE
+            mAppBar.visibility = View.INVISIBLE
             loadInitFragment()
         }
     }
@@ -67,30 +78,35 @@ class HomeActivity : AppCompatActivity(),
             handled = when (menuItem.itemId) {
                 R.id.bottom_menu_item_home -> {
                     if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is HomeFragment)) {
+                        mAppBar.visibility = View.GONE
                         loadHomeFragment()
                     }
                     true
                 }
                 R.id.bottom_menu_item_page_group -> {
                     if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is PageGroupFragment)) {
+                        mAppBar.visibility = View.VISIBLE
                         loadPageGroupFragment()
                     }
                     true
                 }
                 R.id.bottom_menu_item_favourites -> {
                     if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is FavouritesFragment)) {
+                        mAppBar.visibility = View.VISIBLE
                         loadFavouritesFragment()
                     }
                     true
                 }
                 R.id.bottom_menu_item_settings -> {
                     if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is SettingsFragment)) {
+                        mAppBar.visibility = View.VISIBLE
                         loadSettingsFragment()
                     }
                     true
                 }
                 R.id.bottom_menu_item_more -> {
                     if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is MoreFragment)) {
+                        mAppBar.visibility = View.VISIBLE
                         loadMoreFragment()
                     }
                     true
@@ -145,5 +161,38 @@ class HomeActivity : AppCompatActivity(),
 
     override fun loadMoreFragment() {
         navigateTo(MoreFragment())
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        when (item.itemId) {
+            R.id.share_app_menu_item -> {
+                shareAppMenuItemAction()
+                return true
+            }
+            R.id.settings_menu_item -> {
+                loadSettingsFragment()
+                return true
+            }
+            R.id.log_in_app_menu_item -> {
+                logInAppMenuItemAction()
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun logInAppMenuItemAction() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_layout_basic, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+
+    private fun shareAppMenuItemAction() {
+        startActivity(OptionsIntentBuilderUtility.getShareAppIntent(this))
     }
 }

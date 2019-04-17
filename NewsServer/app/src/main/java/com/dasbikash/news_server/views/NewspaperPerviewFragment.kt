@@ -23,10 +23,12 @@ import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
+import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
 import com.dasbikash.news_server_data.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
@@ -63,7 +65,6 @@ class NewspaperPerviewFragment : Fragment() {
         mPagePreviewList = view.findViewById(R.id.newspaper_page_preview_list)
         mNestedScrollView = view.findViewById(R.id.page_preview_scroller)
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
-
         (activity as BottomNavigationViewOwner)
                 .showBottomNavigationView(true)
 
@@ -91,8 +92,9 @@ class NewspaperPerviewFragment : Fragment() {
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe({
-                            mListAdapter = TopPagePreviewListAdapter(activity!!.supportFragmentManager, it)
+                            mListAdapter = TopPagePreviewListAdapter(activity!!.supportFragmentManager)
                             mPagePreviewList.adapter = mListAdapter
+                            mListAdapter.submitList(it)
                         })
         )
 
@@ -118,25 +120,8 @@ class NewspaperPerviewFragment : Fragment() {
     }
 }
 
-class TopPagePreviewListAdapter(val fragmentManager: FragmentManager,val pageList:MutableList<Page>) :
-        RecyclerView.Adapter<PagePreviewHolder>() {
-
-    fun submitList(newPageList:MutableList<Page>){
-        pageList.clear()
-        pageList.addAll(newPageList)
-        notifyDataSetChanged()
-    }
-
-    private fun getItem(position:Int):Page?{
-        if (pageList.size > position){
-            return pageList.get(position)
-        }
-        return null
-    }
-
-    override fun getItemCount(): Int {
-        return pageList.size
-    }
+class TopPagePreviewListAdapter(val fragmentManager: FragmentManager) :
+        ListAdapter<Page,PagePreviewHolder>(PageDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagePreviewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.view_top_page_child_list_preview_holder, parent, false)

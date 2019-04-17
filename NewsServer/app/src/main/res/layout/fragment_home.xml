@@ -13,9 +13,11 @@
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center">
+    android:layout_gravity="center"
+    >
 
     <include
         android:id="@+id/splash_screen"
@@ -28,6 +30,32 @@
         app:layout_constraintBottom_toTopOf="@id/newspaper_name_scroller"
         android:visibility="visible"/>
 
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/page_search_text_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/splash_screen"
+        android:hint="@string/page_search_text_box_hint"
+        android:visibility="gone"
+        android:inputType="text"
+        tools:ignore="Autofill"
+        android:lines="1"
+        android:maxLines="1"
+        android:minLines="1"
+        android:padding="0dp"
+        android:layout_margin="0dp"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/page_search_result_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/page_search_text_box"
+        android:visibility="gone"/>
+
     <com.dasbikash.news_server.custom_views.ViewPagerTitleScroller
         android:id="@+id/newspaper_name_scroller"
         android:layout_width="match_parent"
@@ -36,7 +64,7 @@
         android:background="@color/titleScrollerBG"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/splash_screen"
+        app:layout_constraintTop_toBottomOf="@id/page_search_text_box"
         app:layout_constraintBottom_toTopOf="@id/home_view_pager"
         android:foregroundGravity="center"
         android:visibility="gone"/>
