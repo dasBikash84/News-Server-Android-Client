@@ -99,4 +99,10 @@ data class Page(
     override fun describeContents(): Int {
         return 0
     }
+
+    override fun toString(): String {
+        return "Page(id='$id', newsPaperId=$newsPaperId, name=$name)"
+    }
+
+
 }

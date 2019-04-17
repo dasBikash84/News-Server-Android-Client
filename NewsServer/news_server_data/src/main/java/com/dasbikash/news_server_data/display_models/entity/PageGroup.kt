@@ -14,7 +14,9 @@
 package com.dasbikash.news_server_data.display_models.entity
 
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import com.google.gson.annotations.Expose
 import java.io.Serializable
 
 @Entity
@@ -23,5 +25,8 @@ data class PageGroup  (
         var id: String="",
         var name: String?=null,
         var active: Boolean=true,
-        var pageList: List<String>?=null
+        var pageList: List<String>?=null,
+        @Ignore
+        @Expose(serialize = false,deserialize = false)
+        var pageEntityList: MutableList<Page> = mutableListOf()
 ): Serializable

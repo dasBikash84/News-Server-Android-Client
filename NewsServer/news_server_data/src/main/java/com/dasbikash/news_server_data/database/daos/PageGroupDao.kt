@@ -27,7 +27,7 @@ internal interface PageGroupDao {
     val count: Int
 
     @Query("SELECT * FROM PageGroup")
-    fun findAll(): LiveData<List<PageGroup>>
+    fun findAll(): List<PageGroup>
 
     @Query("SELECT * FROM PageGroup where id=:id")
     fun findById(id: Int): PageGroup

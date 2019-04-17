@@ -14,7 +14,6 @@
 package com.dasbikash.news_server.views
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -29,7 +28,7 @@ class HomeActivity : AppCompatActivity(),
         NavigationHost, HomeNavigator, BottomNavigationViewOwner {
 
     override fun showBottomNavigationView(show: Boolean) {
-        when(show){
+        when (show) {
             true -> mBottomNavigationView.visibility = View.VISIBLE
             false -> mBottomNavigationView.visibility = View.GONE
         }
@@ -42,6 +41,9 @@ class HomeActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+
+        /*val toolbar: Toolbar = findViewById(R.id.app_bar)
+        setSupportActionBar(toolbar)*/
 
         setUpBottomNavigationView()
         initApp()

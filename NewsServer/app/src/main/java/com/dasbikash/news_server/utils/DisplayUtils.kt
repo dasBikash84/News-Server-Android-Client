@@ -14,11 +14,9 @@
 package com.dasbikash.news_server.utils
 
 import android.content.Context
-import android.util.Log
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server_data.display_models.entity.Article
 import com.dasbikash.news_server_data.display_models.entity.Language
-import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import java.text.SimpleDateFormat
 
 object DisplayUtils {

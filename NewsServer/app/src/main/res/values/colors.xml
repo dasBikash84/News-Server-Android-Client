@@ -13,7 +13,7 @@
   -->
 
 <resources>
-    <color name="colorPrimary">#673ab7</color>
+    <color name="colorPrimary">#7e57c2</color>
     <color name="titleScrollerBG">#7e57c2</color>
     <color name="colorPrimaryLight">#d1c4e9</color>
     <color name="colorPageBackground">#ede7f6</color>

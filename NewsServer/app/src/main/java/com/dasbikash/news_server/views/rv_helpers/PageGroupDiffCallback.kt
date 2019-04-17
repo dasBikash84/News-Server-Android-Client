@@ -11,23 +11,16 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views;
+package com.dasbikash.news_server.views.rv_helpers
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import androidx.recyclerview.widget.DiffUtil
+import com.dasbikash.news_server_data.display_models.entity.PageGroup
 
-import com.dasbikash.news_server.R;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
-public class PageGroupFragment extends Fragment {
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_page_group,container,false);
+object PageGroupDiffCallback: DiffUtil.ItemCallback<PageGroup>(){
+    override fun areItemsTheSame(oldItem: PageGroup, newItem: PageGroup): Boolean {
+        return oldItem.id == newItem.id
+    }
+    override fun areContentsTheSame(oldItem: PageGroup, newItem: PageGroup): Boolean {
+        return oldItem == newItem
     }
 }

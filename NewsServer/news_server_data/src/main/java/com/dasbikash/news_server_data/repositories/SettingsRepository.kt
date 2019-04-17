@@ -15,6 +15,7 @@ package com.dasbikash.news_server_data.repositories
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
@@ -23,6 +24,7 @@ import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.display_models.entity.Language
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
+import com.dasbikash.news_server_data.display_models.entity.PageGroup
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException
 
@@ -87,6 +89,23 @@ class SettingsRepository private constructor(context: Context) {
     fun getLanguageByPage(page: Page): Language {
         val newspaper = mDatabase.newsPaperDao.findById(page.newsPaperId!!)
         return mDatabase.languageDao.findByLanguageId(newspaper.languageId!!)
+    }
+
+    fun getPageGroupList(): List<PageGroup> {
+        val pageGroups = mDatabase.pageGroupDao.findAll()
+        pageGroups
+                .asSequence()
+                .forEach {
+                    val thisPageGroup = it
+                    it.pageList?.let {
+                        it.asSequence().forEach {
+                            thisPageGroup.pageEntityList.add(mDatabase.pageDao.findById(it))
+                            //Log.d("PageGroupFragment","thisPageGroup:${thisPageGroup.name} pageId: ${it} listSize: ${thisPageGroup.pageEntityList.size}")
+                        }
+                    }
+                }
+
+        return pageGroups
     }
 
     companion object{

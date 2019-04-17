@@ -30,7 +30,6 @@ import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
 import com.dasbikash.news_server_data.RepositoryFactory
-import com.dasbikash.news_server_data.display_models.entity.Language
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
 import com.dasbikash.news_server_data.repositories.SettingsRepository
@@ -39,7 +38,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
-import kotlin.random.Random
 
 class NewspaperPerviewFragment : Fragment() {
 
@@ -162,7 +160,7 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         val settingsRepository = RepositoryFactory.getSettingsRepository(itemView.context)
 
-        Log.d(TAG,"itemView.id: ${itemView.id}, itemId: ${itemId}")
+        //Log.d(TAG,"itemView.id: ${itemView.id}, itemId: ${itemId}")
 
         disposable.add(
                 Observable.just(true)

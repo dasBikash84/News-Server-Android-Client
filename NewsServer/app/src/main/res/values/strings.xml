@@ -141,4 +141,5 @@
     <string name="ic_home_page_groups">Page Groups</string>
     <string name="app_logo_on_initial_data_loading_page">App logo on Initial data loading page</string>
     <string name="no_internet_message">No internet connection! Please enable network connection.</string>
+    <string name="log_in_app_menu_item_title">Log in/Sign up</string>
 </resources>
