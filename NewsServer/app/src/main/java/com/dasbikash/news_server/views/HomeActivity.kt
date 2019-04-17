@@ -66,23 +66,33 @@ class HomeActivity : AppCompatActivity(),
             var handled: Boolean
             handled = when (menuItem.itemId) {
                 R.id.bottom_menu_item_home -> {
-                    loadHomeFragment()
+                    if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is HomeFragment)) {
+                        loadHomeFragment()
+                    }
                     true
                 }
                 R.id.bottom_menu_item_page_group -> {
-                    loadPageGroupFragment()
+                    if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is PageGroupFragment)) {
+                        loadPageGroupFragment()
+                    }
                     true
                 }
                 R.id.bottom_menu_item_favourites -> {
-                    loadFavouritesFragment()
+                    if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is FavouritesFragment)) {
+                        loadFavouritesFragment()
+                    }
                     true
                 }
                 R.id.bottom_menu_item_settings -> {
-                    loadSettingsFragment()
+                    if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is SettingsFragment)) {
+                        loadSettingsFragment()
+                    }
                     true
                 }
                 R.id.bottom_menu_item_more -> {
-                    loadMoreFragment()
+                    if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is MoreFragment)) {
+                        loadMoreFragment()
+                    }
                     true
                 }
 

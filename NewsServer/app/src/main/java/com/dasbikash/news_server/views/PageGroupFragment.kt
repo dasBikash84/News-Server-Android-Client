@@ -27,6 +27,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server.views.rv_helpers.PageGroupDiffCallback
 import com.dasbikash.news_server_data.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.PageGroup
@@ -59,30 +60,40 @@ class PageGroupFragment : Fragment() {
         mPageGroupListHolder = view.findViewById(R.id.page_group_list_holder)
 
         mPageGroupListAdapter = PageGroupListAdapter(activity!!.supportFragmentManager)
-
         mPageGroupListHolder.adapter = mPageGroupListAdapter
 
         val settingsRepository = RepositoryFactory.getSettingsRepository(context!!)
 
-        mDisposable.add(
-        Observable.just(true)
-                .subscribeOn(Schedulers.io())
-                .map {
-                    settingsRepository.getPageGroupList()
+        (activity as BottomNavigationViewOwner).showBottomNavigationView(true)
+
+        mPageGroupListScroller.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener{
+            override fun onScrollChange(scrollView: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
+                scrollView?.let {
+                    if (mPageGroupListHolder.height > scrollView.context.resources.displayMetrics.heightPixels){
+                        (activity as BottomNavigationViewOwner).showBottomNavigationView(false)
+                    }else{
+                        (activity as BottomNavigationViewOwner).showBottomNavigationView(true)
+                    }
                 }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object : DisposableObserver<List<PageGroup>>(){
-                    override fun onComplete() {
-                    }
+            }
+        })
 
-                    override fun onNext(items: List<PageGroup>) {
-                        mPageGroupListAdapter.submitList(items)
+        mDisposable.add(
+            Observable.just(true)
+                    .subscribeOn(Schedulers.io())
+                    .map {
+                        settingsRepository.getPageGroupList()
                     }
-
-
-                    override fun onError(e: Throwable) {
-                    }
-                })
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(object : DisposableObserver<List<PageGroup>>(){
+                        override fun onComplete() {
+                        }
+                        override fun onNext(items: List<PageGroup>) {
+                            mPageGroupListAdapter.submitList(items)
+                        }
+                        override fun onError(e: Throwable) {
+                        }
+                    })
         )
 
     }
@@ -114,7 +125,6 @@ class PageGroupHolder(itemView: View,val fragmentManager: FragmentManager):Recyc
     private val frameLayout:FrameLayout
 
     init {
-//        itemView.id = View.generateViewId()
         titleHolder = itemView.findViewById(R.id.page_group_title_holder)
         titleText = itemView.findViewById(R.id.page_group_title)
         rightArrow = itemView.findViewById(R.id.right_arrow)

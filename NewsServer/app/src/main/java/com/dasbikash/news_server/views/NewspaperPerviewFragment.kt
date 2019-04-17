@@ -23,12 +23,10 @@ import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
-import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
 import com.dasbikash.news_server_data.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
@@ -69,9 +67,6 @@ class NewspaperPerviewFragment : Fragment() {
         (activity as BottomNavigationViewOwner)
                 .showBottomNavigationView(true)
 
-        mListAdapter = TopPagePreviewListAdapter(activity!!.supportFragmentManager)
-        mPagePreviewList.adapter = mListAdapter
-
         mNestedScrollView.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
             override fun onScrollChange(v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
                 val remainingYOfRV = mPagePreviewList.height - scrollY - resources.displayMetrics.heightPixels
@@ -96,7 +91,8 @@ class NewspaperPerviewFragment : Fragment() {
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe({
-                            mListAdapter.submitList(it)
+                            mListAdapter = TopPagePreviewListAdapter(activity!!.supportFragmentManager, it)
+                            mPagePreviewList.adapter = mListAdapter
                         })
         )
 
@@ -122,8 +118,25 @@ class NewspaperPerviewFragment : Fragment() {
     }
 }
 
-class TopPagePreviewListAdapter(val fragmentManager: FragmentManager) :
-        ListAdapter<Page, PagePreviewHolder>(PageDiffCallback) {
+class TopPagePreviewListAdapter(val fragmentManager: FragmentManager,val pageList:MutableList<Page>) :
+        RecyclerView.Adapter<PagePreviewHolder>() {
+
+    fun submitList(newPageList:MutableList<Page>){
+        pageList.clear()
+        pageList.addAll(newPageList)
+        notifyDataSetChanged()
+    }
+
+    private fun getItem(position:Int):Page?{
+        if (pageList.size > position){
+            return pageList.get(position)
+        }
+        return null
+    }
+
+    override fun getItemCount(): Int {
+        return pageList.size
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagePreviewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.view_top_page_child_list_preview_holder, parent, false)
@@ -132,7 +145,7 @@ class TopPagePreviewListAdapter(val fragmentManager: FragmentManager) :
 
     override fun onBindViewHolder(holder: PagePreviewHolder, position: Int) {
         holder.disposable.clear()
-        holder.bind(getItem(position), fragmentManager)
+        holder.bind(getItem(position)!!, fragmentManager)
     }
 
     override fun onViewRecycled(holder: PagePreviewHolder) {
@@ -152,7 +165,7 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     init {
         itemView.id = View.generateViewId()
-        Log.d(TAG,"itemView.id: ${itemView.id}")
+//        Log.d(TAG,"itemView.id: ${itemView.id}")
     }
 
     @SuppressLint("CheckResult")
@@ -166,7 +179,7 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                 Observable.just(true)
                         .subscribeOn(Schedulers.io())
                         .map {
-//                            Log.d(TAG, "Start for page ${page.name} Np: ${page.newsPaperId}")
+                            Log.d(TAG, "Start for page ${page.name} Np: ${page.newsPaperId}")
                             settingsRepository
                                     .getChildPagesForTopLevelPage(page)
                                     .asSequence()

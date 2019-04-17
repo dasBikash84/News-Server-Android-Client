@@ -53,8 +53,8 @@ class FragmentArticlePreviewForPages : Fragment() {
             mPageListPreviewHolderRV.minimumWidth = resources.displayMetrics.widthPixels
         }
 
-        Log.d("NpPerviewFragment", mPageList.map { "page: ${it.name} Np: ${it.newsPaperId} | " }.toList().toString()
-                + "mArticlePreviewResId: ${mArticlePreviewResId}")
+//        Log.d("NpPerviewFragment", mPageList.map { "page: ${it.name} Np: ${it.newsPaperId} | " }.toList().toString()
+//                + "mArticlePreviewResId: ${mArticlePreviewResId}")
 
         val pagePreviewListAdapter = PagePreviewListAdapter(mArticlePreviewResId!!,ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
 

@@ -13,13 +13,10 @@
 
 package com.dasbikash.news_server_data.repositories
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
-import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.display_models.entity.Language
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
@@ -82,10 +79,6 @@ class SettingsRepository private constructor(context: Context) {
         return mDatabase.pageDao.getChildPagesByTopLevelPageId(topLevelPage.id)
     }
 
-    fun getLanguageByNewspaper(newspaper: Newspaper): Language {
-        return mDatabase.languageDao.findByLanguageId(newspaper.languageId!!)
-    }
-
     fun getLanguageByPage(page: Page): Language {
         val newspaper = mDatabase.newsPaperDao.findById(page.newsPaperId!!)
         return mDatabase.languageDao.findByLanguageId(newspaper.languageId!!)
@@ -100,7 +93,6 @@ class SettingsRepository private constructor(context: Context) {
                     it.pageList?.let {
                         it.asSequence().forEach {
                             thisPageGroup.pageEntityList.add(mDatabase.pageDao.findById(it))
-                            //Log.d("PageGroupFragment","thisPageGroup:${thisPageGroup.name} pageId: ${it} listSize: ${thisPageGroup.pageEntityList.size}")
                         }
                     }
                 }
