@@ -60,7 +60,7 @@ class FragmentArticlePreviewForPages : Fragment() {
 
         mPageListPreviewHolderRV.adapter = pagePreviewListAdapter
 
-        pagePreviewListAdapter.submitList(mPageList)
+        pagePreviewListAdapter.submitList(mPageList.filter { it!=null }.toList())
     }
 
     companion object {

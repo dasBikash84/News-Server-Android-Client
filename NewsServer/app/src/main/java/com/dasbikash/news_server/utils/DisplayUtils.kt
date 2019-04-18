@@ -17,7 +17,9 @@ import android.content.Context
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server_data.display_models.entity.Article
 import com.dasbikash.news_server_data.display_models.entity.Language
+import java.lang.Exception
 import java.text.SimpleDateFormat
+import java.util.concurrent.atomic.AtomicInteger
 
 object DisplayUtils {
 
@@ -40,6 +42,21 @@ object DisplayUtils {
     val HOUR_TIME_STRING_BANGLA = "ঘণ্টা"
     val YESTERDAY_TIME_STRING = "Yesterday"
     val YESTERDAY_TIME_STRING_BANGLA = "গতকাল"
+
+    private var generatedViewId = AtomicInteger(0)
+
+    fun getNextViewId(context: Context):Int{
+        var nextId: Int
+
+        do {
+            nextId = generatedViewId.incrementAndGet()
+            try {
+                context.resources.getResourceName(nextId)
+            }catch (ex:Exception){
+                return nextId
+            }
+        }while (true)
+    }
 
 
     private val BANGLA_UNICODE_ZERO: Char = 0x09E6.toChar()

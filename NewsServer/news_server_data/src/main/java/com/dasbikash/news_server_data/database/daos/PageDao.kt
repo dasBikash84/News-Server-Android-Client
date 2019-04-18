@@ -42,6 +42,8 @@ internal interface PageDao {
     @Query("SELECT * FROM Page WHERE parentPageId= :parentPageId")
     fun getChildPagesByTopLevelPageId(parentPageId: String):List<Page>
 
+    @Query("SELECT * FROM Page WHERE name LIKE :nameContent")
+    fun findByNameContent(nameContent: String): List<Page>
 
 
 }

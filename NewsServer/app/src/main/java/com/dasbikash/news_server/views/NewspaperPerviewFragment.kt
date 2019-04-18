@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
@@ -121,7 +122,7 @@ class NewspaperPerviewFragment : Fragment() {
 }
 
 class TopPagePreviewListAdapter(val fragmentManager: FragmentManager) :
-        ListAdapter<Page,PagePreviewHolder>(PageDiffCallback) {
+        ListAdapter<Page, PagePreviewHolder>(PageDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagePreviewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.view_top_page_child_list_preview_holder, parent, false)
@@ -149,7 +150,7 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val disposable = CompositeDisposable()
 
     init {
-        itemView.id = View.generateViewId()
+        itemView.id = DisplayUtils.getNextViewId(itemView.context)//View.generateViewId()
 //        Log.d(TAG,"itemView.id: ${itemView.id}")
     }
 
@@ -188,28 +189,25 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
                             override fun onNext(data: MutableList<Page>) {
 //                                Log.d(TAG, "Display block for page ${page.name} Np: ${page.newsPaperId}")
-                                when {
-                                    data.size == 1 -> {
-                                        fragmentManager
-                                                .beginTransaction()
-                                                .replace(
-                                                        itemView.id,
-                                                        FragmentArticlePreviewForPages.getInstanceForScreenFillPreview(data[0])
-                                                )
-                                                .commit()
+                                try {
+                                    val fragment = when {
+                                        data.size == 1 -> {
+                                            FragmentArticlePreviewForPages.getInstanceForScreenFillPreview(data[0])
+                                        }
+                                        data.size > 1 -> {
+                                            FragmentArticlePreviewForPages.getInstanceForCustomWidthPreview((data).toList())
+                                        }
+                                        else -> {
+                                            null
+                                        }
                                     }
-                                    data.size > 1 -> {
-                                        fragmentManager
-                                                .beginTransaction()
-                                                .replace(
-                                                        itemView.id,
-                                                        FragmentArticlePreviewForPages.getInstanceForCustomWidthPreview((data).toList())
-                                                )
-                                                .commit()
+                                    //itemView.context.resources.getResourceName(itemView.id)
+                                    if (fragment != null) {
+                                        fragmentManager.beginTransaction().replace(itemView.id, fragment).commit()
+                                        fragmentManager.executePendingTransactions();
                                     }
-                                    else -> {
-                                        itemView.visibility = View.GONE
-                                    }
+                                } catch (ex: Exception) {
+                                    ex.printStackTrace()
                                 }
                             }
 

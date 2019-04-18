@@ -100,6 +100,18 @@ class SettingsRepository private constructor(context: Context) {
         return pageGroups
     }
 
+    fun getTopPageforChildPage(it: Page): Page? {
+        return mDatabase.pageDao.findById(it.parentPageId ?: "")
+    }
+
+    fun getNewspaperByPage(page: Page): Newspaper? {
+        return mDatabase.newsPaperDao.findById(page.newsPaperId ?: "")
+    }
+
+    fun findMatchingPages(it: String): List<Page> {
+        return mDatabase.pageDao.findByNameContent("%"+it+"%")
+    }
+
     companion object{
         @Volatile
         private lateinit var  INSTANCE:SettingsRepository

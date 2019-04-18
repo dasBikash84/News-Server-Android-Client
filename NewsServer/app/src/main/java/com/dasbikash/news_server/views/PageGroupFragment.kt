@@ -27,6 +27,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server.views.rv_helpers.PageGroupDiffCallback
 import com.dasbikash.news_server_data.RepositoryFactory
@@ -42,10 +43,10 @@ class PageGroupFragment : Fragment() {
 
     private val TAG = "PageGroupFragment"
 
-    private lateinit var mPageGroupListScroller:NestedScrollView
-    private lateinit var mPageGroupListHolder:RecyclerView
+    private lateinit var mPageGroupListScroller: NestedScrollView
+    private lateinit var mPageGroupListHolder: RecyclerView
 
-    private lateinit var mPageGroupListAdapter : PageGroupListAdapter
+    private lateinit var mPageGroupListAdapter: PageGroupListAdapter
 
     private val mDisposable = CompositeDisposable()
 
@@ -66,12 +67,12 @@ class PageGroupFragment : Fragment() {
 
         (activity as BottomNavigationViewOwner).showBottomNavigationView(true)
 
-        mPageGroupListScroller.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener{
+        mPageGroupListScroller.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
             override fun onScrollChange(scrollView: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
                 scrollView?.let {
-                    if (mPageGroupListHolder.height > scrollView.context.resources.displayMetrics.heightPixels){
+                    if (mPageGroupListHolder.height > scrollView.context.resources.displayMetrics.heightPixels) {
                         (activity as BottomNavigationViewOwner).showBottomNavigationView(false)
-                    }else{
+                    } else {
                         (activity as BottomNavigationViewOwner).showBottomNavigationView(true)
                     }
                 }
@@ -79,21 +80,23 @@ class PageGroupFragment : Fragment() {
         })
 
         mDisposable.add(
-            Observable.just(true)
-                    .subscribeOn(Schedulers.io())
-                    .map {
-                        settingsRepository.getPageGroupList()
-                    }
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeWith(object : DisposableObserver<List<PageGroup>>(){
-                        override fun onComplete() {
+                Observable.just(true)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            settingsRepository.getPageGroupList()
                         }
-                        override fun onNext(items: List<PageGroup>) {
-                            mPageGroupListAdapter.submitList(items)
-                        }
-                        override fun onError(e: Throwable) {
-                        }
-                    })
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<List<PageGroup>>() {
+                            override fun onComplete() {
+                            }
+
+                            override fun onNext(items: List<PageGroup>) {
+                                mPageGroupListAdapter.submitList(items)
+                            }
+
+                            override fun onError(e: Throwable) {
+                            }
+                        })
         )
 
     }
@@ -105,24 +108,25 @@ class PageGroupFragment : Fragment() {
 }
 
 
-class PageGroupListAdapter(val fragmentManager: FragmentManager):ListAdapter<PageGroup,PageGroupHolder>(PageGroupDiffCallback){
+class PageGroupListAdapter(val fragmentManager: FragmentManager) : ListAdapter<PageGroup, PageGroupHolder>(PageGroupDiffCallback) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageGroupHolder {
-        return PageGroupHolder( LayoutInflater.from(parent.context).inflate(
-                                R.layout.view_page_group_item,parent,false),fragmentManager)
+        return PageGroupHolder(LayoutInflater.from(parent.context).inflate(
+                R.layout.view_page_group_item, parent, false), fragmentManager)
     }
+
     override fun onBindViewHolder(holder: PageGroupHolder, position: Int) {
         holder.bind(getItem(position))
     }
 }
 
-class PageGroupHolder(itemView: View,val fragmentManager: FragmentManager):RecyclerView.ViewHolder(itemView){
+class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : RecyclerView.ViewHolder(itemView) {
 
-    private val titleHolder:MaterialCardView
-    private val titleText:TextView
-    private val rightArrow:ImageView
-    private val downArrow:ImageView
-    private val editIcon:ImageButton
-    private val frameLayout:FrameLayout
+    private val titleHolder: MaterialCardView
+    private val titleText: TextView
+    private val rightArrow: ImageView
+    private val downArrow: ImageView
+    private val editIcon: ImageButton
+    private val frameLayout: FrameLayout
 
     init {
         titleHolder = itemView.findViewById(R.id.page_group_title_holder)
@@ -131,49 +135,47 @@ class PageGroupHolder(itemView: View,val fragmentManager: FragmentManager):Recyc
         downArrow = itemView.findViewById(R.id.down_arrow)
         editIcon = itemView.findViewById(R.id.edit_page_group_icon)
         frameLayout = itemView.findViewById(R.id.page_group_items_holder)
-        frameLayout.id = View.generateViewId()
+        frameLayout.id = DisplayUtils.getNextViewId(itemView.context)//View.generateViewId()
     }
+
     fun bind(item: PageGroup?) {
 
-        if (item!=null){
+        if (item != null) {
             titleText.setText(item.name)
             rightArrow.visibility = View.VISIBLE
             downArrow.visibility = View.GONE
             frameLayout.visibility = View.GONE
 
             item.apply {
-                when {
-                    this.pageEntityList.size == 1 -> {
-                        fragmentManager
-                                .beginTransaction()
-                                .replace(
-                                        frameLayout.id,
-                                        FragmentArticlePreviewForPages.getInstanceForScreenFillPreview(this.pageEntityList.first())
-                                )
-                                .commit()
+
+                try {
+                    val fragment = when {
+                        this.pageEntityList.size == 1 -> {
+                            FragmentArticlePreviewForPages.getInstanceForScreenFillPreview(this.pageEntityList.first())
+                        }
+                        this.pageEntityList.size > 1 -> {
+                            FragmentArticlePreviewForPages.getInstanceForCustomWidthPreview(this.pageEntityList.filter { it != null }.toList())
+                        }
+                        else -> {
+                            null
+                        }
                     }
-                    this.pageEntityList.size > 1 -> {
-                        fragmentManager
-                                .beginTransaction()
-                                .replace(
-                                        frameLayout.id,
-                                        FragmentArticlePreviewForPages.getInstanceForCustomWidthPreview(this.pageEntityList.filter { it!=null }.toList())
-                                )
-                                .commit()
+                    if (fragment != null) {
+                        fragmentManager.beginTransaction().replace(frameLayout.id, fragment).commit()
+                        fragmentManager.executePendingTransactions();
                     }
-                    else -> {
-                        itemView.visibility = View.GONE
-                    }
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
                 }
             }
 
-            titleHolder.setOnClickListener(object : View.OnClickListener{
+            titleHolder.setOnClickListener(object : View.OnClickListener {
                 override fun onClick(v: View?) {
-                    if (frameLayout.visibility == View.GONE){
+                    if (frameLayout.visibility == View.GONE) {
                         frameLayout.visibility = View.VISIBLE
                         downArrow.visibility = View.VISIBLE
                         rightArrow.visibility = View.GONE
-                    }else{
+                    } else {
                         frameLayout.visibility = View.GONE
                         downArrow.visibility = View.GONE
                         rightArrow.visibility = View.VISIBLE
@@ -181,7 +183,7 @@ class PageGroupHolder(itemView: View,val fragmentManager: FragmentManager):Recyc
                 }
             })
 
-        }else{
+        } else {
             itemView.visibility = View.GONE
         }
     }
