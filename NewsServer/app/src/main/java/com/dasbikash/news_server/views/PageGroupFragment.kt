@@ -14,6 +14,7 @@
 package com.dasbikash.news_server.views
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,6 +25,8 @@ import android.widget.TextView
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
@@ -60,7 +63,7 @@ class PageGroupFragment : Fragment() {
         mPageGroupListScroller = view.findViewById(R.id.page_group_list_scroller)
         mPageGroupListHolder = view.findViewById(R.id.page_group_list_holder)
 
-        mPageGroupListAdapter = PageGroupListAdapter(activity!!.supportFragmentManager)
+        mPageGroupListAdapter = PageGroupListAdapter(activity!!.supportFragmentManager,this)
         mPageGroupListHolder.adapter = mPageGroupListAdapter
 
         val settingsRepository = RepositoryFactory.getSettingsRepository(context!!)
@@ -108,18 +111,27 @@ class PageGroupFragment : Fragment() {
 }
 
 
-class PageGroupListAdapter(val fragmentManager: FragmentManager) : ListAdapter<PageGroup, PageGroupHolder>(PageGroupDiffCallback) {
+class PageGroupListAdapter(val fragmentManager: FragmentManager,val lifecycleOwner: LifecycleOwner) : ListAdapter<PageGroup, PageGroupHolder>(PageGroupDiffCallback) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageGroupHolder {
-        return PageGroupHolder(LayoutInflater.from(parent.context).inflate(
+        val pagePreviewHolder = PageGroupHolder(LayoutInflater.from(parent.context).inflate(
                 R.layout.view_page_group_item, parent, false), fragmentManager)
+
+        lifecycleOwner.lifecycle.addObserver(pagePreviewHolder)
+
+        return pagePreviewHolder
     }
 
     override fun onBindViewHolder(holder: PageGroupHolder, position: Int) {
         holder.bind(getItem(position))
     }
+
+    override fun onFailedToRecycleView(holder: PageGroupHolder): Boolean {
+        lifecycleOwner.lifecycle.removeObserver(holder)
+        return super.onFailedToRecycleView(holder)
+    }
 }
 
-class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : RecyclerView.ViewHolder(itemView) {
+class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : RecyclerView.ViewHolder(itemView),DefaultLifecycleObserver {
 
     private val titleHolder: MaterialCardView
     private val titleText: TextView
@@ -127,6 +139,10 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : Re
     private val downArrow: ImageView
     private val editIcon: ImageButton
     private val frameLayout: FrameLayout
+
+    private var active = true
+
+    private lateinit var mPageGroup: PageGroup
 
     init {
         titleHolder = itemView.findViewById(R.id.page_group_title_holder)
@@ -138,7 +154,25 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : Re
         frameLayout.id = DisplayUtils.getNextViewId(itemView.context)//View.generateViewId()
     }
 
+    override fun onResume(owner: LifecycleOwner) {
+        active = true
+    }
+    override fun onPause(owner: LifecycleOwner) {
+        Log.d("NpPerviewFragment","active = false for pageGroup:${mPageGroup.name}")
+        active=false
+    }
+    override fun onStop(owner: LifecycleOwner) {
+        Log.d("NpPerviewFragment","active = false for pageGroup:${mPageGroup.name}")
+        active = false
+    }
+    override fun onDestroy(owner: LifecycleOwner) {
+        Log.d("NpPerviewFragment","active = false for pageGroup:${mPageGroup.name}")
+        active=false
+    }
+
     fun bind(item: PageGroup?) {
+
+        mPageGroup = item!!
 
         if (item != null) {
             titleText.setText(item.name)
@@ -160,9 +194,9 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : Re
                             null
                         }
                     }
-                    if (fragment != null) {
+                    if (fragment != null && active) {
                         fragmentManager.beginTransaction().replace(frameLayout.id, fragment).commit()
-                        fragmentManager.executePendingTransactions();
+//                        fragmentManager.executePendingTransactions()
                     }
                 } catch (ex: Exception) {
                     ex.printStackTrace()

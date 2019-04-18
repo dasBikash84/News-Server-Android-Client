@@ -22,6 +22,8 @@ import android.view.ViewGroup
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -93,7 +95,7 @@ class NewspaperPerviewFragment : Fragment() {
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe({
-                            mListAdapter = TopPagePreviewListAdapter(activity!!.supportFragmentManager)
+                            mListAdapter = TopPagePreviewListAdapter(activity!!.supportFragmentManager,this)
                             mPagePreviewList.adapter = mListAdapter
                             mListAdapter.submitList(it)
                         })
@@ -104,6 +106,22 @@ class NewspaperPerviewFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         mDisposable.clear()
+        Log.d("NpPerviewFragment","onPause():${mNewspaper.name}")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("NpPerviewFragment","onDestroy():${mNewspaper.name}")
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        Log.d("NpPerviewFragment","onDetach():${mNewspaper.name}")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("NpPerviewFragment","onStop():${mNewspaper.name}")
     }
 
     companion object {
@@ -121,12 +139,14 @@ class NewspaperPerviewFragment : Fragment() {
     }
 }
 
-class TopPagePreviewListAdapter(val fragmentManager: FragmentManager) :
+class TopPagePreviewListAdapter(val fragmentManager: FragmentManager,val lifecycleOwner: LifecycleOwner) :
         ListAdapter<Page, PagePreviewHolder>(PageDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagePreviewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.view_top_page_child_list_preview_holder, parent, false)
-        return PagePreviewHolder(view)
+        val holder = PagePreviewHolder(view)
+        lifecycleOwner.lifecycle.addObserver(holder)
+        return holder
     }
 
     override fun onBindViewHolder(holder: PagePreviewHolder, position: Int) {
@@ -139,15 +159,39 @@ class TopPagePreviewListAdapter(val fragmentManager: FragmentManager) :
         holder.disposable.clear()
     }
 
+    override fun onFailedToRecycleView(holder: PagePreviewHolder): Boolean {
+        lifecycleOwner.lifecycle.removeObserver(holder)
+        return super.onFailedToRecycleView(holder)
+    }
+
 }
 
-class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), DefaultLifecycleObserver {
+
+    override fun onPause(owner: LifecycleOwner) {
+        Log.d("NpPerviewFragment","onPause: active = false for page:${mPage.name}")
+        active = false
+    }
+    override fun onStop(owner: LifecycleOwner) {
+        Log.d("NpPerviewFragment","onStop: active = false for page:${mPage.name}")
+        active = false
+    }
+    override fun onDestroy(owner: LifecycleOwner) {
+        Log.d("NpPerviewFragment","onDestroy: active = false for page:${mPage.name}")
+        active = false
+    }
+    override fun onResume(owner: LifecycleOwner) {
+        active = true
+    }
 
     companion object {
         val TAG = "NpPerviewFragment"
     }
 
     val disposable = CompositeDisposable()
+    private var active = true
+
+    lateinit var mPage:Page
 
     init {
         itemView.id = DisplayUtils.getNextViewId(itemView.context)//View.generateViewId()
@@ -157,6 +201,8 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     @SuppressLint("CheckResult")
     fun bind(page: Page, fragmentManager: FragmentManager) {
 
+        mPage = page
+
         val settingsRepository = RepositoryFactory.getSettingsRepository(itemView.context)
 
         //Log.d(TAG,"itemView.id: ${itemView.id}, itemId: ${itemId}")
@@ -165,7 +211,7 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                 Observable.just(true)
                         .subscribeOn(Schedulers.io())
                         .map {
-                            Log.d(TAG, "Start for page ${page.name} Np: ${page.newsPaperId}")
+                            //Log.d(TAG, "Start for page ${page.name} Np: ${page.newsPaperId}")
                             settingsRepository
                                     .getChildPagesForTopLevelPage(page)
                                     .asSequence()
@@ -202,9 +248,9 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                                         }
                                     }
                                     //itemView.context.resources.getResourceName(itemView.id)
-                                    if (fragment != null) {
+                                    if (fragment != null && active) {
                                         fragmentManager.beginTransaction().replace(itemView.id, fragment).commit()
-                                        fragmentManager.executePendingTransactions();
+//                                        fragmentManager.executePendingTransactions()
                                     }
                                 } catch (ex: Exception) {
                                     ex.printStackTrace()
