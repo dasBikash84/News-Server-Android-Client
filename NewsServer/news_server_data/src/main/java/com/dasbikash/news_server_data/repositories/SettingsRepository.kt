@@ -149,9 +149,8 @@ class SettingsRepository private constructor(context: Context) {
         val userPreferenceData : UserPreferenceData
         if (userPreferenceDataList.size ==0){
             return false
-        }else{
-            userPreferenceData = userPreferenceDataList.get(0)
         }
+        userPreferenceData = userPreferenceDataList.get(0)
         if(userPreferenceData.favouritePageIds.contains(page.id)){
             userPreferenceData.favouritePageIds.remove(page.id)
             mDatabase.userPreferenceDataDao.save(userPreferenceData)
@@ -159,6 +158,14 @@ class SettingsRepository private constructor(context: Context) {
         } else{
             return false
         }
+    }
+
+    fun getUserPreferenceData():LiveData<UserPreferenceData>{
+        return mDatabase.userPreferenceDataDao.findUserPreferenceData()
+    }
+
+    fun findPageById(pageId:String): Page? {
+        return mDatabase.pageDao.findById(pageId)
     }
 
     companion object{

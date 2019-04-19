@@ -19,10 +19,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.RepositoryFactory
-import com.dasbikash.news_server_data.display_models.entity.Article
-import com.dasbikash.news_server_data.display_models.entity.Newspaper
-import com.dasbikash.news_server_data.display_models.entity.Page
-import com.dasbikash.news_server_data.display_models.entity.PageGroup
+import com.dasbikash.news_server_data.display_models.entity.*
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.SettingsRepository
 import io.reactivex.Observable
@@ -62,6 +59,10 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
 
     fun getNewsPapers():LiveData<List<Newspaper>>{
         return mSettingsRepository.getNewsPapers()
+    }
+
+    fun getUserPreferenceData():LiveData<UserPreferenceData>{
+        return mSettingsRepository.getUserPreferenceData()
     }
 
     fun getLatestArticleProvider(requestPayload:Pair<UUID,Page>):Observable<Pair<UUID,Article?>>{

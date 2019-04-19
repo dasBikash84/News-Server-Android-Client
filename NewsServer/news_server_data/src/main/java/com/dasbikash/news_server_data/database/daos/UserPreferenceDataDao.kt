@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.database.daos
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -26,6 +27,9 @@ internal interface UserPreferenceDataDao {
 
     @Query("SELECT * from UserPreferenceData")
     fun findAll(): List<UserPreferenceData>
+
+    @Query("SELECT * from UserPreferenceData LIMIT 1")
+    fun findUserPreferenceData(): LiveData<UserPreferenceData>
 
     @Query("DELETE FROM UserPreferenceData")
     fun nukeTable()
