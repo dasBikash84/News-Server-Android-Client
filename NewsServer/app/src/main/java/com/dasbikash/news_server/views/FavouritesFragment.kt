@@ -29,22 +29,22 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveDataReactiveStreams
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
 import com.dasbikash.news_server_data.RepositoryFactory
-import com.dasbikash.news_server_data.display_models.entity.Article
-import com.dasbikash.news_server_data.display_models.entity.Language
-import com.dasbikash.news_server_data.display_models.entity.Page
-import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
+import com.dasbikash.news_server_data.display_models.entity.*
 import com.google.android.material.card.MaterialCardView
 import com.squareup.picasso.Picasso
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.Consumer
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import org.reactivestreams.Subscriber
@@ -80,6 +80,8 @@ class FavouritesFragment : Fragment() {
         mFavItemsHolder.adapter = mFavouritePagesListAdapter
 
         val settingsRepository = RepositoryFactory.getSettingsRepository(context!!)
+
+        ItemTouchHelper(SwipeToDeleteCallback(mFavouritePagesListAdapter)).attachToRecyclerView(mFavItemsHolder)
 
         mHomeViewModel.getUserPreferenceData()
                 .observe(activity!!,object : Observer<UserPreferenceData> {
@@ -120,7 +122,27 @@ class FavouritePagesListAdapter(val context: Context) :
     }
 
     override fun onBindViewHolder(holder: FavouritePagePreviewHolder, position: Int) {
-        holder.bind(getItem(position))
+        Observable.just(getItem(position))
+                .subscribeOn(Schedulers.io())
+                .map {
+                    val settingsRepository = RepositoryFactory.getSettingsRepository(holder.itemView.context)
+                    Pair(it,settingsRepository.getNewspaperByPage(it))
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(Consumer {
+                    it?.let { holder.bind(it.first,it.second!!)}
+                })
+//        holder.bind(getItem(position))
+    }
+
+    override fun onViewAttachedToWindow(holder: FavouritePagePreviewHolder) {
+        super.onViewAttachedToWindow(holder)
+        Log.d("FavouritesFragment","onViewAttachedToWindow")
+    }
+
+    override fun onViewDetachedFromWindow(holder: FavouritePagePreviewHolder) {
+        super.onViewDetachedFromWindow(holder)
+        Log.d("FavouritesFragment","onViewDetachedFromWindow")
     }
 }
 
@@ -132,7 +154,8 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
     private val articlePublicationTime: AppCompatTextView
     private val articleImage: AppCompatImageView
 
-    private lateinit var mPage: Page
+    lateinit var mPage: Page
+    lateinit var mNewspaper: Newspaper
     private lateinit var mArticle: Article
 
     init {
@@ -143,25 +166,25 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
         articleImage = itemview.findViewById(R.id.article_preview_image)
     }
 
-    fun bind(page: Page?) {
+    fun bind(page: Page?,newspaper: Newspaper) {
 
-        Log.d("FavouritesFragment","Page: ${page?.name}")
-        Log.d("FavouritesFragment","Page: ${page?.name}")
+        //Log.d("FavouritesFragment","Page: ${page?.name}")
+        //Log.d("FavouritesFragment","Page: ${page?.name}")
 
         pageTitleHolder.visibility = View.GONE
         hideChilds()
 
-        pageTitle.setOnClickListener({})
+        pageTitleHolder.setOnClickListener({})
 
         if (page == null) return
-
+        mNewspaper = newspaper
         mPage = page
-        Log.d("FavouritesFragment","Page: ${mPage.name}")
+        //Log.d("FavouritesFragment","Page: ${mPage.name}")
 
-        pageTitle.text = mPage.name
+        pageTitle.text = mPage.name + " | " + mNewspaper.name
         pageTitleHolder.visibility = View.VISIBLE
 
-        pageTitle.setOnClickListener {
+        pageTitleHolder.setOnClickListener {
             if (!::mArticle.isInitialized){
                 showChilds()
                 val settingsRepository = RepositoryFactory.getSettingsRepository(itemView.context)
@@ -191,6 +214,11 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
 
                                     mArticle.previewImageLink?.let {
                                         Picasso.get().load(it).into(articleImage)
+                                        articleImage.setOnClickListener {
+                                            itemView.context.startActivity(
+                                                    PageViewActivity.getIntentForPageDisplay(itemView.context,mPage,mArticle.id)
+                                            )
+                                        }
                                     } ?: let {
                                         Picasso.get().load(R.drawable.app_big_logo).into(articleImage)
                                     }
@@ -222,4 +250,30 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
         articleImage.visibility = View.VISIBLE
     }
 
+}
+
+class SwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAdapter) : ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT ) {
+    override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+        return false
+    }
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+
+        favouritePagesListAdapter.notifyDataSetChanged()
+        val page = (viewHolder as FavouritePagePreviewHolder).mPage
+        DialogUtils.createAlertDialog(
+                viewHolder.itemView.context,
+                DialogUtils.AlertDialogDetails(
+                        message = "Sure want to remove ${page.name} from favourites?",
+                        positiveButtonText = "Yes",negetiveButtonText = "No",
+                        doOnPositivePress = {
+                            val settingsRepository = RepositoryFactory.getSettingsRepository(viewHolder.itemView.context)
+                            Observable.just(page)
+                                    .subscribeOn(Schedulers.io())
+                                    .map { settingsRepository.removePageFromFavList(page) }
+                                    .subscribe()
+
+                        }
+                    )
+        ).show()
+    }
 }
