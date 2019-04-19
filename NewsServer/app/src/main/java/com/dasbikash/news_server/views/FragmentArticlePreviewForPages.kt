@@ -60,7 +60,10 @@ class FragmentArticlePreviewForPages : Fragment() {
 
         mPageListPreviewHolderRV.adapter = pagePreviewListAdapter
 
-        pagePreviewListAdapter.submitList(mPageList.filter { it!=null }.toList())
+        pagePreviewListAdapter.submitList(mPageList.filter {
+            @Suppress("SENSELESS_COMPARISON")
+            it!=null
+        }.toList())
     }
 
     companion object {

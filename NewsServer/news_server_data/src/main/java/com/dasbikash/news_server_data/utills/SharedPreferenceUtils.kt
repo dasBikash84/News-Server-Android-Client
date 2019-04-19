@@ -61,6 +61,7 @@ internal object SharedPreferenceUtils {
         val sharedPref =
                 context.getSharedPreferences(SP_FILE_KEY, Context.MODE_PRIVATE)
 
+        @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
         when (defaultValue.value) {
             is Long     -> return sharedPref.getLong(key, defaultValue.value)
             is Int      -> return sharedPref.getInt(key, defaultValue.value)

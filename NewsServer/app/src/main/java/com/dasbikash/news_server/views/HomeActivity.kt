@@ -14,6 +14,7 @@
 package com.dasbikash.news_server.views
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -183,7 +184,8 @@ class HomeActivity : AppCompatActivity(),
     }
 
     private fun logInAppMenuItemAction() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val intent = Intent(this,UserActivity::class.java)
+        startActivity(intent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

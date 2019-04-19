@@ -16,17 +16,18 @@ package com.dasbikash.news_server_data.display_models.entity
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import com.google.firebase.database.Exclude
 import com.google.gson.annotations.Expose
 import java.io.Serializable
 
 @Entity
 data class PageGroup  (
         @PrimaryKey
-        var id: String="",
-        var name: String?=null,
+        var name: String="",
+        @Ignore
         var active: Boolean=true,
         var pageList: List<String>?=null,
         @Ignore
-        @Expose(serialize = false,deserialize = false)
+        @Exclude
         var pageEntityList: MutableList<Page> = mutableListOf()
 ): Serializable

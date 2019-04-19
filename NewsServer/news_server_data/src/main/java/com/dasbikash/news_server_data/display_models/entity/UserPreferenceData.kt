@@ -14,12 +14,15 @@
 package com.dasbikash.news_server_data.display_models.entity
 
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 @Entity
 data class UserPreferenceData(
-        @PrimaryKey(autoGenerate = true) var id:Int,
-        val favouritePages: List<Int>?=null,
-        val inActiveNewsPapers: List<Int>?=null,
-        val inActivePages: List<Int>?=null
+        @PrimaryKey var id:String="",
+        var favouritePageIds: MutableList<String> = mutableListOf(),
+        var inActiveNewsPaperIds: MutableList<String> = mutableListOf(),
+        var inActivePageIds: MutableList<String> = mutableListOf(),
+        @Ignore
+        var pageGroups:Map<String,PageGroup>?= mutableMapOf()
 )

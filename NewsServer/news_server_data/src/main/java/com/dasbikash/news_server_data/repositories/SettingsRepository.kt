@@ -18,12 +18,11 @@ import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.database.NewsServerDatabase
-import com.dasbikash.news_server_data.display_models.entity.Language
-import com.dasbikash.news_server_data.display_models.entity.Newspaper
-import com.dasbikash.news_server_data.display_models.entity.Page
-import com.dasbikash.news_server_data.display_models.entity.PageGroup
+import com.dasbikash.news_server_data.display_models.entity.*
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException
+import java.util.*
+import kotlin.collections.ArrayList
 
 class SettingsRepository private constructor(context: Context) {
 
@@ -110,6 +109,56 @@ class SettingsRepository private constructor(context: Context) {
 
     fun findMatchingPages(it: String): List<Page> {
         return mDatabase.pageDao.findByNameContent("%"+it+"%")
+    }
+
+    fun findArticleById(mFirstArticleId: String): Article? {
+        return mDatabase.articleDao.findById(mFirstArticleId)
+    }
+
+    fun checkIfOnFavList(mPage: Page): Boolean {
+        val userPreferenceDataList = mDatabase.userPreferenceDataDao.findAll()
+        if (userPreferenceDataList.size>0){
+            return userPreferenceDataList.get(0).favouritePageIds?.contains(mPage.id) ?: false
+        }
+        return false
+    }
+
+    fun addPageToFavList(page: Page):Boolean {
+        val userPreferenceDataList = mDatabase.userPreferenceDataDao.findAll()
+        val userPreferenceData : UserPreferenceData
+        if (userPreferenceDataList.size ==0){
+            userPreferenceData = UserPreferenceData(id = UUID.randomUUID().toString())
+        }else{
+            userPreferenceData = userPreferenceDataList.get(0)
+        }
+        if(! userPreferenceData.favouritePageIds.contains(page.id)){
+            userPreferenceData.favouritePageIds.add(page.id)
+        } else{
+            return true
+        }
+        if (userPreferenceDataList.size ==0){
+            mDatabase.userPreferenceDataDao.add(userPreferenceData)
+        }else{
+            mDatabase.userPreferenceDataDao.save(userPreferenceData)
+        }
+        return true
+    }
+
+    fun removePageFromFavList(page: Page): Boolean {
+        val userPreferenceDataList = mDatabase.userPreferenceDataDao.findAll()
+        val userPreferenceData : UserPreferenceData
+        if (userPreferenceDataList.size ==0){
+            return false
+        }else{
+            userPreferenceData = userPreferenceDataList.get(0)
+        }
+        if(userPreferenceData.favouritePageIds.contains(page.id)){
+            userPreferenceData.favouritePageIds.remove(page.id)
+            mDatabase.userPreferenceDataDao.save(userPreferenceData)
+            return true
+        } else{
+            return false
+        }
     }
 
     companion object{

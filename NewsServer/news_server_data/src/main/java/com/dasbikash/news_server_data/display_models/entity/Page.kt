@@ -18,7 +18,6 @@ import android.os.Parcelable
 import androidx.room.*
 import com.google.firebase.database.Exclude
 import com.google.gson.annotations.Expose
-import java.io.Serializable
 
 @Entity(
         foreignKeys = [
@@ -38,7 +37,7 @@ data class Page(
         var active: Boolean = false,
         @Ignore
         var linkFormat:String? = null
-): Serializable, Parcelable {
+): Parcelable {
     @Exclude
     var hasChild:Boolean = false
     @Exclude

@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
+import com.dasbikash.news_server.views.PageViewActivity
 import com.dasbikash.news_server_data.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.Article
 import com.dasbikash.news_server_data.display_models.entity.Language
@@ -138,7 +139,16 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
 
                                     //Add click listner
                                     itemView.setOnClickListener(View.OnClickListener {
-                                        Log.d(TAG, "Article: ${mArticle.title} clicked")
+                                        itemView.context.startActivity(
+                                                PageViewActivity.getIntentForPageDisplay(
+                                                        itemView.context,page,mArticle.id
+                                                )
+                                        )
+                                    })
+                                }else{
+                                    //Empty listner
+                                    itemView.setOnClickListener(View.OnClickListener {
+
                                     })
                                 }
                             }

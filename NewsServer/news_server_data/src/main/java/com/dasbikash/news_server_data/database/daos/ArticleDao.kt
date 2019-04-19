@@ -27,7 +27,7 @@ internal interface ArticleDao {
     fun findAllByPageId(pageId: Int): List<Article>
 
     @Query("SELECT * FROM Article WHERE id=:id")
-    fun findById(id: Int): Article
+    fun findById(id: String): Article
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun addArticles(articles: List<Article>)

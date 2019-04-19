@@ -13,8 +13,17 @@
 
 package com.dasbikash.news_server;
 
+import android.content.Context;
+import android.os.Build;
+import android.util.Log;
+
+import com.dasbikash.news_server_data.data_sources.firebase.AppSettingsBootStrapToRTDb;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 /**
@@ -25,16 +34,16 @@ import androidx.test.runner.AndroidJUnit4;
 @RunWith(AndroidJUnit4.class)
 public class RealTimeDbTest {
 
-    /*public static final String TAG = "DbTest";
-
+    public static final String TAG = "DbTest";
+    private Context appContext;
     private String APP_SETTINGS_NODE = "app_settings";
-    private String COUNTRIES_NODE = "countries";
+    /*private String COUNTRIES_NODE = "countries";
     private String LANGUAGES_NODE = "languages";
     private String NEWSPAPERS_NODE = "newspapers";
     private String PAGES_NODE = "pages";
     private String PAGE_GROUPS_NODE = "page_groups";
 
-    private Context appContext;// = InstrumentationRegistry.getTargetContext();
+    // = InstrumentationRegistry.getTargetContext();
     private FirebaseDatabase mDatabase;
     private DatabaseReference mRootReference;
     private DatabaseReference mAppSettingsReference;
@@ -50,12 +59,12 @@ public class RealTimeDbTest {
         
 
         assertEquals("com.dasbikash.news_server", appContext.getPackageName());
-    }
+    }*/
 
     @Before
     public void init(){
         appContext = InstrumentationRegistry.getTargetContext();
-        mDatabase = FirebaseDatabase.getInstance();
+       /* mDatabase = FirebaseDatabase.getInstance();
         mRootReference = mDatabase.getReference();
         mAppSettingsReference = mRootReference.child(APP_SETTINGS_NODE);
         mCountriesSettingsReference = mAppSettingsReference.child(COUNTRIES_NODE);
@@ -63,7 +72,7 @@ public class RealTimeDbTest {
         mNewspaperSettingsReference = mAppSettingsReference.child(NEWSPAPERS_NODE);
         mPagesSettingsReference = mAppSettingsReference.child(NEWSPAPERS_NODE);
         mPagesSettingsReference = mAppSettingsReference.child(PAGES_NODE);
-        mPageGroupsSettingsReference = mAppSettingsReference.child(PAGE_GROUPS_NODE);
+        mPageGroupsSettingsReference = mAppSettingsReference.child(PAGE_GROUPS_NODE);*/
     }
 
     @Test
@@ -72,6 +81,29 @@ public class RealTimeDbTest {
     }
 
     @Test
+    public void getDeviceDetails(){
+
+
+
+        Log.i("getDeviceDetails", "SERIAL: " + Build.SERIAL);
+        Log.i("getDeviceDetails","MODEL: " + Build.MODEL);
+        Log.i("getDeviceDetails","ID: " + Build.ID);
+        Log.i("getDeviceDetails","Manufacture: " + Build.MANUFACTURER);
+        Log.i("getDeviceDetails","brand: " + Build.BRAND);
+        Log.i("getDeviceDetails","type: " + Build.TYPE);
+        Log.i("getDeviceDetails","user: " + Build.USER);
+        Log.i("getDeviceDetails","BASE: " + Build.VERSION_CODES.BASE);
+        Log.i("getDeviceDetails","INCREMENTAL " + Build.VERSION.INCREMENTAL);
+        Log.i("getDeviceDetails","SDK  " + Build.VERSION.SDK);
+        Log.i("getDeviceDetails","BOARD: " + Build.BOARD);
+        Log.i("getDeviceDetails","BRAND " + Build.BRAND);
+        Log.i("getDeviceDetails","HOST " + Build.HOST);
+        Log.i("getDeviceDetails","FINGERPRINT: "+Build.FINGERPRINT);
+        Log.i("getDeviceDetails","Version Code: " + Build.VERSION.RELEASE);
+        Log.i("getDeviceDetails","PRODUCT: " + Build.PRODUCT);
+    }
+
+    /*@Test
     public void readLastUpdateTime(){
        *//* FirebaseRealtimeDBUtils.INSTANCE.getServerAppSettingsUpdateTime().
                 subscribe(new Consumer<Long>() {

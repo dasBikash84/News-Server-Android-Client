@@ -149,7 +149,10 @@ class HomeFragment : Fragment() {
                                                                             .subscribeOn(Schedulers.io())
                                                                             .map {
                                                                                 val pageList = settingsRepository.findMatchingPages(it)
-                                                                                pageList.filter { it !=null }.toList()
+                                                                                pageList.filter {
+                                                                                    @Suppress("SENSELESS_COMPARISON")
+                                                                                    it !=null
+                                                                                }.toList()
                                                                             }
                                                                             .observeOn(AndroidSchedulers.mainThread())
                                                                             .subscribeWith(object : DisposableObserver<List<Page>>(){
@@ -225,6 +228,7 @@ class SearchResultEntryViewHolder(itemView: View):RecyclerView.ViewHolder(itemVi
 
         page?.let {
             val settingsRepository = RepositoryFactory.getSettingsRepository(itemView.context)
+            @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
             val pageLabelBuilder = StringBuilder(it.name)
             disposable.add(
                 Observable.just(it)
@@ -244,7 +248,7 @@ class SearchResultEntryViewHolder(itemView: View):RecyclerView.ViewHolder(itemVi
 
                             }
                             override fun onNext(t: Page) {
-                                (itemView as TextView).setText(pageLabelBuilder.toString())
+                                (itemView).setText(pageLabelBuilder.toString())
                                 itemView.setOnClickListener({
                                     doOnPageNameClick(page)
                                 })

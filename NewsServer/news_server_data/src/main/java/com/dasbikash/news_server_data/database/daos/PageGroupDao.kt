@@ -29,8 +29,8 @@ internal interface PageGroupDao {
     @Query("SELECT * FROM PageGroup")
     fun findAll(): List<PageGroup>
 
-    @Query("SELECT * FROM PageGroup where id=:id")
-    fun findById(id: Int): PageGroup
+    @Query("SELECT * FROM PageGroup where name=:id")
+    fun findById(id: String): PageGroup
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addPageGroups(newsCategories: List<PageGroup>)

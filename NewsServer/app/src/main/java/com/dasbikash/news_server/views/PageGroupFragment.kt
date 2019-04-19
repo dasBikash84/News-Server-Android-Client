@@ -151,7 +151,7 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : Re
         downArrow = itemView.findViewById(R.id.down_arrow)
         editIcon = itemView.findViewById(R.id.edit_page_group_icon)
         frameLayout = itemView.findViewById(R.id.page_group_items_holder)
-        frameLayout.id = DisplayUtils.getNextViewId(itemView.context)//View.generateViewId()
+        frameLayout.id = View.generateViewId()
     }
 
     override fun onResume(owner: LifecycleOwner) {
@@ -174,6 +174,7 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : Re
 
         mPageGroup = item!!
 
+        @Suppress("SENSELESS_COMPARISON")
         if (item != null) {
             titleText.setText(item.name)
             rightArrow.visibility = View.VISIBLE

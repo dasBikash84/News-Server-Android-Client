@@ -54,35 +54,4 @@ data class Article(
     fun setCreated(time:Long){
         created = time
     }
-
-    /*@Ignore
-    @Expose(serialize = false, deserialize = false)
-    private var modificationTS: Date? = null
-
-    @Ignore
-    @Expose(serialize = false, deserialize = false)
-    private var publicationTS: Date? = null
-
-    @Expose(serialize = false, deserialize = false)
-    var newsPaperId:String? = null
-
-    @Ignore
-    fun getModificationTS(): Date? {
-        if (modificationTime == 0L) {
-            return null
-        }
-        val date = Calendar.getInstance()
-        date.timeInMillis = modificationTime
-        return date.time
-    }
-
-    @Ignore
-    fun getPublicationTS(): Date? {
-        if (publicationTime == 0L) {
-            return null
-        }
-        val date = Calendar.getInstance()
-        date.timeInMillis = publicationTime
-        return date.time
-    }*/
 }

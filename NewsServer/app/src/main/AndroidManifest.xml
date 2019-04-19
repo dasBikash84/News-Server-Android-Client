@@ -5,38 +5,32 @@
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-
     <application
+        android:name=".application.NewsServerApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        tools:targetApi="m"
-        android:name=".application.NewsServerApplication">
-        <uses-library android:name="android.test.runner"
+        tools:targetApi="m">
+        <activity
+            android:name=".views.PageViewActivity"
+            android:label="@string/app_name"
+            android:parentActivityName=".views.HomeActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.dasbikash.news_server.views.HomeActivity" />
+        </activity>
+        <activity android:name=".views.UserActivity" />
+
+        <uses-library
+            android:name="android.test.runner"
             android:required="false" />
-        <activity android:name=".views.HomeActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="www.dasbikash.com"
-                    android:pathPrefix="/news_server"
-                    android:scheme="http" />
-            </intent-filter>
-        </activity>
-        <!--<activity
-            android:name=".old_app.this_view.ArticleListActivity"
+        <activity
+            android:name=".views.HomeActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -55,32 +49,6 @@
                     android:scheme="http" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".old_app.this_view.ArticlePagerActivity"
-            android:label="@string/article_pager_activity_lebel"
-            android:screenOrientation="portrait" />
-        <activity android:name=".old_app.this_view.ArticleImageListActivity" />
-        <activity
-            android:name=".old_app.this_view.AboutAppActivity"
-            android:label="@string/about_app__menu_item_title"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".old_app.this_view.SettingsActivity"
-            android:label="@string/settings_activity_lebel"
-            android:screenOrientation="portrait" />
-
-        <service
-            android:name=".old_app.article_loader.ArticleLoaderService"
-            android:exported="false" />
-        <service
-            android:name=".old_app.edition_loader.EditionLoaderService"
-            android:exported="false" />
-        <service
-            android:name=".old_app.this_utility.CheckConfigIntegrity"
-            android:enabled="true"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />-->
-
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="@string/admob_app_id" />

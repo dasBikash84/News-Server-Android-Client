@@ -11,16 +11,14 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views.rv_helpers
+package com.dasbikash.news_server_data.display_models.entity
 
-import androidx.recyclerview.widget.DiffUtil
-import com.dasbikash.news_server_data.display_models.entity.PageGroup
+import android.os.Build
+import com.google.firebase.database.ServerValue
 
-object PageGroupDiffCallback: DiffUtil.ItemCallback<PageGroup>(){
-    override fun areItemsTheSame(oldItem: PageGroup, newItem: PageGroup): Boolean {
-        return oldItem.name == newItem.name
-    }
-    override fun areContentsTheSame(oldItem: PageGroup, newItem: PageGroup): Boolean {
-        return oldItem == newItem
-    }
-}
+data class UserSettingsUpdateDetails(
+        val timeStamp: Long = System.currentTimeMillis(),
+        var userIp:String?=null,
+        var deviceDetails:String = "BRAND: ${Build.BRAND} Manufacture: ${Build.MANUFACTURER} " +
+                                    "MODEL: ${Build.MODEL} SDK: ${Build.VERSION.SDK_INT}"
+)

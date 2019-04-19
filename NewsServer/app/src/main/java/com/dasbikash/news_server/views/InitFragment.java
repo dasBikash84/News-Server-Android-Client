@@ -222,7 +222,7 @@ public class InitFragment extends Fragment {
 
                 //Check if user settings need to be checked
                 //SystemClock.sleep(1000);
-                //checkIfLoggedIn()
+//                checkIfLoggedIn()
                 //checkIfSettingsUpdated()
                 emitter.onNext(DataLoadingStatus.USER_SETTINGS_GOING_TO_BE_LOADED);
                 //loadUserSettings()

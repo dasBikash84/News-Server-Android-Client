@@ -194,7 +194,7 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), Def
     lateinit var mPage:Page
 
     init {
-        itemView.id = DisplayUtils.getNextViewId(itemView.context)//View.generateViewId()
+        itemView.id = View.generateViewId()
 //        Log.d(TAG,"itemView.id: ${itemView.id}")
     }
 
