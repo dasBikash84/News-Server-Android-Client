@@ -11,18 +11,26 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.display_models.entity
+package com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service
 
-import androidx.room.Entity
-import androidx.room.Ignore
-import androidx.room.PrimaryKey
+import com.dasbikash.news_server_data.utills.ExceptionUtils
 
-@Entity
-data class UserPreferenceData(
-        @PrimaryKey var id:String="",
-        var favouritePageIds: MutableList<String> = mutableListOf(),
-        var inActiveNewsPaperIds: MutableList<String> = mutableListOf(),
-        var inActivePageIds: MutableList<String> = mutableListOf(),
-        @Ignore
-        var pageGroups:MutableMap<String,PageGroup> = mutableMapOf()
-)
+internal object UserIpDataService {
+
+    private val TAG = "UserIpDataService"
+
+    private val userIpWebService
+            = UserIpWebService.RETROFIT.create(UserIpWebService::class.java)
+
+    fun getIpAddress(): String {
+        ExceptionUtils.thowExceptionIfOnMainThred()
+        return userIpWebService
+                .getIpAddress()
+                .execute()
+                .body()!!.ip!!
+    }
+}
+
+class IpAddress{
+    var ip:String?=null
+}

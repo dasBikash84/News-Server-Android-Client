@@ -29,6 +29,9 @@ internal interface UserPreferenceDataDao {
     fun findAll(): List<UserPreferenceData>
 
     @Query("SELECT * from UserPreferenceData LIMIT 1")
+    fun findUserPreferenceStaticData(): UserPreferenceData
+
+    @Query("SELECT * from UserPreferenceData LIMIT 1")
     fun findUserPreferenceData(): LiveData<UserPreferenceData>
 
     @Query("DELETE FROM UserPreferenceData")

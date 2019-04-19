@@ -15,6 +15,8 @@ package com.dasbikash.news_server_data.repositories
 
 import android.content.Context
 import android.content.Intent
+import android.os.SystemClock
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
@@ -48,12 +50,53 @@ class UserSettingsRepository private constructor(context: Context) {
         return mUserSettingsDataService.getLogInStatus()
     }
 
+    fun signOutUser(){
+        return mUserSettingsDataService.signOutUser()
+    }
+
     fun getLogInIntent():Intent?{
         return mUserSettingsDataService.getLogInIntent()
     }
 
     fun doPostLogInProcessing(userLogInResponse: UserLogInResponse):Boolean{
-        TODO()
+        val idpResponse = userLogInResponse.iDpResponse
+
+        if (idpResponse == null) return false
+
+        idpResponse.error?.let { return false }
+        Log.d("HomeActivity","idpResponse.error is null")
+
+        if (idpResponse.isNewUser){
+            Log.d("HomeActivity","isNewUser")
+            uploadUserSettingsToServer()
+        }else{
+            downloadAndSaveUserSettingsFromServer()
+        }
+
+        return true
+    }
+
+    private fun downloadAndSaveUserSettingsFromServer() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    private fun uploadUserSettingsToServer() {
+        Log.d("HomeActivity","uploadUserSettingsToServer")
+
+        var userPreferenceData:UserPreferenceData?
+        do {
+            userPreferenceData = mDatabase.userPreferenceDataDao.findUserPreferenceStaticData()
+            if (userPreferenceData != null) {
+                Log.d("HomeActivity","userPreferenceData != null")
+                break
+            }
+            Log.d("HomeActivity","userPreferenceData == null")
+            SystemClock.sleep(100)
+        }while (true)
+        mDatabase.pageGroupDao.findAll()
+                .asSequence()
+                .forEach { userPreferenceData!!.pageGroups.put(it.name,it) }
+        mUserSettingsDataService.uploadUserSettings(userPreferenceData!!)
     }
 
     fun checkIfOnFavList(mPage: Page): Boolean {
@@ -139,4 +182,4 @@ class UserSettingsRepository private constructor(context: Context) {
 
 }
 
-class UserLogInResponse(val iDpResponse:IdpResponse){}
+class UserLogInResponse(val iDpResponse:IdpResponse?){}

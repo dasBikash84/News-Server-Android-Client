@@ -16,10 +16,13 @@ package com.dasbikash.news_server_data.data_sources
 import android.content.Context
 import android.content.Intent
 import com.dasbikash.news_server_data.display_models.entity.DefaultAppSettings
+import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
 
 internal interface UserSettingsDataService{
     fun getUserSettingsUpdateTime(context: Context): Long
     fun getUserSettings(context: Context): DefaultAppSettings
     fun getLogInStatus():Boolean
     fun getLogInIntent():Intent?
+    fun uploadUserSettings(userPreferenceData: UserPreferenceData): Boolean
+    fun signOutUser()
 }

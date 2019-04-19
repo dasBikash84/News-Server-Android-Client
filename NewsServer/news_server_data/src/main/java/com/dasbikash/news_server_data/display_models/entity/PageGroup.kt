@@ -25,6 +25,7 @@ data class PageGroup  (
         @PrimaryKey
         var name: String="",
         @Ignore
+        @Exclude
         var active: Boolean=true,
         var pageList: List<String>?=null,
         @Ignore

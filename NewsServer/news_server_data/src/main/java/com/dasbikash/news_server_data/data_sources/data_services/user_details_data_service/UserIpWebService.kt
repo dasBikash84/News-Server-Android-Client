@@ -11,18 +11,26 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.display_models.entity
+package com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service
 
-import androidx.room.Entity
-import androidx.room.Ignore
-import androidx.room.PrimaryKey
+import retrofit2.Call
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Query
 
-@Entity
-data class UserPreferenceData(
-        @PrimaryKey var id:String="",
-        var favouritePageIds: MutableList<String> = mutableListOf(),
-        var inActiveNewsPaperIds: MutableList<String> = mutableListOf(),
-        var inActivePageIds: MutableList<String> = mutableListOf(),
-        @Ignore
-        var pageGroups:MutableMap<String,PageGroup> = mutableMapOf()
-)
+internal interface UserIpWebService {
+
+    @GET("?format=json")
+    fun getIpAddress(): Call<IpAddress>
+
+    companion object {
+
+        const val BASE_URL = "https://api.ipify.org/"
+
+        val RETROFIT = Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+    }
+}

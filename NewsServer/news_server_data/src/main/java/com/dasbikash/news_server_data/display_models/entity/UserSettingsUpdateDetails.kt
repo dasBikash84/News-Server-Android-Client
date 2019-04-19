@@ -17,8 +17,8 @@ import android.os.Build
 import com.google.firebase.database.ServerValue
 
 data class UserSettingsUpdateDetails(
-        val timeStamp: Long = System.currentTimeMillis(),
-        var userIp:String?=null,
+        val timeStamp: Map<String,String> = ServerValue.TIMESTAMP,
+        var userIp:String,
         var deviceDetails:String = "BRAND: ${Build.BRAND} Manufacture: ${Build.MANUFACTURER} " +
-                                    "MODEL: ${Build.MODEL} SDK: ${Build.VERSION.SDK_INT}"
+                                    "MODEL: ${Build.MODEL} SDK_INT: ${Build.VERSION.SDK_INT}"
 )

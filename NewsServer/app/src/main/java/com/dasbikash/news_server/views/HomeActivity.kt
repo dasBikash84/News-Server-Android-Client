@@ -16,6 +16,7 @@ package com.dasbikash.news_server.views
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -28,15 +29,30 @@ import com.dasbikash.news_server.utils.OptionsIntentBuilderUtility
 import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
 import com.dasbikash.news_server.views.interfaces.NavigationHost
+import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.repositories.UserLogInResponse
+import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
+import com.firebase.ui.auth.IdpResponse
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import io.reactivex.Observable
+import io.reactivex.Observer
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.functions.Consumer
+import io.reactivex.schedulers.Schedulers
+import org.reactivestreams.Subscriber
 
 class HomeActivity : AppCompatActivity(),
         NavigationHost, HomeNavigator, BottomNavigationViewOwner {
 
-    lateinit var mToolbar: Toolbar
-    lateinit var mAppBar: AppBarLayout
+    private lateinit var mToolbar: Toolbar
+    private lateinit var mAppBar: AppBarLayout
+
+    private lateinit var mUserSettingsRepository:UserSettingsRepository
+
+    private val LOG_IN_REQ_CODE = 7777
 
     override fun showBottomNavigationView(show: Boolean) {
         when (show) {
@@ -54,6 +70,8 @@ class HomeActivity : AppCompatActivity(),
         setContentView(R.layout.activity_home)
         mAppBar = findViewById(R.id.app_bar_layout)
         mToolbar = findViewById(R.id.app_bar)
+        mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
+
         setSupportActionBar(mToolbar)
 
         setUpBottomNavigationView()
@@ -184,8 +202,14 @@ class HomeActivity : AppCompatActivity(),
     }
 
     private fun logInAppMenuItemAction() {
-        val intent = Intent(this,UserActivity::class.java)
-        startActivity(intent)
+        if(mUserSettingsRepository.getLogInStatus()){
+            mUserSettingsRepository.signOutUser()
+        }else {
+            val intent = mUserSettingsRepository.getLogInIntent()
+            intent?.let {
+                startActivityForResult(intent, LOG_IN_REQ_CODE)
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -197,4 +221,51 @@ class HomeActivity : AppCompatActivity(),
     private fun shareAppMenuItemAction() {
         startActivity(OptionsIntentBuilderUtility.getShareAppIntent(this))
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == LOG_IN_REQ_CODE) {
+            val response = IdpResponse.fromResultIntent(data)
+
+            if (resultCode == Activity.RESULT_OK) {
+                Observable.just(response)
+                        .subscribeOn(Schedulers.io())
+                        .map { mUserSettingsRepository.doPostLogInProcessing(UserLogInResponse(it)) }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(object : Observer<Boolean>{
+                            override fun onComplete() {
+                            }
+                            override fun onSubscribe(d: Disposable) {
+                            }
+                            override fun onNext(t: Boolean) {
+                                if (t){
+                                    Log.d(TAG,"User settings data saved.")
+                                }else{
+                                    Log.d(TAG,"Failed to save User settings data.")
+                                }
+                            }
+                            override fun onError(e: Throwable) {
+                                Log.d(TAG,"Error while User settings data saving. Error: ${e}")
+                            }
+                        })
+                // ...
+            } else {
+                // Sign in failed. If response is null the user canceled the
+                // sign-in flow using the back button. Otherwise check
+                // response.getError().getErrorCode() and handle the error.
+                // ...
+                when{
+                    response == null ->  Log.d(TAG,"Log in canceled by user")
+                    else ->{
+                        Log.d(TAG,"Log in error. Message:${response.getError()?.message}")
+                    }
+                }
+            }
+        }
+    }
+    companion object{
+        val TAG = "HomeActivity"
+    }
+
 }
