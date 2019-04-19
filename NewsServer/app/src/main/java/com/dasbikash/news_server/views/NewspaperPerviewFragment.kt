@@ -28,14 +28,13 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
-import com.dasbikash.news_server_data.RepositoryFactory
+import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
-import com.dasbikash.news_server_data.repositories.SettingsRepository
+import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -53,7 +52,7 @@ class NewspaperPerviewFragment : Fragment() {
 
 
     private val mDisposable = CompositeDisposable()
-    lateinit var mSettingsRepository: SettingsRepository
+    lateinit var mAppSettingsRepository: AppSettingsRepository
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_newspaper_page_list_preview_holder, container, false)
@@ -62,7 +61,7 @@ class NewspaperPerviewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mSettingsRepository = RepositoryFactory.getSettingsRepository(activity!!)
+        mAppSettingsRepository = RepositoryFactory.getAppSettingsRepository(activity!!)
 
         mNewspaper = arguments!!.getSerializable(ARG_NEWS_PAPAER) as Newspaper
         mPagePreviewList = view.findViewById(R.id.newspaper_page_preview_list)
@@ -88,7 +87,7 @@ class NewspaperPerviewFragment : Fragment() {
                 Observable.just(true)
                         .subscribeOn(Schedulers.io())
                         .map {
-                            mSettingsRepository
+                            mAppSettingsRepository
                                     .getTopPagesForNewspaper(mNewspaper)
                                     .sortedBy { it.id }
                                     .toCollection(mutableListOf())
@@ -203,7 +202,7 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), Def
 
         mPage = page
 
-        val settingsRepository = RepositoryFactory.getSettingsRepository(itemView.context)
+        val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
 
         //Log.d(TAG,"itemView.id: ${itemView.id}, itemId: ${itemId}")
 
@@ -212,7 +211,7 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), Def
                         .subscribeOn(Schedulers.io())
                         .map {
                             //Log.d(TAG, "Start for page ${page.name} Np: ${page.newsPaperId}")
-                            settingsRepository
+                            appSettingsRepository
                                     .getChildPagesForTopLevelPage(page)
                                     .asSequence()
                                     .filter { it.getHasData() }

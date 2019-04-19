@@ -24,9 +24,9 @@ import com.dasbikash.news_server_data.exceptions.OnMainThreadException
 import java.util.*
 import kotlin.collections.ArrayList
 
-class SettingsRepository private constructor(context: Context) {
+class AppSettingsRepository private constructor(context: Context) {
 
-//    private val TAG = "SettingsRepository"
+//    private val TAG = "AppSettingsRepository"
 
     private val mAppSettingsDataService: AppSettingsDataService = DataServiceImplProvider.getAppSettingsDataServiceImpl()
     private val mDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
@@ -60,7 +60,7 @@ class SettingsRepository private constructor(context: Context) {
         return serverAppSettingsUpdateTime > localAppSettingsUpdateTime
     }
 
-    fun isSettingsDataLoaded(): Boolean {
+    fun isAppSettingsDataLoaded(): Boolean {
         return getLanguageCount() > 0 && getCountryCount() > 0 &&
                 getNewsPaperCount() > 0 && getPageCount() > 0 &&
                 getPageGroupCount() > 0
@@ -83,22 +83,6 @@ class SettingsRepository private constructor(context: Context) {
         return mDatabase.languageDao.findByLanguageId(newspaper.languageId!!)
     }
 
-    fun getPageGroupList(): List<PageGroup> {
-        val pageGroups = mDatabase.pageGroupDao.findAll()
-        pageGroups
-                .asSequence()
-                .forEach {
-                    val thisPageGroup = it
-                    it.pageList?.let {
-                        it.asSequence().forEach {
-                            thisPageGroup.pageEntityList.add(mDatabase.pageDao.findById(it))
-                        }
-                    }
-                }
-
-        return pageGroups
-    }
-
     fun getTopPageforChildPage(it: Page): Page? {
         return mDatabase.pageDao.findById(it.parentPageId ?: "")
     }
@@ -115,68 +99,19 @@ class SettingsRepository private constructor(context: Context) {
         return mDatabase.articleDao.findById(mFirstArticleId)
     }
 
-    fun checkIfOnFavList(mPage: Page): Boolean {
-        val userPreferenceDataList = mDatabase.userPreferenceDataDao.findAll()
-        if (userPreferenceDataList.size>0){
-            return userPreferenceDataList.get(0).favouritePageIds?.contains(mPage.id) ?: false
-        }
-        return false
-    }
-
-    fun addPageToFavList(page: Page):Boolean {
-        val userPreferenceDataList = mDatabase.userPreferenceDataDao.findAll()
-        val userPreferenceData : UserPreferenceData
-        if (userPreferenceDataList.size ==0){
-            userPreferenceData = UserPreferenceData(id = UUID.randomUUID().toString())
-        }else{
-            userPreferenceData = userPreferenceDataList.get(0)
-        }
-        if(! userPreferenceData.favouritePageIds.contains(page.id)){
-            userPreferenceData.favouritePageIds.add(page.id)
-        } else{
-            return true
-        }
-        if (userPreferenceDataList.size ==0){
-            mDatabase.userPreferenceDataDao.add(userPreferenceData)
-        }else{
-            mDatabase.userPreferenceDataDao.save(userPreferenceData)
-        }
-        return true
-    }
-
-    fun removePageFromFavList(page: Page): Boolean {
-        val userPreferenceDataList = mDatabase.userPreferenceDataDao.findAll()
-        val userPreferenceData : UserPreferenceData
-        if (userPreferenceDataList.size ==0){
-            return false
-        }
-        userPreferenceData = userPreferenceDataList.get(0)
-        if(userPreferenceData.favouritePageIds.contains(page.id)){
-            userPreferenceData.favouritePageIds.remove(page.id)
-            mDatabase.userPreferenceDataDao.save(userPreferenceData)
-            return true
-        } else{
-            return false
-        }
-    }
-
-    fun getUserPreferenceData():LiveData<UserPreferenceData>{
-        return mDatabase.userPreferenceDataDao.findUserPreferenceData()
-    }
-
     fun findPageById(pageId:String): Page? {
         return mDatabase.pageDao.findById(pageId)
     }
 
     companion object{
         @Volatile
-        private lateinit var  INSTANCE:SettingsRepository
+        private lateinit var  INSTANCE:AppSettingsRepository
 
-        fun getInstance(context: Context):SettingsRepository{
+        internal fun getInstance(context: Context):AppSettingsRepository{
             if (!::INSTANCE.isInitialized) {
-                synchronized(SettingsRepository::class.java) {
+                synchronized(AppSettingsRepository::class.java) {
                     if (!::INSTANCE.isInitialized) {
-                        INSTANCE = SettingsRepository(context)
+                        INSTANCE = AppSettingsRepository(context)
                     }
                 }
             }

@@ -13,7 +13,6 @@
 
 package com.dasbikash.news_server.views.rv_helpers
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,7 +25,7 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.PageViewActivity
-import com.dasbikash.news_server_data.RepositoryFactory
+import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.Article
 import com.dasbikash.news_server_data.display_models.entity.Language
 import com.dasbikash.news_server_data.display_models.entity.Page
@@ -88,7 +87,7 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
         articlePublicationTime.visibility = View.GONE
 
 
-        val settingsRepository = RepositoryFactory.getSettingsRepository(itemView.context)
+        val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
 
         val uuid = UUID.randomUUID()
 
@@ -97,7 +96,7 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
                 homeViewModel.getLatestArticleProvider(Pair(uuid, page))
                         .filter { it.first == uuid }
                         .map {
-                            language = settingsRepository.getLanguageByPage(page)
+                            language = appSettingsRepository.getLanguageByPage(page)
                             it.second?.let {
                                 val dateString = DisplayUtils.getArticlePublicationDateString(it, language, itemView.context)
                                 return@map Pair(dateString, it)

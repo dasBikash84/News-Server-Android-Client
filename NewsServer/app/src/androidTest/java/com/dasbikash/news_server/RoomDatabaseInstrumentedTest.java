@@ -14,9 +14,8 @@
 package com.dasbikash.news_server;
 
 import android.content.Context;
-import android.util.Log;
 
-import com.dasbikash.news_server_data.RepositoryFactory;
+import com.dasbikash.news_server_data.repositories.RepositoryFactory;
 import com.dasbikash.news_server_data.repositories.NewsDataRepository;
 
 import org.junit.Before;
@@ -42,7 +41,7 @@ public class RoomDatabaseInstrumentedTest {
     @Before
     public void createDb() {
         context = ApplicationProvider.getApplicationContext();
-        newsDataRepository = RepositoryFactory.getNewsDataRepository(context);
+        newsDataRepository = RepositoryFactory.INSTANCE.getNewsDataRepository(context);
     }
 
 

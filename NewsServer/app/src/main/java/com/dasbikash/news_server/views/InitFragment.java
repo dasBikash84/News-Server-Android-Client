@@ -29,12 +29,12 @@ import android.widget.Toast;
 import com.dasbikash.news_server.R;
 import com.dasbikash.news_server.view_models.HomeViewModel;
 import com.dasbikash.news_server.views.interfaces.HomeNavigator;
-import com.dasbikash.news_server_data.RepositoryFactory;
+import com.dasbikash.news_server_data.repositories.RepositoryFactory;
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException;
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException;
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException;
 import com.dasbikash.news_server_data.exceptions.RemoteDbException;
-import com.dasbikash.news_server_data.repositories.SettingsRepository;
+import com.dasbikash.news_server_data.repositories.AppSettingsRepository;
 import com.dasbikash.news_server_data.utills.ExceptionUtils;
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility;
 
@@ -207,10 +207,10 @@ public class InitFragment extends Fragment {
                 //Initialization started
                 emitter.onNext(DataLoadingStatus.STARTING_SETTINGS_DATA_LOADING);
 
-                SettingsRepository settingsRepo =
-                        RepositoryFactory.getSettingsRepository(Objects.requireNonNull(getActivity()));
+                AppSettingsRepository settingsRepo =
+                        RepositoryFactory.INSTANCE.getAppSettingsRepository(Objects.requireNonNull(getActivity()));
 
-                if (!settingsRepo.isSettingsDataLoaded() ||
+                if (!settingsRepo.isAppSettingsDataLoaded() ||
                         settingsRepo.isAppSettingsUpdated(getActivity())) {
                     // going to load app data
                     emitter.onNext(DataLoadingStatus.NEED_TO_READ_DATA_FROM_SERVER);

@@ -11,18 +11,18 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data
+package com.dasbikash.news_server_data.repositories
 
 import android.content.Context
-import com.dasbikash.news_server_data.repositories.NewsDataRepository
-import com.dasbikash.news_server_data.repositories.SettingsRepository
 
 object RepositoryFactory {
 
-    @JvmStatic
-    fun getSettingsRepository(context: Context):
-            SettingsRepository = SettingsRepository.getInstance(context)
-    @JvmStatic
+    fun getUserSettingsRepository(context: Context):
+            UserSettingsRepository = UserSettingsRepository.getInstance(context)
+
+    fun getAppSettingsRepository(context: Context):
+            AppSettingsRepository = AppSettingsRepository.getInstance(context)
+
     fun getNewsDataRepository(context: Context):
             NewsDataRepository = NewsDataRepository.getInstance(context)
 

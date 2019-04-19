@@ -35,7 +35,7 @@ import com.dasbikash.news_server.custom_views.ViewPagerTitleScroller
 import com.dasbikash.news_server.model.PagableNewsPaper
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
-import com.dasbikash.news_server_data.RepositoryFactory
+import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
 import io.reactivex.Observable
@@ -79,7 +79,7 @@ class HomeFragment : Fragment() {
         mPageSearchResultHolder.adapter = mSearchResultListAdapter
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
 
-        val settingsRepository = RepositoryFactory.getSettingsRepository(this.context!!)
+        val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(this.context!!)
 
         data_load_progress.visibility = View.GONE //not to be displayed on this page
 
@@ -148,7 +148,7 @@ class HomeFragment : Fragment() {
                                                                     Observable.just(it.trim().toString())
                                                                             .subscribeOn(Schedulers.io())
                                                                             .map {
-                                                                                val pageList = settingsRepository.findMatchingPages(it)
+                                                                                val pageList = appSettingsRepository.findMatchingPages(it)
                                                                                 pageList.filter {
                                                                                     @Suppress("SENSELESS_COMPARISON")
                                                                                     it !=null
@@ -227,7 +227,7 @@ class SearchResultEntryViewHolder(itemView: View):RecyclerView.ViewHolder(itemVi
         itemView.setOnClickListener{}
 
         page?.let {
-            val settingsRepository = RepositoryFactory.getSettingsRepository(itemView.context)
+            val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
             @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
             val pageLabelBuilder = StringBuilder(it.name)
             disposable.add(
@@ -235,10 +235,10 @@ class SearchResultEntryViewHolder(itemView: View):RecyclerView.ViewHolder(itemVi
                         .subscribeOn(Schedulers.io())
                         .map {
                             if (it.parentPageId != Page.TOP_LEVEL_PAGE_PARENT_ID){
-                                val parentPage = settingsRepository.getTopPageforChildPage(it)
+                                val parentPage = appSettingsRepository.getTopPageforChildPage(it)
                                 parentPage?.let { pageLabelBuilder.append(" | "+parentPage.name) }
                             }
-                            val newsPaper = settingsRepository.getNewspaperByPage(page)
+                            val newsPaper = appSettingsRepository.getNewspaperByPage(page)
                             newsPaper?.let { pageLabelBuilder.append(" | "+it.name) }
                             it
                         }
@@ -249,9 +249,9 @@ class SearchResultEntryViewHolder(itemView: View):RecyclerView.ViewHolder(itemVi
                             }
                             override fun onNext(t: Page) {
                                 (itemView).setText(pageLabelBuilder.toString())
-                                itemView.setOnClickListener({
-                                    doOnPageNameClick(page)
-                                })
+                                itemView.setOnClickListener {
+                                    doOnPageNameClick(page,itemView)
+                                }
                             }
                             override fun onError(e: Throwable) {
 
@@ -264,8 +264,10 @@ class SearchResultEntryViewHolder(itemView: View):RecyclerView.ViewHolder(itemVi
 
     }
 
-    private fun doOnPageNameClick(page: Page?) {
-        Log.d("HomeFragment","Clicked on ${page?.name}")
+    private fun doOnPageNameClick(page: Page,parent: View) {
+        parent.context.startActivity(
+                PageViewActivity.getIntentForPageDisplay(parent.context,page)
+        )
     }
 
 }

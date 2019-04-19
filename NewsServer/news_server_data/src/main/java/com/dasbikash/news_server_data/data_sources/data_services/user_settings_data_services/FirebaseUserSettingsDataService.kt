@@ -14,15 +14,39 @@
 package com.dasbikash.news_server_data.data_sources.data_services.user_settings_data_services
 
 import android.content.Context
+import android.content.Intent
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.display_models.entity.DefaultAppSettings
+import com.firebase.ui.auth.AuthUI
+import com.google.firebase.auth.FirebaseAuth
 
 internal object FirebaseUserSettingsDataService: UserSettingsDataService {
+
+
+    private val mSignInProviders = arrayListOf(
+            AuthUI.IdpConfig.GoogleBuilder().build(),
+            AuthUI.IdpConfig.PhoneBuilder().build(),
+            AuthUI.IdpConfig.EmailBuilder().build())
+
+    //true if logged in
+    override fun getLogInStatus() =
+            FirebaseAuth.getInstance().currentUser != null
+
     override fun getUserSettingsUpdateTime(context: Context): Long {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getUserSettings(context: Context): DefaultAppSettings {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getLogInIntent(): Intent? {
+        if (!getLogInStatus()){
+            return AuthUI.getInstance()
+                    .createSignInIntentBuilder()
+                    .setAvailableProviders(mSignInProviders)
+                    .build()
+        }
+        return null
     }
 }

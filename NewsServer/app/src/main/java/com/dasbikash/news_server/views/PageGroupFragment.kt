@@ -30,10 +30,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server.views.rv_helpers.PageGroupDiffCallback
-import com.dasbikash.news_server_data.RepositoryFactory
+import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.PageGroup
 import com.google.android.material.card.MaterialCardView
 import io.reactivex.Observable
@@ -66,7 +65,7 @@ class PageGroupFragment : Fragment() {
         mPageGroupListAdapter = PageGroupListAdapter(activity!!.supportFragmentManager,this)
         mPageGroupListHolder.adapter = mPageGroupListAdapter
 
-        val settingsRepository = RepositoryFactory.getSettingsRepository(context!!)
+        val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
 
         (activity as BottomNavigationViewOwner).showBottomNavigationView(true)
 
@@ -86,7 +85,7 @@ class PageGroupFragment : Fragment() {
                 Observable.just(true)
                         .subscribeOn(Schedulers.io())
                         .map {
-                            settingsRepository.getPageGroupList()
+                            userSettingsRepository.getPageGroupList()
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<List<PageGroup>>() {

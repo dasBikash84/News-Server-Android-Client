@@ -26,7 +26,6 @@ import androidx.core.widget.NestedScrollView
 
 import com.dasbikash.news_server.R
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveDataReactiveStreams
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -36,19 +35,16 @@ import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
-import com.dasbikash.news_server_data.RepositoryFactory
+import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.*
 import com.google.android.material.card.MaterialCardView
 import com.squareup.picasso.Picasso
-import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Consumer
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
-import org.reactivestreams.Subscriber
-import org.reactivestreams.Subscription
 
 class FavouritesFragment : Fragment() {
 
@@ -56,7 +52,7 @@ class FavouritesFragment : Fragment() {
     private lateinit var mScroller: NestedScrollView
     private lateinit var mFavItemsHolder: RecyclerView
 
-    lateinit var mFavouritePagesListAdapter : FavouritePagesListAdapter
+    lateinit var mFavouritePagesListAdapter: FavouritePagesListAdapter
 
     private val disposable = CompositeDisposable()
 
@@ -79,17 +75,17 @@ class FavouritesFragment : Fragment() {
 
         mFavItemsHolder.adapter = mFavouritePagesListAdapter
 
-        val settingsRepository = RepositoryFactory.getSettingsRepository(context!!)
+        val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
 
         ItemTouchHelper(SwipeToDeleteCallback(mFavouritePagesListAdapter)).attachToRecyclerView(mFavItemsHolder)
 
         mHomeViewModel.getUserPreferenceData()
-                .observe(activity!!,object : Observer<UserPreferenceData> {
+                .observe(activity!!, object : Observer<UserPreferenceData> {
                     override fun onChanged(userPreferenceData: UserPreferenceData) {
                         disposable.add(Observable.just(userPreferenceData.favouritePageIds)
                                 .subscribeOn(Schedulers.io())
                                 .map {
-                                    it.asSequence().map {settingsRepository.findPageById(it)}.toList()
+                                    it.asSequence().map { appSettingsRepository.findPageById(it) }.toList()
                                 }
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribeWith(object : DisposableObserver<List<Page?>>() {
@@ -97,6 +93,7 @@ class FavouritesFragment : Fragment() {
                                     override fun onNext(pageList: List<Page?>) {
                                         mFavouritePagesListAdapter.submitList(pageList)
                                     }
+
                                     override fun onError(e: Throwable) {}
                                 }))
                     }
@@ -116,33 +113,43 @@ class FavouritesFragment : Fragment() {
 
 class FavouritePagesListAdapter(val context: Context) :
         ListAdapter<Page, FavouritePagePreviewHolder>(PageDiffCallback) {
+
+    val disposable = CompositeDisposable()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavouritePagePreviewHolder {
         return FavouritePagePreviewHolder(LayoutInflater.from(context).inflate(
                 R.layout.view_article_perview_parent_width, parent, false))
     }
 
     override fun onBindViewHolder(holder: FavouritePagePreviewHolder, position: Int) {
-        Observable.just(getItem(position))
-                .subscribeOn(Schedulers.io())
-                .map {
-                    val settingsRepository = RepositoryFactory.getSettingsRepository(holder.itemView.context)
-                    Pair(it,settingsRepository.getNewspaperByPage(it))
-                }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(Consumer {
-                    it?.let { holder.bind(it.first,it.second!!)}
-                })
+        disposable.add(
+                Observable.just(getItem(position))
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(holder.itemView.context)
+                            Pair(it, appSettingsRepository.getNewspaperByPage(it))
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(Consumer {
+                            it?.let { holder.bind(it.first, it.second!!) }
+                        })
+        )
 //        holder.bind(getItem(position))
     }
 
     override fun onViewAttachedToWindow(holder: FavouritePagePreviewHolder) {
         super.onViewAttachedToWindow(holder)
-        Log.d("FavouritesFragment","onViewAttachedToWindow")
+        Log.d("FavouritesFragment", "onViewAttachedToWindow")
     }
 
     override fun onViewDetachedFromWindow(holder: FavouritePagePreviewHolder) {
         super.onViewDetachedFromWindow(holder)
-        Log.d("FavouritesFragment","onViewDetachedFromWindow")
+        Log.d("FavouritesFragment", "onViewDetachedFromWindow")
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        disposable.clear()
     }
 }
 
@@ -166,7 +173,7 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
         articleImage = itemview.findViewById(R.id.article_preview_image)
     }
 
-    fun bind(page: Page?,newspaper: Newspaper) {
+    fun bind(page: Page?, newspaper: Newspaper) {
 
         //Log.d("FavouritesFragment","Page: ${page?.name}")
         //Log.d("FavouritesFragment","Page: ${page?.name}")
@@ -181,33 +188,34 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
         mPage = page
         //Log.d("FavouritesFragment","Page: ${mPage.name}")
 
-        pageTitle.text = mPage.name + " | " + mNewspaper.name
+        pageTitle.text = StringBuilder().append(mPage.name).append(" | ").append(mNewspaper.name).toString()
         pageTitleHolder.visibility = View.VISIBLE
 
         pageTitleHolder.setOnClickListener {
-            if (!::mArticle.isInitialized){
+            if (!::mArticle.isInitialized) {
                 showChilds()
-                val settingsRepository = RepositoryFactory.getSettingsRepository(itemView.context)
+                val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
                 val newsDataRepository = RepositoryFactory.getNewsDataRepository(itemView.context)
-                var language:Language
+                var language: Language
                 Observable.just(mPage)
                         .subscribeOn(Schedulers.io())
                         .map {
                             val article = newsDataRepository.getLatestArticleByPage(it)
                             article?.let {
-                                language = settingsRepository.getLanguageByPage(mPage)
-                                return@map Pair(it,DisplayUtils.getArticlePublicationDateString(article, language, itemView.context))
+                                language = appSettingsRepository.getLanguageByPage(mPage)
+                                return@map Pair(it, DisplayUtils.getArticlePublicationDateString(article, language, itemView.context))
                             }
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Any>(){
+                        .subscribeWith(object : DisposableObserver<Any>() {
                             override fun onComplete() {
                             }
-                            override fun onNext(data:Any) {
 
-                                if (data is Pair<*,*>) {
+                            override fun onNext(data: Any) {
+
+                                if (data is Pair<*, *>) {
                                     @Suppress("UNCHECKED_CAST")
-                                    mArticle = (data as Pair<Article,String>).first
+                                    mArticle = (data as Pair<Article, String>).first
 
                                     articleTitle.text = mArticle.title
                                     articlePublicationTime.text = data.second
@@ -216,7 +224,7 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
                                         Picasso.get().load(it).into(articleImage)
                                         articleImage.setOnClickListener {
                                             itemView.context.startActivity(
-                                                    PageViewActivity.getIntentForPageDisplay(itemView.context,mPage,mArticle.id)
+                                                    PageViewActivity.getIntentForPageDisplay(itemView.context, mPage, mArticle.id)
                                             )
                                         }
                                     } ?: let {
@@ -224,14 +232,15 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
                                     }
                                 }
                             }
+
                             override fun onError(e: Throwable) {
                             }
                         })
-            }else{
-                if (articleTitle.visibility == View.GONE){
+            } else {
+                if (articleTitle.visibility == View.GONE) {
                     showChilds()
 
-                } else{
+                } else {
                     hideChilds()
                 }
             }
@@ -252,10 +261,11 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
 
 }
 
-class SwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAdapter) : ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT ) {
+class SwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAdapter) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
         return false
     }
+
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
 
         favouritePagesListAdapter.notifyDataSetChanged()
@@ -264,16 +274,22 @@ class SwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAda
                 viewHolder.itemView.context,
                 DialogUtils.AlertDialogDetails(
                         message = "Sure want to remove ${page.name} from favourites?",
-                        positiveButtonText = "Yes",negetiveButtonText = "No",
+                        positiveButtonText = "Yes", negetiveButtonText = "No",
                         doOnPositivePress = {
-                            val settingsRepository = RepositoryFactory.getSettingsRepository(viewHolder.itemView.context)
+                            val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(viewHolder.itemView.context)
                             Observable.just(page)
                                     .subscribeOn(Schedulers.io())
-                                    .map { settingsRepository.removePageFromFavList(page) }
-                                    .subscribe()
+                                    .map { userSettingsRepository.removePageFromFavList(page) }
+                                    .subscribe(Consumer {
+                                        it?.let {
+                                            if (it){
+
+                                            }
+                                        }
+                                    })
 
                         }
-                    )
+                )
         ).show()
     }
 }

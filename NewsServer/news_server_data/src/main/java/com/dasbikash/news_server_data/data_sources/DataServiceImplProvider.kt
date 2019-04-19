@@ -14,7 +14,7 @@
 package com.dasbikash.news_server_data.data_sources
 
 import com.dasbikash.news_server.data_sources.data_services.app_settings_data_services.SpringMVCAppSettingsDataService
-import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_services.FirebaseAppSettingsDataService
+import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls.FirebaseAppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc.SpringMVCNewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.user_settings_data_services.FirebaseUserSettingsDataService
 
@@ -64,7 +64,7 @@ internal object DataServiceImplProvider {
                 when (userSettingServiceOption) {
 
                     USER_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
-                    -> FirebaseUserSettingsDataService
+                            -> FirebaseUserSettingsDataService
                 }
     }
 

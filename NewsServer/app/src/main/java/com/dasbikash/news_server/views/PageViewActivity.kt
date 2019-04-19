@@ -27,10 +27,11 @@ import android.view.Menu
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server_data.RepositoryFactory
+import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.Article
 import com.dasbikash.news_server_data.display_models.entity.Page
-import com.dasbikash.news_server_data.repositories.SettingsRepository
+import com.dasbikash.news_server_data.repositories.AppSettingsRepository
+import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -45,7 +46,7 @@ class PageViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         const val EXTRA_PAGE_TO_DISPLAY = "com.dasbikash.news_server.views.PageViewActivity.EXTRA_PAGE_TO_DISPLAY"
         const val EXTRA_FIRST_ARTICLE = "com.dasbikash.news_server.views.PageViewActivity.EXTRA_FIRST_ARTICLE"
 
-        fun getIntentForPageDisplay(context: Context, page: Page, firstArticleId: String): Intent {
+        fun getIntentForPageDisplay(context: Context, page: Page, firstArticleId: String = ""): Intent {
             val intent = Intent(context, PageViewActivity::class.java)
             intent.putExtra(EXTRA_PAGE_TO_DISPLAY, page)
             intent.putExtra(EXTRA_FIRST_ARTICLE, firstArticleId)
@@ -58,7 +59,8 @@ class PageViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
 
     private lateinit var mFirstArticleId: String
     private lateinit var mArticleContent: AppCompatTextView
-    private lateinit var mSettingsRepository: SettingsRepository
+    private lateinit var mAppSettingsRepository: AppSettingsRepository
+    private lateinit var mUserSettingsRepository: UserSettingsRepository
     private lateinit var mPageViewContainer:CoordinatorLayout
 
     private var mIsPageOnFavList = false
@@ -85,7 +87,8 @@ class PageViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         navView.setNavigationItemSelectedListener(this)
 
 
-        mSettingsRepository = RepositoryFactory.getSettingsRepository(this)
+        mAppSettingsRepository = RepositoryFactory.getAppSettingsRepository(this)
+        mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
 
         @Suppress("CAST_NEVER_SUCCEEDS")
         mPage = (intent!!.getParcelableExtra(EXTRA_PAGE_TO_DISPLAY)) as Page
@@ -102,8 +105,8 @@ class PageViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
                 Observable.just(mFirstArticleId)
                         .subscribeOn(Schedulers.io())
                         .map {
-                            mIsPageOnFavList = mSettingsRepository.checkIfOnFavList(mPage)
-                            mFirstArticle = mSettingsRepository.findArticleById(mFirstArticleId)
+                            mIsPageOnFavList = mUserSettingsRepository.checkIfOnFavList(mPage)
+                            mFirstArticle = mAppSettingsRepository.findArticleById(mFirstArticleId)
                             mFirstArticle
                         }
                         .observeOn(AndroidSchedulers.mainThread())
@@ -173,8 +176,8 @@ class PageViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
                         .subscribeOn(Schedulers.io())
                         .map {
                             when(action){
-                                PAGE_FAV_STATUS_CHANGE_ACTION.ADD-> return@map mSettingsRepository.addPageToFavList(mPage)
-                                PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE-> return@map mSettingsRepository.removePageFromFavList(mPage)
+                                PAGE_FAV_STATUS_CHANGE_ACTION.ADD-> return@map mUserSettingsRepository.addPageToFavList(mPage)
+                                PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE-> return@map mUserSettingsRepository.removePageFromFavList(mPage)
                             }
                         }
                         .observeOn(AndroidSchedulers.mainThread())

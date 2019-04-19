@@ -19,6 +19,9 @@ import androidx.appcompat.app.AlertDialog
 
 object DialogUtils {
 
+    const val DEFAULT_POS_BUTTON_TEXT = "Ok"
+    const val DEFAULT_NEG_BUTTON_TEXT = "Cancel"
+
     fun createAlertDialog(context: Context,alertDialogDetails: AlertDialogDetails):AlertDialog{
         return getAlertDialogBuilder(context,alertDialogDetails).create()
     }
@@ -43,9 +46,10 @@ object DialogUtils {
     data class AlertDialogDetails(
             val title:String = "",
             val message:String = "",
-            val positiveButtonText:String = "Ok",
-            val negetiveButtonText:String = "Cancel",
+            val positiveButtonText:String = DEFAULT_POS_BUTTON_TEXT,
+            val negetiveButtonText:String = DEFAULT_NEG_BUTTON_TEXT,
             val doOnPositivePress:()->Unit = {},
             val doOnNegetivePress:()->Unit = {}
     )
+
 }

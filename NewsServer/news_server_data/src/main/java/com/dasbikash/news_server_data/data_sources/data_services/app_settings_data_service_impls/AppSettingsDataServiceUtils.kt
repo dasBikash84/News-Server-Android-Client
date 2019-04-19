@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_services
+package com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls
 
 import android.content.Context
 import android.util.Log
@@ -87,11 +87,16 @@ internal object AppSettingsDataServiceUtils {
         return defaultAppSettings
     }
 
+    val APP_SETTINGS_UPDATE_TIME_STAMP_SP_KEY =
+            "com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls." +
+                    "AppSettingsDataServiceUtils.APP_SETTINGS_UPDATE_TIME_STAMP_SP_KEY"
+
     fun getLocalAppSettingsUpdateTime(context: Context): Long{
-        return SharedPreferenceUtils.getLocalAppSettingsUpdateTimestamp(context)
+        return SharedPreferenceUtils.
+                    getData(context,SharedPreferenceUtils.DefaultValues.DEFAULT_LONG, APP_SETTINGS_UPDATE_TIME_STAMP_SP_KEY) as Long
     }
     fun saveLocalAppSettingsUpdateTime(context: Context, updateTime:Long){
-        return SharedPreferenceUtils.saveGlobalSettingsUpdateTimestamp(context,updateTime)
+        SharedPreferenceUtils.saveData(context,updateTime,APP_SETTINGS_UPDATE_TIME_STAMP_SP_KEY)
     }
 
 }

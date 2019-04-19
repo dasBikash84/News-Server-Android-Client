@@ -86,7 +86,7 @@ class NewsDataRepository private constructor(context: Context) {
         @Volatile
         private lateinit var INSTANCE: NewsDataRepository
 
-        fun getInstance(context: Context): NewsDataRepository {
+        internal fun getInstance(context: Context): NewsDataRepository {
             if (!::INSTANCE.isInitialized) {
                 synchronized(NewsDataRepository::class.java) {
                     if (!::INSTANCE.isInitialized) {

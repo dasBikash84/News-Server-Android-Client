@@ -14,7 +14,7 @@
 package com.dasbikash.news_server_data.data_sources
 
 import android.content.Context
-import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_services.AppSettingsDataServiceUtils
+import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls.AppSettingsDataServiceUtils
 import com.dasbikash.news_server_data.display_models.entity.DefaultAppSettings
 
 

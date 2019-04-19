@@ -18,10 +18,11 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import com.dasbikash.news_server_data.RepositoryFactory
+import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.*
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
-import com.dasbikash.news_server_data.repositories.SettingsRepository
+import com.dasbikash.news_server_data.repositories.AppSettingsRepository
+import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -34,7 +35,8 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
 
     val TAG = "HomeViewModel"
 
-    private val mSettingsRepository: SettingsRepository
+    private val mAppSettingsRepository: AppSettingsRepository
+    private val mUserSettingsRepository: UserSettingsRepository
     private val mNewsDataRepository:NewsDataRepository
     private val mMostVisitedPages: LiveData<List<Page>>? = null
     private val mFavouritePages: LiveData<List<Page>>? = null
@@ -48,7 +50,8 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
 
 
     init {
-        mSettingsRepository = RepositoryFactory.getSettingsRepository(mApplication)
+        mAppSettingsRepository = RepositoryFactory.getAppSettingsRepository(mApplication)
+        mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(mApplication)
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(mApplication)
     }
 
@@ -58,11 +61,11 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
     }
 
     fun getNewsPapers():LiveData<List<Newspaper>>{
-        return mSettingsRepository.getNewsPapers()
+        return mAppSettingsRepository.getNewsPapers()
     }
 
     fun getUserPreferenceData():LiveData<UserPreferenceData>{
-        return mSettingsRepository.getUserPreferenceData()
+        return mUserSettingsRepository.getUserPreferenceData()
     }
 
     fun getLatestArticleProvider(requestPayload:Pair<UUID,Page>):Observable<Pair<UUID,Article?>>{
