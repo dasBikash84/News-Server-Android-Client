@@ -176,7 +176,14 @@ internal object FirebaseRealtimeDBUtils {
         getInactivepageIdListRef(user).setValue(userPreferenceData.inActivePageIds)
         getPageGroupListRef(user).setValue(userPreferenceData.pageGroups)
 
-        val userSettingsUpdateDetails = UserSettingsUpdateDetails(userIp = UserIpDataService.getIpAddress())
+        var ipAddress: String
+        try{
+            ipAddress = UserIpDataService.getIpAddress()
+        }catch (ex:Throwable){
+            ipAddress = UserSettingsUpdateDetails.NULL_IP
+        }
+
+        val userSettingsUpdateDetails = UserSettingsUpdateDetails(userIp = ipAddress)
 
         getUpdateLogRef(user).push().setValue(userSettingsUpdateDetails)
 

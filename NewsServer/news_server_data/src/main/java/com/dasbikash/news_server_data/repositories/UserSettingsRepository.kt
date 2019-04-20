@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.repositories
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
@@ -26,6 +27,11 @@ import com.dasbikash.news_server_data.display_models.entity.PageGroup
 import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import com.firebase.ui.auth.IdpResponse
+import io.reactivex.Observable
+import io.reactivex.Observer
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import java.util.*
 
 class UserSettingsRepository private constructor(context: Context) {
@@ -74,6 +80,33 @@ class UserSettingsRepository private constructor(context: Context) {
         }
 
         return true
+    }
+
+    enum class SignInResult{
+        USER_ABORT,SERVER_ERROR,SETTINGS_UPLOAD_ERROR,SUCCESS
+    }
+
+
+    fun processSignInRequestResult(data:Pair<Int,Intent?>):Pair<SignInResult,Throwable?>{
+
+        val response = IdpResponse.fromResultIntent(data.second)
+
+        if (data.first == Activity.RESULT_OK) {
+            try {
+            doPostLogInProcessing(UserLogInResponse(response))
+                    return Pair(SignInResult.SUCCESS,null)
+            }catch (ex:Throwable){
+                ex.printStackTrace()
+                return Pair(SignInResult.SETTINGS_UPLOAD_ERROR,ex)
+            }
+        } else {
+            when{
+                response == null ->  return Pair(SignInResult.USER_ABORT, Throwable("Canceled by user."))
+                else ->{
+                    return Pair(SignInResult.SERVER_ERROR,Throwable(response.getError()))
+                }
+            }
+        }
     }
 
     private fun downloadAndSaveUserSettingsFromServer() {

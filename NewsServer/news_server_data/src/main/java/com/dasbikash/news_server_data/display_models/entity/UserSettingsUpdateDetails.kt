@@ -21,4 +21,8 @@ data class UserSettingsUpdateDetails(
         var userIp:String,
         var deviceDetails:String = "BRAND: ${Build.BRAND} Manufacture: ${Build.MANUFACTURER} " +
                                     "MODEL: ${Build.MODEL} SDK_INT: ${Build.VERSION.SDK_INT}"
-)
+){
+    companion object{
+        const val NULL_IP = "255.255.255.255"
+    }
+}

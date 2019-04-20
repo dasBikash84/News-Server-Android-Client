@@ -13,14 +13,12 @@
 
 package com.dasbikash.news_server.views
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
@@ -30,19 +28,15 @@ import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
 import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
-import com.dasbikash.news_server_data.repositories.UserLogInResponse
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
-import com.firebase.ui.auth.IdpResponse
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
-import org.reactivestreams.Subscriber
 
 class HomeActivity : AppCompatActivity(),
         NavigationHost, HomeNavigator, BottomNavigationViewOwner {
@@ -226,42 +220,28 @@ class HomeActivity : AppCompatActivity(),
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == LOG_IN_REQ_CODE) {
-            val response = IdpResponse.fromResultIntent(data)
 
-            if (resultCode == Activity.RESULT_OK) {
-                Observable.just(response)
-                        .subscribeOn(Schedulers.io())
-                        .map { mUserSettingsRepository.doPostLogInProcessing(UserLogInResponse(it)) }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(object : Observer<Boolean>{
-                            override fun onComplete() {
+            Observable.just(Pair(resultCode,data))
+                    .subscribeOn(Schedulers.io())
+                    .map { mUserSettingsRepository.processSignInRequestResult(it) }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(object : Observer<Pair<UserSettingsRepository.SignInResult, Throwable?>> {
+                        override fun onComplete() {
+                        }
+                        override fun onSubscribe(d: Disposable) {
+                        }
+                        override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult,Throwable?>) {
+                            when(processingResult.first){
+                                UserSettingsRepository.SignInResult.SUCCESS -> Log.d(TAG,"User settings data saved.")
+                                UserSettingsRepository.SignInResult.USER_ABORT -> Log.d(TAG,"Log in canceled by user")
+                                UserSettingsRepository.SignInResult.SERVER_ERROR -> Log.d(TAG,"Log in error. Details:${processingResult.second}")
+                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> Log.d(TAG,"Error while User settings data saving. Details:${processingResult.second}")
                             }
-                            override fun onSubscribe(d: Disposable) {
-                            }
-                            override fun onNext(t: Boolean) {
-                                if (t){
-                                    Log.d(TAG,"User settings data saved.")
-                                }else{
-                                    Log.d(TAG,"Failed to save User settings data.")
-                                }
-                            }
-                            override fun onError(e: Throwable) {
-                                Log.d(TAG,"Error while User settings data saving. Error: ${e}")
-                            }
-                        })
-                // ...
-            } else {
-                // Sign in failed. If response is null the user canceled the
-                // sign-in flow using the back button. Otherwise check
-                // response.getError().getErrorCode() and handle the error.
-                // ...
-                when{
-                    response == null ->  Log.d(TAG,"Log in canceled by user")
-                    else ->{
-                        Log.d(TAG,"Log in error. Message:${response.getError()?.message}")
-                    }
-                }
-            }
+                        }
+                        override fun onError(e: Throwable) {
+                            Log.d(TAG,"Error while User settings data saving. Error: ${e}")
+                        }
+                    })
         }
     }
     companion object{
