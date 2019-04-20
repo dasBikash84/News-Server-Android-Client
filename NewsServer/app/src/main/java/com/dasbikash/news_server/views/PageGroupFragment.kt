@@ -67,19 +67,7 @@ class PageGroupFragment : Fragment() {
 
         val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
 
-        (activity as BottomNavigationViewOwner).showBottomNavigationView(true)
-
-        mPageGroupListScroller.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
-            override fun onScrollChange(scrollView: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
-                scrollView?.let {
-                    if (mPageGroupListHolder.height > scrollView.context.resources.displayMetrics.heightPixels) {
-                        (activity as BottomNavigationViewOwner).showBottomNavigationView(false)
-                    } else {
-                        (activity as BottomNavigationViewOwner).showBottomNavigationView(true)
-                    }
-                }
-            }
-        })
+//        (activity as BottomNavigationViewOwner).showBottomNavigationView(true)
 
         mDisposable.add(
                 Observable.just(true)

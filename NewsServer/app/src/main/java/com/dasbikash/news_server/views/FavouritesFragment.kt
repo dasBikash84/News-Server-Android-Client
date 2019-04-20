@@ -34,6 +34,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
+import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.*
@@ -75,10 +76,10 @@ class FavouritesFragment : Fragment() {
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
 
         mFavItemsHolder.adapter = mFavouritePagesListAdapter
-
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
+        ItemTouchHelper(SwipeToDeleteCallback(mFavouritePagesListAdapter,activity!! as SignInHandler)).attachToRecyclerView(mFavItemsHolder)
 
-        ItemTouchHelper(SwipeToDeleteCallback(mFavouritePagesListAdapter)).attachToRecyclerView(mFavItemsHolder)
+//        (activity as BottomNavigationViewOwner).showBottomNavigationView(true)
 
         mHomeViewModel.getUserPreferenceData()
                 .observe(activity!!, object : Observer<UserPreferenceData?> {
@@ -264,42 +265,61 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
 
 }
 
-class SwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAdapter) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+class SwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAdapter,val signInHandler: SignInHandler) :
+        ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
         return false
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
 
-
         val page = (viewHolder as FavouritePagePreviewHolder).mPage
+        val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(viewHolder.itemView.context)
+
+        val positiveText: String
+        val negetiveText: String = "Cancel"
+        val neutralText: String
+        val positiveAction:()->Unit = {
+            Observable.just(page)
+                    .subscribeOn(Schedulers.io())
+                    .map { userSettingsRepository.removePageFromFavList(page,viewHolder.itemView.context) }
+                    .subscribe(object : io.reactivex.Observer<Boolean>{
+                        override fun onComplete() {   }
+                        override fun onSubscribe(d: Disposable) {}
+                        override fun onNext(result: Boolean) {
+                            if (!result){
+                                favouritePagesListAdapter.notifyDataSetChanged()
+                            }
+                        }
+                        override fun onError(e: Throwable) {
+                            favouritePagesListAdapter.notifyDataSetChanged()
+                        }
+                    })
+
+        }
+        val negetiveAction:()->Unit = {
+            favouritePagesListAdapter.notifyDataSetChanged()
+        }
+        val neutralAction:()->Unit
+        if (userSettingsRepository.checkIfLoggedIn()){
+            positiveText = "Yes"
+            neutralText = ""
+            neutralAction = {}
+        }else{
+            positiveText = "Execute as guest"
+            neutralText = "Sign in and continue"
+            neutralAction = {
+                favouritePagesListAdapter.notifyDataSetChanged()
+                signInHandler.launchSignInActivity()
+            }
+        }
+
         DialogUtils.createAlertDialog(
                 viewHolder.itemView.context,
                 DialogUtils.AlertDialogDetails(
-                        message = "Sure want to remove ${page.name} from favourites?",
-                        positiveButtonText = "Yes", negetiveButtonText = "No",
-                        doOnPositivePress = {
-                            val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(viewHolder.itemView.context)
-                            Observable.just(page)
-                                    .subscribeOn(Schedulers.io())
-                                    .map { userSettingsRepository.removePageFromFavList(page,viewHolder.itemView.context) }
-                                    .subscribe(object : io.reactivex.Observer<Boolean>{
-                                        override fun onComplete() {   }
-                                        override fun onSubscribe(d: Disposable) {}
-                                        override fun onNext(result: Boolean) {
-                                            if (!result){
-                                                favouritePagesListAdapter.notifyDataSetChanged()
-                                            }
-                                        }
-                                        override fun onError(e: Throwable) {
-                                            favouritePagesListAdapter.notifyDataSetChanged()
-                                        }
-                                    })
-
-                        },
-                        doOnNegetivePress = {
-                            favouritePagesListAdapter.notifyDataSetChanged()
-                        },
+                        message = "Remove \"${page.name}\" from favourites?",
+                        positiveButtonText = positiveText, negetiveButtonText = negetiveText, neutralButtonText = neutralText,
+                        doOnPositivePress = positiveAction,doOnNegetivePress = negetiveAction,doOnNeutralPress = neutralAction,
                         isCancelable = false
                 )
         ).show()

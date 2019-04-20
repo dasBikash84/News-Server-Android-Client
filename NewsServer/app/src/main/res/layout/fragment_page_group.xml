@@ -19,7 +19,8 @@
     android:layout_height="match_parent"
     android:overScrollMode="never"
     android:scrollbars="vertical"
-    android:paddingTop="?attr/actionBarSize">
+    android:paddingTop="?attr/actionBarSize"
+    android:paddingBottom="?attr/actionBarSize">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/page_group_list_holder"

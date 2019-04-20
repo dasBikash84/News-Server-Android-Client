@@ -21,8 +21,10 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.OptionsIntentBuilderUtility
 import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
@@ -32,6 +34,7 @@ import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -39,10 +42,11 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
 class HomeActivity : AppCompatActivity(),
-        NavigationHost, HomeNavigator, BottomNavigationViewOwner {
+        NavigationHost, HomeNavigator, BottomNavigationViewOwner,SignInHandler {
 
     private lateinit var mToolbar: Toolbar
     private lateinit var mAppBar: AppBarLayout
+    private lateinit var mCoordinatorLayout: CoordinatorLayout
 
     private lateinit var mUserSettingsRepository:UserSettingsRepository
 
@@ -64,6 +68,7 @@ class HomeActivity : AppCompatActivity(),
         setContentView(R.layout.activity_home)
         mAppBar = findViewById(R.id.app_bar_layout)
         mToolbar = findViewById(R.id.app_bar)
+        mCoordinatorLayout = findViewById(R.id.activity_home_coordinator_container)
         mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
 
         setSupportActionBar(mToolbar)
@@ -197,13 +202,25 @@ class HomeActivity : AppCompatActivity(),
 
     private fun logInAppMenuItemAction() {
         if(mUserSettingsRepository.checkIfLoggedIn()){
-            mUserSettingsRepository.signOutUser()
+            DialogUtils.createAlertDialog(this, DialogUtils.AlertDialogDetails(
+                    title = "Sign Out?",positiveButtonText = "Yes",negetiveButtonText = "Cancel",doOnPositivePress = { signOutAction() }
+            )).show()
+
         }else {
-            val intent = mUserSettingsRepository.getLogInIntent()
-            intent?.let {
-                startActivityForResult(intent, LOG_IN_REQ_CODE)
-            }
+            launchSignInActivity()
         }
+    }
+
+    override fun launchSignInActivity() {
+        val intent = mUserSettingsRepository.getLogInIntent()
+        intent?.let {
+            startActivityForResult(intent, LOG_IN_REQ_CODE)
+        }
+    }
+
+    private fun signOutAction() {
+        mUserSettingsRepository.signOutUser()
+        Snackbar.make(mCoordinatorLayout,"You have just signed out",Snackbar.LENGTH_SHORT).show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -248,4 +265,8 @@ class HomeActivity : AppCompatActivity(),
         val TAG = "HomeActivity"
     }
 
+}
+
+interface SignInHandler{
+    fun launchSignInActivity()
 }

@@ -61,7 +61,7 @@
                 android:gravity="start|center_vertical"
                 android:text="Dummy"
                 android:textSize="20sp"
-                android:textStyle="bold"
+                android:textStyle="normal"
                 android:textColor="@color/article_title_color"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/right_arrow"

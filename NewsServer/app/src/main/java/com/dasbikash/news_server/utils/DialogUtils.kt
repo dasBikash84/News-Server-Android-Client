@@ -21,6 +21,7 @@ object DialogUtils {
 
     const val DEFAULT_POS_BUTTON_TEXT = "Ok"
     const val DEFAULT_NEG_BUTTON_TEXT = "Cancel"
+    const val DEFAULT_NEUTRAL_BUTTON_TEXT = ""
 
     fun createAlertDialog(context: Context,alertDialogDetails: AlertDialogDetails):AlertDialog{
         return getAlertDialogBuilder(context,alertDialogDetails).create()
@@ -37,8 +38,13 @@ object DialogUtils {
         }
         dialogBuilder.setPositiveButton(alertDialogDetails.positiveButtonText.trim(),
                 {dialog: DialogInterface?, which: Int -> alertDialogDetails.doOnPositivePress() })
+
         dialogBuilder.setNegativeButton(alertDialogDetails.negetiveButtonText.trim(),
                 {dialog: DialogInterface?, which: Int -> alertDialogDetails.doOnNegetivePress() })
+
+        dialogBuilder.setNeutralButton(alertDialogDetails.neutralButtonText.trim(),
+                {dialog: DialogInterface?, which: Int -> alertDialogDetails.doOnNeutralPress() })
+
         dialogBuilder.setCancelable(alertDialogDetails.isCancelable)
         return dialogBuilder
     }
@@ -49,9 +55,11 @@ object DialogUtils {
             val message:String = "",
             val positiveButtonText:String = DEFAULT_POS_BUTTON_TEXT,
             val negetiveButtonText:String = DEFAULT_NEG_BUTTON_TEXT,
+            val neutralButtonText:String = DEFAULT_NEUTRAL_BUTTON_TEXT,
             val isCancelable:Boolean = true,
             val doOnPositivePress:()->Unit = {},
-            val doOnNegetivePress:()->Unit = {}
+            val doOnNegetivePress:()->Unit = {},
+            val doOnNeutralPress:()->Unit = {}
     )
 
 }

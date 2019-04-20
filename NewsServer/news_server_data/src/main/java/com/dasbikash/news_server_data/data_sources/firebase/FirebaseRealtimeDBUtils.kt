@@ -62,8 +62,6 @@ internal object FirebaseRealtimeDBUtils {
 
     val mUserSettingsRootReference: DatabaseReference = mRootReference.child(USER_SETTINGS_ROOT_NODE)
 
-
-
     private fun checkRequestValidity() {
         ExceptionUtils.thowExceptionIfOnMainThred()
         ExceptionUtils.thowExceptionIfNoInternetConnection()
