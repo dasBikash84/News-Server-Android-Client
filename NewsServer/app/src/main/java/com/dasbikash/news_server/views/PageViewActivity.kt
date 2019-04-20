@@ -176,8 +176,8 @@ class PageViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
                         .subscribeOn(Schedulers.io())
                         .map {
                             when(action){
-                                PAGE_FAV_STATUS_CHANGE_ACTION.ADD-> return@map mUserSettingsRepository.addPageToFavList(mPage)
-                                PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE-> return@map mUserSettingsRepository.removePageFromFavList(mPage)
+                                PAGE_FAV_STATUS_CHANGE_ACTION.ADD-> return@map mUserSettingsRepository.addPageToFavList(mPage,this)
+                                PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE-> return@map mUserSettingsRepository.removePageFromFavList(mPage,this)
                             }
                         }
                         .observeOn(AndroidSchedulers.mainThread())

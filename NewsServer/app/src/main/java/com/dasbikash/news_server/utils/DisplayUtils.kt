@@ -101,11 +101,9 @@ object DisplayUtils {
 
     val TAG = "DisplayUtils"
 
-    @JvmStatic
     fun dpToPx(dp: Int,context: Context): Float =
         (dp * context.getResources().getDisplayMetrics().density)
 
-    @JvmStatic
     fun pxToDp(px: Int,context: Context): Float =
         (px / context.getResources().getDisplayMetrics().density)
 

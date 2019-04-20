@@ -65,7 +65,7 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
     }
 
     fun getUserPreferenceData():LiveData<UserPreferenceData>{
-        return mUserSettingsRepository.getUserPreferenceData()
+        return mUserSettingsRepository.getUserPreferenceLiveData()
     }
 
     fun getLatestArticleProvider(requestPayload:Pair<UUID,Page>):Observable<Pair<UUID,Article?>>{

@@ -39,9 +39,9 @@ internal object FirebaseUserSettingsDataService: UserSettingsDataService {
         FirebaseAuth.getInstance().signOut()
     }
 
-    override fun getUserSettingsUpdateTime(context: Context): Long {
+    /*override fun getUserSettingsUpdateTime(context: Context): Long {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    }*/
 
     override fun getUserPreferenceData(): UserPreferenceData {
         return FirebaseRealtimeDBUtils.getUserPreferenceData()

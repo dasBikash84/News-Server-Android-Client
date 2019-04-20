@@ -19,16 +19,28 @@ import com.dasbikash.news_server_data.exceptions.OnMainThreadException
 
 object ExceptionUtils {
 
-    @JvmStatic
     fun thowExceptionIfOnMainThred(){
         if (Thread.currentThread() == Looper.getMainLooper().thread) {
             throw OnMainThreadException()
         }
     }
-    @JvmStatic
     fun thowExceptionIfNoInternetConnection(){
         if (!NetConnectivityUtility.isConnected) {
             throw NoInternertConnectionException();
         }
+    }
+
+    fun checkRequestValidityBeforeNetworkAccess(){
+        thowExceptionIfNoInternetConnection()
+        thowExceptionIfOnMainThred()
+    }
+
+    fun checkRequestValidityBeforeDatabaseAccess(){
+        thowExceptionIfNoInternetConnection()
+        thowExceptionIfOnMainThred()
+    }
+
+    fun checkRequestValidityBeforeLocalDiskAccess() {
+        thowExceptionIfOnMainThred()
     }
 }

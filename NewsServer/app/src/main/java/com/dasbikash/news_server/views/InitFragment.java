@@ -226,7 +226,7 @@ public class InitFragment extends Fragment {
                 if (userSettingsRepository.checkIfLoggedIn()) {
                     emitter.onNext(DataLoadingStatus.USER_SETTINGS_GOING_TO_BE_LOADED);
                     //loadUserSettings if updated
-                    userSettingsRepository.processUserSettingsForLoggedInUser(getContext());
+                    userSettingsRepository.updateUserSettingsIfModified(getContext());
                 }
                 emitter.onNext(DataLoadingStatus.EXIT);
                 Log.d(TAG, "subscribe: ");
@@ -248,7 +248,7 @@ public class InitFragment extends Fragment {
                             mRetryCountForRemoteDBError;
             initSettingsDataLoading(mRetryDelayForRemoteDBError);
         } else if (throwable instanceof OnMainThreadException) {
-            ExceptionUtils.thowExceptionIfOnMainThred();
+            ExceptionUtils.INSTANCE.thowExceptionIfOnMainThred();
         }
     }
 

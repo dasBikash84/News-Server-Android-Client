@@ -282,7 +282,7 @@ class SwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAda
                             val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(viewHolder.itemView.context)
                             Observable.just(page)
                                     .subscribeOn(Schedulers.io())
-                                    .map { userSettingsRepository.removePageFromFavList(page) }
+                                    .map { userSettingsRepository.removePageFromFavList(page,viewHolder.itemView.context) }
                                     .subscribe(object : io.reactivex.Observer<Boolean>{
                                         override fun onComplete() {   }
                                         override fun onSubscribe(d: Disposable) {}
