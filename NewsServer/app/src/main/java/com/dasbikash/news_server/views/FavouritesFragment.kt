@@ -80,22 +80,24 @@ class FavouritesFragment : Fragment() {
         ItemTouchHelper(SwipeToDeleteCallback(mFavouritePagesListAdapter)).attachToRecyclerView(mFavItemsHolder)
 
         mHomeViewModel.getUserPreferenceData()
-                .observe(activity!!, object : Observer<UserPreferenceData> {
-                    override fun onChanged(userPreferenceData: UserPreferenceData) {
-                        disposable.add(Observable.just(userPreferenceData.favouritePageIds)
-                                .subscribeOn(Schedulers.io())
-                                .map {
-                                    it.asSequence().map { appSettingsRepository.findPageById(it) }.toList()
-                                }
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribeWith(object : DisposableObserver<List<Page?>>() {
-                                    override fun onComplete() {}
-                                    override fun onNext(pageList: List<Page?>) {
-                                        mFavouritePagesListAdapter.submitList(pageList)
+                .observe(activity!!, object : Observer<UserPreferenceData?> {
+                    override fun onChanged(userPreferenceData: UserPreferenceData?) {
+                        userPreferenceData?.let {
+                            disposable.add(Observable.just(userPreferenceData.favouritePageIds)
+                                    .subscribeOn(Schedulers.io())
+                                    .map {
+                                        it.asSequence().map { appSettingsRepository.findPageById(it) }.toList()
                                     }
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribeWith(object : DisposableObserver<List<Page?>>() {
+                                        override fun onComplete() {}
+                                        override fun onNext(pageList: List<Page?>) {
+                                            mFavouritePagesListAdapter.submitList(pageList)
+                                        }
 
-                                    override fun onError(e: Throwable) {}
-                                }))
+                                        override fun onError(e: Throwable) {}
+                                    }))
+                        }
                     }
                 })
 

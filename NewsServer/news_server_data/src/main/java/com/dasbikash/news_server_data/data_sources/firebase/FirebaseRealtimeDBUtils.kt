@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.data_sources.firebase
 
+import android.content.Context
 import android.util.Log
 import com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service.UserIpDataService
 import com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service.UserIpWebService
@@ -21,6 +22,7 @@ import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
 import com.dasbikash.news_server_data.display_models.entity.UserSettingsUpdateDetails
 import com.dasbikash.news_server_data.exceptions.RemoteDbException
 import com.dasbikash.news_server_data.utills.ExceptionUtils
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -143,6 +145,46 @@ internal object FirebaseRealtimeDBUtils {
 
     }
 
+    fun getUserPreferenceData(): UserPreferenceData {
+        checkRequestValidity()
+
+        var data: UserPreferenceData? = null
+        val waitFlag = AtomicBoolean(true)
+
+        Log.d(TAG, "getUserPreferenceData:")
+
+        getUserSettingsRef(FirebaseAuth.getInstance().currentUser!!).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {
+                Log.d(TAG, "onCancelled Error:" + error.details)
+                throw RemoteDbException(error.toException())
+//                data = null
+//                waitFlag.set(false)
+            }
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    try {
+                        Log.d(TAG, "Data:" + dataSnapshot.value)
+                        data = dataSnapshot.getValue(UserPreferenceData::class.java)!!
+                    } catch (ex: Exception) {
+                        Log.d(TAG, "onDataChange Error:" + ex.message)
+                        ex.printStackTrace()
+                        throw RemoteDbException(ex)
+                    }
+                    Log.d(TAG, "onDataChange:")
+                    waitFlag.set(false)
+                }
+            }
+        })
+
+        while (waitFlag.get()) {
+        }
+        if (data == null) {
+            throw RemoteDbException()
+        }
+        return data as UserPreferenceData
+    }
+
     private fun getUserSettingsRef(user: FirebaseUser):DatabaseReference{
         return mUserSettingsRootReference.child(user.uid)
     }
@@ -168,6 +210,8 @@ internal object FirebaseRealtimeDBUtils {
     }
 
     fun uploadUserSettings(userPreferenceData: UserPreferenceData,user:FirebaseUser): Boolean {
+
+        checkRequestValidity()
 
         if (user.isAnonymous) return false
 

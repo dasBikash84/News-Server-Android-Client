@@ -64,26 +64,16 @@ class UserSettingsRepository private constructor(context: Context) {
         return mUserSettingsDataService.getLogInIntent()
     }
 
-    fun doPostLogInProcessing(userLogInResponse: UserLogInResponse):Boolean{
+    private fun doPostLogInProcessing(userLogInResponse: UserLogInResponse):Boolean{
         val idpResponse = userLogInResponse.iDpResponse
-
         if (idpResponse == null) return false
-
         idpResponse.error?.let { return false }
-        Log.d("HomeActivity","idpResponse.error is null")
-
         if (idpResponse.isNewUser){
-            Log.d("HomeActivity","isNewUser")
             uploadUserSettingsToServer()
         }else{
             downloadAndSaveUserSettingsFromServer()
         }
-
         return true
-    }
-
-    enum class SignInResult{
-        USER_ABORT,SERVER_ERROR,SETTINGS_UPLOAD_ERROR,SUCCESS
     }
 
 
@@ -109,11 +99,19 @@ class UserSettingsRepository private constructor(context: Context) {
         }
     }
 
-    private fun downloadAndSaveUserSettingsFromServer() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    fun downloadAndSaveUserSettingsFromServer() {
+        val userPreferenceData = mUserSettingsDataService.getUserPreferenceData()
+        Log.d("HomeActivity","favouritePageIds: "+userPreferenceData.favouritePageIds)
+        Log.d("HomeActivity","inActivePageIds: "+userPreferenceData.inActivePageIds)
+        Log.d("HomeActivity","inActiveNewsPaperIds: "+userPreferenceData.inActiveNewsPaperIds)
+        mDatabase.userPreferenceDataDao.nukeTable()
+        userPreferenceData.id = UUID.randomUUID().toString()
+        mDatabase.userPreferenceDataDao.add(userPreferenceData)
+        mDatabase.pageGroupDao.nukeTable()
+        mDatabase.pageGroupDao.addPageGroups(userPreferenceData.pageGroups.values.toList())
     }
 
-    private fun uploadUserSettingsToServer() {
+    fun uploadUserSettingsToServer() {
         Log.d("HomeActivity","uploadUserSettingsToServer")
 
         var userPreferenceData:UserPreferenceData?
@@ -211,6 +209,10 @@ class UserSettingsRepository private constructor(context: Context) {
             }
             return INSTANCE
         }
+    }
+
+    enum class SignInResult{
+        USER_ABORT,SERVER_ERROR,SETTINGS_UPLOAD_ERROR,SUCCESS
     }
 
 }

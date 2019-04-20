@@ -22,11 +22,13 @@ internal object StringListConverter {
 
     @TypeConverter
     @JvmStatic
-    fun fromIntList(entry: List<String>): String {
+    fun fromStringList(entry: List<String>): String {
 
         val stringBuilder = StringBuilder("")
 
         for (i in entry.indices) {
+            @Suppress("SENSELESS_COMPARISON")
+            if (entry[i] == null) continue
             stringBuilder.append(entry[i])
             if (i != entry.size - 1) {
                 stringBuilder.append(DATA_BRIDGE)
@@ -38,7 +40,7 @@ internal object StringListConverter {
 
     @TypeConverter
     @JvmStatic
-    fun toIntList(entryListString: String?): List<String> {
+    fun toStringList(entryListString: String?): List<String> {
 
         val entry = ArrayList<String>()
 

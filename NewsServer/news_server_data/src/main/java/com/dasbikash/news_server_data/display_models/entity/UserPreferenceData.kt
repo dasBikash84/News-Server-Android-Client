@@ -16,10 +16,13 @@ package com.dasbikash.news_server_data.display_models.entity
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import com.google.firebase.database.Exclude
 
 @Entity
 data class UserPreferenceData(
-        @PrimaryKey var id:String="",
+        @PrimaryKey
+        @Exclude
+        var id:String="",
         var favouritePageIds: MutableList<String> = mutableListOf(),
         var inActiveNewsPaperIds: MutableList<String> = mutableListOf(),
         var inActivePageIds: MutableList<String> = mutableListOf(),

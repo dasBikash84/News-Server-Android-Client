@@ -20,7 +20,7 @@ import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
 
 internal interface UserSettingsDataService{
     fun getUserSettingsUpdateTime(context: Context): Long
-    fun getUserSettings(context: Context): DefaultAppSettings
+    fun getUserPreferenceData(): UserPreferenceData
     fun getLogInStatus():Boolean
     fun getLogInIntent():Intent?
     fun uploadUserSettings(userPreferenceData: UserPreferenceData): Boolean

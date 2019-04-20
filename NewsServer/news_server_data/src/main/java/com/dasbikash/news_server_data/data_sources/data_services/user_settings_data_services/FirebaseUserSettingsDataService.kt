@@ -21,6 +21,7 @@ import com.dasbikash.news_server_data.display_models.entity.DefaultAppSettings
 import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 internal object FirebaseUserSettingsDataService: UserSettingsDataService {
 
@@ -42,8 +43,8 @@ internal object FirebaseUserSettingsDataService: UserSettingsDataService {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getUserSettings(context: Context): DefaultAppSettings {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun getUserPreferenceData(): UserPreferenceData {
+        return FirebaseRealtimeDBUtils.getUserPreferenceData()
     }
 
     override fun uploadUserSettings(userPreferenceData: UserPreferenceData): Boolean {
