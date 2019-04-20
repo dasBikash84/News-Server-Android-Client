@@ -196,7 +196,7 @@ class HomeActivity : AppCompatActivity(),
     }
 
     private fun logInAppMenuItemAction() {
-        if(mUserSettingsRepository.getLogInStatus()){
+        if(mUserSettingsRepository.checkIfLoggedIn()){
             mUserSettingsRepository.signOutUser()
         }else {
             val intent = mUserSettingsRepository.getLogInIntent()
@@ -223,7 +223,7 @@ class HomeActivity : AppCompatActivity(),
 
             Observable.just(Pair(resultCode,data))
                     .subscribeOn(Schedulers.io())
-                    .map { mUserSettingsRepository.processSignInRequestResult(it) }
+                    .map { mUserSettingsRepository.processSignInRequestResult(it,this) }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(object : Observer<Pair<UserSettingsRepository.SignInResult, Throwable?>> {
                         override fun onComplete() {

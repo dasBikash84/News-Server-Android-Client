@@ -35,6 +35,7 @@ import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException;
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException;
 import com.dasbikash.news_server_data.exceptions.RemoteDbException;
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository;
+import com.dasbikash.news_server_data.repositories.UserSettingsRepository;
 import com.dasbikash.news_server_data.utills.ExceptionUtils;
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility;
 
@@ -47,6 +48,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -59,7 +61,6 @@ public class InitFragment extends Fragment {
 
     private static final String TAG = "InitFragment";
     private static final long RETRY_DELAY_FOR_REMOTE_ERROR_INC_VALUE = 3000L;
-
 
 
     private HomeViewModel mHomeViewModel;
@@ -202,7 +203,7 @@ public class InitFragment extends Fragment {
                 emitter.onNext(DataLoadingStatus.WAITING_FOR_NETWORK_INIT);
 
                 //noinspection StatementWithEmptyBody
-                while (!NetConnectivityUtility.isInitialize());
+                while (!NetConnectivityUtility.isInitialize()) ;
 
                 //Initialization started
                 emitter.onNext(DataLoadingStatus.STARTING_SETTINGS_DATA_LOADING);
@@ -221,13 +222,12 @@ public class InitFragment extends Fragment {
                 emitter.onNext(DataLoadingStatus.SETTINGS_DATA_LOADED);
 
                 //Check if user settings need to be checked
-                //SystemClock.sleep(1000);
-//                checkIfLoggedIn()
-                //checkIfSettingsUpdated()
-                emitter.onNext(DataLoadingStatus.USER_SETTINGS_GOING_TO_BE_LOADED);
-                //loadUserSettings()
-                //SystemClock.sleep(3000);
-                //Settings data loading finished
+                UserSettingsRepository userSettingsRepository = RepositoryFactory.INSTANCE.getUserSettingsRepository(Objects.requireNonNull(getContext()));
+                if (userSettingsRepository.checkIfLoggedIn()) {
+                    emitter.onNext(DataLoadingStatus.USER_SETTINGS_GOING_TO_BE_LOADED);
+                    //loadUserSettings if updated
+                    userSettingsRepository.processUserSettingsForLoggedInUser(getContext());
+                }
                 emitter.onNext(DataLoadingStatus.EXIT);
                 Log.d(TAG, "subscribe: ");
                 emitter.onComplete();
@@ -245,7 +245,7 @@ public class InitFragment extends Fragment {
             mRetryCountForRemoteDBError++;
             mRetryDelayForRemoteDBError +=
                     RETRY_DELAY_FOR_REMOTE_ERROR_INC_VALUE *
-                    mRetryCountForRemoteDBError;
+                            mRetryCountForRemoteDBError;
             initSettingsDataLoading(mRetryDelayForRemoteDBError);
         } else if (throwable instanceof OnMainThreadException) {
             ExceptionUtils.thowExceptionIfOnMainThred();

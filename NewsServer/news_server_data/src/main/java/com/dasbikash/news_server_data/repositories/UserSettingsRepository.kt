@@ -16,7 +16,6 @@ package com.dasbikash.news_server_data.repositories
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
@@ -25,13 +24,9 @@ import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.display_models.entity.Page
 import com.dasbikash.news_server_data.display_models.entity.PageGroup
 import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
+import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import com.firebase.ui.auth.IdpResponse
-import io.reactivex.Observable
-import io.reactivex.Observer
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import java.util.*
 
 class UserSettingsRepository private constructor(context: Context) {
@@ -39,75 +34,90 @@ class UserSettingsRepository private constructor(context: Context) {
     private val DISABLE_PROMPT_FOR_LOG_IN_FLAG_SP_KEY =
             "com.dasbikash.news_server_data.repositories.UserSettingsRepository.DISABLE_PROMPT_FOR_LOG_IN_FLAG_SP_KEY"
 
+    private val LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY =
+            "com.dasbikash.news_server_data.repositories.UserSettingsRepository.LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY"
+
     private val mUserSettingsDataService: UserSettingsDataService = DataServiceImplProvider.getUserSettingsDataServiceImpl()
     private val mDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
 
-    fun shouldPromptForLogIn(context: Context):Boolean{
+    private fun saveLastUserSettingsUpdateTime(updateTs:Long,context: Context){
+        Log.d("HomeActivity", "saveLastUserSettingsUpdateTime: ${updateTs}")
+        SharedPreferenceUtils.saveData(context,updateTs,LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY)
+    }
+
+    private fun getLastUserSettingsUpdateTime(context: Context):Long{
+        return SharedPreferenceUtils
+                .getData(context,SharedPreferenceUtils.DefaultValues.DEFAULT_LONG,LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY) as Long
+    }
+
+    fun shouldPromptForLogIn(context: Context): Boolean {
         return !(SharedPreferenceUtils
-                .getData(context,SharedPreferenceUtils.DefaultValues.DEFAULT_BOOLEAN,DISABLE_PROMPT_FOR_LOG_IN_FLAG_SP_KEY) as Boolean)
+                .getData(context, SharedPreferenceUtils.DefaultValues.DEFAULT_BOOLEAN, DISABLE_PROMPT_FOR_LOG_IN_FLAG_SP_KEY) as Boolean)
     }
 
-    fun disablePromptForLogIn(context: Context){
+    fun disablePromptForLogIn(context: Context) {
         SharedPreferenceUtils
-                .saveData(context,true,DISABLE_PROMPT_FOR_LOG_IN_FLAG_SP_KEY)
+                .saveData(context, true, DISABLE_PROMPT_FOR_LOG_IN_FLAG_SP_KEY)
     }
 
-    fun getLogInStatus():Boolean{
+    fun checkIfLoggedIn(): Boolean {
         return mUserSettingsDataService.getLogInStatus()
     }
 
-    fun signOutUser(){
+    fun signOutUser() {
         return mUserSettingsDataService.signOutUser()
     }
 
-    fun getLogInIntent():Intent?{
+    fun getLogInIntent(): Intent? {
         return mUserSettingsDataService.getLogInIntent()
     }
 
-    private fun doPostLogInProcessing(userLogInResponse: UserLogInResponse):Boolean{
+    private fun doPostLogInProcessing(userLogInResponse: UserLogInResponse,context: Context): Boolean {
         val idpResponse = userLogInResponse.iDpResponse
         if (idpResponse == null) return false
         idpResponse.error?.let { return false }
-        if (idpResponse.isNewUser){
-            uploadUserSettingsToServer()
-        }else{
-            downloadAndSaveUserSettingsFromServer()
+        if (idpResponse.isNewUser) {
+            uploadUserSettingsToServer(context)
+        } else {
+//            download And Save User Settings From Server
+            saveUserPreferenceData(downloadUserPreferenceData(),context)
         }
         return true
     }
 
-
-    fun processSignInRequestResult(data:Pair<Int,Intent?>):Pair<SignInResult,Throwable?>{
+    fun processSignInRequestResult(data: Pair<Int, Intent?>,context: Context): Pair<SignInResult, Throwable?> {
 
         val response = IdpResponse.fromResultIntent(data.second)
 
         if (data.first == Activity.RESULT_OK) {
             try {
-            doPostLogInProcessing(UserLogInResponse(response))
-                    return Pair(SignInResult.SUCCESS,null)
-            }catch (ex:Throwable){
+                doPostLogInProcessing(UserLogInResponse(response),context)
+                return Pair(SignInResult.SUCCESS, null)
+            } catch (ex: Throwable) {
                 ex.printStackTrace()
-                return Pair(SignInResult.SETTINGS_UPLOAD_ERROR,ex)
+                return Pair(SignInResult.SETTINGS_UPLOAD_ERROR, ex)
             }
         } else {
-            when{
-                response == null ->  return Pair(SignInResult.USER_ABORT, Throwable("Canceled by user."))
-                else ->{
-                    return Pair(SignInResult.SERVER_ERROR,Throwable(response.getError()))
+            when {
+                response == null -> return Pair(SignInResult.USER_ABORT, Throwable("Canceled by user."))
+                else -> {
+                    return Pair(SignInResult.SERVER_ERROR, Throwable(response.getError()))
                 }
             }
         }
     }
 
-    fun downloadAndSaveUserSettingsFromServer() {
-        val userPreferenceData = mUserSettingsDataService.getUserPreferenceData()
-        Log.d("HomeActivity","favouritePageIds: "+userPreferenceData.favouritePageIds)
-        Log.d("HomeActivity","inActivePageIds: "+userPreferenceData.inActivePageIds)
-        Log.d("HomeActivity","inActiveNewsPaperIds: "+userPreferenceData.inActiveNewsPaperIds)
+    fun downloadAndSaveUserSettingsFromServer(context: Context) {
+        val userPreferenceData = downloadUserPreferenceData()
+        saveUserPreferenceData(userPreferenceData,context)
+    }
 
-        userPreferenceData.favouritePageIds = userPreferenceData.favouritePageIds.filter { it!=null }.toCollection(mutableListOf())
-        userPreferenceData.inActivePageIds = userPreferenceData.inActivePageIds.filter { it!=null }.toCollection(mutableListOf())
-        userPreferenceData.inActiveNewsPaperIds = userPreferenceData.inActiveNewsPaperIds.filter { it!=null }.toCollection(mutableListOf())
+    private fun saveUserPreferenceData(userPreferenceData: UserPreferenceData,context: Context) {
+
+        val lastUserSettingsUpdateTime =
+                getLastUserSettingsUpdateTime(userPreferenceData)
+
+        saveLastUserSettingsUpdateTime(lastUserSettingsUpdateTime,context)
 
         mDatabase.userPreferenceDataDao.nukeTable()
         userPreferenceData.id = UUID.randomUUID().toString()
@@ -116,49 +126,79 @@ class UserSettingsRepository private constructor(context: Context) {
         mDatabase.pageGroupDao.addPageGroups(userPreferenceData.pageGroups.values.toList())
     }
 
-    fun uploadUserSettingsToServer() {
-        Log.d("HomeActivity","uploadUserSettingsToServer")
+    private fun getLastUserSettingsUpdateTime(userPreferenceData: UserPreferenceData): Long {
+        return userPreferenceData.updateLog.values.sortedBy { it.timeStamp }.last().timeStamp!!
+    }
 
-        val userPreferenceData = mDatabase.userPreferenceDataDao.findUserPreferenceStaticData()//:UserPreferenceData?
-        /*do {
-            userPreferenceData = mDatabase.userPreferenceDataDao.findUserPreferenceStaticData()
-            if (userPreferenceData != null) {
-                Log.d("HomeActivity","userPreferenceData != null")
-                break
-            }
-            Log.d("HomeActivity","userPreferenceData == null")
-            SystemClock.sleep(100)
-        }while (true)*/
+    @Suppress("SENSELESS_COMPARISON")
+    private fun downloadUserPreferenceData(): UserPreferenceData {
+        val userPreferenceData = mUserSettingsDataService.getUserPreferenceData()
+        Log.d("HomeActivity", "favouritePageIds: " + userPreferenceData.favouritePageIds)
+        Log.d("HomeActivity", "inActivePageIds: " + userPreferenceData.inActivePageIds)
+        Log.d("HomeActivity", "inActiveNewsPaperIds: " + userPreferenceData.inActiveNewsPaperIds)
+        Log.d("HomeActivity", "updateLog: " + userPreferenceData.updateLog)
+
+        userPreferenceData.favouritePageIds = userPreferenceData.favouritePageIds.filter { it != null }.toCollection(mutableListOf())
+        userPreferenceData.inActivePageIds = userPreferenceData.inActivePageIds.filter { it != null }.toCollection(mutableListOf())
+        userPreferenceData.inActiveNewsPaperIds = userPreferenceData.inActiveNewsPaperIds.filter { it != null }.toCollection(mutableListOf())
+
+        Log.d("HomeActivity", "favouritePageIds af: " + userPreferenceData.favouritePageIds)
+        Log.d("HomeActivity", "inActivePageIds af: " + userPreferenceData.inActivePageIds)
+        Log.d("HomeActivity", "inActiveNewsPaperIds af: " + userPreferenceData.inActiveNewsPaperIds)
+        return userPreferenceData
+    }
+
+    fun uploadUserSettingsToServer(context: Context) {
+        Log.d("HomeActivity", "uploadUserSettingsToServer")
+
+        val userPreferenceData = mDatabase.userPreferenceDataDao.findUserPreferenceStaticData()
         mDatabase.pageGroupDao.findAll()
                 .asSequence()
-                .forEach { userPreferenceData.pageGroups.put(it.name,it) }
+                .forEach { userPreferenceData.pageGroups.put(it.name, it) }
         mUserSettingsDataService.uploadUserSettings(userPreferenceData)
+        saveLastUserSettingsUpdateTime(getLastUserSettingsUpdateTime(mUserSettingsDataService.getUserPreferenceData()),context)
+    }
+
+    fun processUserSettingsForLoggedInUser(context: Context):Boolean{
+
+        ExceptionUtils.thowExceptionIfOnMainThred()
+        ExceptionUtils.thowExceptionIfNoInternetConnection()
+
+        if (!checkIfLoggedIn()) return false
+
+        val userPreferenceData = downloadUserPreferenceData()
+//        val lastUserSettingsUpdateTs = getLastUserSettingsUpdateTime(context)
+
+        if (getLastUserSettingsUpdateTime(userPreferenceData) > getLastUserSettingsUpdateTime(context)){
+            saveUserPreferenceData(userPreferenceData, context)
+        }
+        return true
     }
 
     fun checkIfOnFavList(mPage: Page): Boolean {
         val userPreferenceDataList = mDatabase.userPreferenceDataDao.findAll()
-        if (userPreferenceDataList.size>0){
+        if (userPreferenceDataList.size > 0) {
             return userPreferenceDataList.get(0).favouritePageIds.contains(mPage.id)
         }
         return false
     }
 
-    fun addPageToFavList(page: Page):Boolean {
+    fun addPageToFavList(page: Page): Boolean {
         val userPreferenceDataList = mDatabase.userPreferenceDataDao.findAll()
-        val userPreferenceData : UserPreferenceData
-        if (userPreferenceDataList.size ==0){
+        val userPreferenceData: UserPreferenceData
+        if (userPreferenceDataList.size == 0) {
             userPreferenceData = UserPreferenceData(id = UUID.randomUUID().toString())
-        }else{
+        } else {
             userPreferenceData = userPreferenceDataList.get(0)
         }
-        if(! userPreferenceData.favouritePageIds.contains(page.id)){
+        if (!userPreferenceData.favouritePageIds.contains(page.id)) {
             userPreferenceData.favouritePageIds.add(page.id)
-        } else{
+        } else {
             return true
         }
-        if (userPreferenceDataList.size ==0){
+        if (userPreferenceDataList.size == 0) {
             mDatabase.userPreferenceDataDao.add(userPreferenceData)
-        }else{
+        } else {
             mDatabase.userPreferenceDataDao.save(userPreferenceData)
         }
         return true
@@ -166,16 +206,16 @@ class UserSettingsRepository private constructor(context: Context) {
 
     fun removePageFromFavList(page: Page): Boolean {
         val userPreferenceDataList = mDatabase.userPreferenceDataDao.findAll()
-        val userPreferenceData : UserPreferenceData
-        if (userPreferenceDataList.size ==0){
+        val userPreferenceData: UserPreferenceData
+        if (userPreferenceDataList.size == 0) {
             return false
         }
         userPreferenceData = userPreferenceDataList.get(0)
-        if(userPreferenceData.favouritePageIds.contains(page.id)){
+        if (userPreferenceData.favouritePageIds.contains(page.id)) {
             userPreferenceData.favouritePageIds.remove(page.id)
             mDatabase.userPreferenceDataDao.save(userPreferenceData)
             return true
-        } else{
+        } else {
             return false
         }
     }
@@ -200,11 +240,11 @@ class UserSettingsRepository private constructor(context: Context) {
         return pageGroups
     }
 
-    companion object{
+    companion object {
         @Volatile
-        private lateinit var  INSTANCE:UserSettingsRepository
+        private lateinit var INSTANCE: UserSettingsRepository
 
-        internal fun getInstance(context: Context):UserSettingsRepository{
+        internal fun getInstance(context: Context): UserSettingsRepository {
             if (!::INSTANCE.isInitialized) {
                 synchronized(UserSettingsRepository::class.java) {
                     if (!::INSTANCE.isInitialized) {
@@ -216,10 +256,10 @@ class UserSettingsRepository private constructor(context: Context) {
         }
     }
 
-    enum class SignInResult{
-        USER_ABORT,SERVER_ERROR,SETTINGS_UPLOAD_ERROR,SUCCESS
+    enum class SignInResult {
+        USER_ABORT, SERVER_ERROR, SETTINGS_UPLOAD_ERROR, SUCCESS
     }
 
 }
 
-class UserLogInResponse(val iDpResponse:IdpResponse?){}
+class UserLogInResponse(val iDpResponse: IdpResponse?) {}
