@@ -122,8 +122,6 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : Re
 
     private val titleHolder: MaterialCardView
     private val titleText: TextView
-    private val rightArrow: ImageView
-    private val downArrow: ImageView
     private val editIcon: ImageButton
     private val frameLayout: FrameLayout
 
@@ -134,8 +132,6 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : Re
     init {
         titleHolder = itemView.findViewById(R.id.page_group_title_holder)
         titleText = itemView.findViewById(R.id.page_group_title)
-        rightArrow = itemView.findViewById(R.id.right_arrow)
-        downArrow = itemView.findViewById(R.id.down_arrow)
         editIcon = itemView.findViewById(R.id.edit_page_group_icon)
         frameLayout = itemView.findViewById(R.id.page_group_items_holder)
         frameLayout.id = View.generateViewId()
@@ -164,8 +160,6 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : Re
         @Suppress("SENSELESS_COMPARISON")
         if (item != null) {
             titleText.setText(item.name)
-            rightArrow.visibility = View.VISIBLE
-            downArrow.visibility = View.GONE
             frameLayout.visibility = View.GONE
 
             item.apply {
@@ -195,12 +189,10 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : Re
                 override fun onClick(v: View?) {
                     if (frameLayout.visibility == View.GONE) {
                         frameLayout.visibility = View.VISIBLE
-                        downArrow.visibility = View.VISIBLE
-                        rightArrow.visibility = View.GONE
+                        editIcon.visibility = View.VISIBLE
                     } else {
                         frameLayout.visibility = View.GONE
-                        downArrow.visibility = View.GONE
-                        rightArrow.visibility = View.VISIBLE
+                        editIcon.visibility = View.GONE
                     }
                 }
             })

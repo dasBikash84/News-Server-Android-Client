@@ -14,7 +14,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/page_group_title_holder"
@@ -33,24 +35,12 @@
             android:layout_marginStart="8dp">
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/down_arrow"
+                android:id="@+id/swipe_handle"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:src="@drawable/baseline_arrow_drop_down_black_24"
-                android:visibility="gone"
+                app:srcCompat="@drawable/ic_drag_handle_black_24dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/right_arrow"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/right_arrow"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:src="@drawable/baseline_arrow_right_black_24"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/page_group_title"
-                app:layout_constraintStart_toEndOf="@+id/down_arrow"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.AppCompatTextView
@@ -59,12 +49,11 @@
                 android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:gravity="start|center_vertical"
-                android:text="Dummy"
                 android:textSize="20sp"
                 android:textStyle="normal"
-                android:textColor="@color/article_title_color"
+                android:textColor="@android:color/black"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/right_arrow"
+                app:layout_constraintStart_toEndOf="@+id/swipe_handle"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.AppCompatImageButton
@@ -72,10 +61,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="24dp"
-                android:src="@drawable/baseline_edit_black_24"
+                app:srcCompat="@drawable/ic_edit"
+                android:background="@android:color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:visibility="gone"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
