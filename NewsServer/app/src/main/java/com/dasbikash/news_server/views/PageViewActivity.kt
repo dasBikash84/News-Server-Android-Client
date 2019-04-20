@@ -16,6 +16,7 @@ package com.dasbikash.news_server.views
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.core.view.GravityCompat
 import androidx.appcompat.app.ActionBarDrawerToggle
 import android.view.MenuItem
@@ -27,6 +28,7 @@ import android.view.Menu
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.Article
 import com.dasbikash.news_server_data.display_models.entity.Page
@@ -34,15 +36,20 @@ import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
+import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class PageViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class PageViewActivity : AppCompatActivity(),
+        NavigationView.OnNavigationItemSelectedListener, SignInHandler {
+
 
     companion object {
-
+        const val TAG = "PageViewActivity"
+        const val LOG_IN_REQ_CODE = 7777
         const val EXTRA_PAGE_TO_DISPLAY = "com.dasbikash.news_server.views.PageViewActivity.EXTRA_PAGE_TO_DISPLAY"
         const val EXTRA_FIRST_ARTICLE = "com.dasbikash.news_server.views.PageViewActivity.EXTRA_FIRST_ARTICLE"
 
@@ -61,7 +68,7 @@ class PageViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
     private lateinit var mArticleContent: AppCompatTextView
     private lateinit var mAppSettingsRepository: AppSettingsRepository
     private lateinit var mUserSettingsRepository: UserSettingsRepository
-    private lateinit var mPageViewContainer:CoordinatorLayout
+    private lateinit var mPageViewContainer: CoordinatorLayout
 
     private var mIsPageOnFavList = false
 
@@ -166,49 +173,76 @@ class PageViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         }
     }
 
-    private enum class PAGE_FAV_STATUS_CHANGE_ACTION{
-        ADD,REMOVE
+    private enum class PAGE_FAV_STATUS_CHANGE_ACTION {
+        ADD, REMOVE
     }
 
-    private fun changePageFavStatus(action:PAGE_FAV_STATUS_CHANGE_ACTION){
-        disposable.add(
-                Observable.just(mPage)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            when(action){
-                                PAGE_FAV_STATUS_CHANGE_ACTION.ADD-> return@map mUserSettingsRepository.addPageToFavList(mPage,this)
-                                PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE-> return@map mUserSettingsRepository.removePageFromFavList(mPage,this)
-                            }
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Boolean>() {
-                            override fun onComplete() {
+    private fun changePageFavStatus(action: PAGE_FAV_STATUS_CHANGE_ACTION) {
 
-                            }
+        val dialogMessage: String
 
-                            override fun onNext(result: Boolean) {
-                                if(result){
-                                    when(action){
-                                        PAGE_FAV_STATUS_CHANGE_ACTION.ADD->   {
-                                            mIsPageOnFavList = true
-                                            Snackbar.make(mPageViewContainer,"${mPage.name} added to favourites",Snackbar.LENGTH_SHORT)
-                                                    .show()
-                                        }
-                                        PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE-> {
-                                            mIsPageOnFavList = false
-                                            Snackbar.make(mPageViewContainer,"${mPage.name} removed from favourites",Snackbar.LENGTH_SHORT)
-                                                    .show()
-                                        }
-                                    }
-                                    invalidateOptionsMenu()
+        when (action) {
+            PAGE_FAV_STATUS_CHANGE_ACTION.ADD -> dialogMessage = "Add \"${mPage.name}\" to favourites?"
+            PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE -> dialogMessage = "Remove \"${mPage.name}\" from favourites?"
+        }
+
+        val positiveText: String
+        val negetiveText: String = "Cancel"
+        val neutralText: String
+        val positiveAction: () -> Unit = {
+            disposable.add(
+                    Observable.just(mPage)
+                            .subscribeOn(Schedulers.io())
+                            .map {
+                                when (action) {
+                                    PAGE_FAV_STATUS_CHANGE_ACTION.ADD -> return@map mUserSettingsRepository.addPageToFavList(mPage, this)
+                                    PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE -> return@map mUserSettingsRepository.removePageFromFavList(mPage, this)
                                 }
                             }
-
-                            override fun onError(e: Throwable) {
-
-                            }
-                        })
-        )
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeWith(object : DisposableObserver<Boolean>() {
+                                override fun onComplete() {}
+                                override fun onNext(result: Boolean) {
+                                    if (result) {
+                                        when (action) {
+                                            PAGE_FAV_STATUS_CHANGE_ACTION.ADD -> {
+                                                mIsPageOnFavList = true
+                                                Snackbar.make(mPageViewContainer, "${mPage.name} added to favourites", Snackbar.LENGTH_SHORT)
+                                                        .show()
+                                            }
+                                            PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE -> {
+                                                mIsPageOnFavList = false
+                                                Snackbar.make(mPageViewContainer, "${mPage.name} removed from favourites", Snackbar.LENGTH_SHORT)
+                                                        .show()
+                                            }
+                                        }
+                                        invalidateOptionsMenu()
+                                    }
+                                }
+                                override fun onError(e: Throwable) {}
+                            })
+            )
+        }
+        val neutralAction: () -> Unit
+        if (mUserSettingsRepository.checkIfLoggedIn()) {
+            positiveText = "Yes"
+            neutralText = ""
+            neutralAction = {}
+        } else {
+            positiveText = "Execute as guest"
+            neutralText = "Sign in and continue"
+            neutralAction = {
+                launchSignInActivity()
+            }
+        }
+        DialogUtils.createAlertDialog(
+                this,
+                DialogUtils.AlertDialogDetails(
+                        message = dialogMessage,
+                        positiveButtonText = positiveText, neutralButtonText = neutralText, negetiveButtonText = negetiveText,
+                        doOnPositivePress = positiveAction, doOnNeutralPress = neutralAction
+                )
+        ).show()
 
     }
 
@@ -243,5 +277,39 @@ class PageViewActivity : AppCompatActivity(), NavigationView.OnNavigationItemSel
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         drawerLayout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == LOG_IN_REQ_CODE) {
+            Observable.just(Pair(resultCode, data))
+                    .subscribeOn(Schedulers.io())
+                    .map { mUserSettingsRepository.processSignInRequestResult(it, this) }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(object : Observer<Pair<UserSettingsRepository.SignInResult, Throwable?>> {
+                        override fun onComplete() {}
+                        override fun onSubscribe(d: Disposable) {}
+                        override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult, Throwable?>) {
+                            when (processingResult.first) {
+                                UserSettingsRepository.SignInResult.SUCCESS -> Log.d(TAG, "User settings data saved.")
+                                UserSettingsRepository.SignInResult.USER_ABORT -> Log.d(TAG, "Log in canceled by user")
+                                UserSettingsRepository.SignInResult.SERVER_ERROR -> Log.d(TAG, "Log in error. Details:${processingResult.second}")
+                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> Log.d(TAG, "Error while User settings data saving. Details:${processingResult.second}")
+                            }
+                        }
+
+                        override fun onError(e: Throwable) {
+                            Log.d(TAG, "Error while User settings data saving. Error: ${e}")
+                        }
+                    })
+        }
+    }
+
+    override fun launchSignInActivity() {
+        val intent = mUserSettingsRepository.getLogInIntent()
+        intent?.let {
+            startActivityForResult(intent, LOG_IN_REQ_CODE)
+        }
     }
 }
