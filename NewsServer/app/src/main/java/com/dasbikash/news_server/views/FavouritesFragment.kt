@@ -42,6 +42,7 @@ import com.squareup.picasso.Picasso
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
@@ -270,7 +271,7 @@ class SwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAda
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
 
-        favouritePagesListAdapter.notifyDataSetChanged()
+
         val page = (viewHolder as FavouritePagePreviewHolder).mPage
         DialogUtils.createAlertDialog(
                 viewHolder.itemView.context,
@@ -282,15 +283,24 @@ class SwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAda
                             Observable.just(page)
                                     .subscribeOn(Schedulers.io())
                                     .map { userSettingsRepository.removePageFromFavList(page) }
-                                    .subscribe(Consumer {
-                                        it?.let {
-                                            if (it){
-
+                                    .subscribe(object : io.reactivex.Observer<Boolean>{
+                                        override fun onComplete() {   }
+                                        override fun onSubscribe(d: Disposable) {}
+                                        override fun onNext(result: Boolean) {
+                                            if (!result){
+                                                favouritePagesListAdapter.notifyDataSetChanged()
                                             }
+                                        }
+                                        override fun onError(e: Throwable) {
+                                            favouritePagesListAdapter.notifyDataSetChanged()
                                         }
                                     })
 
-                        }
+                        },
+                        doOnNegetivePress = {
+                            favouritePagesListAdapter.notifyDataSetChanged()
+                        },
+                        isCancelable = false
                 )
         ).show()
     }

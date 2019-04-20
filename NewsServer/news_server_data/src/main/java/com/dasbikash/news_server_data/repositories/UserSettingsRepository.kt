@@ -104,6 +104,11 @@ class UserSettingsRepository private constructor(context: Context) {
         Log.d("HomeActivity","favouritePageIds: "+userPreferenceData.favouritePageIds)
         Log.d("HomeActivity","inActivePageIds: "+userPreferenceData.inActivePageIds)
         Log.d("HomeActivity","inActiveNewsPaperIds: "+userPreferenceData.inActiveNewsPaperIds)
+
+        userPreferenceData.favouritePageIds = userPreferenceData.favouritePageIds.filter { it!=null }.toCollection(mutableListOf())
+        userPreferenceData.inActivePageIds = userPreferenceData.inActivePageIds.filter { it!=null }.toCollection(mutableListOf())
+        userPreferenceData.inActiveNewsPaperIds = userPreferenceData.inActiveNewsPaperIds.filter { it!=null }.toCollection(mutableListOf())
+
         mDatabase.userPreferenceDataDao.nukeTable()
         userPreferenceData.id = UUID.randomUUID().toString()
         mDatabase.userPreferenceDataDao.add(userPreferenceData)
@@ -114,8 +119,8 @@ class UserSettingsRepository private constructor(context: Context) {
     fun uploadUserSettingsToServer() {
         Log.d("HomeActivity","uploadUserSettingsToServer")
 
-        var userPreferenceData:UserPreferenceData?
-        do {
+        val userPreferenceData = mDatabase.userPreferenceDataDao.findUserPreferenceStaticData()//:UserPreferenceData?
+        /*do {
             userPreferenceData = mDatabase.userPreferenceDataDao.findUserPreferenceStaticData()
             if (userPreferenceData != null) {
                 Log.d("HomeActivity","userPreferenceData != null")
@@ -123,11 +128,11 @@ class UserSettingsRepository private constructor(context: Context) {
             }
             Log.d("HomeActivity","userPreferenceData == null")
             SystemClock.sleep(100)
-        }while (true)
+        }while (true)*/
         mDatabase.pageGroupDao.findAll()
                 .asSequence()
-                .forEach { userPreferenceData!!.pageGroups.put(it.name,it) }
-        mUserSettingsDataService.uploadUserSettings(userPreferenceData!!)
+                .forEach { userPreferenceData.pageGroups.put(it.name,it) }
+        mUserSettingsDataService.uploadUserSettings(userPreferenceData)
     }
 
     fun checkIfOnFavList(mPage: Page): Boolean {

@@ -39,6 +39,7 @@ object DialogUtils {
                 {dialog: DialogInterface?, which: Int -> alertDialogDetails.doOnPositivePress() })
         dialogBuilder.setNegativeButton(alertDialogDetails.negetiveButtonText.trim(),
                 {dialog: DialogInterface?, which: Int -> alertDialogDetails.doOnNegetivePress() })
+        dialogBuilder.setCancelable(alertDialogDetails.isCancelable)
         return dialogBuilder
     }
 
@@ -48,6 +49,7 @@ object DialogUtils {
             val message:String = "",
             val positiveButtonText:String = DEFAULT_POS_BUTTON_TEXT,
             val negetiveButtonText:String = DEFAULT_NEG_BUTTON_TEXT,
+            val isCancelable:Boolean = true,
             val doOnPositivePress:()->Unit = {},
             val doOnNegetivePress:()->Unit = {}
     )
