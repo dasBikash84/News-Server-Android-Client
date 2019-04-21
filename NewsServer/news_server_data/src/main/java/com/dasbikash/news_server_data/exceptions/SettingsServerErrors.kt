@@ -13,7 +13,34 @@
 
 package com.dasbikash.news_server_data.exceptions
 
-class NoInternertConnectionException : NewsServerException {
+open class SettingsServerException : NewsServerException {
+
+    constructor() {}
+
+    constructor(message: String) : super(message) {}
+
+    constructor(cause: Throwable) : super(cause) {}
+}
+
+class SettingsServerUnavailable : SettingsServerException {
+
+    constructor() {}
+
+    constructor(message: String) : super(message) {}
+
+    constructor(cause: Throwable) : super(cause) {}
+}
+
+class AppSettingsNotFound : SettingsServerException {
+
+    constructor() {}
+
+    constructor(message: String) : super(message) {}
+
+    constructor(cause: Throwable) : super(cause) {}
+}
+
+class UserSettingsNotFoundException : SettingsServerException {
 
     constructor() {}
 

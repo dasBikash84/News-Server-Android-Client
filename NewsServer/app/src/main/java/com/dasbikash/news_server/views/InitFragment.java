@@ -35,10 +35,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.dasbikash.news_server.R;
 import com.dasbikash.news_server.view_models.HomeViewModel;
 import com.dasbikash.news_server.views.interfaces.HomeNavigator;
-import com.dasbikash.news_server_data.exceptions.DataNotFoundException;
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException;
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException;
-import com.dasbikash.news_server_data.exceptions.RemoteDbException;
+import com.dasbikash.news_server_data.exceptions.SettingsServerException;
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository;
 import com.dasbikash.news_server_data.repositories.RepositoryFactory;
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository;
@@ -240,8 +239,8 @@ public class InitFragment extends Fragment {
             mLoadSettingsDataOnNetConnection.set(true);
             mProgressBar.setIndeterminate(true);
             mNoInternetMessage.setVisibility(View.VISIBLE);
-        } else if (throwable instanceof DataNotFoundException ||
-                throwable instanceof RemoteDbException) {
+        } else if (throwable instanceof SettingsServerException/* ||
+                throwable instanceof RemoteDbException*/) {
             mRetryCountForRemoteDBError++;
             mRetryDelayForRemoteDBError +=
                     RETRY_DELAY_FOR_REMOTE_ERROR_INC_VALUE *

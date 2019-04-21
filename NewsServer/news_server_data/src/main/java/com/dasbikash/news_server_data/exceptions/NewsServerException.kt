@@ -13,7 +13,7 @@
 
 package com.dasbikash.news_server_data.exceptions
 
-class DataNotFoundException : RuntimeException {
+open class NewsServerException : RuntimeException {
 
     constructor() {}
 

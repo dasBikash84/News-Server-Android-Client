@@ -13,14 +13,13 @@
 
 package com.dasbikash.news_server_data.data_sources.firebase
 
-import android.content.Context
 import android.util.Log
 import com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service.UserIpDataService
-import com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service.UserIpWebService
 import com.dasbikash.news_server_data.display_models.entity.DefaultAppSettings
 import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
 import com.dasbikash.news_server_data.display_models.entity.UserSettingsUpdateDetails
-import com.dasbikash.news_server_data.exceptions.RemoteDbException
+import com.dasbikash.news_server_data.exceptions.AppSettingsNotFound
+import com.dasbikash.news_server_data.exceptions.UserSettingsNotFoundException
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -69,17 +68,16 @@ internal object FirebaseRealtimeDBUtils {
 
     fun getServerAppSettingsUpdateTime(): Long {
 
-        val REMOTE_DB_ERROR_FLAG = -1L
-
         checkRequestValidity()
 
         var data = 0L
         val waitFlag = AtomicBoolean(true)
 
+        var appSettingsNotFound:AppSettingsNotFound? = null
 
         mSettingsUpdateTimeReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(databaseError: DatabaseError) {
-                data = REMOTE_DB_ERROR_FLAG
+                appSettingsNotFound = AppSettingsNotFound(databaseError.message)
                 waitFlag.set(false)
             }
 
@@ -88,18 +86,16 @@ internal object FirebaseRealtimeDBUtils {
                     try {
                         data = dataSnapshot.children.last().value as Long
                     } catch (e: Exception) {
-                        data = REMOTE_DB_ERROR_FLAG
+                        appSettingsNotFound = AppSettingsNotFound(e)
                     }
                 }
                 waitFlag.set(false)
             }
         })
 
-        while (waitFlag.get()) {
-        }
-        if (data == REMOTE_DB_ERROR_FLAG) {
-            throw RemoteDbException();
-        }
+        while (waitFlag.get()) {}
+        if (appSettingsNotFound !=null) {throw appSettingsNotFound as AppSettingsNotFound}
+
         return data
     }
 
@@ -110,37 +106,29 @@ internal object FirebaseRealtimeDBUtils {
         var data: DefaultAppSettings? = null
         val waitFlag = AtomicBoolean(true)
 
-        Log.d(TAG, "getServerAppSettingsData:")
+        var appSettingsNotFound:AppSettingsNotFound? = null
 
         mAppSettingsReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
-                data = null
-                Log.d(TAG, "onCancelled Error:" + error.details)
+                appSettingsNotFound = AppSettingsNotFound(error.message)
                 waitFlag.set(false)
             }
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     try {
-                        Log.d(TAG, "Data:" + dataSnapshot.value)
                         data = dataSnapshot.getValue(DefaultAppSettings::class.java)!!
                     } catch (ex: Exception) {
-                        Log.d(TAG, "onDataChange Error:" + ex.message)
-                        ex.printStackTrace()
+                        appSettingsNotFound = AppSettingsNotFound(ex)
                     }
-                    Log.d(TAG, "onDataChange:")
                     waitFlag.set(false)
                 }
             }
         })
+        while (waitFlag.get()) {}
+        if (appSettingsNotFound !=null) {throw appSettingsNotFound as AppSettingsNotFound}
 
-        while (waitFlag.get()) {
-        }
-        if (data == null) {
-            throw RemoteDbException();
-        }
         return data!!
-
     }
 
     fun getUserPreferenceData(): UserPreferenceData {
@@ -149,37 +137,28 @@ internal object FirebaseRealtimeDBUtils {
         var data: UserPreferenceData? = null
         val waitFlag = AtomicBoolean(true)
 
-        Log.d(TAG, "getUserPreferenceData:")
+        var userSettingsException:UserSettingsNotFoundException?=null
 
         getUserSettingsRef(FirebaseAuth.getInstance().currentUser!!).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
-                Log.d(TAG, "onCancelled Error:" + error.details)
-                throw RemoteDbException(error.toException())
-//                data = null
-//                waitFlag.set(false)
+                userSettingsException =  UserSettingsNotFoundException(error.message)
+                waitFlag.set(false)
             }
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     try {
-                        Log.d(TAG, "Data:" + dataSnapshot.value)
                         data = dataSnapshot.getValue(UserPreferenceData::class.java)!!
                     } catch (ex: Exception) {
-                        Log.d(TAG, "onDataChange Error:" + ex.message)
-                        ex.printStackTrace()
-                        throw RemoteDbException(ex)
+                        userSettingsException =  UserSettingsNotFoundException(ex)
                     }
-                    Log.d(TAG, "onDataChange:")
                     waitFlag.set(false)
                 }
             }
         })
+        while (waitFlag.get()) {}
+        if (userSettingsException !=null) {throw userSettingsException as UserSettingsNotFoundException}
 
-        while (waitFlag.get()) {
-        }
-        if (data == null) {
-            throw RemoteDbException()
-        }
         return data as UserPreferenceData
     }
 

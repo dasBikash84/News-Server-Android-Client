@@ -13,7 +13,25 @@
 
 package com.dasbikash.news_server_data.exceptions
 
-class NoInternertConnectionException : NewsServerException {
+open class AuthServerException : NewsServerException {
+
+    constructor() {}
+
+    constructor(message: String) : super(message) {}
+
+    constructor(cause: Throwable) : super(cause) {}
+}
+
+open class AuthServerUnavailable : AuthServerException {
+
+    constructor() {}
+
+    constructor(message: String) : super(message) {}
+
+    constructor(cause: Throwable) : super(cause) {}
+}
+
+open class WrongCredentialException : AuthServerException {
 
     constructor() {}
 

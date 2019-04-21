@@ -13,7 +13,7 @@
 
 package com.dasbikash.news_server_data.exceptions
 
-class OnMainThreadException : RuntimeException {
+class OnMainThreadException : NewsServerException {
 
     constructor() {}
 

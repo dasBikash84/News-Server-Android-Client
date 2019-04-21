@@ -13,7 +13,7 @@
 
 package com.dasbikash.news_server_data.exceptions
 
-open class DataSourceException : RuntimeException {
+class InternalDbError: NewsServerException {
 
     constructor() {}
 

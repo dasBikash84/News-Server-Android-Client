@@ -13,7 +13,45 @@
 
 package com.dasbikash.news_server_data.exceptions
 
-class RemoteDbException : DataSourceException {
+
+
+open class DataServerException : NewsServerException {
+
+    constructor() {}
+
+    constructor(message: String) : super(message) {}
+
+    constructor(cause: Throwable) : super(cause) {}
+}
+
+class DataServerUnavailable : DataServerException {
+
+    constructor() {}
+
+    constructor(message: String) : super(message) {}
+
+    constructor(cause: Throwable) : super(cause) {}
+}
+
+class DataNotFound : DataServerException {
+
+    constructor() {}
+
+    constructor(message: String) : super(message) {}
+
+    constructor(cause: Throwable) : super(cause) {}
+}
+
+class DataPostingException : DataServerException {
+
+    constructor() {}
+
+    constructor(message: String) : super(message) {}
+
+    constructor(cause: Throwable) : super(cause) {}
+}
+
+class TokenGenerationException : DataServerException {
 
     constructor() {}
 
