@@ -31,7 +31,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
-import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.dasbikash.news_server.views.rv_helpers.PageListAdapter
 import com.dasbikash.news_server.views.rv_helpers.PageViewHolder
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
@@ -257,23 +256,27 @@ class PageGroupEditFragment : Fragment() {
         }
     }
 
-    private fun cancelButtonClickAction() {
-
+    private fun checkIfModified(): Boolean {
         if (mMode == OPERATING_MODE.CREATE &&
                 mPageGroupNameEditText.text.toString().isBlank() &&
-                mCurrentPageList.size == 0){
-            exit()
-        }else if(mMode == OPERATING_MODE.EDIT &&
+                mCurrentPageList.size == 0) {
+            return false
+        } else return !(mMode == OPERATING_MODE.EDIT &&
                 mPageGroupNameEditText.text.trim().toString().equals(mPageGroup.name) &&
                 mCurrentPageList.size == mPageGroup.pageEntityList.size &&
-                mCurrentPageList.filter { ! mPageGroup.pageEntityList.contains(it) }.count() == 0){
-            exit()
-        }else {
+                mCurrentPageList.filter { !mPageGroup.pageEntityList.contains(it) }.count() == 0)
+    }
+
+    private fun cancelButtonClickAction() {
+
+        if (checkIfModified()) {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                     title = "Exit!", message = "Discard changes and exit?", positiveButtonText = "Yes",
                     negetiveButtonText = "No", doOnPositivePress = {
                 exit()
             })).show()
+        } else {
+            exit()
         }
     }
 
@@ -282,17 +285,21 @@ class PageGroupEditFragment : Fragment() {
     }
 
     private fun doneButtonClickAction() {
+
+        if (!checkIfModified()) {
+            DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
+                    message = "No modifications. Exit?", doOnPositivePress = { exit() }
+            )).show()
+            return
+        }
+
         val newPageGroupName = mPageGroupNameEditText.text.toString()
-        if (newPageGroupName.isBlank()) {
-            Toast.makeText(context, "Page Group name can't be blank", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (mCurrentPageList.size == 0) {
-            Toast.makeText(context, "Atleast one page must be added to group", Toast.LENGTH_SHORT).show()
-            return
-        }
+
+        var oldName = ""
         if (mMode == OPERATING_MODE.CREATE) {
             mPageGroup = PageGroup()
+        } else {
+            oldName = mPageGroup.name
         }
         mPageGroup.name = newPageGroupName.trim()
         mPageGroup.pageList = mCurrentPageList.map { it.id }.toList()
@@ -305,10 +312,10 @@ class PageGroupEditFragment : Fragment() {
                         .map {
                             when (mMode) {
                                 OPERATING_MODE.CREATE -> {
-                                    return@map userSettingsRepository.add(mPageGroup,context!!)
+                                    return@map userSettingsRepository.add(mPageGroup, context!!)
                                 }
                                 OPERATING_MODE.EDIT -> {
-                                    return@map userSettingsRepository.save(mPageGroup,context!!)
+                                    return@map userSettingsRepository.save(oldName, mPageGroup, context!!)
                                 }
                             }
                         }

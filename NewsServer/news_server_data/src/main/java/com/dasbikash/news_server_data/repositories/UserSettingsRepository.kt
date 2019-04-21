@@ -270,13 +270,14 @@ class UserSettingsRepository private constructor(context: Context) {
         return true
     }
 
-    fun save(pageGroup: PageGroup,context: Context):Boolean {
+    fun save(oldId:String,pageGroup: PageGroup,context: Context):Boolean {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         Log.d(TAG, "save: ${pageGroup.name}")
         //Before update fetch current settings from server
         updateUserSettingsIfModified(context)
 
-        mDatabase.pageGroupDao.save(pageGroup)
+        mDatabase.pageGroupDao.delete(oldId)
+        mDatabase.pageGroupDao.add(pageGroup)
         uploadUserSettingsToServerIfLoggedIn(context)
         return true
     }

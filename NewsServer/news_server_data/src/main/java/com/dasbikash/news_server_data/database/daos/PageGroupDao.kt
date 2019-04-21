@@ -38,6 +38,9 @@ internal interface PageGroupDao {
     @Query("DELETE FROM PageGroup")
     fun nukeTable()
 
+    @Query("DELETE FROM PageGroup WHERE name=:oldId")
+    fun delete(oldId:String)
+
     @Delete
     fun delete(pageGroup: PageGroup)
 
