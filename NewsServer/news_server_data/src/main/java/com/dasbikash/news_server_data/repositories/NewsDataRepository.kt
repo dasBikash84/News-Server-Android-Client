@@ -55,7 +55,6 @@ class NewsDataRepository private constructor(context: Context) {
 
 
     fun getLatestArticleByPage(page: Page): Article? {
-        ExceptionUtils.thowExceptionIfOnMainThred()
 
         val article: Article? = newsServerDatabase.articleDao.getLatestArticleByPageId(page.id)
 

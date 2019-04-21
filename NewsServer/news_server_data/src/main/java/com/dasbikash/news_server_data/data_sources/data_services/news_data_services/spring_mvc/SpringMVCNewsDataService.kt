@@ -17,6 +17,10 @@ import android.util.Log
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.display_models.entity.Article
 import com.dasbikash.news_server_data.utills.ExceptionUtils
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.util.*
 
 internal object SpringMVCNewsDataService: NewsDataService {
 
@@ -27,7 +31,7 @@ internal object SpringMVCNewsDataService: NewsDataService {
 
 
     override fun getLatestArticleByTopLevelPageId(topLevelPageId: String): Article {
-        ExceptionUtils.thowExceptionIfOnMainThred()
+//        ExceptionUtils.thowExceptionIfOnMainThred()
         return springMVCWebService
                 .getLatestArticleByTopLevelPageId(topLevelPageId)
                 .execute()
@@ -35,22 +39,28 @@ internal object SpringMVCNewsDataService: NewsDataService {
     }
 
     override fun getLatestArticlesByPageId(pageId: String, articleRequestSize: Int): List<Article> {
-        ExceptionUtils.thowExceptionIfOnMainThred()
-        Log.d(TAG,"getLatestArticlesByPageId: article request from page: ${pageId} for ${articleRequestSize} articles")
+//        ExceptionUtils.thowExceptionIfOnMainThred()
 
-        val response = springMVCWebService.getLatestArticlesByPageId(pageId,articleRequestSize).execute()
+        val lock = Object()
+        val articles = mutableListOf<Article>()
 
-        if (response.isSuccessful){
-            Log.d(TAG,"getLatestArticlesByPageId: article found for page: ${pageId}")
-            return response.body()!!
-        }else{
-            Log.d(TAG,"getLatestArticlesByPageId: no article for page: ${pageId}")
-            return listOf()
-        }
+        springMVCWebService.getLatestArticlesByPageId(pageId,articleRequestSize).enqueue(object : Callback<List<Article>?>{
+            override fun onFailure(call: Call<List<Article>?>, t: Throwable) {
+                synchronized(lock){lock.notify()}
+            }
+            override fun onResponse(call: Call<List<Article>?>, response: Response<List<Article>?>) {
+                response.body()?.let { articles.addAll(it) }
+                synchronized(lock){lock.notify()}
+            }
+
+        })
+
+        synchronized(lock){lock.wait()}
+        return articles
     }
 
     override fun getArticlesAfterLastId(pageId:String,lastArticleId: String, articleRequestSize: Int): List<Article> {
-        ExceptionUtils.thowExceptionIfOnMainThred()
+//        ExceptionUtils.thowExceptionIfOnMainThred()
         return springMVCWebService
                 .getArticlesAfterLastId(pageId,lastArticleId,articleRequestSize)
                 .execute()

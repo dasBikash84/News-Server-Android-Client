@@ -13,7 +13,10 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service
 
-import com.dasbikash.news_server_data.utills.ExceptionUtils
+import com.dasbikash.news_server_data.exceptions.DataNotFoundException
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 internal object UserIpDataService {
 
@@ -23,11 +26,31 @@ internal object UserIpDataService {
             = UserIpWebService.RETROFIT.create(UserIpWebService::class.java)
 
     fun getIpAddress(): String {
-        ExceptionUtils.thowExceptionIfOnMainThred()
-        return userIpWebService
-                .getIpAddress()
-                .execute()
-                .body()!!.ip!!
+        val lock = Object()
+        val call = userIpWebService.getIpAddress()
+
+        var result:String? = null
+        var dataNotFoundException:DataNotFoundException?=null
+
+        call.enqueue(object : Callback<IpAddress>{
+            override fun onFailure(call: Call<IpAddress>, t: Throwable) {
+                dataNotFoundException = DataNotFoundException(t)
+                synchronized(lock){lock.notify()}
+            }
+            override fun onResponse(call: Call<IpAddress>, response: Response<IpAddress>) {
+                if (response.isSuccessful){
+                    result = response.body()!!.ip!!
+                }else{
+                    dataNotFoundException = DataNotFoundException()
+                }
+                synchronized(lock){lock.notify()}
+            }
+        })
+
+        synchronized(lock){lock.wait()}
+        dataNotFoundException?.let { throw it }
+
+        return result!!
     }
 }
 

@@ -21,6 +21,7 @@ import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.display_models.entity.*
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException
+import com.dasbikash.news_server_data.utills.ExceptionUtils
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -40,6 +41,7 @@ class AppSettingsRepository private constructor(context: Context) {
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     @Throws(OnMainThreadException::class, NoInternertConnectionException::class)
     fun loadAppSettings(context: Context) {
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val appSettings = mAppSettingsDataService.getAppSettings(context)
 
         mDatabase.nukeAppSettings()
@@ -55,12 +57,14 @@ class AppSettingsRepository private constructor(context: Context) {
     }
 
     fun isAppSettingsUpdated(context: Context): Boolean {
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val localAppSettingsUpdateTime = mAppSettingsDataService.getLocalAppSettingsUpdateTime(context)
         val serverAppSettingsUpdateTime = mAppSettingsDataService.getServerAppSettingsUpdateTime(context)
         return serverAppSettingsUpdateTime > localAppSettingsUpdateTime
     }
 
     fun isAppSettingsDataLoaded(): Boolean {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         return getLanguageCount() > 0 && getCountryCount() > 0 &&
                 getNewsPaperCount() > 0 && getPageCount() > 0 &&
                 getPageGroupCount() > 0
@@ -71,35 +75,43 @@ class AppSettingsRepository private constructor(context: Context) {
     }
 
     fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page> {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         return mDatabase.pageDao.getTopPagesByNewsPaperId(newspaper.id)
     }
 
     fun getChildPagesForTopLevelPage(topLevelPage: Page):List<Page>{
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         return mDatabase.pageDao.getChildPagesByTopLevelPageId(topLevelPage.id)
     }
 
     fun getLanguageByPage(page: Page): Language {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         val newspaper = mDatabase.newsPaperDao.findById(page.newsPaperId!!)
         return mDatabase.languageDao.findByLanguageId(newspaper.languageId!!)
     }
 
     fun getTopPageforChildPage(it: Page): Page? {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         return mDatabase.pageDao.findById(it.parentPageId ?: "")
     }
 
     fun getNewspaperByPage(page: Page): Newspaper {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         return mDatabase.newsPaperDao.findById(page.newsPaperId ?: "")
     }
 
     fun findMatchingPages(it: String): List<Page> {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         return mDatabase.pageDao.findByNameContent("%"+it+"%")
     }
 
     fun findArticleById(mFirstArticleId: String): Article? {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         return mDatabase.articleDao.findById(mFirstArticleId)
     }
 
     fun findPageById(pageId:String): Page? {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         return mDatabase.pageDao.findById(pageId)
     }
 

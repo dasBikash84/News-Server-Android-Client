@@ -48,3 +48,12 @@ class UserSettingsNotFoundException : SettingsServerException {
 
     constructor(cause: Throwable) : super(cause) {}
 }
+
+class UserSettingsUploadException : SettingsServerException {
+
+    constructor() {}
+
+    constructor(message: String) : super(message) {}
+
+    constructor(cause: Throwable) : super(cause) {}
+}

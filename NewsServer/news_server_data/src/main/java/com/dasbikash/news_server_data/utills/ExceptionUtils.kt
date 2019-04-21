@@ -19,7 +19,7 @@ import com.dasbikash.news_server_data.exceptions.OnMainThreadException
 
 object ExceptionUtils {
 
-    fun thowExceptionIfOnMainThred(){
+    private fun thowExceptionIfOnMainThred(){
         if (Thread.currentThread() == Looper.getMainLooper().thread) {
             throw OnMainThreadException()
         }
@@ -36,7 +36,6 @@ object ExceptionUtils {
     }
 
     fun checkRequestValidityBeforeDatabaseAccess(){
-        thowExceptionIfNoInternetConnection()
         thowExceptionIfOnMainThred()
     }
 

@@ -239,15 +239,12 @@ public class InitFragment extends Fragment {
             mLoadSettingsDataOnNetConnection.set(true);
             mProgressBar.setIndeterminate(true);
             mNoInternetMessage.setVisibility(View.VISIBLE);
-        } else if (throwable instanceof SettingsServerException/* ||
-                throwable instanceof RemoteDbException*/) {
+        } else if (throwable instanceof SettingsServerException) {
             mRetryCountForRemoteDBError++;
             mRetryDelayForRemoteDBError +=
                     RETRY_DELAY_FOR_REMOTE_ERROR_INC_VALUE *
                             mRetryCountForRemoteDBError;
             initSettingsDataLoading(mRetryDelayForRemoteDBError);
-        } else if (throwable instanceof OnMainThreadException) {
-            ExceptionUtils.INSTANCE.thowExceptionIfOnMainThred();
         }
     }
 

@@ -22,7 +22,7 @@ import java.util.*
 internal object NewsDataServiceUtils {
 
     fun processFetchedArticleData(article: Article,database: NewsServerDatabase):Article{
-        ExceptionUtils.thowExceptionIfOnMainThred()
+//        ExceptionUtils.thowExceptionIfOnMainThred()
 
         val page = database.pageDao.findById(article.pageId!!)
 
@@ -30,7 +30,7 @@ internal object NewsDataServiceUtils {
     }
 
     fun processFetchedArticleData(article: Article,page: Page):Article{
-        ExceptionUtils.thowExceptionIfOnMainThred()
+//        ExceptionUtils.thowExceptionIfOnMainThred()
 
         article.newsPaperId = page.newsPaperId
 

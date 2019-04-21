@@ -20,6 +20,7 @@ import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
 import com.dasbikash.news_server_data.display_models.entity.UserSettingsUpdateDetails
 import com.dasbikash.news_server_data.exceptions.AppSettingsNotFound
 import com.dasbikash.news_server_data.exceptions.UserSettingsNotFoundException
+import com.dasbikash.news_server_data.exceptions.UserSettingsUploadException
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -61,102 +62,91 @@ internal object FirebaseRealtimeDBUtils {
 
     val mUserSettingsRootReference: DatabaseReference = mRootReference.child(USER_SETTINGS_ROOT_NODE)
 
-    private fun checkRequestValidity() {
-        ExceptionUtils.thowExceptionIfOnMainThred()
-        ExceptionUtils.thowExceptionIfNoInternetConnection()
-    }
-
     fun getServerAppSettingsUpdateTime(): Long {
 
-        checkRequestValidity()
-
         var data = 0L
-        val waitFlag = AtomicBoolean(true)
+        val lock = Object()
 
         var appSettingsNotFound:AppSettingsNotFound? = null
 
         mSettingsUpdateTimeReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(databaseError: DatabaseError) {
                 appSettingsNotFound = AppSettingsNotFound(databaseError.message)
-                waitFlag.set(false)
+                synchronized(lock){lock.notify()}
             }
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
                     try {
                         data = dataSnapshot.children.last().value as Long
+                        synchronized(lock){lock.notify()}
                     } catch (e: Exception) {
                         appSettingsNotFound = AppSettingsNotFound(e)
                     }
                 }
-                waitFlag.set(false)
             }
         })
 
-        while (waitFlag.get()) {}
+        synchronized(lock){lock.wait()}
         if (appSettingsNotFound !=null) {throw appSettingsNotFound as AppSettingsNotFound}
 
         return data
     }
 
     fun getServerAppSettingsData(): DefaultAppSettings {
-
-        checkRequestValidity()
-
         var data: DefaultAppSettings? = null
-        val waitFlag = AtomicBoolean(true)
+        val lock = Object()
 
         var appSettingsNotFound:AppSettingsNotFound? = null
 
         mAppSettingsReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
                 appSettingsNotFound = AppSettingsNotFound(error.message)
-                waitFlag.set(false)
+                synchronized(lock){lock.notify()}
             }
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     try {
                         data = dataSnapshot.getValue(DefaultAppSettings::class.java)!!
+                        synchronized(lock){lock.notify()}
                     } catch (ex: Exception) {
                         appSettingsNotFound = AppSettingsNotFound(ex)
                     }
-                    waitFlag.set(false)
                 }
             }
         })
-        while (waitFlag.get()) {}
+
+        synchronized(lock){lock.wait()}
         if (appSettingsNotFound !=null) {throw appSettingsNotFound as AppSettingsNotFound}
 
         return data!!
     }
 
     fun getUserPreferenceData(): UserPreferenceData {
-        checkRequestValidity()
-
         var data: UserPreferenceData? = null
-        val waitFlag = AtomicBoolean(true)
+        val lock = Object()
 
         var userSettingsException:UserSettingsNotFoundException?=null
 
         getUserSettingsRef(FirebaseAuth.getInstance().currentUser!!).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
                 userSettingsException =  UserSettingsNotFoundException(error.message)
-                waitFlag.set(false)
+                synchronized(lock){lock.notify()}
             }
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     try {
                         data = dataSnapshot.getValue(UserPreferenceData::class.java)!!
+                        synchronized(lock){lock.notify()}
                     } catch (ex: Exception) {
                         userSettingsException =  UserSettingsNotFoundException(ex)
                     }
-                    waitFlag.set(false)
                 }
             }
         })
-        while (waitFlag.get()) {}
+        synchronized(lock){lock.wait()}
         if (userSettingsException !=null) {throw userSettingsException as UserSettingsNotFoundException}
 
         return data as UserPreferenceData
@@ -188,14 +178,50 @@ internal object FirebaseRealtimeDBUtils {
 
     fun uploadUserSettings(userPreferenceData: UserPreferenceData,user:FirebaseUser): Boolean {
 
-        checkRequestValidity()
-
         if (user.isAnonymous) return false
 
-        getFavPageIdListRef(user).setValue(userPreferenceData.favouritePageIds)
-        getInactiveNewspaperIdListRef(user).setValue(userPreferenceData.inActiveNewsPaperIds)
-        getInactivepageIdListRef(user).setValue(userPreferenceData.inActivePageIds)
-        getPageGroupListRef(user).setValue(userPreferenceData.pageGroups)
+        val lock = Object()
+
+        var task = getFavPageIdListRef(user).setValue(userPreferenceData.favouritePageIds)
+        task.addOnCompleteListener { task ->
+            if (task.isSuccessful){
+                synchronized(lock){lock.notify()}
+            }else{
+                throw UserSettingsUploadException()
+            }
+        }
+        synchronized(lock){lock.wait()}
+
+        task = getInactiveNewspaperIdListRef(user).setValue(userPreferenceData.inActiveNewsPaperIds)
+        task.addOnCompleteListener { task ->
+            if (task.isSuccessful){
+                synchronized(lock){lock.notify()}
+            }else{
+                throw UserSettingsUploadException()
+            }
+        }
+        synchronized(lock){lock.wait()}
+
+
+        task = getInactivepageIdListRef(user).setValue(userPreferenceData.inActivePageIds)
+        task.addOnCompleteListener { task ->
+            if (task.isSuccessful){
+                synchronized(lock){lock.notify()}
+            }else{
+                throw UserSettingsUploadException()
+            }
+        }
+        synchronized(lock){lock.wait()}
+
+        task = getPageGroupListRef(user).setValue(userPreferenceData.pageGroups)
+        task.addOnCompleteListener { task ->
+            if (task.isSuccessful){
+                synchronized(lock){lock.notify()}
+            }else{
+                throw UserSettingsUploadException()
+            }
+        }
+        synchronized(lock){lock.wait()}
 
         var ipAddress: String
         try{
@@ -206,7 +232,16 @@ internal object FirebaseRealtimeDBUtils {
 
         val userSettingsUpdateDetails = UserSettingsUpdateDetails(userIp = ipAddress)
 
-        getUpdateLogRef(user).push().setValue(userSettingsUpdateDetails)
+        task = getUpdateLogRef(user).push().setValue(userSettingsUpdateDetails)
+
+        task.addOnCompleteListener { task ->
+            if (task.isSuccessful){
+                synchronized(lock){lock.notify()}
+            }else{
+                throw UserSettingsUploadException()
+            }
+        }
+        synchronized(lock){lock.wait()}
 
         return true
     }

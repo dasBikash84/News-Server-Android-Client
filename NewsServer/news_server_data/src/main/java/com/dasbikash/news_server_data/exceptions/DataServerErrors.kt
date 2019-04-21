@@ -33,7 +33,7 @@ class DataServerUnavailable : DataServerException {
     constructor(cause: Throwable) : super(cause) {}
 }
 
-class DataNotFound : DataServerException {
+class DataNotFoundException : DataServerException {
 
     constructor() {}
 
