@@ -14,10 +14,7 @@
 package com.dasbikash.news_server_data.database.daos
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.dasbikash.news_server_data.display_models.entity.PageGroup
 
 @Dao
@@ -27,7 +24,10 @@ internal interface PageGroupDao {
     val count: Int
 
     @Query("SELECT * FROM PageGroup")
-    fun findAll(): List<PageGroup>
+    fun findAllStatic(): List<PageGroup>
+
+    @Query("SELECT * FROM PageGroup")
+    fun findAllLive(): LiveData<List<PageGroup>>
 
     @Query("SELECT * FROM PageGroup where name=:id")
     fun findById(id: String): PageGroup
@@ -37,5 +37,14 @@ internal interface PageGroupDao {
 
     @Query("DELETE FROM PageGroup")
     fun nukeTable()
+
+    @Delete
+    fun delete(pageGroup: PageGroup)
+
+    @Update
+    fun save(pageGroup: PageGroup)
+
+    @Insert
+    fun add(pageGroup: PageGroup)
 
 }

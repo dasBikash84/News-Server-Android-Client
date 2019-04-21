@@ -21,4 +21,8 @@ interface NavigationHost {
      * stack to make this navigation reversible.
      */
     fun navigateTo(fragment: Fragment, addToBackstack: Boolean=false)
+    fun addFragment(fragment: Fragment)
+    fun removeFragment(fragment: Fragment)
+    fun showBottomNavigationView(show: Boolean)
+    fun showAppBar(show: Boolean)
 }

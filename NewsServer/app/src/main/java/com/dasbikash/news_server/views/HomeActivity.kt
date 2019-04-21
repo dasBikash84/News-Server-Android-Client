@@ -26,7 +26,6 @@ import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.OptionsIntentBuilderUtility
-import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
 import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
@@ -42,7 +41,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
 class HomeActivity : AppCompatActivity(),
-        NavigationHost, HomeNavigator, BottomNavigationViewOwner,SignInHandler {
+        NavigationHost, HomeNavigator, SignInHandler {
 
     private lateinit var mToolbar: Toolbar
     private lateinit var mAppBar: AppBarLayout
@@ -136,6 +135,32 @@ class HomeActivity : AppCompatActivity(),
         }
     }
 
+    override fun addFragment(fragment: Fragment) {
+        val transaction = supportFragmentManager
+                .beginTransaction()
+                .add(R.id.main_frame, fragment)
+                .addToBackStack(null)
+
+        transaction.commit()
+    }
+
+    override fun removeFragment(fragment: Fragment) {
+        val transaction = supportFragmentManager
+                .beginTransaction()
+                .remove(fragment)
+
+        transaction.commit()
+
+    }
+
+    override fun showAppBar(show: Boolean) {
+        if(show) {
+            mAppBar.visibility = View.VISIBLE
+        }else{
+            mAppBar.visibility = View.GONE
+        }
+    }
+
     /**
      * Trigger a navigation to the specified fragment, optionally adding a transaction to the back
      * stack to make this navigation reversible.
@@ -174,7 +199,8 @@ class HomeActivity : AppCompatActivity(),
     }
 
     override fun loadSettingsFragment() {
-        navigateTo(SettingsFragment())
+        navigateTo(PageGroupEditFragment.getInstance("Food"))
+//        navigateTo(SettingsFragment())
     }
 
     override fun loadMoreFragment() {

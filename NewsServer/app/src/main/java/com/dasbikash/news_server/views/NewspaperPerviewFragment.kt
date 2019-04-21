@@ -29,12 +29,12 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.view_models.HomeViewModel
-import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
+import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
-import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.Newspaper
 import com.dasbikash.news_server_data.display_models.entity.Page
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
+import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -67,17 +67,17 @@ class NewspaperPerviewFragment : Fragment() {
         mPagePreviewList = view.findViewById(R.id.newspaper_page_preview_list)
         mNestedScrollView = view.findViewById(R.id.page_preview_scroller)
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
-        (activity as BottomNavigationViewOwner)
+        (activity as NavigationHost)
                 .showBottomNavigationView(true)
 
         mNestedScrollView.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
             override fun onScrollChange(v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
                 val remainingYOfRV = mPagePreviewList.height - scrollY - resources.displayMetrics.heightPixels
                 if (remainingYOfRV < resources.displayMetrics.heightPixels / 5) { //Hides scroller if 1/5 off Child recycler view is below scroller
-                    (activity as BottomNavigationViewOwner)
+                    (activity as NavigationHost)
                             .showBottomNavigationView(false)
                 } else {
-                    (activity as BottomNavigationViewOwner)
+                    (activity as NavigationHost)
                             .showBottomNavigationView(true)
                 }
             }

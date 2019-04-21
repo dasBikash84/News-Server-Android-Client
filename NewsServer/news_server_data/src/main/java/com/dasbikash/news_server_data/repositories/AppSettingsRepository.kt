@@ -87,7 +87,7 @@ class AppSettingsRepository private constructor(context: Context) {
         return mDatabase.pageDao.findById(it.parentPageId ?: "")
     }
 
-    fun getNewspaperByPage(page: Page): Newspaper? {
+    fun getNewspaperByPage(page: Page): Newspaper {
         return mDatabase.newsPaperDao.findById(page.newsPaperId ?: "")
     }
 

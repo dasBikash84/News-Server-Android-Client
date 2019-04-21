@@ -22,18 +22,24 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatButton
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
+import com.dasbikash.news_server.utils.DialogUtils
+import com.dasbikash.news_server.view_models.HomeViewModel
+import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.dasbikash.news_server.views.rv_helpers.PageGroupDiffCallback
-import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.PageGroup
+import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.google.android.material.card.MaterialCardView
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -62,32 +68,74 @@ class PageGroupFragment : Fragment() {
         mPageGroupListScroller = view.findViewById(R.id.page_group_list_scroller)
         mPageGroupListHolder = view.findViewById(R.id.page_group_list_holder)
 
-        mPageGroupListAdapter = PageGroupListAdapter(activity!!.supportFragmentManager,this)
+        mPageGroupListAdapter =
+                PageGroupListAdapter(activity!!.supportFragmentManager, this,
+                        activity!! as SignInHandler,activity as NavigationHost)
         mPageGroupListHolder.adapter = mPageGroupListAdapter
 
-        val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
+        val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
 
-//        (activity as BottomNavigationViewOwner).showBottomNavigationView(true)
+        ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
+                .getPageGroups().observe(this, object : Observer<List<PageGroup>> {
+                    override fun onChanged(pageGroups: List<PageGroup>?) {
+                        pageGroups?.let {
+                            mDisposable.add(
+                                    Observable.just(it)
+                                            .subscribeOn(Schedulers.io())
+                                            .map {
+                                                it.asSequence()
+                                                        .forEach {
+                                                            val thisPageGroup = it
+                                                            it.pageList?.let {
+                                                                it.asSequence().forEach {
+                                                                    appSettingsRepository.findPageById(it)?.let { thisPageGroup.pageEntityList.add(it) }
+                                                                }
+                                                            }
+                                                        }
+                                                it
+                                            }
+                                            .observeOn(AndroidSchedulers.mainThread())
+                                            .subscribeWith(object : DisposableObserver<List<PageGroup>>() {
+                                                override fun onComplete() {}
+                                                override fun onNext(items: List<PageGroup>) {
+                                                    mPageGroupListAdapter.submitList(items)
+                                                }
 
-        mDisposable.add(
-                Observable.just(true)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            userSettingsRepository.getPageGroupList()
+                                                override fun onError(e: Throwable) {}
+                                            })
+                            )
                         }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<List<PageGroup>>() {
-                            override fun onComplete() {
-                            }
+                    }
+                })
 
-                            override fun onNext(items: List<PageGroup>) {
-                                mPageGroupListAdapter.submitList(items)
-                            }
+        view.findViewById<AppCompatButton>(R.id.add_page_group_button)
+                .setOnClickListener {
 
-                            override fun onError(e: Throwable) {
-                            }
-                        })
-        )
+                    val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
+
+                    val notLoggedInDialog = DialogUtils.createAlertDialog(
+                            context!!,
+                            DialogUtils.AlertDialogDetails(
+                                    message = "Add new page group?",
+                                    positiveButtonText = "Execute as guest", negetiveButtonText = "Cancel",
+                                    neutralButtonText = "Sign in and continue",
+                                    doOnPositivePress = {
+                                        (activity as NavigationHost)
+                                                .addFragment(PageGroupEditFragment.getInstance())
+                                    },
+                                    doOnNeutralPress = {
+                                        (activity as SignInHandler).launchSignInActivity()
+                                    }
+                            )
+                    )
+
+                    if (userSettingsRepository.checkIfLoggedIn()) {
+                        (activity as NavigationHost)
+                                .addFragment(PageGroupEditFragment.getInstance())
+                    } else {
+                        notLoggedInDialog.show()
+                    }
+                }
 
     }
 
@@ -98,10 +146,12 @@ class PageGroupFragment : Fragment() {
 }
 
 
-class PageGroupListAdapter(val fragmentManager: FragmentManager,val lifecycleOwner: LifecycleOwner) : ListAdapter<PageGroup, PageGroupHolder>(PageGroupDiffCallback) {
+class PageGroupListAdapter(val fragmentManager: FragmentManager, val lifecycleOwner: LifecycleOwner,
+                           val signInHandler: SignInHandler,val navigationHost: NavigationHost)
+    : ListAdapter<PageGroup, PageGroupHolder>(PageGroupDiffCallback) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageGroupHolder {
         val pagePreviewHolder = PageGroupHolder(LayoutInflater.from(parent.context).inflate(
-                R.layout.view_page_group_item, parent, false), fragmentManager)
+                R.layout.view_page_group_item, parent, false), fragmentManager, signInHandler,navigationHost)
 
         lifecycleOwner.lifecycle.addObserver(pagePreviewHolder)
 
@@ -118,39 +168,126 @@ class PageGroupListAdapter(val fragmentManager: FragmentManager,val lifecycleOwn
     }
 }
 
-class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : RecyclerView.ViewHolder(itemView),DefaultLifecycleObserver {
+class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
+                      val signInHandler: SignInHandler,val navigationHost: NavigationHost)
+    :RecyclerView.ViewHolder(itemView), DefaultLifecycleObserver {
 
     private val titleHolder: MaterialCardView
     private val titleText: TextView
     private val editIcon: ImageButton
     private val frameLayout: FrameLayout
 
+    private val rightArrow: ImageView
+    private val downArrow: ImageView
+
     private var active = true
 
-    private lateinit var mPageGroup: PageGroup
+    lateinit var mPageGroup: PageGroup
 
     init {
         titleHolder = itemView.findViewById(R.id.page_group_title_holder)
         titleText = itemView.findViewById(R.id.page_group_title)
+        rightArrow = itemView.findViewById(R.id.right_arrow)
+        downArrow = itemView.findViewById(R.id.down_arrow)
         editIcon = itemView.findViewById(R.id.edit_page_group_icon)
         frameLayout = itemView.findViewById(R.id.page_group_items_holder)
         frameLayout.id = View.generateViewId()
+
+        editIcon.setOnClickListener {
+            if (::mPageGroup.isInitialized) {
+
+                val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(itemView.context)
+
+                val positiveText: String = "Delete group"
+                val negetiveText: String = "Cancel"
+                val neutralText: String = "Add/remove page(s)"
+                val pageGroupDeletionAction: () -> Unit = {
+                    DialogUtils.createAlertDialog(
+                            itemView.context,
+                            DialogUtils.AlertDialogDetails(
+                                    message = "Proceed with deletion of \"${mPageGroup.name}\" page group?",
+                                    positiveButtonText = "Yes",negetiveButtonText = "Cancel",
+                                    doOnPositivePress = {
+                                        Observable.just(mPageGroup)
+                                                .subscribeOn(Schedulers.io())
+                                                .map {
+                                                    userSettingsRepository.deletePageGroup(mPageGroup,itemView.context)
+                                                }
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribeWith(object : DisposableObserver<Boolean>(){
+                                                    override fun onComplete() {
+
+                                                    }
+                                                    override fun onNext(result: Boolean) {
+
+                                                    }
+                                                    override fun onError(e: Throwable) {
+
+                                                    }
+                                                })
+                                    }
+
+                            )
+                    ).show()
+                }
+                val pageGroupEditFragmentLaunchAction: () -> Unit = {
+                    navigationHost.addFragment(PageGroupEditFragment.getInstance(mPageGroup.name))
+                }
+
+                val modifyActionDialog = DialogUtils.createAlertDialog(
+                        itemView.context,
+                        DialogUtils.AlertDialogDetails(
+                                message = "Edit \"${mPageGroup.name}\" group?",
+                                positiveButtonText = positiveText, negetiveButtonText = negetiveText, neutralButtonText = neutralText,
+                                doOnPositivePress = pageGroupDeletionAction, doOnNeutralPress = pageGroupEditFragmentLaunchAction
+                        )
+                )
+
+                val logInPromptPositiveText: String = "Execute as guest"
+                val logInPromptNegetiveText: String = "Cancel"
+                val logInPromptNeutralText: String = "Sign in and continue"
+                val logInPromptPositiveAction: () -> Unit = {
+                    modifyActionDialog.show()
+                }
+                val logInPromptNeutralAction: () -> Unit = {
+                    signInHandler.launchSignInActivity()
+                }
+
+                val notLoggedInDialog = DialogUtils.createAlertDialog(
+                        itemView.context,
+                        DialogUtils.AlertDialogDetails(
+                                message = "Edit \"${mPageGroup.name}\" group?",
+                                positiveButtonText = logInPromptPositiveText, negetiveButtonText = logInPromptNegetiveText, neutralButtonText = logInPromptNeutralText,
+                                doOnPositivePress = logInPromptPositiveAction, doOnNeutralPress = logInPromptNeutralAction
+                        )
+                )
+
+                if (userSettingsRepository.checkIfLoggedIn()) {
+                    modifyActionDialog.show()
+                } else {
+                    notLoggedInDialog.show()
+                }
+            }
+        }
     }
 
     override fun onResume(owner: LifecycleOwner) {
         active = true
     }
+
     override fun onPause(owner: LifecycleOwner) {
-        Log.d("NpPerviewFragment","active = false for pageGroup:${mPageGroup.name}")
-        active=false
-    }
-    override fun onStop(owner: LifecycleOwner) {
-        Log.d("NpPerviewFragment","active = false for pageGroup:${mPageGroup.name}")
+        Log.d("NpPerviewFragment", "active = false for pageGroup:${mPageGroup.name}")
         active = false
     }
+
+    override fun onStop(owner: LifecycleOwner) {
+        Log.d("NpPerviewFragment", "active = false for pageGroup:${mPageGroup.name}")
+        active = false
+    }
+
     override fun onDestroy(owner: LifecycleOwner) {
-        Log.d("NpPerviewFragment","active = false for pageGroup:${mPageGroup.name}")
-        active=false
+        Log.d("NpPerviewFragment", "active = false for pageGroup:${mPageGroup.name}")
+        active = false
     }
 
     fun bind(item: PageGroup?) {
@@ -160,7 +297,10 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : Re
         @Suppress("SENSELESS_COMPARISON")
         if (item != null) {
             titleText.setText(item.name)
+            rightArrow.visibility = View.VISIBLE
+            downArrow.visibility = View.GONE
             frameLayout.visibility = View.GONE
+            editIcon.visibility = View.GONE
 
             item.apply {
 
@@ -189,10 +329,14 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : Re
                 override fun onClick(v: View?) {
                     if (frameLayout.visibility == View.GONE) {
                         frameLayout.visibility = View.VISIBLE
+                        downArrow.visibility = View.VISIBLE
+                        rightArrow.visibility = View.GONE
                         editIcon.visibility = View.VISIBLE
                     } else {
                         frameLayout.visibility = View.GONE
                         editIcon.visibility = View.GONE
+                        downArrow.visibility = View.GONE
+                        rightArrow.visibility = View.VISIBLE
                     }
                 }
             })
@@ -202,4 +346,81 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager) : Re
         }
     }
 
+}
+
+class PageGroupSwipeToDeleteCallback(val pageGroupListAdapter: PageGroupListAdapter, val signInHandler: SignInHandler) :
+        ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT /*or ItemTouchHelper.LEFT*/) {
+    override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+        return false
+    }
+
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+
+        val pageGroup = (viewHolder as PageGroupHolder).mPageGroup
+        val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(viewHolder.itemView.context)
+
+        val positiveText: String = "Delete group"
+        val negetiveText: String = "Cancel"
+        val neutralText: String = "Add/remove page(s)"
+        val positiveAction: () -> Unit = {
+            //Delete action
+        }
+        val negetiveAction: () -> Unit = {
+            pageGroupListAdapter.notifyDataSetChanged()
+        }
+        val neutralAction: () -> Unit = {
+            pageGroupListAdapter.notifyDataSetChanged()
+            //Edit fragment launch action
+        }
+
+        val loggedInDialog = DialogUtils.createAlertDialog(
+                viewHolder.itemView.context,
+                DialogUtils.AlertDialogDetails(
+                        message = "Edit \"${pageGroup.name}\" group?",
+                        positiveButtonText = positiveText, negetiveButtonText = negetiveText, neutralButtonText = neutralText,
+                        doOnPositivePress = positiveAction, doOnNegetivePress = negetiveAction, doOnNeutralPress = neutralAction,
+                        isCancelable = false
+                )
+        )
+
+        val logInPromptPositiveText: String = "Execute as guest"
+        val logInPromptNegetiveText: String = "Cancel"
+        val logInPromptNeutralText: String = "Sign in and continue"
+        val logInPromptPositiveAction: () -> Unit = {
+            loggedInDialog.show()
+        }
+        val logInPromptNegetiveAction: () -> Unit = {
+            pageGroupListAdapter.notifyDataSetChanged()
+        }
+        val logInPromptNeutralAction: () -> Unit = {
+            pageGroupListAdapter.notifyDataSetChanged()
+            signInHandler.launchSignInActivity()
+        }
+
+        val notLoggedInDialog = DialogUtils.createAlertDialog(
+                viewHolder.itemView.context,
+                DialogUtils.AlertDialogDetails(
+                        message = "Edit \"${pageGroup.name}\" group?",
+                        positiveButtonText = logInPromptPositiveText, negetiveButtonText = logInPromptNegetiveText, neutralButtonText = logInPromptNeutralText,
+                        doOnPositivePress = logInPromptPositiveAction, doOnNegetivePress = logInPromptNegetiveAction, doOnNeutralPress = logInPromptNeutralAction,
+                        isCancelable = false
+                )
+        )
+
+        when (direction) {
+            ItemTouchHelper.LEFT -> {
+
+            }
+            ItemTouchHelper.RIGHT -> {
+                //if signed in show dialog for modification
+                //else show prompt for sign in
+
+                if (userSettingsRepository.checkIfLoggedIn()) {
+                    loggedInDialog.show()
+                } else {
+                    notLoggedInDialog.show()
+                }
+            }
+        }
+    }
 }

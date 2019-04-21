@@ -26,15 +26,21 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.dasbikash.news_server.R;
 import com.dasbikash.news_server.view_models.HomeViewModel;
 import com.dasbikash.news_server.views.interfaces.HomeNavigator;
-import com.dasbikash.news_server_data.repositories.RepositoryFactory;
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException;
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException;
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException;
 import com.dasbikash.news_server_data.exceptions.RemoteDbException;
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository;
+import com.dasbikash.news_server_data.repositories.RepositoryFactory;
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository;
 import com.dasbikash.news_server_data.utills.ExceptionUtils;
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility;
@@ -42,12 +48,6 @@ import com.dasbikash.news_server_data.utills.NetConnectivityUtility;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;

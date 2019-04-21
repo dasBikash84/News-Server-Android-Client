@@ -18,6 +18,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Transformations
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.database.NewsServerDatabase
@@ -27,6 +28,11 @@ import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import com.firebase.ui.auth.IdpResponse
+import io.reactivex.Observable
+import io.reactivex.Observer
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import java.util.*
 
 class UserSettingsRepository private constructor(context: Context) {
@@ -40,19 +46,19 @@ class UserSettingsRepository private constructor(context: Context) {
     private val mUserSettingsDataService: UserSettingsDataService = DataServiceImplProvider.getUserSettingsDataServiceImpl()
     private val mDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
 
-    private fun saveLastUserSettingsUpdateTime(updateTs:Long,context: Context){
+    private fun saveLastUserSettingsUpdateTime(updateTs: Long, context: Context) {
         ExceptionUtils.checkRequestValidityBeforeLocalDiskAccess()
         Log.d("HomeActivity", "saveLastUserSettingsUpdateTime: ${updateTs}")
-        SharedPreferenceUtils.saveData(context,updateTs,LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY)
+        SharedPreferenceUtils.saveData(context, updateTs, LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY)
     }
 
-    private fun getLastUserSettingsUpdateTime(context: Context):Long{
+    private fun getLastUserSettingsUpdateTime(context: Context): Long {
         ExceptionUtils.checkRequestValidityBeforeLocalDiskAccess()
         return SharedPreferenceUtils
-                .getData(context,SharedPreferenceUtils.DefaultValues.DEFAULT_LONG,LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY) as Long
+                .getData(context, SharedPreferenceUtils.DefaultValues.DEFAULT_LONG, LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY) as Long
     }
 
-    private fun doPostLogInProcessing(userLogInResponse: UserLogInResponse,context: Context): Boolean {
+    private fun doPostLogInProcessing(userLogInResponse: UserLogInResponse, context: Context): Boolean {
         val idpResponse = userLogInResponse.iDpResponse
         if (idpResponse == null) return false
         idpResponse.error?.let { return false }
@@ -60,18 +66,18 @@ class UserSettingsRepository private constructor(context: Context) {
             uploadUserSettingsToServer(context)
         } else {
 //            download And Save User Settings From Server
-            saveUserPreferenceData(downloadUserPreferenceData(),context)
+            saveUserPreferenceData(downloadUserPreferenceData(), context)
         }
         return true
     }
 
-    private fun saveUserPreferenceData(userPreferenceData: UserPreferenceData,context: Context) {
+    private fun saveUserPreferenceData(userPreferenceData: UserPreferenceData, context: Context) {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
 
         val lastUserSettingsUpdateTime =
                 getLastUserSettingsUpdateTime(userPreferenceData)
 
-        saveLastUserSettingsUpdateTime(lastUserSettingsUpdateTime,context)
+        saveLastUserSettingsUpdateTime(lastUserSettingsUpdateTime, context)
 
         mDatabase.userPreferenceDataDao.nukeTable()
         userPreferenceData.id = UUID.randomUUID().toString()
@@ -102,15 +108,15 @@ class UserSettingsRepository private constructor(context: Context) {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
 
         val userPreferenceData = mDatabase.userPreferenceDataDao.findUserPreferenceStaticData()
-        mDatabase.pageGroupDao.findAll()
+        mDatabase.pageGroupDao.findAllStatic()
                 .asSequence()
                 .forEach { userPreferenceData.pageGroups.put(it.name, it) }
         mUserSettingsDataService.uploadUserSettings(userPreferenceData)
-        saveLastUserSettingsUpdateTime(getLastUserSettingsUpdateTime(downloadUserPreferenceData()),context)
+        saveLastUserSettingsUpdateTime(getLastUserSettingsUpdateTime(downloadUserPreferenceData()), context)
     }
 
-    private fun uploadUserSettingsToServerIfLoggedIn(context: Context){
-        if (checkIfLoggedIn()){
+    private fun uploadUserSettingsToServerIfLoggedIn(context: Context) {
+        if (checkIfLoggedIn()) {
             uploadUserSettingsToServer(context)
         }
     }
@@ -125,13 +131,13 @@ class UserSettingsRepository private constructor(context: Context) {
                 .saveData(context, true, DISABLE_PROMPT_FOR_LOG_IN_FLAG_SP_KEY)
     }
 
-    fun processSignInRequestResult(data: Pair<Int, Intent?>,context: Context): Pair<SignInResult, Throwable?> {
+    fun processSignInRequestResult(data: Pair<Int, Intent?>, context: Context): Pair<SignInResult, Throwable?> {
 
         val response = IdpResponse.fromResultIntent(data.second)
 
         if (data.first == Activity.RESULT_OK) {
             try {
-                doPostLogInProcessing(UserLogInResponse(response),context)
+                doPostLogInProcessing(UserLogInResponse(response), context)
                 return Pair(SignInResult.SUCCESS, null)
             } catch (ex: Throwable) {
                 ex.printStackTrace()
@@ -159,12 +165,12 @@ class UserSettingsRepository private constructor(context: Context) {
         return mUserSettingsDataService.getLogInIntent()
     }
 
-    fun updateUserSettingsIfModified(context: Context):Boolean{
+    fun updateUserSettingsIfModified(context: Context): Boolean {
 
         if (!checkIfLoggedIn()) return false
         val userPreferenceData = downloadUserPreferenceData()
 
-        if (getLastUserSettingsUpdateTime(userPreferenceData) > getLastUserSettingsUpdateTime(context)){
+        if (getLastUserSettingsUpdateTime(userPreferenceData) > getLastUserSettingsUpdateTime(context)) {
             saveUserPreferenceData(userPreferenceData, context)
         }
         return true
@@ -172,7 +178,7 @@ class UserSettingsRepository private constructor(context: Context) {
 
     fun checkIfOnFavList(mPage: Page): Boolean {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        Log.d(TAG,"checkIfOnFavList: ${mPage.name}")
+        Log.d(TAG, "checkIfOnFavList: ${mPage.name}")
 
         val userPreferenceDataList = mDatabase.userPreferenceDataDao.findAll()
         if (userPreferenceDataList.size > 0) {
@@ -181,9 +187,9 @@ class UserSettingsRepository private constructor(context: Context) {
         return false
     }
 
-    fun addPageToFavList(page: Page,context: Context): Boolean {
+    fun addPageToFavList(page: Page, context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        Log.d(TAG,"addPageToFavList: ${page.name}")
+        Log.d(TAG, "addPageToFavList: ${page.name}")
         //Before update fetch current settings from server
         updateUserSettingsIfModified(context)
 
@@ -208,9 +214,9 @@ class UserSettingsRepository private constructor(context: Context) {
         return true
     }
 
-    fun removePageFromFavList(page: Page,context: Context): Boolean {
+    fun removePageFromFavList(page: Page, context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        Log.d(TAG,"removePageFromFavList: ${page.name}")
+        Log.d(TAG, "removePageFromFavList: ${page.name}")
         //Before update fetch current settings from server
         updateUserSettingsIfModified(context)
 
@@ -234,22 +240,45 @@ class UserSettingsRepository private constructor(context: Context) {
         return mDatabase.userPreferenceDataDao.findUserPreferenceData()
     }
 
-    fun getPageGroupList(): List<PageGroup> {
+    fun getPageGroupListLive(): LiveData<List<PageGroup>> {
+        return mDatabase.pageGroupDao.findAllLive()
+    }
+
+    fun deletePageGroup(pageGroup: PageGroup, context: Context):Boolean {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        Log.d(TAG, "deletePageGroup: ${pageGroup.name}")
+        //Before update fetch current settings from server
+        updateUserSettingsIfModified(context)
 
-        val pageGroups = mDatabase.pageGroupDao.findAll()
-        pageGroups
-                .asSequence()
-                .forEach {
-                    val thisPageGroup = it
-                    it.pageList?.let {
-                        it.asSequence().forEach {
-                            thisPageGroup.pageEntityList.add(mDatabase.pageDao.findById(it))
-                        }
-                    }
-                }
+        mDatabase.pageGroupDao.delete(pageGroup)
+        uploadUserSettingsToServerIfLoggedIn(context)
+        return true
+    }
 
-        return pageGroups
+    fun findPageGroupByName(pageGroupName: String): PageGroup {
+        return mDatabase.pageGroupDao.findById(pageGroupName)
+    }
+
+    fun add(pageGroup: PageGroup,context: Context):Boolean {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        Log.d(TAG, "add: ${pageGroup.name}")
+        //Before update fetch current settings from server
+        updateUserSettingsIfModified(context)
+
+        mDatabase.pageGroupDao.add(pageGroup)
+        uploadUserSettingsToServerIfLoggedIn(context)
+        return true
+    }
+
+    fun save(pageGroup: PageGroup,context: Context):Boolean {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        Log.d(TAG, "save: ${pageGroup.name}")
+        //Before update fetch current settings from server
+        updateUserSettingsIfModified(context)
+
+        mDatabase.pageGroupDao.save(pageGroup)
+        uploadUserSettingsToServerIfLoggedIn(context)
+        return true
     }
 
     companion object {

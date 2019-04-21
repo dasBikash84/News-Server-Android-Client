@@ -18,6 +18,7 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.*
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
@@ -66,6 +67,10 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
 
     fun getUserPreferenceData():LiveData<UserPreferenceData>{
         return mUserSettingsRepository.getUserPreferenceLiveData()
+    }
+
+    fun getPageGroups():LiveData<List<PageGroup>>{
+        return mUserSettingsRepository.getPageGroupListLive()
     }
 
     fun getLatestArticleProvider(requestPayload:Pair<UUID,Page>):Observable<Pair<UUID,Article?>>{

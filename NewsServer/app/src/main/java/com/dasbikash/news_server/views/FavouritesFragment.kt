@@ -23,21 +23,19 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.widget.NestedScrollView
-
-import com.dasbikash.news_server.R
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
-import com.dasbikash.news_server.views.interfaces.BottomNavigationViewOwner
 import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
-import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.display_models.entity.*
+import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.google.android.material.card.MaterialCardView
 import com.squareup.picasso.Picasso
 import io.reactivex.Observable
@@ -77,7 +75,7 @@ class FavouritesFragment : Fragment() {
 
         mFavItemsHolder.adapter = mFavouritePagesListAdapter
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
-        ItemTouchHelper(SwipeToDeleteCallback(mFavouritePagesListAdapter,activity!! as SignInHandler)).attachToRecyclerView(mFavItemsHolder)
+        ItemTouchHelper(FavPageSwipeToDeleteCallback(mFavouritePagesListAdapter,activity!! as SignInHandler)).attachToRecyclerView(mFavItemsHolder)
 
 //        (activity as BottomNavigationViewOwner).showBottomNavigationView(true)
 
@@ -265,7 +263,7 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
 
 }
 
-class SwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAdapter,val signInHandler: SignInHandler) :
+class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAdapter, val signInHandler: SignInHandler) :
         ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
         return false

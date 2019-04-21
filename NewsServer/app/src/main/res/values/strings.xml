@@ -158,4 +158,11 @@
     <string name="menu_tools">Tools</string>
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
+    <string name="pagegroup_title_input_hint">Pagegroup Name</string>
+    <string name="page_search_to_add_text_box_hint">Search Page by name to add</string>
+    <string name="current_page_list_title">Current pages</string>
+    <string name="done_text">Done</string>
+    <string name="cancel_text">Cancel</string>
+    <string name="reset_text">Reset</string>
+    <string name="add_page_group_button_text">Add Group</string>
 </resources>
