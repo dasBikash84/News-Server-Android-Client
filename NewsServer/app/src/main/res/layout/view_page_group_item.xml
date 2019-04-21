@@ -15,48 +15,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="4dp"
-    android:paddingTop="4dp"
-    android:paddingBottom="4dp"
     android:layout_marginBottom="4dp">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/page_group_title_holder"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="32dp"
         app:layout_constraintBottom_toTopOf="@+id/page_group_items_holder"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_margin="2dp">
+        style="@style/Widget.MaterialComponents.CardView">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="start|center_vertical"
             android:layout_marginStart="8dp">
-
-            <!--<androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/swipe_handle"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                app:srcCompat="@drawable/ic_drag_handle_black_24dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/page_group_title"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="8dp"
-                android:gravity="start|center_vertical"
-                android:textSize="20sp"
-                android:textStyle="normal"
-                android:textColor="@android:color/black"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/swipe_handle"
-                app:layout_constraintTop_toTopOf="parent" />-->
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/down_arrow"
@@ -88,7 +63,7 @@
                 android:text="Dummy"
                 android:textSize="20sp"
                 android:textStyle="normal"
-                android:textColor="@color/article_title_color"
+                android:textColor="@android:color/black"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/right_arrow"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -97,7 +72,7 @@
                 android:id="@+id/edit_page_group_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginEnd="24dp"
+                android:layout_marginEnd="16dp"
                 android:padding="4dp"
                 app:srcCompat="@drawable/ic_edit"
                 android:background="@android:color/white"
@@ -113,8 +88,7 @@
     <FrameLayout
         android:id="@+id/page_group_items_holder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/page_group_title_holder"/>

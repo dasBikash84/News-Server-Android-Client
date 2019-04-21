@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
+import com.dasbikash.news_server.views.interfaces.HomeNavigator
 import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.dasbikash.news_server.views.rv_helpers.PageListAdapter
 import com.dasbikash.news_server.views.rv_helpers.PageViewHolder
@@ -70,16 +71,6 @@ class PageGroupEditFragment : Fragment() {
     }
 
     private val MINIMUM_CHAR_LENGTH_FOR_PAGE_SEARCH = 3
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        //(activity as NavigationHost).showBottomNavigationView(false)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        //(activity as NavigationHost).showBottomNavigationView(true)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -135,7 +126,7 @@ class PageGroupEditFragment : Fragment() {
                                             appSettingsRepository.findMatchingPages(it)
                                                     .filter {
                                                         @Suppress("SENSELESS_COMPARISON")
-                                                        it != null
+                                                        it != null && !mCurrentPageList.contains(it)
                                                     }.toList()
                                         }
                                         .observeOn(AndroidSchedulers.mainThread())
@@ -271,14 +262,23 @@ class PageGroupEditFragment : Fragment() {
         if (mMode == OPERATING_MODE.CREATE &&
                 mPageGroupNameEditText.text.toString().isBlank() &&
                 mCurrentPageList.size == 0){
-            (activity as NavigationHost).removeFragment(this)
+            exit()
+        }else if(mMode == OPERATING_MODE.EDIT &&
+                mPageGroupNameEditText.text.trim().toString().equals(mPageGroup.name) &&
+                mCurrentPageList.size == mPageGroup.pageEntityList.size &&
+                mCurrentPageList.filter { ! mPageGroup.pageEntityList.contains(it) }.count() == 0){
+            exit()
         }else {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                     title = "Exit!", message = "Discard changes and exit?", positiveButtonText = "Yes",
                     negetiveButtonText = "No", doOnPositivePress = {
-                (activity as NavigationHost).removeFragment(this)
+                exit()
             })).show()
         }
+    }
+
+    private fun exit() {
+        (activity as HomeNavigator).loadPageGroupFragment()
     }
 
     private fun doneButtonClickAction() {
@@ -318,7 +318,7 @@ class PageGroupEditFragment : Fragment() {
                             override fun onNext(t: Boolean) {
                                 if (t) {
                                     Toast.makeText(context, "Data Saved!!", Toast.LENGTH_SHORT).show()
-                                    (activity as NavigationHost).removeFragment(this@PageGroupEditFragment)
+                                    exit()
                                 } else {
                                     Toast.makeText(context, "Error!! Please retry!!", Toast.LENGTH_SHORT).show()
                                 }

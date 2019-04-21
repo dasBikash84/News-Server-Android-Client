@@ -199,8 +199,7 @@ class HomeActivity : AppCompatActivity(),
     }
 
     override fun loadSettingsFragment() {
-        navigateTo(PageGroupEditFragment.getInstance("Food"))
-//        navigateTo(SettingsFragment())
+        navigateTo(SettingsFragment())
     }
 
     override fun loadMoreFragment() {
