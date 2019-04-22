@@ -17,9 +17,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
-import com.dasbikash.news_server.R;
-
 import androidx.core.app.ShareCompat;
+
+import com.dasbikash.news_server.R;
 
 @SuppressWarnings("ConstantConditions")
 public abstract class OptionsIntentBuilderUtility {

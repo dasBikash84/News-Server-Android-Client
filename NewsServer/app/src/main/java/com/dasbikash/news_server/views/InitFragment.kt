@@ -32,9 +32,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
-import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
+import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.Observable

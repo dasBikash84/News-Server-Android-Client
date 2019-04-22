@@ -15,24 +15,23 @@ package com.dasbikash.news_server_data.data_sources.data_services.app_settings_d
 
 import android.content.Context
 import android.util.Log
-import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import com.dasbikash.news_server_data.models.DefaultAppSettings
-import com.dasbikash.news_server_data.models.NetworkResponse
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 
 internal object AppSettingsDataServiceUtils {
 
     val TAG = "DbTest"
 
-    fun processDefaultAppSettingsData(inputAppSettings: NetworkResponse<DefaultAppSettings>):
-            NetworkResponse<DefaultAppSettings> {
+    fun processDefaultAppSettingsData(defaultAppSettings: DefaultAppSettings):
+            DefaultAppSettings {
 
-        if (inputAppSettings.status == NetworkResponse.ResponseStatus.FAILURE){
+        /*if (inputAppSettings.status == NetworkResponse.ResponseStatus.FAILURE){
             return inputAppSettings
-        }
+        }*/
 
-        val defaultAppSettings = inputAppSettings.payload
+        //val defaultAppSettings = inputAppSettings.payload
 
         defaultAppSettings.newspapers?.let {
 
@@ -91,7 +90,7 @@ internal object AppSettingsDataServiceUtils {
 
             }
         }
-        return NetworkResponse.getSuccessResponse(defaultAppSettings)
+        return defaultAppSettings
     }
 
     val APP_SETTINGS_UPDATE_TIME_STAMP_SP_KEY =

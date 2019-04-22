@@ -26,7 +26,7 @@ internal interface PageGroupDao {
     @Query("SELECT * FROM PageGroup")
     fun findAllStatic(): List<PageGroup>
 
-    @Query("SELECT * FROM PageGroup")
+    @Query("SELECT * FROM PageGroup ORDER BY name")
     fun findAllLive(): LiveData<List<PageGroup>>
 
     @Query("SELECT * FROM PageGroup where name=:id")

@@ -49,7 +49,7 @@ class UserSettingsNotFoundException : SettingsServerException {
     constructor(cause: Throwable) : super(cause) {}
 }
 
-class UserSettingsUploadException : SettingsServerException {
+class UserSettingsUploadFailureException : SettingsServerException {
 
     constructor() {}
 

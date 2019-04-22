@@ -75,7 +75,7 @@ class FavouritesFragment : Fragment() {
 
         mFavItemsHolder.adapter = mFavouritePagesListAdapter
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
-        ItemTouchHelper(FavPageSwipeToDeleteCallback(mFavouritePagesListAdapter,activity!! as SignInHandler)).attachToRecyclerView(mFavItemsHolder)
+        ItemTouchHelper(FavPageSwipeToDeleteCallback(mFavouritePagesListAdapter, activity!! as SignInHandler)).attachToRecyclerView(mFavItemsHolder)
 
 //        (activity as BottomNavigationViewOwner).showBottomNavigationView(true)
 
@@ -86,6 +86,7 @@ class FavouritesFragment : Fragment() {
                             disposable.add(Observable.just(userPreferenceData.favouritePageIds)
                                     .subscribeOn(Schedulers.io())
                                     .map {
+                                        it.sortBy { it }
                                         it.asSequence().map { appSettingsRepository.findPageById(it) }.toList()
                                     }
                                     .observeOn(AndroidSchedulers.mainThread())
@@ -176,9 +177,6 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
     }
 
     fun bind(page: Page?, newspaper: Newspaper) {
-
-        //Log.d("FavouritesFragment","Page: ${page?.name}")
-        //Log.d("FavouritesFragment","Page: ${page?.name}")
 
         pageTitleHolder.visibility = View.GONE
         hideChilds()
@@ -274,40 +272,37 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
         val page = (viewHolder as FavouritePagePreviewHolder).mPage
         val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(viewHolder.itemView.context)
 
-        val positiveText: String
+        var positiveText: String = ""
         val negetiveText: String = "Cancel"
-        val neutralText: String
-        val positiveAction:()->Unit = {
-            Observable.just(page)
-                    .subscribeOn(Schedulers.io())
-                    .map { userSettingsRepository.removePageFromFavList(page,viewHolder.itemView.context) }
-                    .subscribe(object : io.reactivex.Observer<Boolean>{
-                        override fun onComplete() {   }
-                        override fun onSubscribe(d: Disposable) {}
-                        override fun onNext(result: Boolean) {
-                            if (!result){
-                                favouritePagesListAdapter.notifyDataSetChanged()
-                            }
-                        }
-                        override fun onError(e: Throwable) {
-                            e.printStackTrace()
-                            favouritePagesListAdapter.notifyDataSetChanged()
-                        }
-                    })
-
-        }
-        val negetiveAction:()->Unit = {
+        var positiveAction: () -> Unit = {}
+        val negetiveAction: () -> Unit = {
             favouritePagesListAdapter.notifyDataSetChanged()
         }
-        val neutralAction:()->Unit
-        if (userSettingsRepository.checkIfLoggedIn()){
+
+        if (userSettingsRepository.checkIfLoggedIn()) {
             positiveText = "Yes"
-            neutralText = ""
-            neutralAction = {}
-        }else{
-            positiveText = "Execute as guest"
-            neutralText = "Sign in and continue"
-            neutralAction = {
+            positiveAction = {
+                Observable.just(page)
+                        .subscribeOn(Schedulers.io())
+                        .map { userSettingsRepository.removePageFromFavList(page, viewHolder.itemView.context) }
+                        .subscribe(object : io.reactivex.Observer<Boolean> {
+                            override fun onComplete() {}
+                            override fun onSubscribe(d: Disposable) {}
+                            override fun onNext(result: Boolean) {
+                                if (!result) {
+                                    favouritePagesListAdapter.notifyDataSetChanged()
+                                }
+                            }
+
+                            override fun onError(e: Throwable) {
+                                e.printStackTrace()
+                                favouritePagesListAdapter.notifyDataSetChanged()
+                            }
+                        })
+            }
+        } else {
+            positiveText = "Sign in and continue"
+            positiveAction = {
                 favouritePagesListAdapter.notifyDataSetChanged()
                 signInHandler.launchSignInActivity()
             }
@@ -317,8 +312,8 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
                 viewHolder.itemView.context,
                 DialogUtils.AlertDialogDetails(
                         message = "Remove \"${page.name}\" from favourites?",
-                        positiveButtonText = positiveText, negetiveButtonText = negetiveText, neutralButtonText = neutralText,
-                        doOnPositivePress = positiveAction,doOnNegetivePress = negetiveAction,doOnNeutralPress = neutralAction,
+                        positiveButtonText = positiveText, negetiveButtonText = negetiveText, /*neutralButtonText = neutralText,*/
+                        doOnPositivePress = positiveAction, doOnNegetivePress = negetiveAction,/*doOnNeutralPress = neutralAction,*/
                         isCancelable = false
                 )
         ).show()

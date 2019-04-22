@@ -17,7 +17,6 @@ import android.content.Context
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
-import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.concurrent.atomic.AtomicInteger
 

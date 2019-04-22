@@ -18,10 +18,10 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.models.room_entity.*
-import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
+import com.dasbikash.news_server_data.repositories.NewsDataRepository
+import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable

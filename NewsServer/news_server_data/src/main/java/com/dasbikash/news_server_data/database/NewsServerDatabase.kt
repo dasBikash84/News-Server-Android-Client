@@ -19,11 +19,11 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.dasbikash.news_server_data.database.daos.*
-import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.database.room_converters.ArticleImageConverter
 import com.dasbikash.news_server_data.database.room_converters.DateConverter
 import com.dasbikash.news_server_data.database.room_converters.IntListConverter
 import com.dasbikash.news_server_data.database.room_converters.StringListConverter
+import com.dasbikash.news_server_data.models.room_entity.*
 
 @Database(entities = [Country::class, Language::class, Newspaper::class, Page::class, PageGroup::class, Article::class, UserPreferenceData::class, ArticleVisitHistory::class], version = 1, exportSchema = false)
 @TypeConverters(DateConverter::class, IntListConverter::class, StringListConverter::class, ArticleImageConverter::class)

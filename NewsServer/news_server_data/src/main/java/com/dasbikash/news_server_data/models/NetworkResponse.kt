@@ -16,9 +16,10 @@ package com.dasbikash.news_server_data.models
 import com.dasbikash.news_server_data.exceptions.NewsServerException
 
 internal class NetworkResponse<T> private
-        constructor(val status: ResponseStatus,val payload: T,val exception:NewsServerException?=null){
+        constructor(val status: ResponseStatus,val payload: T?=null,val exception:NewsServerException?=null){
 
-    constructor(status: ResponseStatus,payload: T): this (status = status, payload = payload,exception = null)
+    constructor(status: ResponseStatus,payload: T?=null): this (status = status, payload = payload,exception = null)
+    constructor(status: ResponseStatus,exception: NewsServerException): this (status = status, exception = exception,payload = null)
 
     enum class ResponseStatus{
         SUCCESS,FAILURE
@@ -26,8 +27,8 @@ internal class NetworkResponse<T> private
 
     companion object{
         internal fun <T> getSuccessResponse(payload:T) = NetworkResponse<T>(ResponseStatus.SUCCESS,payload)
-        internal fun <T>getFailureResponse(dummyPayload: T, exception:NewsServerException) =
-                NetworkResponse(status = ResponseStatus.FAILURE,payload = dummyPayload,exception = exception)
+        internal fun <T> getFailureResponse(exception:NewsServerException)
+                =NetworkResponse<T>(status = ResponseStatus.FAILURE,exception = exception)
     }
 
 }

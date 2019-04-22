@@ -30,7 +30,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
@@ -70,7 +69,7 @@ class PageGroupFragment : Fragment() {
 
         mPageGroupListAdapter =
                 PageGroupListAdapter(activity!!.supportFragmentManager, this,
-                        activity!! as SignInHandler,activity as NavigationHost)
+                        activity!! as SignInHandler, activity as NavigationHost)
         mPageGroupListHolder.adapter = mPageGroupListAdapter
 
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
@@ -116,14 +115,9 @@ class PageGroupFragment : Fragment() {
                     val notLoggedInDialog = DialogUtils.createAlertDialog(
                             context!!,
                             DialogUtils.AlertDialogDetails(
-                                    message = "Add new page group?",
-                                    positiveButtonText = "Execute as guest", negetiveButtonText = "Cancel",
-                                    neutralButtonText = "Sign in and continue",
+                                    message = "Add new page group?", negetiveButtonText = "Cancel",
+                                    positiveButtonText = "Sign in and continue",
                                     doOnPositivePress = {
-                                        (activity as NavigationHost)
-                                                .addFragment(PageGroupEditFragment.getInstance())
-                                    },
-                                    doOnNeutralPress = {
                                         (activity as SignInHandler).launchSignInActivity()
                                     }
                             )
@@ -147,11 +141,11 @@ class PageGroupFragment : Fragment() {
 
 
 class PageGroupListAdapter(val fragmentManager: FragmentManager, val lifecycleOwner: LifecycleOwner,
-                           val signInHandler: SignInHandler,val navigationHost: NavigationHost)
+                           val signInHandler: SignInHandler, val navigationHost: NavigationHost)
     : ListAdapter<PageGroup, PageGroupHolder>(PageGroupDiffCallback) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageGroupHolder {
         val pagePreviewHolder = PageGroupHolder(LayoutInflater.from(parent.context).inflate(
-                R.layout.view_page_group_item, parent, false), fragmentManager, signInHandler,navigationHost)
+                R.layout.view_page_group_item, parent, false), fragmentManager, signInHandler, navigationHost)
 
         lifecycleOwner.lifecycle.addObserver(pagePreviewHolder)
 
@@ -169,8 +163,8 @@ class PageGroupListAdapter(val fragmentManager: FragmentManager, val lifecycleOw
 }
 
 class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
-                      val signInHandler: SignInHandler,val navigationHost: NavigationHost)
-    :RecyclerView.ViewHolder(itemView), DefaultLifecycleObserver {
+                      val signInHandler: SignInHandler, val navigationHost: NavigationHost)
+    : RecyclerView.ViewHolder(itemView), DefaultLifecycleObserver {
 
     private val titleHolder: MaterialCardView
     private val titleText: TextView
@@ -206,21 +200,23 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                             itemView.context,
                             DialogUtils.AlertDialogDetails(
                                     message = "Proceed with deletion of \"${mPageGroup.name}\" page group?",
-                                    positiveButtonText = "Yes",negetiveButtonText = "Cancel",
+                                    positiveButtonText = "Yes", negetiveButtonText = "Cancel",
                                     doOnPositivePress = {
                                         Observable.just(mPageGroup)
                                                 .subscribeOn(Schedulers.io())
                                                 .map {
-                                                    userSettingsRepository.deletePageGroup(mPageGroup,itemView.context)
+                                                    userSettingsRepository.deletePageGroup(mPageGroup, itemView.context)
                                                 }
                                                 .observeOn(AndroidSchedulers.mainThread())
-                                                .subscribeWith(object : DisposableObserver<Boolean>(){
+                                                .subscribeWith(object : DisposableObserver<Boolean>() {
                                                     override fun onComplete() {
 
                                                     }
+
                                                     override fun onNext(result: Boolean) {
 
                                                     }
+
                                                     override fun onError(e: Throwable) {
 
                                                     }
@@ -243,13 +239,9 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                         )
                 )
 
-                val logInPromptPositiveText: String = "Execute as guest"
                 val logInPromptNegetiveText: String = "Cancel"
-                val logInPromptNeutralText: String = "Sign in and continue"
+                val logInPromptPositiveText: String = "Sign in and continue"
                 val logInPromptPositiveAction: () -> Unit = {
-                    modifyActionDialog.show()
-                }
-                val logInPromptNeutralAction: () -> Unit = {
                     signInHandler.launchSignInActivity()
                 }
 
@@ -257,8 +249,8 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                         itemView.context,
                         DialogUtils.AlertDialogDetails(
                                 message = "Edit \"${mPageGroup.name}\" group?",
-                                positiveButtonText = logInPromptPositiveText, negetiveButtonText = logInPromptNegetiveText, neutralButtonText = logInPromptNeutralText,
-                                doOnPositivePress = logInPromptPositiveAction, doOnNeutralPress = logInPromptNeutralAction
+                                positiveButtonText = logInPromptPositiveText, negetiveButtonText = logInPromptNegetiveText,
+                                doOnPositivePress = logInPromptPositiveAction
                         )
                 )
 
@@ -348,79 +340,3 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
 
 }
 
-class PageGroupSwipeToDeleteCallback(val pageGroupListAdapter: PageGroupListAdapter, val signInHandler: SignInHandler) :
-        ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT /*or ItemTouchHelper.LEFT*/) {
-    override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-        return false
-    }
-
-    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-
-        val pageGroup = (viewHolder as PageGroupHolder).mPageGroup
-        val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(viewHolder.itemView.context)
-
-        val positiveText: String = "Delete group"
-        val negetiveText: String = "Cancel"
-        val neutralText: String = "Add/remove page(s)"
-        val positiveAction: () -> Unit = {
-            //Delete action
-        }
-        val negetiveAction: () -> Unit = {
-            pageGroupListAdapter.notifyDataSetChanged()
-        }
-        val neutralAction: () -> Unit = {
-            pageGroupListAdapter.notifyDataSetChanged()
-            //Edit fragment launch action
-        }
-
-        val loggedInDialog = DialogUtils.createAlertDialog(
-                viewHolder.itemView.context,
-                DialogUtils.AlertDialogDetails(
-                        message = "Edit \"${pageGroup.name}\" group?",
-                        positiveButtonText = positiveText, negetiveButtonText = negetiveText, neutralButtonText = neutralText,
-                        doOnPositivePress = positiveAction, doOnNegetivePress = negetiveAction, doOnNeutralPress = neutralAction,
-                        isCancelable = false
-                )
-        )
-
-        val logInPromptPositiveText: String = "Execute as guest"
-        val logInPromptNegetiveText: String = "Cancel"
-        val logInPromptNeutralText: String = "Sign in and continue"
-        val logInPromptPositiveAction: () -> Unit = {
-            loggedInDialog.show()
-        }
-        val logInPromptNegetiveAction: () -> Unit = {
-            pageGroupListAdapter.notifyDataSetChanged()
-        }
-        val logInPromptNeutralAction: () -> Unit = {
-            pageGroupListAdapter.notifyDataSetChanged()
-            signInHandler.launchSignInActivity()
-        }
-
-        val notLoggedInDialog = DialogUtils.createAlertDialog(
-                viewHolder.itemView.context,
-                DialogUtils.AlertDialogDetails(
-                        message = "Edit \"${pageGroup.name}\" group?",
-                        positiveButtonText = logInPromptPositiveText, negetiveButtonText = logInPromptNegetiveText, neutralButtonText = logInPromptNeutralText,
-                        doOnPositivePress = logInPromptPositiveAction, doOnNegetivePress = logInPromptNegetiveAction, doOnNeutralPress = logInPromptNeutralAction,
-                        isCancelable = false
-                )
-        )
-
-        when (direction) {
-            ItemTouchHelper.LEFT -> {
-
-            }
-            ItemTouchHelper.RIGHT -> {
-                //if signed in show dialog for modification
-                //else show prompt for sign in
-
-                if (userSettingsRepository.checkIfLoggedIn()) {
-                    loggedInDialog.show()
-                } else {
-                    notLoggedInDialog.show()
-                }
-            }
-        }
-    }
-}

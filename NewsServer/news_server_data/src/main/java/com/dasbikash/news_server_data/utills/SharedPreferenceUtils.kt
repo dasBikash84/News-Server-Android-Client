@@ -14,7 +14,6 @@
 package com.dasbikash.news_server_data.utills
 
 import android.content.Context
-import com.dasbikash.news_server_data.R
 
 internal object SharedPreferenceUtils {
 

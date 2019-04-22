@@ -17,10 +17,10 @@ import android.content.Intent
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 
 internal interface UserSettingsDataService{
-//    fun getUserSettingsUpdateTime(context: Context): Long
+    fun getLastUserSettingsUpdateTime(): Long
     fun getUserPreferenceData(): UserPreferenceData
     fun getLogInStatus():Boolean
     fun getLogInIntent():Intent?
-    fun uploadUserSettings(userPreferenceData: UserPreferenceData): Boolean
+    fun uploadUserPreferenceData(userPreferenceData: UserPreferenceData)
     fun signOutUser()
 }

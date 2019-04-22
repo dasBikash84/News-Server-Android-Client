@@ -26,3 +26,7 @@ data class UserSettingsUpdateDetails(
         const val NULL_IP = "255.255.255.255"
     }
 }
+
+class UserSettingsUpdateTime(
+        var timeStamp: Long = 0L
+)

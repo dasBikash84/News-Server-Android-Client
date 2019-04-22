@@ -312,10 +312,10 @@ class PageGroupEditFragment : Fragment() {
                         .map {
                             when (mMode) {
                                 OPERATING_MODE.CREATE -> {
-                                    return@map userSettingsRepository.add(mPageGroup, context!!)
+                                    return@map userSettingsRepository.addPageGroup(mPageGroup, context!!)
                                 }
                                 OPERATING_MODE.EDIT -> {
-                                    return@map userSettingsRepository.save(oldName, mPageGroup, context!!)
+                                    return@map userSettingsRepository.savePageGroup(oldName, mPageGroup, context!!)
                                 }
                             }
                         }

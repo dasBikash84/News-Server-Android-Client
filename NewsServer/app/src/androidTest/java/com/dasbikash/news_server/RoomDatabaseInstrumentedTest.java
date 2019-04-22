@@ -15,15 +15,15 @@ package com.dasbikash.news_server;
 
 import android.content.Context;
 
-import com.dasbikash.news_server_data.repositories.RepositoryFactory;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.dasbikash.news_server_data.repositories.NewsDataRepository;
+import com.dasbikash.news_server_data.repositories.RepositoryFactory;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import androidx.test.core.app.ApplicationProvider;
-import androidx.test.runner.AndroidJUnit4;
 
 /**
  * Instrumented test, which will execute on an Android device.

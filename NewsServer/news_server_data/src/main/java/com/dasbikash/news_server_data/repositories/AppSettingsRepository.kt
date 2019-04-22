@@ -18,12 +18,13 @@ import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.database.NewsServerDatabase
-import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException
-import com.dasbikash.news_server_data.models.NetworkResponse
+import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.Language
+import com.dasbikash.news_server_data.models.room_entity.Newspaper
+import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.utills.ExceptionUtils
-import kotlin.collections.ArrayList
 
 class AppSettingsRepository private constructor(context: Context) {
 
@@ -42,13 +43,7 @@ class AppSettingsRepository private constructor(context: Context) {
     @Throws(OnMainThreadException::class, NoInternertConnectionException::class)
     fun loadAppSettings(context: Context) {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        val appSettingsResponse = mAppSettingsDataService.getAppSettings(context)
-
-        if (appSettingsResponse.status == NetworkResponse.ResponseStatus.FAILURE){
-            throw appSettingsResponse.exception!!
-        }
-
-        val appSettings = appSettingsResponse.payload
+        val appSettings = mAppSettingsDataService.getAppSettings(context)
 
         mDatabase.nukeAppSettings()
 
@@ -66,10 +61,7 @@ class AppSettingsRepository private constructor(context: Context) {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val localAppSettingsUpdateTime = mAppSettingsDataService.getLocalAppSettingsUpdateTime(context)
         val appSettingsUpdateTimeResponse = mAppSettingsDataService.getServerAppSettingsUpdateTime(context)
-        if (appSettingsUpdateTimeResponse.status == NetworkResponse.ResponseStatus.FAILURE){
-            throw appSettingsUpdateTimeResponse.exception!!
-        }
-        val serverAppSettingsUpdateTime = appSettingsUpdateTimeResponse.payload!!
+        val serverAppSettingsUpdateTime = appSettingsUpdateTimeResponse//.payload!!
         return serverAppSettingsUpdateTime > localAppSettingsUpdateTime
     }
 

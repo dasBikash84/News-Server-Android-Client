@@ -239,7 +239,7 @@ class SearchResultEntryViewHolder(itemView: View):RecyclerView.ViewHolder(itemVi
                                 parentPage?.let { pageLabelBuilder.append(" | "+parentPage.name) }
                             }
                             val newsPaper = appSettingsRepository.getNewspaperByPage(page)
-                            newsPaper?.let { pageLabelBuilder.append(" | "+it.name) }
+                            newsPaper.let { pageLabelBuilder.append(" | "+it.name) }
                             it
                         }
                         .observeOn(AndroidSchedulers.mainThread())

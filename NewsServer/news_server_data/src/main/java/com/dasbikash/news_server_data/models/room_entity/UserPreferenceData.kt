@@ -27,14 +27,7 @@ data class UserPreferenceData(
         var inActiveNewsPaperIds: MutableList<String> = mutableListOf(),
         var inActivePageIds: MutableList<String> = mutableListOf(),
         @Ignore
-        var pageGroups:MutableMap<String,PageGroup> = mutableMapOf(),
+        var pageGroups:MutableMap<String,PageGroup> = mutableMapOf()/*,
         @Ignore
-        var updateLog:MutableMap<String,userSettingsUpdateTime> = mutableMapOf()
+        var updateLog:MutableMap<String,userSettingsUpdateTime> = mutableMapOf()*/
 )
-class userSettingsUpdateTime(
-        var timeStamp:Long? = null
-){
-        override fun toString(): String {
-                return "userSettingsUpdateTime(timeStamp=$timeStamp)"
-        }
-}

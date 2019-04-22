@@ -17,14 +17,13 @@ import android.content.Context
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.firebase.FirebaseRealtimeDBUtils
 import com.dasbikash.news_server_data.models.DefaultAppSettings
-import com.dasbikash.news_server_data.models.NetworkResponse
 
 internal object FirebaseAppSettingsDataService: AppSettingsDataService {
-    override fun getServerAppSettingsUpdateTime(context: Context): NetworkResponse<Long> {
+    override fun getServerAppSettingsUpdateTime(context: Context): Long {
         return FirebaseRealtimeDBUtils.getServerAppSettingsUpdateTime()
     }
 
-    override fun getRawAppSettings(context: Context): NetworkResponse<DefaultAppSettings> {
+    override fun getRawAppSettings(context: Context): DefaultAppSettings {
         return FirebaseRealtimeDBUtils.getServerAppSettingsData()
     }
 }
