@@ -64,24 +64,20 @@ public class InitFragment extends Fragment {
 
     private HomeViewModel mHomeViewModel;
 
-    private HomeNavigator mHomeNavigator;
     private ProgressBar mProgressBar;
     private TextView mNoInternetMessage;
 
     private long mRetryDelayForRemoteDBError = 0L;
     private long mRetryCountForRemoteDBError = 0L;
 
-    private AtomicBoolean mLoadSettingsDataOnNetConnection = new AtomicBoolean(false);
 
     private CompositeDisposable mDisposable = new CompositeDisposable();
 
     private final BroadcastReceiver mNetConAvailableBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mLoadSettingsDataOnNetConnection.get()) {
-                mLoadSettingsDataOnNetConnection.set(false);
+                unregisterBrodcastReceivers();
                 initSettingsDataLoading(0L);
-            }
         }
     };
 
@@ -136,8 +132,6 @@ public class InitFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        registerBrodcastReceivers();
-
         initSettingsDataLoading(0L);
     }
 
@@ -184,7 +178,7 @@ public class InitFragment extends Fragment {
                                 mHomeViewModel
                                         .getNewsPapers()
                                         .observe(Objects.requireNonNull(getActivity()), newspapers -> {
-                                            mHomeNavigator.loadHomeFragment();
+                                            ((HomeNavigator)getActivity()).loadHomeFragment();
                                         });
                             }
                         })
@@ -236,9 +230,9 @@ public class InitFragment extends Fragment {
 
     private void doOnError(Throwable throwable) {
         if (throwable instanceof NoInternertConnectionException) {
-            mLoadSettingsDataOnNetConnection.set(true);
             mProgressBar.setIndeterminate(true);
             mNoInternetMessage.setVisibility(View.VISIBLE);
+            registerBrodcastReceivers();
         } else if (throwable instanceof SettingsServerException) {
             mRetryCountForRemoteDBError++;
             mRetryDelayForRemoteDBError +=
@@ -252,13 +246,6 @@ public class InitFragment extends Fragment {
     public void onPause() {
         super.onPause();
         mDisposable.clear();
-        unregisterBrodcastReceivers();
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        mHomeNavigator = (HomeNavigator) context;
     }
 
 
