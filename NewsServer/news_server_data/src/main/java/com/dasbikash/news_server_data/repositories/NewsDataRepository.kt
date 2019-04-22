@@ -20,6 +20,7 @@ import com.dasbikash.news_server_data.data_sources.data_services.news_data_servi
 import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.utills.ExceptionUtils
 
 class NewsDataRepository private constructor(context: Context) {
 
@@ -28,32 +29,10 @@ class NewsDataRepository private constructor(context: Context) {
 
     private val TAG = "DataService"
 
-    /*fun getLatestArticleByTopLevelPageId(topLevelPageId:String): Article{
-        return newsDataService.getLatestArticleByTopLevelPageId(topLevelPageId)
-    }
-    //Latest articles from any page
-    fun getLatestArticlesByPageId(pageId:String,
-                                  articleRequestSize:Int? = null):List<Article>{
-        articleRequestSize?.let {
-            return newsDataService.getLatestArticlesByPageId(pageId,articleRequestSize = articleRequestSize)
-        }
-        return newsDataService.getLatestArticlesByPageId(pageId)
-    }
-    //Articles after last article ID
-    fun getArticlesAfterLastId(pageId:String,lastArticleId:String,
-                               articleRequestSize:Int? = null):List<Article>{
-        articleRequestSize?.let {
-            return newsDataService.getArticlesAfterLastId(pageId,lastArticleId,articleRequestSize = articleRequestSize)
-        }
-        return newsDataService.getArticlesAfterLastId(pageId,lastArticleId)
-    }
-
-    fun getTopPagesByNewsPaper(newspaper: Newspaper):List<Page>{
-        return newsServerDatabase.pageDao.getTopPagesByNewsPaperId(newspaper.id)
-    }*/
-
-
     fun getLatestArticleByPage(page: Page): Article? {
+
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
 
         val article: Article? = newsServerDatabase.articleDao.getLatestArticleByPageId(page.id)
 
@@ -69,11 +48,13 @@ class NewsDataRepository private constructor(context: Context) {
                 latestArticle = this.first()
             }
         }
+
         latestArticle?.let {
             NewsDataServiceUtils.processFetchedArticleData(it, page)
             newsServerDatabase.articleDao.addArticles(it)
             return it
         }
+
         return null
     }
 

@@ -24,7 +24,7 @@ open class DataServerException : NewsServerException {
     constructor(cause: Throwable) : super(cause) {}
 }
 
-class DataServerUnavailable : DataServerException {
+class DataServerNotAvailableExcepption : DataServerException {
 
     constructor() {}
 
