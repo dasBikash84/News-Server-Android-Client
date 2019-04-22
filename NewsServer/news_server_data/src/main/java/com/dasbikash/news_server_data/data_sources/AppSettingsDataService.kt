@@ -16,16 +16,17 @@ package com.dasbikash.news_server_data.data_sources
 import android.content.Context
 import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls.AppSettingsDataServiceUtils
 import com.dasbikash.news_server_data.models.DefaultAppSettings
+import com.dasbikash.news_server_data.models.NetworkResponse
 
 
 internal interface AppSettingsDataService {
 
-    fun getServerAppSettingsUpdateTime(context: Context): Long
+    fun getServerAppSettingsUpdateTime(context: Context): NetworkResponse<Long>
 
-    fun getRawAppSettings(context: Context): DefaultAppSettings
+    fun getRawAppSettings(context: Context): NetworkResponse<DefaultAppSettings>
 
     fun getAppSettings(context: Context):
-            DefaultAppSettings {
+            NetworkResponse<DefaultAppSettings> {
         return AppSettingsDataServiceUtils
                 .processDefaultAppSettingsData(getRawAppSettings(context))
     }

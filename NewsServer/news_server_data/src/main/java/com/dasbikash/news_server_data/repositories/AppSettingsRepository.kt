@@ -21,6 +21,7 @@ import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException
+import com.dasbikash.news_server_data.models.NetworkResponse
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 import kotlin.collections.ArrayList
 
@@ -41,7 +42,13 @@ class AppSettingsRepository private constructor(context: Context) {
     @Throws(OnMainThreadException::class, NoInternertConnectionException::class)
     fun loadAppSettings(context: Context) {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        val appSettings = mAppSettingsDataService.getAppSettings(context)
+        val appSettingsResponse = mAppSettingsDataService.getAppSettings(context)
+
+        if (appSettingsResponse.status == NetworkResponse.ResponseStatus.FAILURE){
+            throw appSettingsResponse.exception!!
+        }
+
+        val appSettings = appSettingsResponse.payload
 
         mDatabase.nukeAppSettings()
 
@@ -58,7 +65,11 @@ class AppSettingsRepository private constructor(context: Context) {
     fun isAppSettingsUpdated(context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val localAppSettingsUpdateTime = mAppSettingsDataService.getLocalAppSettingsUpdateTime(context)
-        val serverAppSettingsUpdateTime = mAppSettingsDataService.getServerAppSettingsUpdateTime(context)
+        val appSettingsUpdateTimeResponse = mAppSettingsDataService.getServerAppSettingsUpdateTime(context)
+        if (appSettingsUpdateTimeResponse.status == NetworkResponse.ResponseStatus.FAILURE){
+            throw appSettingsUpdateTimeResponse.exception!!
+        }
+        val serverAppSettingsUpdateTime = appSettingsUpdateTimeResponse.payload!!
         return serverAppSettingsUpdateTime > localAppSettingsUpdateTime
     }
 

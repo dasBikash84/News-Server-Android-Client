@@ -13,24 +13,26 @@
 
 package com.dasbikash.news_server_data.data_sources.firebase
 
+import android.os.SystemClock
 import android.util.Log
 import com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service.UserIpDataService
-import com.dasbikash.news_server_data.display_models.entity.DefaultAppSettings
-import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
-import com.dasbikash.news_server_data.display_models.entity.UserSettingsUpdateDetails
+import com.dasbikash.news_server_data.models.DefaultAppSettings
+import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
+import com.dasbikash.news_server_data.models.UserSettingsUpdateDetails
 import com.dasbikash.news_server_data.exceptions.AppSettingsNotFound
 import com.dasbikash.news_server_data.exceptions.UserSettingsNotFoundException
 import com.dasbikash.news_server_data.exceptions.UserSettingsUploadException
-import com.dasbikash.news_server_data.utills.ExceptionUtils
+import com.dasbikash.news_server_data.models.NetworkResponse
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
-import java.util.concurrent.atomic.AtomicBoolean
 
 
 internal object FirebaseRealtimeDBUtils {
 
-    private val TAG = "FirebaseRealtimeDBUtils"
+    private val MAX_SETTINGS_UPLOAD_RETRY = 3
+    private val MAX_SETTINGS_UPLOAD_RETRY_SLEEP_PERIOD = 5000L
+    private val TAG = "SettingsRepository"
 
     //App settings related nodes
     private const val APP_SETTINGS_NODE = "app_settings"
@@ -49,8 +51,14 @@ internal object FirebaseRealtimeDBUtils {
     private const val PAGE_GROUP_LIST_NODE = "pageGroups"
     private const val UPDATE_LOG_NODE = "updateLog"
 
+    val mFBDataBase : FirebaseDatabase
 
-    val mRootReference = FirebaseDatabase.getInstance().reference
+    init {
+        mFBDataBase = FirebaseDatabase.getInstance()
+        //mFBDataBase.setPersistenceEnabled(false)
+    }
+
+    val mRootReference = mFBDataBase.reference
 
     val mAppSettingsReference: DatabaseReference = mRootReference.child(APP_SETTINGS_NODE)
     val mCountriesSettingsReference: DatabaseReference = mAppSettingsReference.child(COUNTRIES_NODE)
@@ -62,7 +70,7 @@ internal object FirebaseRealtimeDBUtils {
 
     val mUserSettingsRootReference: DatabaseReference = mRootReference.child(USER_SETTINGS_ROOT_NODE)
 
-    fun getServerAppSettingsUpdateTime(): Long {
+    fun getServerAppSettingsUpdateTime(): NetworkResponse<Long> {
 
         var data = 0L
         val lock = Object()
@@ -88,13 +96,15 @@ internal object FirebaseRealtimeDBUtils {
         })
 
         synchronized(lock){lock.wait()}
-        if (appSettingsNotFound !=null) {throw appSettingsNotFound as AppSettingsNotFound}
+        if (appSettingsNotFound !=null){
+            return NetworkResponse.getFailureResponse(dummyPayload = data,exception = appSettingsNotFound as AppSettingsNotFound)
+        }
 
-        return data
+        return NetworkResponse.getSuccessResponse(data)//data
     }
 
-    fun getServerAppSettingsData(): DefaultAppSettings {
-        var data: DefaultAppSettings? = null
+    fun getServerAppSettingsData(): NetworkResponse<DefaultAppSettings> {
+        var data = DefaultAppSettings()
         val lock = Object()
 
         var appSettingsNotFound:AppSettingsNotFound? = null
@@ -118,9 +128,12 @@ internal object FirebaseRealtimeDBUtils {
         })
 
         synchronized(lock){lock.wait()}
-        if (appSettingsNotFound !=null) {throw appSettingsNotFound as AppSettingsNotFound}
+//        if (appSettingsNotFound !=null) {throw appSettingsNotFound as AppSettingsNotFound}
+        if (appSettingsNotFound !=null) {
+            return NetworkResponse.getFailureResponse(data,appSettingsNotFound as AppSettingsNotFound)
+        }
 
-        return data!!
+        return NetworkResponse.getSuccessResponse(data)
     }
 
     fun getUserPreferenceData(): UserPreferenceData {
@@ -182,66 +195,95 @@ internal object FirebaseRealtimeDBUtils {
 
         val lock = Object()
 
-        var task = getFavPageIdListRef(user).setValue(userPreferenceData.favouritePageIds)
-        task.addOnCompleteListener { task ->
-            if (task.isSuccessful){
-                synchronized(lock){lock.notify()}
-            }else{
-                throw UserSettingsUploadException()
+        var remainingTries = MAX_SETTINGS_UPLOAD_RETRY
+
+        do {
+
+            try {
+                var userSettingsUploadException:UserSettingsUploadException? = null
+                getFavPageIdListRef(user)
+                        .setValue(userPreferenceData.favouritePageIds)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                synchronized(lock) { lock.notify() }
+                            } else {
+                                userSettingsUploadException = UserSettingsUploadException()
+                                synchronized(lock) { lock.notify() }
+                            }
+                        }
+                synchronized(lock) { lock.wait() }
+                userSettingsUploadException?.let { throw it }
+
+                getInactiveNewspaperIdListRef(user)
+                        .setValue(userPreferenceData.inActiveNewsPaperIds)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                synchronized(lock) { lock.notify() }
+                            } else {
+                                userSettingsUploadException = UserSettingsUploadException()
+                                synchronized(lock) { lock.notify() }
+                            }
+                        }
+                synchronized(lock) { lock.wait() }
+                userSettingsUploadException?.let { throw it }
+
+                getInactivepageIdListRef(user)
+                        .setValue(userPreferenceData.inActivePageIds)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                synchronized(lock) { lock.notify() }
+                            } else {
+                                userSettingsUploadException = UserSettingsUploadException()
+                                synchronized(lock) { lock.notify() }
+                            }
+                        }
+                synchronized(lock) { lock.wait() }
+                userSettingsUploadException?.let { throw it }
+
+                getPageGroupListRef(user)
+                        .setValue(userPreferenceData.pageGroups)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                synchronized(lock) { lock.notify() }
+                            } else {
+                                userSettingsUploadException = UserSettingsUploadException()
+                                synchronized(lock) { lock.notify() }
+                            }
+                        }
+                synchronized(lock) { lock.wait() }
+                userSettingsUploadException?.let { throw it }
+
+                var ipAddress: String
+                try {
+                    ipAddress = UserIpDataService.getIpAddress()
+                } catch (ex: Throwable) {
+                    ipAddress = UserSettingsUpdateDetails.NULL_IP
+                }
+
+                getUpdateLogRef(user)
+                        .push()
+                        .setValue(UserSettingsUpdateDetails(userIp = ipAddress))
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                synchronized(lock) { lock.notify() }
+                            } else {
+                                userSettingsUploadException = UserSettingsUploadException()
+                                synchronized(lock) { lock.notify() }
+                            }
+                        }
+                synchronized(lock) { lock.wait() }
+                userSettingsUploadException?.let { throw it }
+                break
+            }catch (ex:UserSettingsUploadException){
+                Log.d(TAG,"${remainingTries}")
+                remainingTries--
+                if (remainingTries == 0){
+                    return false
+                }
+                SystemClock.sleep(MAX_SETTINGS_UPLOAD_RETRY_SLEEP_PERIOD)
+                continue
             }
-        }
-        synchronized(lock){lock.wait()}
-
-        task = getInactiveNewspaperIdListRef(user).setValue(userPreferenceData.inActiveNewsPaperIds)
-        task.addOnCompleteListener { task ->
-            if (task.isSuccessful){
-                synchronized(lock){lock.notify()}
-            }else{
-                throw UserSettingsUploadException()
-            }
-        }
-        synchronized(lock){lock.wait()}
-
-
-        task = getInactivepageIdListRef(user).setValue(userPreferenceData.inActivePageIds)
-        task.addOnCompleteListener { task ->
-            if (task.isSuccessful){
-                synchronized(lock){lock.notify()}
-            }else{
-                throw UserSettingsUploadException()
-            }
-        }
-        synchronized(lock){lock.wait()}
-
-        task = getPageGroupListRef(user).setValue(userPreferenceData.pageGroups)
-        task.addOnCompleteListener { task ->
-            if (task.isSuccessful){
-                synchronized(lock){lock.notify()}
-            }else{
-                throw UserSettingsUploadException()
-            }
-        }
-        synchronized(lock){lock.wait()}
-
-        var ipAddress: String
-        try{
-            ipAddress = UserIpDataService.getIpAddress()
-        }catch (ex:Throwable){
-            ipAddress = UserSettingsUpdateDetails.NULL_IP
-        }
-
-        val userSettingsUpdateDetails = UserSettingsUpdateDetails(userIp = ipAddress)
-
-        task = getUpdateLogRef(user).push().setValue(userSettingsUpdateDetails)
-
-        task.addOnCompleteListener { task ->
-            if (task.isSuccessful){
-                synchronized(lock){lock.notify()}
-            }else{
-                throw UserSettingsUploadException()
-            }
-        }
-        synchronized(lock){lock.wait()}
+        }while (remainingTries>0)
 
         return true
     }
