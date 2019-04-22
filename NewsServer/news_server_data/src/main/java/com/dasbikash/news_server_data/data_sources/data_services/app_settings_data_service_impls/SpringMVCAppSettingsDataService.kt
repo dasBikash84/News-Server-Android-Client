@@ -15,7 +15,7 @@ package com.dasbikash.news_server.data_sources.data_services.app_settings_data_s
 
 import android.content.Context
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
-import com.dasbikash.news_server_data.display_models.entity.DefaultAppSettings
+import com.dasbikash.news_server_data.models.DefaultAppSettings
 
 internal object SpringMVCAppSettingsDataService: AppSettingsDataService {
     override fun getServerAppSettingsUpdateTime(context: Context): Long {

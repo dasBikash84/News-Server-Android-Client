@@ -17,7 +17,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.dasbikash.news_server_data.display_models.entity.Country
+import com.dasbikash.news_server_data.models.room_entity.Country
 
 @Dao
 internal interface CountryDao {

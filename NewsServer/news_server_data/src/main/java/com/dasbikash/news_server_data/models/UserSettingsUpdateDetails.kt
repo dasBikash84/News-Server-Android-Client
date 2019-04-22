@@ -11,24 +11,18 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.display_models.entity
+package com.dasbikash.news_server_data.models
 
-import androidx.room.Entity
-import androidx.room.Ignore
-import androidx.room.PrimaryKey
-import com.google.firebase.database.Exclude
-import com.google.gson.annotations.Expose
-import java.io.Serializable
+import android.os.Build
+import com.google.firebase.database.ServerValue
 
-@Entity
-data class PageGroup  (
-        @PrimaryKey
-        var name: String="",
-        @Ignore
-        @Exclude
-        var active: Boolean=true,
-        var pageList: List<String>?=null,
-        @Ignore
-        @Exclude
-        var pageEntityList: MutableList<Page> = mutableListOf()
-): Serializable
+data class UserSettingsUpdateDetails(
+        val timeStamp: Map<String,String> = ServerValue.TIMESTAMP,
+        var userIp:String,
+        var deviceDetails:String = "BRAND: ${Build.BRAND} Manufacture: ${Build.MANUFACTURER} " +
+                                    "MODEL: ${Build.MODEL} SDK_INT: ${Build.VERSION.SDK_INT}"
+){
+    companion object{
+        const val NULL_IP = "255.255.255.255"
+    }
+}

@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.display_models.entity
+package com.dasbikash.news_server_data.models.room_entity
 
 import android.os.Parcel
 import android.os.Parcelable

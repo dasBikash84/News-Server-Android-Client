@@ -13,7 +13,7 @@
 
 package com.dasbikash.news_server_data.data_sources
 
-import com.dasbikash.news_server_data.display_models.entity.Article
+import com.dasbikash.news_server_data.models.room_entity.Article
 
 internal interface NewsDataService {
 

@@ -28,8 +28,8 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
-import com.dasbikash.news_server_data.display_models.entity.Article
-import com.dasbikash.news_server_data.display_models.entity.Page
+import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository

@@ -34,7 +34,7 @@ import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
-import com.dasbikash.news_server_data.display_models.entity.*
+import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.google.android.material.card.MaterialCardView
 import com.squareup.picasso.Picasso
@@ -133,7 +133,7 @@ class FavouritePagesListAdapter(val context: Context) :
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(Consumer {
-                            it?.let { holder.bind(it.first, it.second!!) }
+                            it?.let { holder.bind(it.first, it.second) }
                         })
         )
 //        holder.bind(getItem(position))
@@ -290,6 +290,7 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
                             }
                         }
                         override fun onError(e: Throwable) {
+                            e.printStackTrace()
                             favouritePagesListAdapter.notifyDataSetChanged()
                         }
                     })

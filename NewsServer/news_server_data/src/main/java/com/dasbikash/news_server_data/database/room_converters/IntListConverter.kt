@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.display_models.room_converters
+package com.dasbikash.news_server_data.database.room_converters
 
 import androidx.room.TypeConverter
 import java.util.*

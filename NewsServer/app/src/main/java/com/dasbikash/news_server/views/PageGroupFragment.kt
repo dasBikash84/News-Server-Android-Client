@@ -38,7 +38,7 @@ import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.dasbikash.news_server.views.rv_helpers.PageGroupDiffCallback
-import com.dasbikash.news_server_data.display_models.entity.PageGroup
+import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.google.android.material.card.MaterialCardView
 import io.reactivex.Observable

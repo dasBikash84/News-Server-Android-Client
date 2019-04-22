@@ -16,9 +16,9 @@ package com.dasbikash.news_server_data.data_sources.data_services.app_settings_d
 import android.content.Context
 import android.util.Log
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
-import com.dasbikash.news_server_data.display_models.entity.DefaultAppSettings
-import com.dasbikash.news_server_data.display_models.entity.Newspaper
-import com.dasbikash.news_server_data.display_models.entity.Page
+import com.dasbikash.news_server_data.models.DefaultAppSettings
+import com.dasbikash.news_server_data.models.room_entity.Newspaper
+import com.dasbikash.news_server_data.models.room_entity.Page
 
 internal object AppSettingsDataServiceUtils {
 

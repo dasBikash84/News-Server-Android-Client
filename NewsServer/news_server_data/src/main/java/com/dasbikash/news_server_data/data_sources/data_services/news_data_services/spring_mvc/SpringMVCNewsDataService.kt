@@ -13,14 +13,11 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc
 
-import android.util.Log
 import com.dasbikash.news_server_data.data_sources.NewsDataService
-import com.dasbikash.news_server_data.display_models.entity.Article
-import com.dasbikash.news_server_data.utills.ExceptionUtils
+import com.dasbikash.news_server_data.models.room_entity.Article
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.*
 
 internal object SpringMVCNewsDataService: NewsDataService {
 

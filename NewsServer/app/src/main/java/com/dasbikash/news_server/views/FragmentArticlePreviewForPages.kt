@@ -24,7 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.rv_helpers.PagePreviewListAdapter
-import com.dasbikash.news_server_data.display_models.entity.Page
+import com.dasbikash.news_server_data.models.room_entity.Page
 
 /**
  *

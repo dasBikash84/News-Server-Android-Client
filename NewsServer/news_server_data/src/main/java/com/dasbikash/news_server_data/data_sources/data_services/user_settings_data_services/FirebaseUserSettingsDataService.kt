@@ -13,15 +13,12 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.user_settings_data_services
 
-import android.content.Context
 import android.content.Intent
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.data_sources.firebase.FirebaseRealtimeDBUtils
-import com.dasbikash.news_server_data.display_models.entity.DefaultAppSettings
-import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
+import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 
 internal object FirebaseUserSettingsDataService: UserSettingsDataService {
 

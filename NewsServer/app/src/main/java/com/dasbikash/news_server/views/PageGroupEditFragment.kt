@@ -33,9 +33,9 @@ import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
 import com.dasbikash.news_server.views.rv_helpers.PageListAdapter
 import com.dasbikash.news_server.views.rv_helpers.PageViewHolder
-import com.dasbikash.news_server_data.display_models.entity.Newspaper
-import com.dasbikash.news_server_data.display_models.entity.Page
-import com.dasbikash.news_server_data.display_models.entity.PageGroup
+import com.dasbikash.news_server_data.models.room_entity.Newspaper
+import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -248,7 +248,7 @@ class PageGroupEditFragment : Fragment() {
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
             Log.d(TAG, "Page to remove: ${(viewHolder as CurrentPageViewHolder).mPage.name}")
-            if (mCurrentPageList.remove((viewHolder as CurrentPageViewHolder).mPage)) {
+            if (mCurrentPageList.remove((viewHolder).mPage)) {
                 Log.d(TAG, "Page to removed:")
                 Log.d(TAG, "mCurrentPageList: ${mCurrentPageList.map { it.name }.toList()}")
                 mCurrentPageListAdapter.submitList(mCurrentPageList.toList())

@@ -14,7 +14,7 @@
 package com.dasbikash.news_server.views.rv_helpers
 
 import androidx.recyclerview.widget.DiffUtil
-import com.dasbikash.news_server_data.display_models.entity.PageGroup
+import com.dasbikash.news_server_data.models.room_entity.PageGroup
 
 object PageGroupDiffCallback: DiffUtil.ItemCallback<PageGroup>(){
     override fun areItemsTheSame(oldItem: PageGroup, newItem: PageGroup): Boolean {

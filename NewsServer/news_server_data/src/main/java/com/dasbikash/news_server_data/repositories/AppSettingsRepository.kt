@@ -18,11 +18,10 @@ import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.database.NewsServerDatabase
-import com.dasbikash.news_server_data.display_models.entity.*
+import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException
 import com.dasbikash.news_server_data.utills.ExceptionUtils
-import java.util.*
 import kotlin.collections.ArrayList
 
 class AppSettingsRepository private constructor(context: Context) {

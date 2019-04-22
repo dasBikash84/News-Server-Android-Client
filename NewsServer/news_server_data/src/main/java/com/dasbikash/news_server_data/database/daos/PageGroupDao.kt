@@ -15,7 +15,7 @@ package com.dasbikash.news_server_data.database.daos
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.dasbikash.news_server_data.display_models.entity.PageGroup
+import com.dasbikash.news_server_data.models.room_entity.PageGroup
 
 @Dao
 internal interface PageGroupDao {

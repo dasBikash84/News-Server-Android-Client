@@ -18,7 +18,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.dasbikash.news_server_data.display_models.entity.UserPreferenceData
+import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 
 @Dao
 internal interface UserPreferenceDataDao {

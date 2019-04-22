@@ -11,9 +11,10 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.display_models.entity
+package com.dasbikash.news_server_data.models
 
 
+import com.dasbikash.news_server_data.models.room_entity.*
 import java.util.*
 
 class DefaultAppSettings {

@@ -11,18 +11,15 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.display_models.entity
+package com.dasbikash.news_server_data.models.room_entity
 
-import android.os.Build
-import com.google.firebase.database.ServerValue
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import java.io.Serializable
 
-data class UserSettingsUpdateDetails(
-        val timeStamp: Map<String,String> = ServerValue.TIMESTAMP,
-        var userIp:String,
-        var deviceDetails:String = "BRAND: ${Build.BRAND} Manufacture: ${Build.MANUFACTURER} " +
-                                    "MODEL: ${Build.MODEL} SDK_INT: ${Build.VERSION.SDK_INT}"
-){
-    companion object{
-        const val NULL_IP = "255.255.255.255"
-    }
-}
+@Entity
+data class Country (
+        @PrimaryKey var name: String="",
+        var countryCode: String?=null,
+        var timeZone: String?=null
+):Serializable

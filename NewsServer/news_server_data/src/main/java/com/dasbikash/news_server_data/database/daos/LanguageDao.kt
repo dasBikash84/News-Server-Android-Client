@@ -14,7 +14,7 @@
 package com.dasbikash.news_server_data.database.daos
 
 import androidx.room.*
-import com.dasbikash.news_server_data.display_models.entity.Language
+import com.dasbikash.news_server_data.models.room_entity.Language
 
 @Dao
 internal interface LanguageDao {

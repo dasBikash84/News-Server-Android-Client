@@ -11,9 +11,10 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.display_models.room_converters
+package com.dasbikash.news_server_data.models.room_converters
 
-import com.dasbikash.news_server_data.display_models.entity.ArticleImage
+import com.dasbikash.news_server_data.database.room_converters.ArticleImageConverter
+import com.dasbikash.news_server_data.models.room_entity.ArticleImage
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

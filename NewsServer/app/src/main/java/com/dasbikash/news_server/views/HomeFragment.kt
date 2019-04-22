@@ -35,8 +35,8 @@ import com.dasbikash.news_server.custom_views.ViewPagerTitleScroller
 import com.dasbikash.news_server.model.PagableNewsPaper
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
-import com.dasbikash.news_server_data.display_models.entity.Newspaper
-import com.dasbikash.news_server_data.display_models.entity.Page
+import com.dasbikash.news_server_data.models.room_entity.Newspaper
+import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers

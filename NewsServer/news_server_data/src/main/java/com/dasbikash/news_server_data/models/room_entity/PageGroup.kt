@@ -11,15 +11,23 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.display_models.entity
+package com.dasbikash.news_server_data.models.room_entity
 
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import com.google.firebase.database.Exclude
 import java.io.Serializable
 
 @Entity
-data class Country (
-        @PrimaryKey var name: String="",
-        var countryCode: String?=null,
-        var timeZone: String?=null
-):Serializable
+data class PageGroup  (
+        @PrimaryKey
+        var name: String="",
+        @Ignore
+        @Exclude
+        var active: Boolean=true,
+        var pageList: List<String>?=null,
+        @Ignore
+        @Exclude
+        var pageEntityList: MutableList<Page> = mutableListOf()
+): Serializable

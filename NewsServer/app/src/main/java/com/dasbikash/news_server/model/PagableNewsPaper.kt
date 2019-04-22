@@ -15,7 +15,7 @@ package com.dasbikash.news_server.model
 
 
 import com.dasbikash.news_server.custom_views.ViewPagerTitleScroller
-import com.dasbikash.news_server_data.display_models.entity.Newspaper
+import com.dasbikash.news_server_data.models.room_entity.Newspaper
 
 class PagableNewsPaper(val newspaper: Newspaper): ViewPagerTitleScroller.PageKey {
     override fun getKeyString(): String {
