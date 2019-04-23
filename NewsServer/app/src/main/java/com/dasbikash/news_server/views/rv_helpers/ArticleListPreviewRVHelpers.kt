@@ -46,16 +46,14 @@ class PagePreviewListAdapter(@LayoutRes val holderResId: Int, val homeViewModel:
     }
 
     override fun onBindViewHolder(holder: ArticlePreviewHolder, position: Int) {
-//        holder.disposable.clear()
         holder.bind(getItem(position))
     }
 
     override fun onViewRecycled(holder: ArticlePreviewHolder) {
         super.onViewRecycled(holder)
-//        holder.disposable.clear()
         holder.disposableObserver?.let {
-            Log.d("ArticlePreviewHolder","disposed in PagePreviewListAdapter for:${holder.mPage.name}")
-            if (!it.isDisposed){
+            Log.d("ArticlePreviewHolder", "disposed in PagePreviewListAdapter for:${holder.mPage.name}")
+            if (!it.isDisposed) {
                 it.dispose()
             }
         }
@@ -68,7 +66,6 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
     companion object {
         val TAG = "ArticlePreviewHolder"
     }
-
     val pageTitle: TextView
     val articlePreviewImage: ImageView
     val articleTitle: TextView
@@ -79,7 +76,7 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
     lateinit var mArticle: Article
 
     val disposable = CompositeDisposable()
-    var disposableObserver:Disposable?=null// = CompositeDisposable()
+    var disposableObserver: Disposable? = null
 
     init {
         pageTitle = itemView.findViewById(R.id.page_title)
@@ -88,7 +85,7 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
         articlePublicationTime = itemView.findViewById(R.id.article_time)
     }
 
-    lateinit var mPage:Page
+    lateinit var mPage: Page
 
     fun bind(page: Page) {
 
@@ -103,85 +100,81 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
         val uuid = UUID.randomUUID()
 
         disposableObserver?.let {
-            Log.d(TAG,"disposed in bind for:${page.name}")
-            if (!it.isDisposed){
+            Log.d(TAG, "disposed in bind for:${page.name}")
+            if (!it.isDisposed) {
                 it.dispose()
             }
         }
 
-        //disposable.add(
-
         disposableObserver = homeViewModel.getLatestArticleProvider(Pair(uuid, page))
-                        .filter { it.first == uuid }
-                        .map {
-                            language = appSettingsRepository.getLanguageByPage(page)
-                            it.second?.let {
-                                val dateString = DisplayUtils.getArticlePublicationDateString(it, language, itemView.context)
+                .filter { it.first == uuid }
+                .map {
+                    language = appSettingsRepository.getLanguageByPage(page)
+                    it.second?.let {
+                        val dateString = DisplayUtils.getArticlePublicationDateString(it, language, itemView.context)
 
-                                val displayImageLink:String?
+                        val displayImageLink: String?
 
-                                when{
-                                    it.previewImageLink != null -> displayImageLink = it.previewImageLink
-                                    else ->{
-                                        displayImageLink = it.imageLinkList?.first { it.link!=null }?.link
-                                    }
-                                }
-                                return@map Triple(dateString, it,displayImageLink)
+                        when {
+                            it.previewImageLink != null -> displayImageLink = it.previewImageLink
+                            else -> {
+                                displayImageLink = it.imageLinkList?.first { it.link != null }?.link
                             }
-                            return@map Any()
                         }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Any>() {
-                            override fun onComplete() {
-                                Log.d(TAG, "onComplete for page ${page.name} Np: ${page.newsPaperId} L2")
+                        return@map Triple(dateString, it, displayImageLink)
+                    }
+                    return@map Any()
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(object : DisposableObserver<Any>() {
+                    override fun onComplete() {
+                        Log.d(TAG, "onComplete for page ${page.name} Np: ${page.newsPaperId} L2")
+                    }
+
+                    @Suppress("UNCHECKED_CAST")
+                    override fun onNext(articleData: Any) {
+
+                        pageTitle.text = page.name
+                        pageTitle.visibility = View.VISIBLE
+
+                        if (articleData is Triple<*, *, *>) {
+
+                            val articleDataResult = articleData as Triple<String, Article, String?>
+
+                            mArticle = articleDataResult.second
+
+                            articleTitle.text = mArticle.title
+                            articlePublicationTime.text = articleDataResult.first
+                            articleTitle.visibility = View.VISIBLE
+                            articlePublicationTime.visibility = View.VISIBLE
+
+                            articleDataResult.third?.let {
+                                Picasso.get().load(it).into(articlePreviewImage)
+                                articlePreviewImage.visibility = View.VISIBLE
+                            } ?: let {
+                                Picasso.get().load(R.drawable.app_big_logo).into(articlePreviewImage)
+                                articlePreviewImage.visibility = View.VISIBLE
                             }
 
-                            @Suppress("UNCHECKED_CAST")
-                            override fun onNext(articleData: Any) {
-
-                                pageTitle.text = page.name
-                                pageTitle.visibility = View.VISIBLE
-
-                                if (articleData is Triple<*, *,*>) {
-
-                                    val articleDataResult = articleData as Triple<String, Article,String?>
-
-                                    mArticle = articleDataResult.second
-
-                                    articleTitle.text = mArticle.title
-                                    articlePublicationTime.text = articleDataResult.first
-                                    articleTitle.visibility = View.VISIBLE
-                                    articlePublicationTime.visibility = View.VISIBLE
-
-                                    articleDataResult.third?.let {
-                                        Picasso.get().load(it).into(articlePreviewImage)
-                                        articlePreviewImage.visibility = View.VISIBLE
-                                    } ?: let {
-                                        Picasso.get().load(R.drawable.app_big_logo).into(articlePreviewImage)
-                                        articlePreviewImage.visibility = View.VISIBLE
-                                    }
-
-                                    //Add click listner
-                                    itemView.setOnClickListener(View.OnClickListener {
-                                        itemView.context.startActivity(
-                                                PageViewActivity.getIntentForPageDisplay(
-                                                        itemView.context,page,mArticle.id
-                                                )
+                            //Add click listner
+                            itemView.setOnClickListener(View.OnClickListener {
+                                itemView.context.startActivity(
+                                        PageViewActivity.getIntentForPageDisplay(
+                                                itemView.context, page, mArticle.id
                                         )
-                                    })
-                                }else{
-                                    //Empty listner
-                                    itemView.setOnClickListener(View.OnClickListener {
+                                )
+                            })
+                        } else {
+                            //Empty listner
+                            itemView.setOnClickListener(View.OnClickListener {
 
-                                    })
-                                }
-                            }
+                            })
+                        }
+                    }
 
-                            override fun onError(e: Throwable) {
-                                Log.d(TAG, e.message + " for page Np: ${page.newsPaperId} ${page.name} L2")
-                            }
-                        })
-        //)
-
+                    override fun onError(e: Throwable) {
+                        Log.d(TAG, e.message + " for page Np: ${page.newsPaperId} ${page.name} L2")
+                    }
+                })
     }
 }

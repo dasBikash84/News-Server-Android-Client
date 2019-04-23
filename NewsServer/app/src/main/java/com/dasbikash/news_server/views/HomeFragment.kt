@@ -26,7 +26,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
@@ -34,7 +33,8 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.custom_views.ViewPagerTitleScroller
 import com.dasbikash.news_server.model.PagableNewsPaper
 import com.dasbikash.news_server.view_models.HomeViewModel
-import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
+import com.dasbikash.news_server.views.rv_helpers.PageListAdapter
+import com.dasbikash.news_server.views.rv_helpers.PageViewHolder
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
@@ -109,82 +109,82 @@ class HomeFragment : Fragment() {
         })
 
         mHomeViewModel
-                .getNewsPapers()
-                .observe(this,object : Observer<List<Newspaper>>{
-                    override fun onChanged(newspapers: List<Newspaper>?) {
-                        mDisposable.add(
-                            Observable.just(true)
-                                    .subscribeOn(Schedulers.computation())
-                                    .map {
-                                        newspapers
-                                                ?.map { PagableNewsPaper(it) }
-                                                ?.sortedBy { it.newspaper.id }
-                                                ?.forEach { mNewsPapers.add(it) }
-                                        return@map mNewsPapers
+            .getNewsPapers()
+            .observe(this,object : Observer<List<Newspaper>>{
+                override fun onChanged(newspapers: List<Newspaper>?) {
+                    mDisposable.add(
+                        Observable.just(true)
+                            .subscribeOn(Schedulers.computation())
+                            .map {
+                                newspapers
+                                        ?.map { PagableNewsPaper(it) }
+                                        ?.sortedBy { it.newspaper.id }
+                                        ?.forEach { mNewsPapers.add(it) }
+                                return@map mNewsPapers
+                            }
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeWith(object : DisposableObserver<MutableList<PagableNewsPaper>>(){
+                                override fun onComplete() {
+                                }
+                                override fun onNext(t: MutableList<PagableNewsPaper>) {
+
+                                    mViewPagerTitleScroller.initView(mNewsPapers.toList(), R.layout.view_page_label) {
+                                        Log.d(TAG, "${it.keyString} clicked")
+                                        mHomeViewPager.setCurrentItem(mNewsPapers.indexOf(it),true)
                                     }
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribeWith(object : DisposableObserver<MutableList<PagableNewsPaper>>(){
-                                        override fun onComplete() {
-                                        }
-                                        override fun onNext(t: MutableList<PagableNewsPaper>) {
+                                    mHomeViewPager.adapter = mFragmentStatePagerAdapter
+                                    mHomeViewPager.setCurrentItem(0)
 
-                                            mViewPagerTitleScroller.initView(mNewsPapers.toList(), R.layout.view_page_label) {
-                                                Log.d(TAG, "${it.keyString} clicked")
-                                                mHomeViewPager.setCurrentItem(mNewsPapers.indexOf(it),true)
-                                            }
-                                            mHomeViewPager.adapter = mFragmentStatePagerAdapter
-                                            mHomeViewPager.setCurrentItem(0)
+                                    splash_screen.visibility = View.GONE
+                                    mViewPagerTitleScroller.visibility = View.VISIBLE
+                                    mHomeViewPager.visibility = View.VISIBLE
+                                    page_search_text_box_layout.visibility = View.VISIBLE
 
-                                            splash_screen.visibility = View.GONE
-                                            mViewPagerTitleScroller.visibility = View.VISIBLE
-                                            mHomeViewPager.visibility = View.VISIBLE
-                                            page_search_text_box_layout.visibility = View.VISIBLE
+                                    mPageSearchTextBox.addTextChangedListener(object : TextWatcher{
+                                        override fun afterTextChanged(text: Editable?) {
+                                            text?.let {
+                                                if (it.length >= MINIMUM_CHAR_LENGTH_FOR_PAGE_SEARCH){
+                                                    mDisposable.add(
+                                                        Observable.just(it.trim().toString())
+                                                                .subscribeOn(Schedulers.io())
+                                                                .map {
+                                                                    val pageList = appSettingsRepository.findMatchingPages(it)
+                                                                    pageList.filter {
+                                                                        @Suppress("SENSELESS_COMPARISON")
+                                                                        it !=null
+                                                                    }.toList()
+                                                                }
+                                                                .observeOn(AndroidSchedulers.mainThread())
+                                                                .subscribeWith(object : DisposableObserver<List<Page>>(){
+                                                                    override fun onComplete() {}
+                                                                    override fun onNext(pageList: List<Page>) {
+                                                                        mPageSearchResultContainer.visibility = View.VISIBLE
+                                                                        mPageSearchResultContainer.bringToFront()
+                                                                        mPageSearchResultContainer.setOnClickListener({
+                                                                            mPageSearchResultContainer.visibility = View.GONE
+                                                                        })
+                                                                        mSearchResultListAdapter.submitList(pageList)
+                                                                    }
+                                                                    override fun onError(e: Throwable) {}
 
-                                            mPageSearchTextBox.addTextChangedListener(object : TextWatcher{
-                                                override fun afterTextChanged(text: Editable?) {
-                                                    text?.let {
-                                                        if (it.length >= MINIMUM_CHAR_LENGTH_FOR_PAGE_SEARCH){
-                                                            mDisposable.add(
-                                                                    Observable.just(it.trim().toString())
-                                                                            .subscribeOn(Schedulers.io())
-                                                                            .map {
-                                                                                val pageList = appSettingsRepository.findMatchingPages(it)
-                                                                                pageList.filter {
-                                                                                    @Suppress("SENSELESS_COMPARISON")
-                                                                                    it !=null
-                                                                                }.toList()
-                                                                            }
-                                                                            .observeOn(AndroidSchedulers.mainThread())
-                                                                            .subscribeWith(object : DisposableObserver<List<Page>>(){
-                                                                                override fun onComplete() {}
-                                                                                override fun onNext(pageList: List<Page>) {
-                                                                                    mPageSearchResultContainer.visibility = View.VISIBLE
-                                                                                    mPageSearchResultContainer.bringToFront()
-                                                                                    mPageSearchResultContainer.setOnClickListener({
-                                                                                        mPageSearchResultContainer.visibility = View.GONE
-                                                                                    })
-                                                                                    mSearchResultListAdapter.submitList(pageList)
-                                                                                }
-                                                                                override fun onError(e: Throwable) {}
-
-                                                                            })
-                                                            )
-                                                        }else{
-                                                            mPageSearchResultContainer.visibility = View.GONE
-                                                        }
-                                                    }
+                                                                })
+                                                    )
+                                                }else{
+                                                    mPageSearchResultContainer.visibility = View.GONE
                                                 }
-                                                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                                                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-                                            })
+                                            }
                                         }
-                                        override fun onError(e: Throwable) {
-                                        }
+                                        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                                        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                                     })
-                        )
-                    }
+                                }
+                                override fun onError(e: Throwable) {
+                                }
+                            })
+                    )
+                }
 
-                })
+            })
 
     }
 
@@ -199,75 +199,25 @@ class HomeFragment : Fragment() {
     }
 }
 
-class SearchResultListAdapter():ListAdapter<Page,SearchResultEntryViewHolder>(PageDiffCallback){
+
+class SearchResultListAdapter(): PageListAdapter<SearchResultEntryViewHolder>(){
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchResultEntryViewHolder {
         return SearchResultEntryViewHolder(
                 LayoutInflater.from(parent.context).inflate(R.layout.view_page_label,parent,false)
-            )
-    }
-    override fun onBindViewHolder(holder: SearchResultEntryViewHolder, position: Int) {
-        holder.disposable.clear()
-        holder.bind(getItem(position))
-    }
-
-    override fun onViewRecycled(holder: SearchResultEntryViewHolder) {
-        super.onViewRecycled(holder)
-        holder.disposable.clear()
-    }
-}
-
-class SearchResultEntryViewHolder(itemView: View):RecyclerView.ViewHolder(itemView){
-
-    val disposable = CompositeDisposable()
-
-    fun bind(page: Page?) {
-
-        (itemView as TextView).setText("")
-
-        itemView.setOnClickListener{}
-
-        page?.let {
-            val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
-            @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-            val pageLabelBuilder = StringBuilder(it.name)
-            disposable.add(
-                Observable.just(it)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            if (it.parentPageId != Page.TOP_LEVEL_PAGE_PARENT_ID){
-                                val parentPage = appSettingsRepository.getTopPageforChildPage(it)
-                                parentPage?.let { pageLabelBuilder.append(" | "+parentPage.name) }
-                            }
-                            val newsPaper = appSettingsRepository.getNewspaperByPage(page)
-                            newsPaper.let { pageLabelBuilder.append(" | "+it.name) }
-                            it
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Page>(){
-                            override fun onComplete() {
-
-                            }
-                            override fun onNext(t: Page) {
-                                (itemView).setText(pageLabelBuilder.toString())
-                                itemView.setOnClickListener {
-                                    doOnPageNameClick(page,itemView)
-                                }
-                            }
-                            override fun onError(e: Throwable) {
-
-                            }
-                        })
-            )
-
-        }
-
-
-    }
-
-    private fun doOnPageNameClick(page: Page,parent: View) {
-        parent.context.startActivity(
-                PageViewActivity.getIntentForPageDisplay(parent.context,page)
         )
     }
-
 }
+class SearchResultEntryViewHolder(itemView: View): PageViewHolder(itemView){
+    override fun bind(page: Page, parentPage: Page?, newspaper: Newspaper) {
+        val pageLabelBuilder = StringBuilder(page.name!!).append(" | ")
+        parentPage?.let { pageLabelBuilder.append(it.name).append(" | ") }
+        pageLabelBuilder.append(newspaper.name)
+        (itemView as TextView).setText(pageLabelBuilder.toString())
+
+        itemView.setOnClickListener {
+            itemView.context
+                .startActivity(PageViewActivity.getIntentForPageDisplay(itemView.context,page))
+        }
+    }
+}
+
