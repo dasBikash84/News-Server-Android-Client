@@ -77,11 +77,13 @@ class PageGroupEditFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (activity as NavigationHost).showAppBar(false) //To disable sign out
+        (activity as NavigationHost).disableBackPress(true) //To disable sign out
     }
 
     override fun onDestroy() {
         super.onDestroy()
         (activity as NavigationHost).showAppBar(true)
+        (activity as NavigationHost).disableBackPress(false) //To disable sign out
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -296,6 +298,7 @@ class PageGroupEditFragment : Fragment() {
     private fun exit() {
         (activity as HomeNavigator).loadPageGroupFragment()
         (activity as NavigationHost).showAppBar(true)
+        (activity as NavigationHost).disableBackPress(false) //To disable sign out
     }
 
     private fun doneButtonClickAction() {

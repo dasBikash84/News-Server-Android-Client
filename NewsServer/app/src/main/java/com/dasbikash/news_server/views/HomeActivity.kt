@@ -140,7 +140,7 @@ class HomeActivity : AppCompatActivity(),
         val transaction = supportFragmentManager
                 .beginTransaction()
                 .add(R.id.main_frame, fragment)
-                .addToBackStack(null)
+//                .addToBackStack(null)
 
         transaction.commit()
     }
@@ -161,6 +161,11 @@ class HomeActivity : AppCompatActivity(),
             mAppBar.visibility = View.GONE
         }
     }
+
+    override fun disableBackPress(disable: Boolean) {
+        disableBackPressFlag = disable
+    }
+    var disableBackPressFlag = false
     var mWaitWindowShown = false
     var mWaitWindow :Fragment? = null
     override fun loadWorkInProcessWindow() {
@@ -168,6 +173,7 @@ class HomeActivity : AppCompatActivity(),
         showBottomNavigationView(false)
         addFragment(mWaitWindow!!)
         mWaitWindowShown = true
+        disableBackPress(true)
     }
 
     override fun removeWorkInProcessWindow() {
@@ -175,10 +181,11 @@ class HomeActivity : AppCompatActivity(),
         removeFragment(mWaitWindow!!)
         mWaitWindow = null
         showBottomNavigationView(true)
+        disableBackPress(false)
     }
 
     override fun onBackPressed() {
-        if (!mWaitWindowShown) {
+        if (!disableBackPressFlag) {
             super.onBackPressed()
         }
     }
@@ -279,6 +286,7 @@ class HomeActivity : AppCompatActivity(),
         menuInflater.inflate(R.menu.menu_layout_basic, menu)
         return super.onCreateOptionsMenu(menu)
     }
+
 
 
     private fun shareAppMenuItemAction() {

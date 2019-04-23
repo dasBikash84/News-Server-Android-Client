@@ -25,4 +25,5 @@ interface NavigationHost {
     fun removeFragment(fragment: Fragment)
     fun showBottomNavigationView(show: Boolean)
     fun showAppBar(show: Boolean)
+    fun disableBackPress(disable:Boolean)
 }
