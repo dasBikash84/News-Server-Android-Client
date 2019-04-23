@@ -32,6 +32,7 @@ import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
+import com.dasbikash.news_server.views.rv_helpers.PagePreviewListAdapter
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
@@ -68,6 +69,7 @@ class NewspaperPerviewFragment : Fragment() {
         mPagePreviewList = view.findViewById(R.id.newspaper_page_preview_list)
         mNestedScrollView = view.findViewById(R.id.page_preview_scroller)
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
+
         (activity as NavigationHost)
                 .showBottomNavigationView(true)
 
@@ -95,7 +97,8 @@ class NewspaperPerviewFragment : Fragment() {
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe({
-                            mListAdapter = TopPagePreviewListAdapter(activity!!.supportFragmentManager,this)
+                            Log.d(TAG, "newspaper: ${mNewspaper.name}, top page count: ${it.size}")
+                            mListAdapter = TopPagePreviewListAdapter(this, mAppSettingsRepository, ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
                             mPagePreviewList.adapter = mListAdapter
                             mListAdapter.submitList(it)
                         })
@@ -106,22 +109,7 @@ class NewspaperPerviewFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         mDisposable.clear()
-        Log.d("NpPerviewFragment","onPause():${mNewspaper.name}")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("NpPerviewFragment","onDestroy():${mNewspaper.name}")
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        Log.d("NpPerviewFragment","onDetach():${mNewspaper.name}")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d("NpPerviewFragment","onStop():${mNewspaper.name}")
+        Log.d("NpPerviewFragment", "onPause():${mNewspaper.name}")
     }
 
     companion object {
@@ -139,64 +127,83 @@ class NewspaperPerviewFragment : Fragment() {
     }
 }
 
-class TopPagePreviewListAdapter(val fragmentManager: FragmentManager,val lifecycleOwner: LifecycleOwner) :
+class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
+                                val appSettingsRepository: AppSettingsRepository,
+                                val homeViewModel: HomeViewModel) :
         ListAdapter<Page, PagePreviewHolder>(PageDiffCallback) {
+
+    val childPageMap = mutableMapOf<Page, List<Page>>()
 
     val disposable = CompositeDisposable()
 
+    override fun onCurrentListChanged(previousList: MutableList<Page>, currentList: MutableList<Page>) {
+        super.onCurrentListChanged(previousList, currentList)
+        if (currentList.size > 0) {
+            disposable.add(
+                Observable.fromIterable(currentList)
+                    .subscribeOn(Schedulers.io())
+                    .forEach {
+                        it?.let {
+                            val childPages =
+                                    appSettingsRepository
+                                            .getChildPagesForTopLevelPage(it)
+                                            .asSequence()
+                                            .filter { it.getHasData() }
+                                            .sortedBy { it.id }
+                                            .toCollection(mutableListOf<Page>())
+                            if (it.getHasData()) {
+                                childPages.add(0, it)
+                            }
+                            synchronized(childPageMap) {
+                                childPageMap.put(it, childPages)
+                            }
+                        }
+                    }
+            )
+        }
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagePreviewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.view_top_page_child_list_preview_holder, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_child_page_list_preview, parent, false)
         val holder = PagePreviewHolder(view)
         lifecycleOwner.lifecycle.addObserver(holder)
         return holder
     }
 
     override fun onBindViewHolder(holder: PagePreviewHolder, position: Int) {
-//        holder.disposable.clear()
-//        holder.bind(getItem(position)!!, fragmentManager)
 
         val page = getItem(position)!!
 
-        val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(holder.itemView.context)
-
-        //Log.d(TAG,"itemView.id: ${itemView.id}, itemId: ${itemId}")
-
         disposable.add(
-                Observable.just(true)
+                Observable.just(page)
                         .subscribeOn(Schedulers.io())
                         .map {
-                            //Log.d(TAG, "Start for page ${page.name} Np: ${page.newsPaperId}")
-                            appSettingsRepository
-                                    .getChildPagesForTopLevelPage(page)
-                                    .asSequence()
-                                    .filter { it.getHasData() }
-                                    .sortedBy { it.id }
-                                    .toCollection(mutableListOf<Page>())
-                        }
-                        .map {
-                            if (it.size > 0) {
-                                if (page.getHasData()) it.set(0, page)
-                            } else {
-                                if (page.getHasData()) it.add(page)
-                            }
-                            it
+                            do {
+                                synchronized(childPageMap) {
+                                    if (childPageMap.containsKey(it)) {
+                                        return@map childPageMap.get(it)
+                                    }
+                                }
+                                Thread.sleep(100L)
+                            } while (true)
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<MutableList<Page>>() {
+                        .subscribeWith(object : DisposableObserver<Any>() {
                             override fun onComplete() {}
-                            override fun onNext(t: MutableList<Page>) {
-                                holder.bind(page,t.toList(), fragmentManager)
+                            override fun onNext(childPageList: Any) {
+                                if (childPageList is List<*>) {
+                                    holder.bind(page, childPageList as List<Page>, homeViewModel)
+                                }
                             }
-                            override fun onError(e: Throwable) {
-                                holder.itemView.visibility = View.GONE
-                            }
-                        }))
+
+                            override fun onError(e: Throwable) {}
+                        })
+        )
     }
 
     override fun onViewRecycled(holder: PagePreviewHolder) {
         super.onViewRecycled(holder)
         holder.active = false
-//        holder.disposable.clear()
     }
 
     override fun onFailedToRecycleView(holder: PagePreviewHolder): Boolean {
@@ -214,18 +221,22 @@ class TopPagePreviewListAdapter(val fragmentManager: FragmentManager,val lifecyc
 class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), DefaultLifecycleObserver {
 
     override fun onPause(owner: LifecycleOwner) {
-        Log.d("NpPerviewFragment","onPause: active = false for page:${mPage.name}")
+        Log.d("NpPerviewFragment", "onPause: active = false for page:${mPage.name}")
         active = false
     }
+
     override fun onStop(owner: LifecycleOwner) {
-        Log.d("NpPerviewFragment","onStop: active = false for page:${mPage.name}")
+        Log.d("NpPerviewFragment", "onStop: active = false for page:${mPage.name}")
         active = false
     }
+
     override fun onDestroy(owner: LifecycleOwner) {
-        Log.d("NpPerviewFragment","onDestroy: active = false for page:${mPage.name}")
+        Log.d("NpPerviewFragment", "onDestroy: active = false for page:${mPage.name}")
         active = false
     }
+
     override fun onResume(owner: LifecycleOwner) {
+        Log.d("NpPerviewFragment", "onResume: active = true at PagePreviewHolder")
         active = true
     }
 
@@ -233,97 +244,31 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), Def
         val TAG = "NpPerviewFragment"
     }
 
-//    val disposable = CompositeDisposable()
     var active = true
 
-    lateinit var mPage:Page
+    lateinit var mPage: Page
+
+    private val mPageListPreviewHolderRV: RecyclerView
 
     init {
-        itemView.id = DisplayUtils.getNextViewId(itemView.context)//View.generateViewId()
-//        Log.d(TAG,"itemView.id: ${itemView.id}")
+        mPageListPreviewHolderRV = itemView.findViewById(R.id.mPageListPreviewHolder)
     }
 
     @SuppressLint("CheckResult")
-//    fun bind(page: Page, fragmentManager: FragmentManager) {
-    fun bind(page: Page,data:List<Page>, fragmentManager: FragmentManager) {
-
+    fun bind(page: Page, data: List<Page>, homeViewModel: HomeViewModel) {
         mPage = page
-
-        val fragment = when {
-            data.size == 1 -> {
-                FragmentArticlePreviewForPages.getInstanceForScreenFillPreview(data[0])
-            }
-            data.size > 1 -> {
-                FragmentArticlePreviewForPages.getInstanceForCustomWidthPreview(data)
-            }
-            else -> {
-                null
-            }
-        }
-        //itemView.context.resources.getResourceName(itemView.id)
-        if (fragment != null && active) {
-            fragmentManager.beginTransaction().replace(itemView.id, fragment).commit()
-//                                        fragmentManager.executePendingTransactions()
+        val articlePreviewResId: Int
+        if (data.size == 1) {
+            articlePreviewResId = R.layout.view_article_preview_holder_parent_width
+            mPageListPreviewHolderRV.minimumWidth = itemView.resources.displayMetrics.widthPixels
+        } else if (data.size > 1) {
+            articlePreviewResId = R.layout.view_article_preview_holder_custom_width
+        } else {
+            return
         }
 
-        /*val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
-
-        //Log.d(TAG,"itemView.id: ${itemView.id}, itemId: ${itemId}")
-
-        disposable.add(
-                Observable.just(true)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            //Log.d(TAG, "Start for page ${page.name} Np: ${page.newsPaperId}")
-                            appSettingsRepository
-                                    .getChildPagesForTopLevelPage(page)
-                                    .asSequence()
-                                    .filter { it.getHasData() }
-                                    .sortedBy { it.id }
-                                    .toCollection(mutableListOf<Page>())
-                        }
-                        .map {
-                            if (it.size > 0) {
-                                if (page.getHasData()) it.set(0, page)
-                            } else {
-                                if (page.getHasData()) it.add(page)
-                            }
-                            it
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<MutableList<Page>>() {
-                            override fun onComplete() {
-//                                Log.d(TAG, "onComplete for page ${page.name} Np: ${page.newsPaperId} L1")
-                            }
-
-                            override fun onNext(data: MutableList<Page>) {
-//                                Log.d(TAG, "Display block for page ${page.name} Np: ${page.newsPaperId}")
-                                try {
-                                    val fragment = when {
-                                        data.size == 1 -> {
-                                            FragmentArticlePreviewForPages.getInstanceForScreenFillPreview(data[0])
-                                        }
-                                        data.size > 1 -> {
-                                            FragmentArticlePreviewForPages.getInstanceForCustomWidthPreview((data).toList())
-                                        }
-                                        else -> {
-                                            null
-                                        }
-                                    }
-                                    //itemView.context.resources.getResourceName(itemView.id)
-                                    if (fragment != null && active) {
-                                        fragmentManager.beginTransaction().replace(itemView.id, fragment).commit()
-//                                        fragmentManager.executePendingTransactions()
-                                    }
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
-                                }
-                            }
-
-                            override fun onError(e: Throwable) {
-//                                Log.d(TAG, "Error: " + e.message + " for page ${page.name} Np: ${page.newsPaperId} L1")
-                            }
-                        })
-        )*/
+        val pagePreviewListAdapter = PagePreviewListAdapter(articlePreviewResId, homeViewModel)
+        mPageListPreviewHolderRV.adapter = pagePreviewListAdapter
+        pagePreviewListAdapter.submitList(data)
     }
 }
