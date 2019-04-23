@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server.views
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -31,6 +32,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
+import com.dasbikash.news_server.views.interfaces.NavigationHost
+import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.views.rv_helpers.PageListAdapter
 import com.dasbikash.news_server.views.rv_helpers.PageViewHolder
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
@@ -70,6 +73,16 @@ class PageGroupEditFragment : Fragment() {
     }
 
     private val MINIMUM_CHAR_LENGTH_FOR_PAGE_SEARCH = 3
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        (activity as NavigationHost).showAppBar(false) //To disable sign out
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        (activity as NavigationHost).showAppBar(true)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -282,6 +295,7 @@ class PageGroupEditFragment : Fragment() {
 
     private fun exit() {
         (activity as HomeNavigator).loadPageGroupFragment()
+        (activity as NavigationHost).showAppBar(true)
     }
 
     private fun doneButtonClickAction() {
@@ -306,6 +320,7 @@ class PageGroupEditFragment : Fragment() {
 
         val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
 
+        (activity as WorkInProcessWindowOperator).loadWorkInProcessWindow()
         mDisposable.add(
                 Observable.just(true)
                         .subscribeOn(Schedulers.io())
@@ -323,6 +338,8 @@ class PageGroupEditFragment : Fragment() {
                         .subscribeWith(object : DisposableObserver<Boolean>() {
                             override fun onComplete() {}
                             override fun onNext(t: Boolean) {
+
+                                (activity as WorkInProcessWindowOperator).removeWorkInProcessWindow()
                                 if (t) {
                                     Toast.makeText(context, "Data Saved!!", Toast.LENGTH_SHORT).show()
                                     exit()
@@ -332,6 +349,8 @@ class PageGroupEditFragment : Fragment() {
                             }
 
                             override fun onError(e: Throwable) {
+
+                                (activity as WorkInProcessWindowOperator).removeWorkInProcessWindow()
                                 Toast.makeText(context, "Error!! Please retry!!", Toast.LENGTH_SHORT).show()
                             }
                         })

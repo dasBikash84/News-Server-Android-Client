@@ -37,6 +37,7 @@ import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.NavigationHost
+import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.views.rv_helpers.PageGroupDiffCallback
 import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
@@ -70,7 +71,7 @@ class PageGroupFragment : Fragment() {
 
         mPageGroupListAdapter =
                 PageGroupListAdapter(activity!!.supportFragmentManager, this,
-                        activity!! as SignInHandler, activity as NavigationHost)
+                        activity!! as SignInHandler, activity as NavigationHost,activity as WorkInProcessWindowOperator)
         mPageGroupListHolder.adapter = mPageGroupListAdapter
 
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
@@ -119,7 +120,10 @@ class PageGroupFragment : Fragment() {
                                     message = "Add new page group?", negetiveButtonText = "Cancel",
                                     positiveButtonText = "Sign in and continue",
                                     doOnPositivePress = {
-                                        (activity as SignInHandler).launchSignInActivity()
+                                        (activity as SignInHandler).launchSignInActivity({
+                                            (activity as NavigationHost)
+                                                    .addFragment(PageGroupEditFragment.getInstance())
+                                        })
                                     }
                             )
                     )
@@ -142,11 +146,12 @@ class PageGroupFragment : Fragment() {
 
 
 class PageGroupListAdapter(val fragmentManager: FragmentManager, val lifecycleOwner: LifecycleOwner,
-                           val signInHandler: SignInHandler, val navigationHost: NavigationHost)
+                           val signInHandler: SignInHandler, val navigationHost: NavigationHost,val workInProcessWindowOperator: WorkInProcessWindowOperator)
     : ListAdapter<PageGroup, PageGroupHolder>(PageGroupDiffCallback) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageGroupHolder {
         val pagePreviewHolder = PageGroupHolder(LayoutInflater.from(parent.context).inflate(
-                R.layout.view_page_group_item, parent, false), fragmentManager, signInHandler, navigationHost)
+                R.layout.view_page_group_item, parent, false), fragmentManager,
+                signInHandler, navigationHost,workInProcessWindowOperator)
 
         lifecycleOwner.lifecycle.addObserver(pagePreviewHolder)
 
@@ -164,7 +169,8 @@ class PageGroupListAdapter(val fragmentManager: FragmentManager, val lifecycleOw
 }
 
 class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
-                      val signInHandler: SignInHandler, val navigationHost: NavigationHost)
+                      val signInHandler: SignInHandler, val navigationHost: NavigationHost,
+                      val workInProcessWindowOperator: WorkInProcessWindowOperator)
     : RecyclerView.ViewHolder(itemView), DefaultLifecycleObserver {
 
     private val titleHolder: MaterialCardView
@@ -203,6 +209,7 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                                     message = "Proceed with deletion of \"${mPageGroup.name}\" page group?",
                                     positiveButtonText = "Yes", negetiveButtonText = "Cancel",
                                     doOnPositivePress = {
+                                        workInProcessWindowOperator.loadWorkInProcessWindow()
                                         Observable.just(mPageGroup)
                                                 .subscribeOn(Schedulers.io())
                                                 .map {
@@ -211,7 +218,7 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                                                 .observeOn(AndroidSchedulers.mainThread())
                                                 .subscribeWith(object : DisposableObserver<Boolean>() {
                                                     override fun onComplete() {
-
+                                                        workInProcessWindowOperator.removeWorkInProcessWindow()
                                                     }
 
                                                     override fun onNext(result: Boolean) {
@@ -219,7 +226,7 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                                                     }
 
                                                     override fun onError(e: Throwable) {
-
+                                                        workInProcessWindowOperator.removeWorkInProcessWindow()
                                                     }
                                                 })
                                     }
@@ -243,7 +250,9 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                 val logInPromptNegetiveText: String = "Cancel"
                 val logInPromptPositiveText: String = "Sign in and continue"
                 val logInPromptPositiveAction: () -> Unit = {
-                    signInHandler.launchSignInActivity()
+                    signInHandler.launchSignInActivity({
+                        modifyActionDialog.show()
+                    })
                 }
 
                 val notLoggedInDialog = DialogUtils.createAlertDialog(

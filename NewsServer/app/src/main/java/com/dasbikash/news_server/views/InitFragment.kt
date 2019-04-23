@@ -190,9 +190,11 @@ class InitFragment : Fragment() {
             mRetryDelayForRemoteDBError += RETRY_DELAY_FOR_REMOTE_ERROR_INC_VALUE * mRetryCountForRemoteDBError
             initSettingsDataLoading(mRetryDelayForRemoteDBError)
         } else if (throwable is AuthServerException){
-            //val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
-            //userSettingsRepository.signOutUser()
-
+            val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
+            userSettingsRepository.signOutUser()
+            (activity as SignInHandler).launchSignInActivity({
+                initSettingsDataLoading(0L)
+            })
         }
     }
 

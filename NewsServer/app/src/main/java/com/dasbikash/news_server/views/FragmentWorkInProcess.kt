@@ -18,7 +18,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.core.widget.ContentLoadingProgressBar
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
 
@@ -31,6 +30,5 @@ class FragmentWorkInProcess : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.findViewById<LinearLayout>(R.id.wait_window).setOnClickListener {  }
-        //view.findViewById<ContentLoadingProgressBar>(R.id.wait_window_progress_bar).isIndeterminate = true
     }
 }

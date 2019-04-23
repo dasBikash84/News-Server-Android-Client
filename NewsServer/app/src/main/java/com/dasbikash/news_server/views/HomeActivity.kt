@@ -166,7 +166,6 @@ class HomeActivity : AppCompatActivity(),
     override fun loadWorkInProcessWindow() {
         mWaitWindow = FragmentWorkInProcess()
         showBottomNavigationView(false)
-//        showAppBar(false)
         addFragment(mWaitWindow!!)
         mWaitWindowShown = true
     }
@@ -176,7 +175,6 @@ class HomeActivity : AppCompatActivity(),
         removeFragment(mWaitWindow!!)
         mWaitWindow = null
         showBottomNavigationView(true)
-//        showAppBar(true)
     }
 
     override fun onBackPressed() {
@@ -298,6 +296,7 @@ class HomeActivity : AppCompatActivity(),
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(object : Observer<Pair<UserSettingsRepository.SignInResult, Throwable?>> {
                         override fun onComplete() {
+                            actionAfterSuccessfulLogIn = null
                         }
                         override fun onSubscribe(d: Disposable) {
                         }
@@ -307,7 +306,6 @@ class HomeActivity : AppCompatActivity(),
                                     Log.d(TAG,"User settings data saved.")
                                     actionAfterSuccessfulLogIn?.let {
                                         it()
-                                        actionAfterSuccessfulLogIn = null
                                     }
                                 }
                                 UserSettingsRepository.SignInResult.USER_ABORT -> Log.d(TAG,"Log in canceled by user")
@@ -316,6 +314,7 @@ class HomeActivity : AppCompatActivity(),
                             }
                         }
                         override fun onError(e: Throwable) {
+                            actionAfterSuccessfulLogIn = null
                             Log.d(TAG,"Error while User settings data saving. Error: ${e}")
                         }
                     })

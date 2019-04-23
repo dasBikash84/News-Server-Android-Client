@@ -26,8 +26,10 @@ import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
+import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
@@ -44,7 +46,7 @@ import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
 class PageViewActivity : AppCompatActivity(),
-        NavigationView.OnNavigationItemSelectedListener, SignInHandler {
+        NavigationView.OnNavigationItemSelectedListener, SignInHandler/*, WorkInProcessWindowOperator*/ {
 
 
     companion object {
@@ -186,9 +188,9 @@ class PageViewActivity : AppCompatActivity(),
             PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE -> dialogMessage = "Remove \"${mPage.name}\" from favourites?"
         }
 
-        val positiveText: String
-        val negetiveText: String = "Cancel"
-        val neutralText: String
+        val positiveActionText = "Yes"
+        val negetiveActionText = "Cancel"
+
         val positiveAction: () -> Unit = {
             disposable.add(
                     Observable.just(mPage)
@@ -219,30 +221,41 @@ class PageViewActivity : AppCompatActivity(),
                                         invalidateOptionsMenu()
                                     }
                                 }
-                                override fun onError(e: Throwable) {}
+
+                                override fun onError(e: Throwable) {
+                                    Snackbar.make(mPageViewContainer, "Error!! Please retry.", Snackbar.LENGTH_SHORT).show()}
                             })
             )
         }
-        val neutralAction: () -> Unit
-        if (mUserSettingsRepository.checkIfLoggedIn()) {
-            positiveText = "Yes"
-            neutralText = ""
-            neutralAction = {}
-        } else {
-            positiveText = "Execute as guest"
-            neutralText = "Sign in and continue"
-            neutralAction = {
-                launchSignInActivity()
-            }
-        }
-        DialogUtils.createAlertDialog(
-                this,
-                DialogUtils.AlertDialogDetails(
-                        message = dialogMessage,
-                        positiveButtonText = positiveText, neutralButtonText = neutralText, negetiveButtonText = negetiveText,
-                        doOnPositivePress = positiveAction, doOnNeutralPress = neutralAction
+
+        val changeFavStatusDialog =
+                DialogUtils.createAlertDialog(
+                        this,
+                        DialogUtils.AlertDialogDetails(
+                                message = dialogMessage,
+                                positiveButtonText = positiveActionText,
+                                negetiveButtonText = negetiveActionText,
+                                doOnPositivePress = positiveAction
+                        )
                 )
-        ).show()
+
+        if (mUserSettingsRepository.checkIfLoggedIn()) {
+            changeFavStatusDialog.show()
+        } else {
+            DialogUtils.createAlertDialog(
+                    this,
+                    DialogUtils.AlertDialogDetails(
+                            message = dialogMessage,
+                            positiveButtonText = "Sign in and continue",
+                            negetiveButtonText = "Cancel",
+                            doOnPositivePress = {
+                                    launchSignInActivity({
+                                        changeFavStatusDialog.show()
+                                    })
+                            }
+                    )
+            ).show()
+        }
 
     }
 
@@ -288,11 +301,18 @@ class PageViewActivity : AppCompatActivity(),
                     .map { mUserSettingsRepository.processSignInRequestResult(it, this) }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(object : Observer<Pair<UserSettingsRepository.SignInResult, Throwable?>> {
-                        override fun onComplete() {}
+                        override fun onComplete() {
+                            actionAfterSuccessfulLogIn = null
+                        }
                         override fun onSubscribe(d: Disposable) {}
                         override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult, Throwable?>) {
                             when (processingResult.first) {
-                                UserSettingsRepository.SignInResult.SUCCESS -> Log.d(TAG, "User settings data saved.")
+                                UserSettingsRepository.SignInResult.SUCCESS ->  {
+                                    Log.d(HomeActivity.TAG,"User settings data saved.")
+                                    actionAfterSuccessfulLogIn?.let {
+                                        it()
+                                    }
+                                }
                                 UserSettingsRepository.SignInResult.USER_ABORT -> Log.d(TAG, "Log in canceled by user")
                                 UserSettingsRepository.SignInResult.SERVER_ERROR -> Log.d(TAG, "Log in error. Details:${processingResult.second}")
                                 UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> Log.d(TAG, "Error while User settings data saving. Details:${processingResult.second}")
@@ -300,16 +320,42 @@ class PageViewActivity : AppCompatActivity(),
                         }
 
                         override fun onError(e: Throwable) {
+                            actionAfterSuccessfulLogIn = null
                             Log.d(TAG, "Error while User settings data saving. Error: ${e}")
                         }
                     })
         }
     }
 
+    var actionAfterSuccessfulLogIn : (() -> Unit)? = null
+
     override fun launchSignInActivity(doOnSignIn:()->Unit) {
         val intent = mUserSettingsRepository.getLogInIntent()
         intent?.let {
             startActivityForResult(intent, LOG_IN_REQ_CODE)
         }
+        actionAfterSuccessfulLogIn = doOnSignIn
     }
+
+    /*var mWaitWindowShown = false
+    var mWaitWindow : Fragment? = null
+    override fun loadWorkInProcessWindow() {
+        mWaitWindow = FragmentWorkInProcess()
+        showBottomNavigationView(false)
+        addFragment(mWaitWindow!!)
+        mWaitWindowShown = true
+    }
+
+    override fun removeWorkInProcessWindow() {
+        mWaitWindowShown = false
+        removeFragment(mWaitWindow!!)
+        mWaitWindow = null
+        showBottomNavigationView(true)
+    }
+
+    override fun onBackPressed() {
+        if (!mWaitWindowShown) {
+            super.onBackPressed()
+        }
+    }*/
 }
