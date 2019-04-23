@@ -23,7 +23,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.dasbikash.news_server.views.HomeActivity" />
         </activity>
-        <activity android:name=".views.UserActivity" />
 
         <uses-library
             android:name="android.test.runner"

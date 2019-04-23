@@ -165,4 +165,7 @@
     <string name="cancel_text">Cancel</string>
     <string name="reset_text">Reset</string>
     <string name="add_page_group_button_text">Add Group</string>
+    <string name="log_in_sign_up">Log in/Sign up</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="customize_button">Customize</string>
 </resources>

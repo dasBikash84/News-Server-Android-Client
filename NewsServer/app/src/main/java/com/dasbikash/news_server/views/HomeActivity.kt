@@ -21,6 +21,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
@@ -34,6 +35,7 @@ import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
 import io.reactivex.Observer
@@ -49,6 +51,12 @@ class HomeActivity : AppCompatActivity(),
     private lateinit var mCoordinatorLayout: CoordinatorLayout
 
     private lateinit var mUserSettingsRepository:UserSettingsRepository
+
+    private lateinit var mLogInMenuHolder:ConstraintLayout
+
+    private lateinit var mLogInButton:MaterialButton
+    private lateinit var mSignOutButton:MaterialButton
+    private lateinit var mUserSettingEditButton:MaterialButton
 
     private val LOG_IN_REQ_CODE = 7777
 
@@ -66,13 +74,11 @@ class HomeActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
-        mAppBar = findViewById(R.id.app_bar_layout)
-        mToolbar = findViewById(R.id.app_bar)
-        mCoordinatorLayout = findViewById(R.id.activity_home_coordinator_container)
         mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
 
+        findViewItems()
         setSupportActionBar(mToolbar)
-
+        setViewItemOnClickListners()
         setUpBottomNavigationView()
         initApp()
 
@@ -81,6 +87,34 @@ class HomeActivity : AppCompatActivity(),
             mAppBar.visibility = View.INVISIBLE
             loadInitFragment()
         }
+    }
+
+    private fun setViewItemOnClickListners() {
+        mLogInButton.setOnClickListener {
+            launchSignInActivity()
+            mLogInMenuHolder.visibility = View.GONE
+        }
+        mSignOutButton.setOnClickListener {
+            launchSignOutDialog()
+            mLogInMenuHolder.visibility = View.GONE
+        }
+        mUserSettingEditButton.setOnClickListener {
+            launchUserSettingEditDialog()
+            mLogInMenuHolder.visibility = View.GONE
+        }
+
+        mLogInMenuHolder.setOnClickListener { mLogInMenuHolder.visibility = View.GONE }
+    }
+
+    private fun findViewItems() {
+        mAppBar = findViewById(R.id.app_bar_layout)
+        mToolbar = findViewById(R.id.app_bar)
+        mLogInMenuHolder = findViewById(R.id.log_in_menu_holder)
+        mCoordinatorLayout = findViewById(R.id.activity_home_coordinator_container)
+
+        mLogInButton = findViewById(R.id.log_in_sign_up_button)
+        mSignOutButton = findViewById(R.id.sign_out_button)
+        mUserSettingEditButton = findViewById(R.id.customize_button)
     }
 
     private fun initApp() {
@@ -140,8 +174,6 @@ class HomeActivity : AppCompatActivity(),
         val transaction = supportFragmentManager
                 .beginTransaction()
                 .add(R.id.main_frame, fragment)
-//                .addToBackStack(null)
-
         transaction.commit()
     }
 
@@ -256,15 +288,42 @@ class HomeActivity : AppCompatActivity(),
         return false
     }
 
+    private fun launchSignOutDialog(){
+        DialogUtils.createAlertDialog(this, DialogUtils.AlertDialogDetails(
+                title = "Sign Out?",positiveButtonText = "Yes",negetiveButtonText = "Cancel",doOnPositivePress = { signOutAction() }
+        )).show()
+    }
+
+    private fun launchUserSettingEditDialog() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private fun logInAppMenuItemAction() {
-        if(mUserSettingsRepository.checkIfLoggedIn()){
+
+        if (mLogInMenuHolder.visibility == View.GONE){
+            mLogInMenuHolder.visibility = View.VISIBLE
+            mLogInMenuHolder.bringToFront()
+            if(mUserSettingsRepository.checkIfLoggedIn()){
+                mSignOutButton.visibility = View.VISIBLE
+                mUserSettingEditButton.visibility = View.VISIBLE
+                mLogInButton.visibility = View.GONE
+            }else{
+                mSignOutButton.visibility = View.GONE
+                mUserSettingEditButton.visibility = View.GONE
+                mLogInButton.visibility = View.VISIBLE
+            }
+        }else{
+            mLogInMenuHolder.visibility = View.GONE
+        }
+
+        /*if(mUserSettingsRepository.checkIfLoggedIn()){
             DialogUtils.createAlertDialog(this, DialogUtils.AlertDialogDetails(
                     title = "Sign Out?",positiveButtonText = "Yes",negetiveButtonText = "Cancel",doOnPositivePress = { signOutAction() }
             )).show()
 
         }else {
             launchSignInActivity()
-        }
+        }*/
     }
 
     var actionAfterSuccessfulLogIn : (() -> Unit)? = null
