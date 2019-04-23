@@ -28,6 +28,7 @@ import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.OptionsIntentBuilderUtility
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
 import com.dasbikash.news_server.views.interfaces.NavigationHost
+import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
@@ -41,7 +42,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
 class HomeActivity : AppCompatActivity(),
-        NavigationHost, HomeNavigator, SignInHandler {
+        NavigationHost, HomeNavigator, SignInHandler,WorkInProcessWindowOperator {
 
     private lateinit var mToolbar: Toolbar
     private lateinit var mAppBar: AppBarLayout
@@ -160,6 +161,29 @@ class HomeActivity : AppCompatActivity(),
             mAppBar.visibility = View.GONE
         }
     }
+    var mWaitWindowShown = false
+    var mWaitWindow :Fragment? = null
+    override fun loadWorkInProcessWindow() {
+        mWaitWindow = FragmentWorkInProcess()
+        showBottomNavigationView(false)
+//        showAppBar(false)
+        addFragment(mWaitWindow!!)
+        mWaitWindowShown = true
+    }
+
+    override fun removeWorkInProcessWindow() {
+        mWaitWindowShown = false
+        removeFragment(mWaitWindow!!)
+        mWaitWindow = null
+        showBottomNavigationView(true)
+//        showAppBar(true)
+    }
+
+    override fun onBackPressed() {
+        if (!mWaitWindowShown) {
+            super.onBackPressed()
+        }
+    }
 
     /**
      * Trigger a navigation to the specified fragment, optionally adding a transaction to the back
@@ -169,16 +193,17 @@ class HomeActivity : AppCompatActivity(),
      * @param addToBackstack
      */
     override fun navigateTo(fragment: Fragment, addToBackstack: Boolean) {
+        if (!mWaitWindowShown) {
+            val transaction = supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.main_frame, fragment)
 
-        val transaction = supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.main_frame, fragment)
+            if (addToBackstack) {
+                transaction.addToBackStack(null)
+            }
 
-        if (addToBackstack) {
-            transaction.addToBackStack(null)
+            transaction.commit()
         }
-
-        transaction.commit()
     }
 
     fun loadInitFragment() {
@@ -207,19 +232,20 @@ class HomeActivity : AppCompatActivity(),
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
-        when (item.itemId) {
-            R.id.share_app_menu_item -> {
-                shareAppMenuItemAction()
-                return true
-            }
-            R.id.settings_menu_item -> {
-                loadSettingsFragment()
-                return true
-            }
-            R.id.log_in_app_menu_item -> {
-                logInAppMenuItemAction()
-                return true
+        if (!mWaitWindowShown) {
+            when (item.itemId) {
+                R.id.share_app_menu_item -> {
+                    shareAppMenuItemAction()
+                    return true
+                }
+                R.id.settings_menu_item -> {
+                    loadSettingsFragment()
+                    return true
+                }
+                R.id.log_in_app_menu_item -> {
+                    logInAppMenuItemAction()
+                    return true
+                }
             }
         }
         return false
@@ -236,11 +262,14 @@ class HomeActivity : AppCompatActivity(),
         }
     }
 
-    override fun launchSignInActivity() {
+    var actionAfterSuccessfulLogIn : (() -> Unit)? = null
+
+    override fun launchSignInActivity(doOnSignIn:()->Unit) {
         val intent = mUserSettingsRepository.getLogInIntent()
         intent?.let {
             startActivityForResult(intent, LOG_IN_REQ_CODE)
         }
+        actionAfterSuccessfulLogIn = doOnSignIn
     }
 
     private fun signOutAction() {
@@ -274,7 +303,13 @@ class HomeActivity : AppCompatActivity(),
                         }
                         override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult,Throwable?>) {
                             when(processingResult.first){
-                                UserSettingsRepository.SignInResult.SUCCESS -> Log.d(TAG,"User settings data saved.")
+                                UserSettingsRepository.SignInResult.SUCCESS -> {
+                                    Log.d(TAG,"User settings data saved.")
+                                    actionAfterSuccessfulLogIn?.let {
+                                        it()
+                                        actionAfterSuccessfulLogIn = null
+                                    }
+                                }
                                 UserSettingsRepository.SignInResult.USER_ABORT -> Log.d(TAG,"Log in canceled by user")
                                 UserSettingsRepository.SignInResult.SERVER_ERROR -> Log.d(TAG,"Log in error. Details:${processingResult.second}")
                                 UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> Log.d(TAG,"Error while User settings data saving. Details:${processingResult.second}")
@@ -293,5 +328,5 @@ class HomeActivity : AppCompatActivity(),
 }
 
 interface SignInHandler{
-    fun launchSignInActivity()
+    fun launchSignInActivity(doOnSignIn:()->Unit = {})
 }

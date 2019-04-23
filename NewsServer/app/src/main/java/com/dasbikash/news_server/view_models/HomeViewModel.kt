@@ -78,7 +78,7 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
                 .map {
                     do {
                         Log.d(TAG,"Waiting for page: ${it.second.name}")
-                        SystemClock.sleep(Random(System.currentTimeMillis()).nextLong(100L))
+                        Thread.sleep(Random(System.currentTimeMillis()).nextLong(100L))
                     }while (currentArticleRequestCount.get() >= MAX_PARALLEL_ARTICLE_REQUEST)
                     Log.d(TAG,"Going to increment count for page: ${it.second.name}")
                     currentArticleRequestCount.incrementAndGet()

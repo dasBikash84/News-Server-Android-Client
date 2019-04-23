@@ -33,6 +33,7 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
+import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
@@ -75,9 +76,8 @@ class FavouritesFragment : Fragment() {
 
         mFavItemsHolder.adapter = mFavouritePagesListAdapter
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
-        ItemTouchHelper(FavPageSwipeToDeleteCallback(mFavouritePagesListAdapter, activity!! as SignInHandler)).attachToRecyclerView(mFavItemsHolder)
-
-//        (activity as BottomNavigationViewOwner).showBottomNavigationView(true)
+        ItemTouchHelper(FavPageSwipeToDeleteCallback(mFavouritePagesListAdapter, activity!! as SignInHandler, activity!! as WorkInProcessWindowOperator))
+                .attachToRecyclerView(mFavItemsHolder)
 
         mHomeViewModel.getUserPreferenceData()
                 .observe(activity!!, object : Observer<UserPreferenceData?> {
@@ -137,7 +137,6 @@ class FavouritePagesListAdapter(val context: Context) :
                             it?.let { holder.bind(it.first, it.second) }
                         })
         )
-//        holder.bind(getItem(position))
     }
 
     override fun onViewAttachedToWindow(holder: FavouritePagePreviewHolder) {
@@ -261,7 +260,9 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
 
 }
 
-class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAdapter, val signInHandler: SignInHandler) :
+class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAdapter,
+                                   val signInHandler: SignInHandler,
+                                   val workInProcessWindowOperator: WorkInProcessWindowOperator) :
         ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
         return false
@@ -272,50 +273,62 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
         val page = (viewHolder as FavouritePagePreviewHolder).mPage
         val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(viewHolder.itemView.context)
 
-        var positiveText: String = ""
-        val negetiveText: String = "Cancel"
-        var positiveAction: () -> Unit = {}
+        val message = "Remove \"${page.name}\" from favourites?"
+        val positiveText = "Yes"
+        val negetiveText = "Cancel"
         val negetiveAction: () -> Unit = {
             favouritePagesListAdapter.notifyDataSetChanged()
         }
-
-        if (userSettingsRepository.checkIfLoggedIn()) {
-            positiveText = "Yes"
-            positiveAction = {
-                Observable.just(page)
-                        .subscribeOn(Schedulers.io())
-                        .map { userSettingsRepository.removePageFromFavList(page, viewHolder.itemView.context) }
-                        .subscribe(object : io.reactivex.Observer<Boolean> {
-                            override fun onComplete() {}
-                            override fun onSubscribe(d: Disposable) {}
-                            override fun onNext(result: Boolean) {
-                                if (!result) {
-                                    favouritePagesListAdapter.notifyDataSetChanged()
-                                }
-                            }
-
-                            override fun onError(e: Throwable) {
-                                e.printStackTrace()
+        val positiveAction: () -> Unit = {
+            workInProcessWindowOperator.loadWorkInProcessWindow()
+            Observable.just(page)
+                    .subscribeOn(Schedulers.io())
+                    .map { userSettingsRepository.removePageFromFavList(page, viewHolder.itemView.context) }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(object : io.reactivex.Observer<Boolean> {
+                        override fun onComplete() {
+                            workInProcessWindowOperator.removeWorkInProcessWindow()
+                        }
+                        override fun onSubscribe(d: Disposable) {}
+                        override fun onNext(result: Boolean) {
+                            if (!result) {
                                 favouritePagesListAdapter.notifyDataSetChanged()
                             }
-                        })
-            }
-        } else {
-            positiveText = "Sign in and continue"
-            positiveAction = {
-                favouritePagesListAdapter.notifyDataSetChanged()
-                signInHandler.launchSignInActivity()
-            }
+                        }
+
+                        override fun onError(e: Throwable) {
+                            e.printStackTrace()
+                            workInProcessWindowOperator.removeWorkInProcessWindow()
+                            favouritePagesListAdapter.notifyDataSetChanged()
+                        }
+                    })
         }
 
-        DialogUtils.createAlertDialog(
-                viewHolder.itemView.context,
-                DialogUtils.AlertDialogDetails(
-                        message = "Remove \"${page.name}\" from favourites?",
-                        positiveButtonText = positiveText, negetiveButtonText = negetiveText, /*neutralButtonText = neutralText,*/
-                        doOnPositivePress = positiveAction, doOnNegetivePress = negetiveAction,/*doOnNeutralPress = neutralAction,*/
-                        isCancelable = false
+        val removeFavItemDialog =
+                DialogUtils.createAlertDialog(
+                    viewHolder.itemView.context,
+                    DialogUtils.AlertDialogDetails(
+                            message = message,positiveButtonText = positiveText, negetiveButtonText = negetiveText,
+                            doOnPositivePress = positiveAction, doOnNegetivePress = negetiveAction,
+                            isCancelable = false
+                    )
                 )
-        ).show()
+
+        if (userSettingsRepository.checkIfLoggedIn()){
+            removeFavItemDialog.show()
+        }else{
+            DialogUtils.createAlertDialog(
+                    viewHolder.itemView.context,
+                    DialogUtils.AlertDialogDetails(
+                            message = message,positiveButtonText = "Sign in and continue", negetiveButtonText = negetiveText,
+                            doOnPositivePress = {
+                                signInHandler.launchSignInActivity({
+                                    removeFavItemDialog.show()
+                                })
+                            }, doOnNegetivePress = negetiveAction,
+                            isCancelable = false
+                    )
+            ).show()
+        }
     }
 }

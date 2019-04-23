@@ -60,9 +60,8 @@ class AppSettingsRepository private constructor(context: Context) {
     fun isAppSettingsUpdated(context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val localAppSettingsUpdateTime = mAppSettingsDataService.getLocalAppSettingsUpdateTime(context)
-        val appSettingsUpdateTimeResponse = mAppSettingsDataService.getServerAppSettingsUpdateTime(context)
-        val serverAppSettingsUpdateTime = appSettingsUpdateTimeResponse//.payload!!
-        return serverAppSettingsUpdateTime > localAppSettingsUpdateTime
+        val appSettingsUpdateTime = mAppSettingsDataService.getServerAppSettingsUpdateTime(context)
+        return appSettingsUpdateTime > localAppSettingsUpdateTime
     }
 
     fun isAppSettingsDataLoaded(): Boolean {

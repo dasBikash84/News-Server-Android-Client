@@ -34,6 +34,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
+import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.dasbikash.news_server.views.rv_helpers.PageGroupDiffCallback
@@ -185,7 +186,7 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
         downArrow = itemView.findViewById(R.id.down_arrow)
         editIcon = itemView.findViewById(R.id.edit_page_group_icon)
         frameLayout = itemView.findViewById(R.id.page_group_items_holder)
-        frameLayout.id = View.generateViewId()
+        frameLayout.id = DisplayUtils.getNextViewId(itemView.context)//View.generateViewId()
 
         editIcon.setOnClickListener {
             if (::mPageGroup.isInitialized) {

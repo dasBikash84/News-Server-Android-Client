@@ -28,6 +28,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
@@ -141,6 +142,8 @@ class NewspaperPerviewFragment : Fragment() {
 class TopPagePreviewListAdapter(val fragmentManager: FragmentManager,val lifecycleOwner: LifecycleOwner) :
         ListAdapter<Page, PagePreviewHolder>(PageDiffCallback) {
 
+    val disposable = CompositeDisposable()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagePreviewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.view_top_page_child_list_preview_holder, parent, false)
         val holder = PagePreviewHolder(view)
@@ -149,18 +152,61 @@ class TopPagePreviewListAdapter(val fragmentManager: FragmentManager,val lifecyc
     }
 
     override fun onBindViewHolder(holder: PagePreviewHolder, position: Int) {
-        holder.disposable.clear()
-        holder.bind(getItem(position)!!, fragmentManager)
+//        holder.disposable.clear()
+//        holder.bind(getItem(position)!!, fragmentManager)
+
+        val page = getItem(position)!!
+
+        val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(holder.itemView.context)
+
+        //Log.d(TAG,"itemView.id: ${itemView.id}, itemId: ${itemId}")
+
+        disposable.add(
+                Observable.just(true)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            //Log.d(TAG, "Start for page ${page.name} Np: ${page.newsPaperId}")
+                            appSettingsRepository
+                                    .getChildPagesForTopLevelPage(page)
+                                    .asSequence()
+                                    .filter { it.getHasData() }
+                                    .sortedBy { it.id }
+                                    .toCollection(mutableListOf<Page>())
+                        }
+                        .map {
+                            if (it.size > 0) {
+                                if (page.getHasData()) it.set(0, page)
+                            } else {
+                                if (page.getHasData()) it.add(page)
+                            }
+                            it
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<MutableList<Page>>() {
+                            override fun onComplete() {}
+                            override fun onNext(t: MutableList<Page>) {
+                                holder.bind(page,t.toList(), fragmentManager)
+                            }
+                            override fun onError(e: Throwable) {
+                                holder.itemView.visibility = View.GONE
+                            }
+                        }))
     }
 
     override fun onViewRecycled(holder: PagePreviewHolder) {
         super.onViewRecycled(holder)
-        holder.disposable.clear()
+        holder.active = false
+//        holder.disposable.clear()
     }
 
     override fun onFailedToRecycleView(holder: PagePreviewHolder): Boolean {
         lifecycleOwner.lifecycle.removeObserver(holder)
         return super.onFailedToRecycleView(holder)
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        disposable.clear()
     }
 
 }
@@ -187,22 +233,40 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), Def
         val TAG = "NpPerviewFragment"
     }
 
-    val disposable = CompositeDisposable()
-    private var active = true
+//    val disposable = CompositeDisposable()
+    var active = true
 
     lateinit var mPage:Page
 
     init {
-        itemView.id = View.generateViewId()
+        itemView.id = DisplayUtils.getNextViewId(itemView.context)//View.generateViewId()
 //        Log.d(TAG,"itemView.id: ${itemView.id}")
     }
 
     @SuppressLint("CheckResult")
-    fun bind(page: Page, fragmentManager: FragmentManager) {
+//    fun bind(page: Page, fragmentManager: FragmentManager) {
+    fun bind(page: Page,data:List<Page>, fragmentManager: FragmentManager) {
 
         mPage = page
 
-        val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
+        val fragment = when {
+            data.size == 1 -> {
+                FragmentArticlePreviewForPages.getInstanceForScreenFillPreview(data[0])
+            }
+            data.size > 1 -> {
+                FragmentArticlePreviewForPages.getInstanceForCustomWidthPreview(data)
+            }
+            else -> {
+                null
+            }
+        }
+        //itemView.context.resources.getResourceName(itemView.id)
+        if (fragment != null && active) {
+            fragmentManager.beginTransaction().replace(itemView.id, fragment).commit()
+//                                        fragmentManager.executePendingTransactions()
+        }
+
+        /*val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
 
         //Log.d(TAG,"itemView.id: ${itemView.id}, itemId: ${itemId}")
 
@@ -260,6 +324,6 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), Def
 //                                Log.d(TAG, "Error: " + e.message + " for page ${page.name} Np: ${page.newsPaperId} L1")
                             }
                         })
-        )
+        )*/
     }
 }

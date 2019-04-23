@@ -306,7 +306,7 @@ class PageViewActivity : AppCompatActivity(),
         }
     }
 
-    override fun launchSignInActivity() {
+    override fun launchSignInActivity(doOnSignIn:()->Unit) {
         val intent = mUserSettingsRepository.getLogInIntent()
         intent?.let {
             startActivityForResult(intent, LOG_IN_REQ_CODE)

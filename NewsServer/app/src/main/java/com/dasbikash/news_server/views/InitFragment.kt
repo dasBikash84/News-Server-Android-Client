@@ -32,6 +32,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
+import com.dasbikash.news_server_data.exceptions.AuthServerException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
@@ -188,6 +189,10 @@ class InitFragment : Fragment() {
             mRetryCountForRemoteDBError++
             mRetryDelayForRemoteDBError += RETRY_DELAY_FOR_REMOTE_ERROR_INC_VALUE * mRetryCountForRemoteDBError
             initSettingsDataLoading(mRetryDelayForRemoteDBError)
+        } else if (throwable is AuthServerException){
+            //val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
+            //userSettingsRepository.signOutUser()
+
         }
     }
 

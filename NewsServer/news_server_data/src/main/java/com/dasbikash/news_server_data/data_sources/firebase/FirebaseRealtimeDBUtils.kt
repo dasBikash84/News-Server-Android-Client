@@ -72,11 +72,11 @@ internal object FirebaseRealtimeDBUtils {
         var data = 0L
         val lock = Object()
 
-        var appSettingsNotFound: AppSettingsNotFound? = null
+        var appSettingsNotFound: SettingsServerException? = null
 
         mSettingsUpdateTimeReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(databaseError: DatabaseError) {
-                appSettingsNotFound = AppSettingsNotFound(databaseError.message)
+                appSettingsNotFound = SettingsServerException(databaseError.message)
                 synchronized(lock) { lock.notify() }
             }
 
@@ -94,21 +94,21 @@ internal object FirebaseRealtimeDBUtils {
 
         synchronized(lock) { lock.wait() }
         if (appSettingsNotFound != null) {
-            throw appSettingsNotFound as AppSettingsNotFound
+            throw appSettingsNotFound as SettingsServerException
         }
 
-        return data//data
+        return data
     }
 
     fun getServerAppSettingsData(): DefaultAppSettings {
         var data = DefaultAppSettings()
         val lock = Object()
 
-        var appSettingsNotFound: AppSettingsNotFound? = null
+        var appSettingsNotFound: SettingsServerException? = null
 
         mAppSettingsReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
-                appSettingsNotFound = AppSettingsNotFound(error.message)
+                appSettingsNotFound = SettingsServerException(error.message)
                 synchronized(lock) { lock.notify() }
             }
 
@@ -126,7 +126,7 @@ internal object FirebaseRealtimeDBUtils {
 
         synchronized(lock) { lock.wait() }
         if (appSettingsNotFound != null) {
-            throw appSettingsNotFound as AppSettingsNotFound
+            throw appSettingsNotFound as SettingsServerException
         }
 
         return data
@@ -139,13 +139,13 @@ internal object FirebaseRealtimeDBUtils {
         var data: UserPreferenceData? = null
         val lock = Object()
 
-        var userSettingsException: UserSettingsNotFoundException? = null
+        var userSettingsException: SettingsServerException? = null
 
         getUserSettingsNodes(user)
                 .rootUserSettingdNode
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onCancelled(error: DatabaseError) {
-                        userSettingsException = UserSettingsNotFoundException(error.message)
+                        userSettingsException = SettingsServerException(error.message)
                         synchronized(lock) { lock.notify() }
                     }
 
@@ -161,7 +161,7 @@ internal object FirebaseRealtimeDBUtils {
                     }
                 })
         synchronized(lock) { lock.wait() }
-        userSettingsException?.let { throw userSettingsException as UserSettingsNotFoundException }
+        userSettingsException?.let { throw userSettingsException as SettingsServerException }
         return data!!
     }
 
@@ -269,7 +269,7 @@ internal object FirebaseRealtimeDBUtils {
                                 lastUpdateTime = dataSnapshot.children.last().getValue(UserSettingsUpdateTime::class.java)?.timeStamp ?: 0L
                             }
                         }catch (ex:Exception){
-                            settingsServerException = SettingsServerException(ex)
+                            settingsServerException = UserSettingsNotFoundException(ex)
                         }
                         synchronized(lock) { lock.notify() }
                     }
