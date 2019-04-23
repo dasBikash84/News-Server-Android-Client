@@ -90,9 +90,9 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
     fun bind(page: Page) {
 
         pageTitle.visibility = View.GONE
-        articlePreviewImage.visibility = View.GONE
-        articleTitle.visibility = View.GONE
-        articlePublicationTime.visibility = View.GONE
+        articlePreviewImage.visibility = View.INVISIBLE
+        articleTitle.visibility = View.INVISIBLE
+        articlePublicationTime.visibility = View.INVISIBLE
 
         mPage = page
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
@@ -106,6 +106,13 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
             }
         }
 
+        pageTitle.text = page.name
+        pageTitle.visibility = View.VISIBLE
+
+        itemView.setOnClickListener(View.OnClickListener {
+
+        })
+
         disposableObserver = homeViewModel.getLatestArticleProvider(Pair(uuid, page))
                 .filter { it.first == uuid }
                 .map {
@@ -113,12 +120,12 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
                     it.second?.let {
                         val dateString = DisplayUtils.getArticlePublicationDateString(it, language, itemView.context)
 
-                        val displayImageLink: String?
+                        var displayImageLink: String? = null
 
-                        when {
-                            it.previewImageLink != null -> displayImageLink = it.previewImageLink
-                            else -> {
-                                displayImageLink = it.imageLinkList?.first { it.link != null }?.link
+                        if(it.previewImageLink !=null || (it.imageLinkList!=null && it.imageLinkList!!.size>0)) {
+                            when {
+                                it.previewImageLink != null && it.previewImageLink?.isNotBlank() ?: false -> displayImageLink = it.previewImageLink
+                                else -> displayImageLink = it.imageLinkList?.first { !it.link.isNullOrBlank() }?.link
                             }
                         }
                         return@map Triple(dateString, it, displayImageLink)
@@ -133,9 +140,6 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
 
                     @Suppress("UNCHECKED_CAST")
                     override fun onNext(articleData: Any) {
-
-                        pageTitle.text = page.name
-                        pageTitle.visibility = View.VISIBLE
 
                         if (articleData is Triple<*, *, *>) {
 
@@ -163,11 +167,6 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
                                                 itemView.context, page, mArticle.id
                                         )
                                 )
-                            })
-                        } else {
-                            //Empty listner
-                            itemView.setOnClickListener(View.OnClickListener {
-
                             })
                         }
                     }
