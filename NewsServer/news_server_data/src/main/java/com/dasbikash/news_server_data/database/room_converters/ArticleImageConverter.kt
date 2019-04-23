@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.database.room_converters
 
+import android.util.Log
 import androidx.room.TypeConverter
 import com.dasbikash.news_server_data.models.room_entity.ArticleImage
 import java.util.*
@@ -27,12 +28,23 @@ internal object ArticleImageConverter {
     fun fromArticleImage(entry: List<ArticleImage>): String {
 
         val stringBuilder = StringBuilder("")
-        for (i in entry.indices) {
-            stringBuilder.append(entry[i].imageLink + PARAM_BRIDGE + entry[i].imageCaptin)
+
+        entry.asSequence()
+                .map {
+                    stringBuilder.append(it.link).append(PARAM_BRIDGE).append(it.captin).append(DATA_BRIDGE)
+                    it
+                }
+                .filter { entry.indexOf(it) == entry.size-1 }
+                .forEach { stringBuilder.append(DATA_BRIDGE) }
+
+        /*for (i in entry.indices) {
+            stringBuilder.append(entry[i].link + PARAM_BRIDGE + entry[i].captin)
             if (i != entry.size - 1) {
                 stringBuilder.append(DATA_BRIDGE)
             }
-        }
+        }*/
+        Log.d("ArticleImageConverter","stringBuilder: ${stringBuilder.toString()}")
+        Log.d("ArticleImageConverter","entry: ${entry.toString()}")
         return stringBuilder.toString()
     }
 
@@ -49,13 +61,15 @@ internal object ArticleImageConverter {
             val dataFragments = entryStr.split(PARAM_BRIDGE)
 
             if (dataFragments.size == 1) {
-                articleImage.imageLink = dataFragments.get(0)
+                articleImage.link = dataFragments.get(0)
             } else if (dataFragments.size == 2) {
-                articleImage.imageLink = dataFragments.get(0)
-                articleImage.imageCaptin = dataFragments.get(1)
+                articleImage.link = dataFragments.get(0)
+                articleImage.captin = dataFragments.get(1)
             }
             entryList.add(articleImage)
         }
+        Log.d("ArticleImageConverter","entryCatString: ${entryCatString.toString()}")
+        Log.d("ArticleImageConverter","entryList: ${entryList}")
 
         return entryList
     }

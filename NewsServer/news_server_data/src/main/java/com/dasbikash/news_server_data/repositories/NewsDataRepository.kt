@@ -29,18 +29,13 @@ class NewsDataRepository private constructor(context: Context) {
 
     private val TAG = "DataService"
 
-    fun getLatestArticleByPage(page: Page): Article? {
-
+    fun getLatestArticleByPageFromLocalDb(page: Page): Article? {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        return newsServerDatabase.articleDao.getLatestArticleByPageId(page.id)
+    }
+
+    fun getLatestArticleByPage(page: Page): Article? {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-
-        val article: Article? = newsServerDatabase.articleDao.getLatestArticleByPageId(page.id)
-
-        if (article != null) {
-            if (System.currentTimeMillis() - article.getCreated() < MIN_ARTICLE_REFRESH_INTERVAL) {
-                return article
-            }
-        }
 
         var latestArticle: Article? = null
         newsDataService.getLatestArticlesByPageId(page.id, 1).apply {

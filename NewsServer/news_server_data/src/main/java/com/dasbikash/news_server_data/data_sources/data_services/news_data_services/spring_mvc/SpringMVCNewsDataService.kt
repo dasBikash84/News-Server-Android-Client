@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc
 
+import android.util.Log
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
@@ -64,18 +65,26 @@ internal object SpringMVCNewsDataService : NewsDataService {
         val articles = mutableListOf<Article>()
         var dataServerException: DataServerException? = null
 
+        Log.d(TAG,"getLatestArticlesByPageId for: ${pageId}")
+
         springMVCWebService
                 .getLatestArticlesByPageId(pageId, articleRequestSize)
                 .enqueue(object : Callback<List<Article>?> {
                     override fun onFailure(call: Call<List<Article>?>, throwable: Throwable) {
+                        Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} onFailure")
                         dataServerException = DataServerNotAvailableExcepption(throwable)
                         synchronized(lock) { lock.notify() }
                     }
 
                     override fun onResponse(call: Call<List<Article>?>, response: Response<List<Article>?>) {
+                        Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} onResponse")
                         if (response.isSuccessful) {
+
+                            Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} onResponse isSuccessful")
                             response.body()?.let { articles.addAll(it) }
                         } else {
+
+                            Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} onResponse not Successful")
                             dataServerException = DataNotFoundException()
 
                         }
@@ -83,8 +92,17 @@ internal object SpringMVCNewsDataService : NewsDataService {
                     }
                 })
 
-        synchronized(lock) { lock.wait() }
+
+        Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} before wait")
+        synchronized(lock) { lock.wait(5000) }
+
+        Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} before throw it")
         dataServerException?.let { throw it }
+
+        Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} before throw DataNotFoundException()")
+        if (articles.size == 0 ){throw DataNotFoundException()}
+
+        Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} before return")
         return articles
     }
 

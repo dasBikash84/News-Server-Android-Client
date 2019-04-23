@@ -48,6 +48,8 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
     private val MAX_PARALLEL_ARTICLE_REQUEST = 5
     private var currentArticleRequestCount = AtomicInteger(0)
 
+    private val MIN_ARTICLE_REFRESH_INTERVAL = 5 * 60 * 1000L
+
 
     init {
         mAppSettingsRepository = RepositoryFactory.getAppSettingsRepository(mApplication)
@@ -76,18 +78,32 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
         return Observable.just(requestPayload)
                 .subscribeOn(Schedulers.io())
                 .map {
+                    Triple(it.first,it.second,mNewsDataRepository.getLatestArticleByPageFromLocalDb(it.second))
+                }
+                .map {
+                    val input = it
+                    it.third?.let {
+                        if (System.currentTimeMillis() - it.getCreated() < MIN_ARTICLE_REFRESH_INTERVAL) {
+                            return@map Pair(input.first,it)
+                        }
+                    }
                     do {
                         Log.d(TAG,"Waiting for page: ${it.second.name}")
                         Thread.sleep(Random(System.currentTimeMillis()).nextLong(100L))
                     }while (currentArticleRequestCount.get() >= MAX_PARALLEL_ARTICLE_REQUEST)
-                    Log.d(TAG,"Going to increment count for page: ${it.second.name}")
+                    Log.d(TAG+"1","Going to increment count for page: ${it.second.name}")
                     currentArticleRequestCount.incrementAndGet()
-                    Log.d(TAG,"Request send for page: ${it.second.name}")
+                    Log.d(TAG+"1","Request send for page: ${it.second.name}")
                     val article = mNewsDataRepository.getLatestArticleByPage(it.second)
-                    Log.d(TAG,"Response received for page: ${it.second.name}")
-                    Log.d(TAG,"Going to decrement count for page: ${it.second.name}")
+                    Log.d(TAG+"1","Response received for page: ${it.second.name}")
+                    Log.d(TAG+"1","Going to decrement count for page: ${it.second.name}")
                     currentArticleRequestCount.decrementAndGet()
-                    Pair(it.first,article)
+                    article?.let { return@map Pair(input.first,it) }
+                    Pair(it.first,input.third)
+                }.onErrorReturn {
+                    Log.d(TAG+"1","decrementAndGet after error:${it::class.java.canonicalName}")
+                    currentArticleRequestCount.decrementAndGet()
+                    throw it
                 }
     }
 

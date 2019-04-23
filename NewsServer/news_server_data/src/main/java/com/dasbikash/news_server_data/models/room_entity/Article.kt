@@ -42,7 +42,7 @@ data class Article(
         var publicationTime: Long = 0L,
         @Expose(serialize = false, deserialize = false)
         var publicationDate: Date ? = null, //have to fill after fetch from server
-        var imageLinkList: List<ArticleImage>? = mutableListOf(),
+        var imageLinkList: List<ArticleImage>? = null,
         var previewImageLink: String? = null,
         @Expose(serialize = false, deserialize = false)
         private var created:Long = 0L

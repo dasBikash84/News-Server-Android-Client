@@ -13,7 +13,15 @@
 
 package com.dasbikash.news_server_data.models.room_entity
 
-data class ArticleImage(
-        var imageLink: String = "",
-        var imageCaptin:String = ""
-)
+import com.google.gson.annotations.Expose
+
+class ArticleImage(
+        @Expose(deserialize = true,serialize = true)
+        var link: String?=null,
+        @Expose(deserialize = true,serialize = true)
+        var captin:String?=null
+){
+        override fun toString(): String {
+                return "ArticleImage(link=$link, captin=$captin)"
+        }
+}
