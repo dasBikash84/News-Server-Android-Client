@@ -56,6 +56,7 @@ class UserSettingsRepository private constructor(context: Context) {
 
     private fun uploadUserPreferenceData(context: Context,userPreferenceData:UserPreferenceData) {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        Log.d(TAG,"uploadUserPreferenceData")
         mUserSettingsDataService.uploadUserPreferenceData(userPreferenceData)
         saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
     }
@@ -90,6 +91,7 @@ class UserSettingsRepository private constructor(context: Context) {
         if (idpResponse == null || idpResponse.error!= null) {throw AuthServerException()}
 
         if (idpResponse.isNewUser) {
+            Log.d(TAG,"New user")
             return uploadUserPreferenceData(context,getUserPreferenceDataFromLocalDB())
         } else {
 //            download And Save User Settings From Server
@@ -99,10 +101,15 @@ class UserSettingsRepository private constructor(context: Context) {
 
     private fun getUserPreferenceDataFromLocalDB(): UserPreferenceData {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        val userPreferenceData = mDatabase.userPreferenceDataDao.findUserPreferenceStaticData()
+        var userPreferenceData:UserPreferenceData? = mDatabase.userPreferenceDataDao.findUserPreferenceStaticData()
+        if(userPreferenceData == null) {
+            userPreferenceData = UserPreferenceData(id=UUID.randomUUID().toString())
+            mDatabase.userPreferenceDataDao.add(userPreferenceData)
+        }
         mDatabase.pageGroupDao.findAllStatic()
                 .asSequence()
                 .forEach { userPreferenceData.pageGroups.put(it.name, it) }
+        Log.d(TAG,"getUserPreferenceDataFromLocalDB: ${userPreferenceData}")
         return userPreferenceData
     }
 
@@ -209,7 +216,7 @@ class UserSettingsRepository private constructor(context: Context) {
 
         val userPreferenceDataList = mDatabase.userPreferenceDataDao.findAll()
         if (userPreferenceDataList.size > 0) {
-            return userPreferenceDataList.get(0).favouritePageIds.contains(mPage.id)
+            return userPreferenceDataList.get(0)!!.favouritePageIds.contains(mPage.id)
         }
         return false
     }
@@ -243,7 +250,7 @@ class UserSettingsRepository private constructor(context: Context) {
     }
 
 
-    fun getUserPreferenceLiveData(): LiveData<UserPreferenceData> {
+    fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?> {
         return mDatabase.userPreferenceDataDao.findUserPreferenceData()
     }
 

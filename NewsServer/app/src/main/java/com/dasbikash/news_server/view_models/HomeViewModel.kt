@@ -66,7 +66,7 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
         return mAppSettingsRepository.getNewsPapers()
     }
 
-    fun getUserPreferenceData():LiveData<UserPreferenceData>{
+    fun getUserPreferenceData():LiveData<UserPreferenceData?>{
         return mUserSettingsRepository.getUserPreferenceLiveData()
     }
 

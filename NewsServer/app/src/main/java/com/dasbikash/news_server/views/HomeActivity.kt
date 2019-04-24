@@ -123,7 +123,6 @@ class HomeActivity : AppCompatActivity(),
 
 
     private fun setUpBottomNavigationView() {
-        //mBottomNavigationView = findViewById(R.id.bottom_navigation)
 
         mBottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
             var handled: Boolean
@@ -315,15 +314,6 @@ class HomeActivity : AppCompatActivity(),
         }else{
             mLogInMenuHolder.visibility = View.GONE
         }
-
-        /*if(mUserSettingsRepository.checkIfLoggedIn()){
-            DialogUtils.createAlertDialog(this, DialogUtils.AlertDialogDetails(
-                    title = "Sign Out?",positiveButtonText = "Yes",negetiveButtonText = "Cancel",doOnPositivePress = { signOutAction() }
-            )).show()
-
-        }else {
-            launchSignInActivity()
-        }*/
     }
 
     var actionAfterSuccessfulLogIn : (() -> Unit)? = null
@@ -377,7 +367,7 @@ class HomeActivity : AppCompatActivity(),
                                 }
                                 UserSettingsRepository.SignInResult.USER_ABORT -> Log.d(TAG,"Log in canceled by user")
                                 UserSettingsRepository.SignInResult.SERVER_ERROR -> Log.d(TAG,"Log in error. Details:${processingResult.second}")
-                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> Log.d(TAG,"Error while User settings data saving. Details:${processingResult.second}")
+                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> Log.d(TAG,"Error while saving User settings data. Details:${processingResult.second}")
                             }
                         }
                         override fun onError(e: Throwable) {

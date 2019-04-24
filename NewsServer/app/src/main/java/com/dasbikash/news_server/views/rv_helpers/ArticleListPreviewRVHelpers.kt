@@ -122,10 +122,17 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
 
                         var displayImageLink: String? = null
 
-                        if(it.previewImageLink !=null || (it.imageLinkList!=null && it.imageLinkList!!.size>0)) {
-                            when {
-                                it.previewImageLink != null && it.previewImageLink?.isNotBlank() ?: false -> displayImageLink = it.previewImageLink
-                                else -> displayImageLink = it.imageLinkList?.first { !it.link.isNullOrBlank() }?.link
+                        if (it.previewImageLink !=null && it.previewImageLink!!.isNotBlank()){
+                            displayImageLink = it.previewImageLink
+                        } else if (it.imageLinkList!=null && it.imageLinkList!!.size>0) {
+                            var i=0
+                            it.imageLinkList?.forEach {
+                                it.link?.let {
+                                    if (it.isNotBlank()){
+                                        displayImageLink = it
+                                        return@forEach
+                                    }
+                                }
                             }
                         }
                         return@map Triple(dateString, it, displayImageLink)
