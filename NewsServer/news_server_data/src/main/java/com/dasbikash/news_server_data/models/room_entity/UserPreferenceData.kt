@@ -24,10 +24,6 @@ data class UserPreferenceData(
         @Exclude
         var id:String="",
         var favouritePageIds: MutableList<String> = mutableListOf(),
-        var inActiveNewsPaperIds: MutableList<String> = mutableListOf(),
-        var inActivePageIds: MutableList<String> = mutableListOf(),
         @Ignore
-        var pageGroups:MutableMap<String,PageGroup> = mutableMapOf()/*,
-        @Ignore
-        var updateLog:MutableMap<String,userSettingsUpdateTime> = mutableMapOf()*/
+        var pageGroups:MutableMap<String,PageGroup> = mutableMapOf()
 )

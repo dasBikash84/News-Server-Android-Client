@@ -119,23 +119,7 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
                     language = appSettingsRepository.getLanguageByPage(page)
                     it.second?.let {
                         val dateString = DisplayUtils.getArticlePublicationDateString(it, language, itemView.context)
-
-                        var displayImageLink: String? = null
-
-                        if (it.previewImageLink !=null && it.previewImageLink!!.isNotBlank()){
-                            displayImageLink = it.previewImageLink
-                        } else if (it.imageLinkList!=null && it.imageLinkList!!.size>0) {
-                            var i=0
-                            it.imageLinkList?.forEach {
-                                it.link?.let {
-                                    if (it.isNotBlank()){
-                                        displayImageLink = it
-                                        return@forEach
-                                    }
-                                }
-                            }
-                        }
-                        return@map Triple(dateString, it, displayImageLink)
+                        return@map Pair(dateString, it)//, displayImageLink)
                     }
                     return@map Any()
                 }
@@ -148,9 +132,9 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
                     @Suppress("UNCHECKED_CAST")
                     override fun onNext(articleData: Any) {
 
-                        if (articleData is Triple<*, *, *>) {
+                        if (articleData is Pair<*, *>) {
 
-                            val articleDataResult = articleData as Triple<String, Article, String?>
+                            val articleDataResult = articleData as Pair<String?, Article>
 
                             mArticle = articleDataResult.second
 
@@ -159,7 +143,7 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
                             articleTitle.visibility = View.VISIBLE
                             articlePublicationTime.visibility = View.VISIBLE
 
-                            articleDataResult.third?.let {
+                            mArticle.previewImageLink?.let {
                                 Picasso.get().load(it).into(articlePreviewImage)
                                 articlePreviewImage.visibility = View.VISIBLE
                             } ?: let {

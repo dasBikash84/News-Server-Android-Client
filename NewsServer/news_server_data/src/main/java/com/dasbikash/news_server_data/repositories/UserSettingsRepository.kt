@@ -48,8 +48,6 @@ class UserSettingsRepository private constructor(context: Context) {
         val userPreferenceData = mUserSettingsDataService.getUserPreferenceData()
         //Remove if any null entry found
         userPreferenceData.favouritePageIds = userPreferenceData.favouritePageIds.filter { it != null }.toCollection(mutableListOf())
-        userPreferenceData.inActivePageIds = userPreferenceData.inActivePageIds.filter { it != null }.toCollection(mutableListOf())
-        userPreferenceData.inActiveNewsPaperIds = userPreferenceData.inActiveNewsPaperIds.filter { it != null }.toCollection(mutableListOf())
 
         return userPreferenceData
     }
