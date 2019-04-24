@@ -13,7 +13,6 @@
 
 package com.dasbikash.news_server.views
 
-import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -34,8 +33,8 @@ import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.views.interfaces.HomeNavigator
 import com.dasbikash.news_server.views.interfaces.NavigationHost
 import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
-import com.dasbikash.news_server.views.rv_helpers.PageListAdapter
-import com.dasbikash.news_server.views.rv_helpers.PageViewHolder
+import com.dasbikash.news_server.views.view_helpers.PageListAdapter
+import com.dasbikash.news_server.views.view_helpers.PageViewHolder
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.models.room_entity.PageGroup

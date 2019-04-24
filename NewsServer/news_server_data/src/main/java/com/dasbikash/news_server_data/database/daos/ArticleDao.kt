@@ -23,7 +23,7 @@ import com.dasbikash.news_server_data.models.room_entity.Article
 internal interface ArticleDao {
 
     @Query("SELECT * FROM Article WHERE pageId=:pageId")
-    fun findAllByPageId(pageId: Int): List<Article>
+    fun findAllByPageId(pageId: String): List<Article>
 
     @Query("SELECT * FROM Article WHERE id=:id")
     fun findById(id: String): Article

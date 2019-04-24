@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views.rv_helpers
+package com.dasbikash.news_server.views.view_helpers
 
 import android.view.View
 import androidx.recyclerview.widget.DiffUtil

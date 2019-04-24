@@ -19,20 +19,26 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.Button
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.ViewPager
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
-import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
+import com.dasbikash.news_server.views.view_helpers.ArticlePreviewListAdapter
 import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.Language
+import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
+import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.google.android.material.navigation.NavigationView
@@ -46,92 +52,114 @@ import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
 class PageViewActivity : AppCompatActivity(),
-        NavigationView.OnNavigationItemSelectedListener, SignInHandler/*, WorkInProcessWindowOperator*/ {
+        SignInHandler/*, WorkInProcessWindowOperator*/ {
 
 
     companion object {
         const val TAG = "PageViewActivity"
         const val LOG_IN_REQ_CODE = 7777
         const val EXTRA_PAGE_TO_DISPLAY = "com.dasbikash.news_server.views.PageViewActivity.EXTRA_PAGE_TO_DISPLAY"
-        const val EXTRA_FIRST_ARTICLE = "com.dasbikash.news_server.views.PageViewActivity.EXTRA_FIRST_ARTICLE"
 
-        fun getIntentForPageDisplay(context: Context, page: Page, firstArticleId: String = ""): Intent {
+        fun getIntentForPageDisplay(context: Context, page: Page): Intent {
             val intent = Intent(context, PageViewActivity::class.java)
             intent.putExtra(EXTRA_PAGE_TO_DISPLAY, page)
-            intent.putExtra(EXTRA_FIRST_ARTICLE, firstArticleId)
             return intent
         }
     }
 
-    private lateinit var mPage: Page
-    private var mFirstArticle: Article? = null
+    private lateinit var mDrawerLayout: DrawerLayout
+    private lateinit var mArticleLoadingProgressBarHolder:ConstraintLayout
+    private lateinit var mArticlePreviewListHolder:RecyclerView
+    private lateinit var mLoadMoreArticleButton:Button
 
-    private lateinit var mFirstArticleId: String
-    private lateinit var mArticleContent: AppCompatTextView
+    private lateinit var mPageViewContainer: CoordinatorLayout
+    private lateinit var mArticleViewContainer: ViewPager
+
+    private lateinit var mArticlePreviewListAdapter: ArticlePreviewListAdapter
+
     private lateinit var mAppSettingsRepository: AppSettingsRepository
     private lateinit var mUserSettingsRepository: UserSettingsRepository
-    private lateinit var mPageViewContainer: CoordinatorLayout
+    private lateinit var mNewsDataRepository: NewsDataRepository
+
+    private lateinit var mPage: Page
+    private lateinit var mNewspaper: Newspaper
+    private lateinit var mLanguage: Language
 
     private var mIsPageOnFavList = false
 
     private val disposable = CompositeDisposable()
 
+    private val MINIMUM_INIT_ARTICLE_COUNT = 5
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_page_view)
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-
-        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
-        val navView: NavigationView = findViewById(R.id.nav_view)
-        mArticleContent = findViewById(R.id.articleContent)
-        mPageViewContainer = findViewById(R.id.page_view_container)
-
-        val toggle = ActionBarDrawerToggle(
-                this, drawerLayout, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close)
-        drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        navView.setNavigationItemSelectedListener(this)
-
-
-        mAppSettingsRepository = RepositoryFactory.getAppSettingsRepository(this)
-        mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
 
         @Suppress("CAST_NEVER_SUCCEEDS")
         mPage = (intent!!.getParcelableExtra(EXTRA_PAGE_TO_DISPLAY)) as Page
 
-        @Suppress("CAST_NEVER_SUCCEEDS")
-        mFirstArticleId = (intent!!.getStringExtra(EXTRA_FIRST_ARTICLE))
+        initDrawerComponents()
+        mPageViewContainer = findViewById(R.id.page_view_container)
+        mArticleViewContainer = findViewById(R.id.article_view_container)
+
+        mAppSettingsRepository = RepositoryFactory.getAppSettingsRepository(this)
+        mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
+        mNewsDataRepository = RepositoryFactory.getNewsDataRepository(this)
+
+        disposable.add(
+                Observable.just(mPage)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            mNewspaper = mAppSettingsRepository.getNewspaperByPage(mPage)
+                            mLanguage = mAppSettingsRepository.getLanguageByPage(mPage)
+                            val articleList = mNewsDataRepository.getArticlesByPage(mPage)
+                            if (articleList.isEmpty() || articleList.size < MINIMUM_INIT_ARTICLE_COUNT){
+                                mNewsDataRepository.downloadArticlesByPage(mPage)
+                                return@map mNewsDataRepository.getArticlesByPage(mPage)
+                            }
+                            articleList
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<List<Article>>(){
+                            override fun onComplete() {}
+                            override fun onNext(articleList: List<Article>) {
+                                mArticlePreviewListAdapter = ArticlePreviewListAdapter(mLanguage)
+                                mArticlePreviewListHolder.adapter = mArticlePreviewListAdapter
+                                mArticlePreviewListAdapter.submitList(articleList)
+
+                            }
+                            override fun onError(e: Throwable) {
+                                throw e
+                            }
+                        })
+        )
 
         supportActionBar!!.setTitle(mPage.name)
     }
 
+    private fun initDrawerComponents() {
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        mDrawerLayout = findViewById(R.id.drawer_layout)
+        val toggle = ActionBarDrawerToggle(
+                this, mDrawerLayout, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close)
+        mDrawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+        findViewById<NavigationView>(R.id.nav_view).setOnClickListener(View.OnClickListener { closeNavigationDrawer() })
+
+        mArticleLoadingProgressBarHolder = mDrawerLayout.findViewById(R.id.article_loading_progress_bar_holder)
+        mArticlePreviewListHolder = mDrawerLayout.findViewById(R.id.article_preview_list_holder)
+        mLoadMoreArticleButton = mDrawerLayout.findViewById(R.id.load_more_articel_button)
+    }
+
+
+    fun closeNavigationDrawer() {
+        mDrawerLayout.closeDrawer(GravityCompat.START)
+    }
+
     override fun onResume() {
         super.onResume()
-        disposable.add(
-                Observable.just(mFirstArticleId)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            mIsPageOnFavList = mUserSettingsRepository.checkIfOnFavList(mPage)
-                            mFirstArticle = mAppSettingsRepository.findArticleById(mFirstArticleId)
-                            mFirstArticle
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Article>() {
-                            override fun onComplete() {
-                            }
-
-                            override fun onNext(article: Article) {
-                                invalidateOptionsMenu()
-                                mArticleContent.text = article.title
-                            }
-
-                            override fun onError(e: Throwable) {
-                            }
-                        })
-        )
     }
 
     override fun onPause() {
@@ -223,7 +251,8 @@ class PageViewActivity : AppCompatActivity(),
                                 }
 
                                 override fun onError(e: Throwable) {
-                                    Snackbar.make(mPageViewContainer, "Error!! Please retry.", Snackbar.LENGTH_SHORT).show()}
+                                    Snackbar.make(mPageViewContainer, "Error!! Please retry.", Snackbar.LENGTH_SHORT).show()
+                                }
                             })
             )
         }
@@ -249,9 +278,9 @@ class PageViewActivity : AppCompatActivity(),
                             positiveButtonText = "Sign in and continue",
                             negetiveButtonText = "Cancel",
                             doOnPositivePress = {
-                                    launchSignInActivity({
-                                        changeFavStatusDialog.show()
-                                    })
+                                launchSignInActivity({
+                                    changeFavStatusDialog.show()
+                                })
                             }
                     )
             ).show()
@@ -265,32 +294,32 @@ class PageViewActivity : AppCompatActivity(),
     private fun addPageToFavListAction() =
             changePageFavStatus(PAGE_FAV_STATUS_CHANGE_ACTION.ADD)
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        // Handle navigation view item clicks here.
-        when (item.itemId) {
-            R.id.nav_home -> {
-                // Handle the camera action
-            }
-            R.id.nav_gallery -> {
-
-            }
-            R.id.nav_slideshow -> {
-
-            }
-            R.id.nav_tools -> {
-
-            }
-            R.id.nav_share -> {
-
-            }
-            R.id.nav_send -> {
-
-            }
-        }
-        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
-        drawerLayout.closeDrawer(GravityCompat.START)
-        return true
-    }
+//    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+//         Handle navigation view item clicks here.
+//        when (item.itemId) {
+//            R.id.nav_home -> {
+//                 Handle the camera action
+//            }
+//            R.id.nav_gallery -> {
+//
+//            }
+//            R.id.nav_slideshow -> {
+//
+//            }
+//            R.id.nav_tools -> {
+//
+//            }
+//            R.id.nav_share -> {
+//
+//            }
+//            R.id.nav_send -> {
+//
+//            }
+//        }
+//        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
+//        drawerLayout.closeDrawer(GravityCompat.START)
+//        return true
+//    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -304,11 +333,12 @@ class PageViewActivity : AppCompatActivity(),
                         override fun onComplete() {
                             actionAfterSuccessfulLogIn = null
                         }
+
                         override fun onSubscribe(d: Disposable) {}
                         override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult, Throwable?>) {
                             when (processingResult.first) {
-                                UserSettingsRepository.SignInResult.SUCCESS ->  {
-                                    Log.d(HomeActivity.TAG,"User settings data saved.")
+                                UserSettingsRepository.SignInResult.SUCCESS -> {
+                                    Log.d(HomeActivity.TAG, "User settings data saved.")
                                     actionAfterSuccessfulLogIn?.let {
                                         it()
                                     }
@@ -327,9 +357,9 @@ class PageViewActivity : AppCompatActivity(),
         }
     }
 
-    var actionAfterSuccessfulLogIn : (() -> Unit)? = null
+    var actionAfterSuccessfulLogIn: (() -> Unit)? = null
 
-    override fun launchSignInActivity(doOnSignIn:()->Unit) {
+    override fun launchSignInActivity(doOnSignIn: () -> Unit) {
         val intent = mUserSettingsRepository.getLogInIntent()
         intent?.let {
             startActivityForResult(intent, LOG_IN_REQ_CODE)
@@ -359,3 +389,4 @@ class PageViewActivity : AppCompatActivity(),
         }
     }*/
 }
+

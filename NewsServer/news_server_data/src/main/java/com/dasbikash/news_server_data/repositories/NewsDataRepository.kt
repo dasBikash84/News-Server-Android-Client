@@ -27,7 +27,7 @@ class NewsDataRepository private constructor(context: Context) {
     private val newsDataService: NewsDataService = DataServiceImplProvider.getNewsDataServiceImpl()
     private val newsServerDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
 
-    private val TAG = "DataService"
+    private val TAG = "NewsDataRepository"
 
     fun getLatestArticleByPageFromLocalDb(page: Page): Article? {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
@@ -51,6 +51,26 @@ class NewsDataRepository private constructor(context: Context) {
         }
 
         return null
+    }
+
+    fun getArticlesByPage(page: Page):List<Article>{
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        return newsServerDatabase.articleDao.findAllByPageId(page.id)
+    }
+
+    fun downloadArticlesByPage(page: Page,lastArticleId:String?=null):List<Article>{
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        val articleList:List<Article>
+        if (lastArticleId != null){
+            articleList = newsDataService.getArticlesAfterLastId(page.id,lastArticleId)
+        }else{
+            articleList = newsDataService.getLatestArticlesByPageId(page.id)
+        }
+        articleList.asSequence().forEach {
+            NewsDataServiceUtils.processFetchedArticleData(it, page)
+        }
+        newsServerDatabase.articleDao.addArticles(articleList)
+        return articleList
     }
 
     companion object {

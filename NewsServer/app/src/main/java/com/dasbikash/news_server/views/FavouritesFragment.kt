@@ -34,7 +34,7 @@ import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
-import com.dasbikash.news_server.views.rv_helpers.PageDiffCallback
+import com.dasbikash.news_server.views.view_helpers.PageDiffCallback
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.google.android.material.card.MaterialCardView
@@ -223,7 +223,7 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
                                         Picasso.get().load(it).into(articleImage)
                                         articleImage.setOnClickListener {
                                             itemView.context.startActivity(
-                                                    PageViewActivity.getIntentForPageDisplay(itemView.context, mPage, mArticle.id)
+                                                    PageViewActivity.getIntentForPageDisplay(itemView.context, mPage/*, mArticle.id*/)
                                             )
                                         }
                                     } ?: let {

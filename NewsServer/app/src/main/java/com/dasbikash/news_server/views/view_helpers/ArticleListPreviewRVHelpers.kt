@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views.rv_helpers
+package com.dasbikash.news_server.views.view_helpers
 
 import android.util.Log
 import android.view.LayoutInflater
@@ -38,18 +38,18 @@ import io.reactivex.observers.DisposableObserver
 import java.util.*
 
 class PagePreviewListAdapter(@LayoutRes val holderResId: Int, val homeViewModel: HomeViewModel) :
-        ListAdapter<Page, ArticlePreviewHolder>(PageDiffCallback) {
+        ListAdapter<Page, LatestArticlePreviewHolder>(PageDiffCallback) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticlePreviewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LatestArticlePreviewHolder {
         val view = LayoutInflater.from(parent.context).inflate(holderResId, parent, false)
-        return ArticlePreviewHolder(view, homeViewModel)
+        return LatestArticlePreviewHolder(view, homeViewModel)
     }
 
-    override fun onBindViewHolder(holder: ArticlePreviewHolder, position: Int) {
+    override fun onBindViewHolder(holder: LatestArticlePreviewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    override fun onViewRecycled(holder: ArticlePreviewHolder) {
+    override fun onViewRecycled(holder: LatestArticlePreviewHolder) {
         super.onViewRecycled(holder)
         holder.disposableObserver?.let {
             Log.d("ArticlePreviewHolder", "disposed in PagePreviewListAdapter for:${holder.mPage.name}")
@@ -61,7 +61,7 @@ class PagePreviewListAdapter(@LayoutRes val holderResId: Int, val homeViewModel:
 
 }
 
-class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : RecyclerView.ViewHolder(itemView) {
+class LatestArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : RecyclerView.ViewHolder(itemView) {
 
     companion object {
         val TAG = "ArticlePreviewHolder"
@@ -155,7 +155,7 @@ class ArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : R
                             itemView.setOnClickListener(View.OnClickListener {
                                 itemView.context.startActivity(
                                         PageViewActivity.getIntentForPageDisplay(
-                                                itemView.context, page, mArticle.id
+                                                itemView.context, page/*, mArticle.id*/
                                         )
                                 )
                             })

@@ -168,4 +168,5 @@
     <string name="log_in_sign_up">Log in/Sign up</string>
     <string name="sign_out">Sign Out</string>
     <string name="customize_button">Customize</string>
+    <string name="load_more_articel_text">Load More</string>
 </resources>

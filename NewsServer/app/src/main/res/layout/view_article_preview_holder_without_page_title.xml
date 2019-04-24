@@ -1,25 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!--
-  ~ Copyright 2019 das.bikash.dev@gmail.com. All rights reserved.
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~ http://www.apache.org/licenses/LICENSE-2.0
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
-
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="@dimen/article_preview_width_without_page_title"
     android:layout_height="wrap_content"
     android:layout_margin="2dp"
     android:background="@android:color/white"
-    style="@style/Widget.MaterialComponents.CardView">
+    style="@style/Widget.MaterialComponents.CardView"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:layout_marginTop="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -27,16 +17,15 @@
         android:background="@android:color/white">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/page_title"
+            android:id="@+id/article_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
-            android:gravity="center|center_vertical"
+            android:gravity="center"
             android:padding="2dp"
             android:textColor="@android:color/black"
-            android:textSize="18sp"
-            android:lines="1"
-            app:layout_constraintBottom_toTopOf="@+id/article_preview_image"
+            android:textSize="16sp"
+            android:lines="2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -48,26 +37,9 @@
             android:background="@android:color/white"
             android:gravity="center"
             android:padding="2dp"
-            app:layout_constraintBottom_toTopOf="@+id/article_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/page_title" />
-
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/article_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:gravity="center"
-            android:padding="2dp"
-            android:textColor="@android:color/black"
-            android:textSize="14sp"
-            android:lines="2"
-            app:layout_constraintBottom_toTopOf="@+id/article_time"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/article_preview_image" />
+            app:layout_constraintTop_toBottomOf="@+id/article_title" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/article_time"
@@ -79,10 +51,9 @@
             android:textSize="12sp"
             android:padding="2dp"
             android:lines="1"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/article_title" />
+            app:layout_constraintTop_toBottomOf="@id/article_preview_image" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
