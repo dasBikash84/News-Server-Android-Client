@@ -132,6 +132,13 @@ internal object FirebaseRealtimeDBUtils {
         return data
     }
 
+    fun getCurrentUserName():String?{
+        FirebaseAuth.getInstance().currentUser?.let {
+            return it.displayName
+        }
+        return null
+    }
+
     fun getUserPreferenceData(): UserPreferenceData {
         val user = FirebaseAuth.getInstance().currentUser
         if (user==null || user.isAnonymous) { throw WrongCredentialException() }

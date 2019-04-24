@@ -11,17 +11,14 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.data_sources
+package com.dasbikash.news_server.utils
 
-import android.content.Intent
-import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
-
-internal interface UserSettingsDataService{
-    fun getLastUserSettingsUpdateTime(): Long
-    fun getUserPreferenceData(): UserPreferenceData
-    fun getLogInStatus():Boolean
-    fun getLogInIntent():Intent?
-    fun uploadUserPreferenceData(userPreferenceData: UserPreferenceData)
-    fun signOutUser()
-    fun getCurrentUserName():String?
+class OnceSettableBoolean {
+    private var status = false
+    fun get():Boolean{
+        return status
+    }
+    fun set(){
+        status = true
+    }
 }

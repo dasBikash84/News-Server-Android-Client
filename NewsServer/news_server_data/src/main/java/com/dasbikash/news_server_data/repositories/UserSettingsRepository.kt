@@ -126,6 +126,10 @@ class UserSettingsRepository private constructor(context: Context) {
         }
     }
 
+    fun getCurrentUserName():String?{
+        return mUserSettingsDataService.getCurrentUserName()
+    }
+
     //Action methods
     fun addPageToFavList(page: Page, context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()

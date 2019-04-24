@@ -16,11 +16,14 @@ package com.dasbikash.news_server.views
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Message
+import android.os.SystemClock
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
+import android.widget.ProgressBar
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -32,7 +35,12 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
+import com.dasbikash.news_server.utils.OnceSettableBoolean
+import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.views.view_helpers.ArticlePreviewListAdapter
+import com.dasbikash.news_server_data.exceptions.DataNotFoundException
+import com.dasbikash.news_server_data.exceptions.DataServerNotAvailableExcepption
+import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
@@ -52,7 +60,7 @@ import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
 class PageViewActivity : AppCompatActivity(),
-        SignInHandler/*, WorkInProcessWindowOperator*/ {
+        SignInHandler, WorkInProcessWindowOperator {
 
 
     companion object {
@@ -68,12 +76,13 @@ class PageViewActivity : AppCompatActivity(),
     }
 
     private lateinit var mDrawerLayout: DrawerLayout
-    private lateinit var mArticleLoadingProgressBarHolder:ConstraintLayout
-    private lateinit var mArticlePreviewListHolder:RecyclerView
-    private lateinit var mLoadMoreArticleButton:Button
+    private lateinit var mArticleLoadingProgressBarDrawerHolder: ConstraintLayout
+    private lateinit var mArticlePreviewListHolder: RecyclerView
+    private lateinit var mLoadMoreArticleButton: Button
 
     private lateinit var mPageViewContainer: CoordinatorLayout
     private lateinit var mArticleViewContainer: ViewPager
+    private lateinit var mArticleLoadingProgressBarMiddle: ProgressBar
 
     private lateinit var mArticlePreviewListAdapter: ArticlePreviewListAdapter
 
@@ -88,8 +97,12 @@ class PageViewActivity : AppCompatActivity(),
     private var mIsPageOnFavList = false
 
     private val disposable = CompositeDisposable()
+    private val mArticleList = mutableListOf<Article>()
 
     private val MINIMUM_INIT_ARTICLE_COUNT = 5
+    private val ARTICLE_DOWNLOAD_CHUNCK_SIZE = 5
+
+    private val mHaveMoreArticle = OnceSettableBoolean()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,40 +115,113 @@ class PageViewActivity : AppCompatActivity(),
         initDrawerComponents()
         mPageViewContainer = findViewById(R.id.page_view_container)
         mArticleViewContainer = findViewById(R.id.article_view_container)
+        mArticleLoadingProgressBarMiddle = findViewById(R.id.article_loading_progress_bar_middle)
 
         mAppSettingsRepository = RepositoryFactory.getAppSettingsRepository(this)
         mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(this)
+        mArticleLoadingProgressBarMiddle.setOnClickListener { }
 
-        disposable.add(
-                Observable.just(mPage)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            mNewspaper = mAppSettingsRepository.getNewspaperByPage(mPage)
-                            mLanguage = mAppSettingsRepository.getLanguageByPage(mPage)
-                            val articleList = mNewsDataRepository.getArticlesByPage(mPage)
-                            if (articleList.isEmpty() || articleList.size < MINIMUM_INIT_ARTICLE_COUNT){
-                                mNewsDataRepository.downloadArticlesByPage(mPage)
-                                return@map mNewsDataRepository.getArticlesByPage(mPage)
-                            }
-                            articleList
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<List<Article>>(){
-                            override fun onComplete() {}
-                            override fun onNext(articleList: List<Article>) {
-                                mArticlePreviewListAdapter = ArticlePreviewListAdapter(mLanguage)
-                                mArticlePreviewListHolder.adapter = mArticlePreviewListAdapter
-                                mArticlePreviewListAdapter.submitList(articleList)
-
-                            }
-                            override fun onError(e: Throwable) {
-                                throw e
-                            }
-                        })
-        )
+        loadMoreArticles()
 
         supportActionBar!!.setTitle(mPage.name)
+    }
+
+    fun getArticleDownloaderObservable(): Observable<List<Article>> {
+        return Observable.just(mPage)
+                .subscribeOn(Schedulers.io())
+                .map {
+                    if (!::mNewspaper.isInitialized) {
+                        mNewspaper = mAppSettingsRepository.getNewspaperByPage(mPage)
+                    }
+                    if (!::mLanguage.isInitialized) {
+                        mLanguage = mAppSettingsRepository.getLanguageByPage(mPage)
+                    }
+                    var lastArticleId: String? = null
+                    synchronized(mArticleList) {
+                        if (!mArticleList.isEmpty()) {
+                            lastArticleId = mArticleList.last().id
+                            Log.d(TAG, "lastArticleId: ${lastArticleId}")
+                        }
+                    }
+                    mNewsDataRepository.downloadArticlesByPage(mPage, lastArticleId)
+                }
+    }
+
+    fun loadMoreArticles() {
+
+        if (!mHaveMoreArticle.get()) {
+
+            loadWorkInProcessWindow()//showProgressBars()
+
+            disposable.add(
+                    getArticleDownloaderObservable()
+                            .map {
+                                val newList = mNewsDataRepository.getArticlesByPage(mPage)
+                                Log.d(TAG, "newList: ${newList.size}")
+                                newList
+                            }
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeWith(object : DisposableObserver<List<Article>>() {
+                                override fun onComplete() {
+                                    removeWorkInProcessWindow()//hideProgressBars()
+                                }
+
+                                override fun onNext(articleList: List<Article>) {
+                                    postNewArticlesForDisplay(articleList)
+                                }
+
+                                override fun onError(throwable: Throwable) {
+                                    removeWorkInProcessWindow()//hideProgressBars()
+                                    when {
+                                        throwable is DataNotFoundException -> {
+                                            mHaveMoreArticle.set()
+                                            mLoadMoreArticleButton.visibility = View.GONE
+                                            showShortSnack("No more articles to display.")
+                                        }
+                                        throwable is DataServerNotAvailableExcepption -> {
+                                            showShortSnack("Remote server error! Please try again later.")
+                                        }
+                                        throwable is NoInternertConnectionException -> {
+                                            showShortSnack("No internet connection!!!")
+                                        }
+                                        else -> {
+                                            throw throwable
+                                        }
+                                    }
+                                }
+                            })
+            )
+        }
+    }
+
+    private fun hideProgressBars() {
+        mArticleLoadingProgressBarDrawerHolder.visibility = View.GONE
+        mArticleLoadingProgressBarMiddle.visibility = View.GONE
+    }
+
+    private fun showProgressBars() {
+        mArticleLoadingProgressBarDrawerHolder.visibility = View.VISIBLE
+        mArticleLoadingProgressBarMiddle.visibility = View.VISIBLE
+
+        mArticleLoadingProgressBarDrawerHolder.bringToFront()
+        mArticleLoadingProgressBarMiddle.bringToFront()
+    }
+
+    private fun postNewArticlesForDisplay(articleList: List<Article>) {
+        mArticleList.clear()
+        mArticleList.addAll(articleList)
+        if (!::mArticlePreviewListAdapter.isInitialized) {
+            mArticlePreviewListAdapter = ArticlePreviewListAdapter(mLanguage)
+            mArticlePreviewListHolder.adapter = mArticlePreviewListAdapter
+        }
+        mArticlePreviewListAdapter.submitList(mArticleList.toList())
+    }
+
+    fun showShortSnack(message: String) {
+        Snackbar
+                .make(mPageViewContainer, message, Snackbar.LENGTH_SHORT)
+                .show()
     }
 
     private fun initDrawerComponents() {
@@ -148,9 +234,12 @@ class PageViewActivity : AppCompatActivity(),
         toggle.syncState()
         findViewById<NavigationView>(R.id.nav_view).setOnClickListener(View.OnClickListener { closeNavigationDrawer() })
 
-        mArticleLoadingProgressBarHolder = mDrawerLayout.findViewById(R.id.article_loading_progress_bar_holder)
+        mArticleLoadingProgressBarDrawerHolder = mDrawerLayout.findViewById(R.id.article_loading_progress_bar_drawer_holder)
         mArticlePreviewListHolder = mDrawerLayout.findViewById(R.id.article_preview_list_holder)
         mLoadMoreArticleButton = mDrawerLayout.findViewById(R.id.load_more_articel_button)
+
+        mArticleLoadingProgressBarDrawerHolder.setOnClickListener { }
+        mLoadMoreArticleButton.setOnClickListener { loadMoreArticles() }
     }
 
 
@@ -160,6 +249,28 @@ class PageViewActivity : AppCompatActivity(),
 
     override fun onResume() {
         super.onResume()
+        refreshFavStatus()
+    }
+
+    private fun refreshFavStatus(doOnNext:()->Unit = {}) {
+        disposable.add(
+                Observable.just(true)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            mIsPageOnFavList = mUserSettingsRepository.checkIfOnFavList(mPage)
+                            mIsPageOnFavList
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<Boolean>() {
+                            override fun onComplete() {}
+                            override fun onNext(isFav: Boolean) {
+                                invalidateOptionsMenu()
+                                doOnNext()
+                            }
+
+                            override fun onError(e: Throwable) {}
+                        })
+        )
     }
 
     override fun onPause() {
@@ -167,13 +278,13 @@ class PageViewActivity : AppCompatActivity(),
         disposable.clear()
     }
 
-
     override fun onBackPressed() {
-        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START)
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawer(GravityCompat.START)
         } else {
-            super.onBackPressed()
+            if (!mWaitWindowShown) {
+                super.onBackPressed()
+            }
         }
     }
 
@@ -190,17 +301,20 @@ class PageViewActivity : AppCompatActivity(),
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.add_to_favourites_menu_item -> {
-                addPageToFavListAction()
-                true
+        if (!mWaitWindowShown) {
+            return when (item.itemId) {
+                R.id.add_to_favourites_menu_item -> {
+                    addPageToFavListAction()
+                    true
+                }
+                R.id.remove_from_favourites_menu_item -> {
+                    removePageFromFavListAction()
+                    true
+                }
+                else -> super.onOptionsItemSelected(item)
             }
-            R.id.remove_from_favourites_menu_item -> {
-                removePageFromFavListAction()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
         }
+        return false
     }
 
     private enum class PAGE_FAV_STATUS_CHANGE_ACTION {
@@ -220,6 +334,7 @@ class PageViewActivity : AppCompatActivity(),
         val negetiveActionText = "Cancel"
 
         val positiveAction: () -> Unit = {
+            loadWorkInProcessWindow()
             disposable.add(
                     Observable.just(mPage)
                             .subscribeOn(Schedulers.io())
@@ -231,19 +346,19 @@ class PageViewActivity : AppCompatActivity(),
                             }
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribeWith(object : DisposableObserver<Boolean>() {
-                                override fun onComplete() {}
+                                override fun onComplete() {
+                                    removeWorkInProcessWindow()
+                                }
                                 override fun onNext(result: Boolean) {
                                     if (result) {
                                         when (action) {
                                             PAGE_FAV_STATUS_CHANGE_ACTION.ADD -> {
                                                 mIsPageOnFavList = true
-                                                Snackbar.make(mPageViewContainer, "${mPage.name} added to favourites", Snackbar.LENGTH_SHORT)
-                                                        .show()
+                                                showShortSnack("${mPage.name} added to favourites")
                                             }
                                             PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE -> {
                                                 mIsPageOnFavList = false
-                                                Snackbar.make(mPageViewContainer, "${mPage.name} removed from favourites", Snackbar.LENGTH_SHORT)
-                                                        .show()
+                                                showShortSnack("${mPage.name} removed from favourites")
                                             }
                                         }
                                         invalidateOptionsMenu()
@@ -251,7 +366,8 @@ class PageViewActivity : AppCompatActivity(),
                                 }
 
                                 override fun onError(e: Throwable) {
-                                    Snackbar.make(mPageViewContainer, "Error!! Please retry.", Snackbar.LENGTH_SHORT).show()
+                                    showShortSnack("Error!! Please retry.")
+                                    removeWorkInProcessWindow()
                                 }
                             })
             )
@@ -279,7 +395,7 @@ class PageViewActivity : AppCompatActivity(),
                             negetiveButtonText = "Cancel",
                             doOnPositivePress = {
                                 launchSignInActivity({
-                                    changeFavStatusDialog.show()
+                                    refreshFavStatus({changeFavStatusDialog.show()})
                                 })
                             }
                     )
@@ -294,37 +410,11 @@ class PageViewActivity : AppCompatActivity(),
     private fun addPageToFavListAction() =
             changePageFavStatus(PAGE_FAV_STATUS_CHANGE_ACTION.ADD)
 
-//    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-//         Handle navigation view item clicks here.
-//        when (item.itemId) {
-//            R.id.nav_home -> {
-//                 Handle the camera action
-//            }
-//            R.id.nav_gallery -> {
-//
-//            }
-//            R.id.nav_slideshow -> {
-//
-//            }
-//            R.id.nav_tools -> {
-//
-//            }
-//            R.id.nav_share -> {
-//
-//            }
-//            R.id.nav_send -> {
-//
-//            }
-//        }
-//        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
-//        drawerLayout.closeDrawer(GravityCompat.START)
-//        return true
-//    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == LOG_IN_REQ_CODE) {
+            loadWorkInProcessWindow()
             Observable.just(Pair(resultCode, data))
                     .subscribeOn(Schedulers.io())
                     .map { mUserSettingsRepository.processSignInRequestResult(it, this) }
@@ -332,26 +422,29 @@ class PageViewActivity : AppCompatActivity(),
                     .subscribe(object : Observer<Pair<UserSettingsRepository.SignInResult, Throwable?>> {
                         override fun onComplete() {
                             actionAfterSuccessfulLogIn = null
+                            removeWorkInProcessWindow()
                         }
 
                         override fun onSubscribe(d: Disposable) {}
                         override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult, Throwable?>) {
                             when (processingResult.first) {
                                 UserSettingsRepository.SignInResult.SUCCESS -> {
-                                    Log.d(HomeActivity.TAG, "User settings data saved.")
+                                    showShortSnack("Welcome ${mUserSettingsRepository.getCurrentUserName()
+                                            ?: ""}")
                                     actionAfterSuccessfulLogIn?.let {
                                         it()
                                     }
                                 }
-                                UserSettingsRepository.SignInResult.USER_ABORT -> Log.d(TAG, "Log in canceled by user")
-                                UserSettingsRepository.SignInResult.SERVER_ERROR -> Log.d(TAG, "Log in error. Details:${processingResult.second}")
-                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> Log.d(TAG, "Error while User settings data saving. Details:${processingResult.second}")
+                                UserSettingsRepository.SignInResult.USER_ABORT -> showShortSnack("Log in aborted")
+                                UserSettingsRepository.SignInResult.SERVER_ERROR -> showShortSnack("Log in error. Details:${processingResult.second}")
+                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> showShortSnack("Error while User settings data saving. Details:${processingResult.second}")
                             }
                         }
 
                         override fun onError(e: Throwable) {
                             actionAfterSuccessfulLogIn = null
-                            Log.d(TAG, "Error while User settings data saving. Error: ${e}")
+                            showShortSnack("Error while User settings data saving. Error: ${e}")
+                            removeWorkInProcessWindow()
                         }
                     })
         }
@@ -367,26 +460,15 @@ class PageViewActivity : AppCompatActivity(),
         actionAfterSuccessfulLogIn = doOnSignIn
     }
 
-    /*var mWaitWindowShown = false
-    var mWaitWindow : Fragment? = null
+    var mWaitWindowShown = false
     override fun loadWorkInProcessWindow() {
-        mWaitWindow = FragmentWorkInProcess()
-        showBottomNavigationView(false)
-        addFragment(mWaitWindow!!)
+        showProgressBars()
         mWaitWindowShown = true
     }
 
     override fun removeWorkInProcessWindow() {
         mWaitWindowShown = false
-        removeFragment(mWaitWindow!!)
-        mWaitWindow = null
-        showBottomNavigationView(true)
+        hideProgressBars()
     }
-
-    override fun onBackPressed() {
-        if (!mWaitWindowShown) {
-            super.onBackPressed()
-        }
-    }*/
 }
 

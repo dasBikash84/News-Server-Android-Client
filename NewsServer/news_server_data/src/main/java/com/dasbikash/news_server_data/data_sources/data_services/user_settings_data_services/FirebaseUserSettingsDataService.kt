@@ -21,6 +21,9 @@ import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 
 internal object FirebaseUserSettingsDataService: UserSettingsDataService {
+    override fun getCurrentUserName(): String? {
+        return FirebaseRealtimeDBUtils.getCurrentUserName()
+    }
 
 
     private val mSignInProviders = arrayListOf(
