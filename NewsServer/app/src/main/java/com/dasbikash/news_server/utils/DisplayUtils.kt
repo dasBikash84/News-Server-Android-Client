@@ -14,6 +14,8 @@
 package com.dasbikash.news_server.utils
 
 import android.content.Context
+import android.text.Html
+import android.widget.TextView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
@@ -105,6 +107,14 @@ object DisplayUtils {
 
     fun pxToDp(px: Int,context: Context): Float =
         (px / context.getResources().getDisplayMetrics().density)
+
+    fun getArticlePositionString(positionString:String, language: Language):String{
+
+        if (!language.name!!.contains("English") && !language.name!!.contains("english")){
+            return replaceEnglishDigits(positionString)
+        }
+        return positionString
+    }
 
 
     fun getArticlePublicationDateString(article: Article, language: Language, context: Context): String? {
@@ -217,5 +227,11 @@ object DisplayUtils {
         return str
     }
 
-
+    fun displayHtmlText(textView: TextView, text: String) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            textView.text = Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY)
+        } else {
+            textView.text = Html.fromHtml(text)
+        }
+    }
 }

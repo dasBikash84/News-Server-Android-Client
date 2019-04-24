@@ -43,6 +43,12 @@ internal object NewsDataServiceUtils {
 
         article.publicationDate = publicationDate.time
 
+        article.articleText = article.articleText
+                                ?.replace(Regex("(<br>)+"),"<br>")
+                                ?.replace(regex = Regex("<a.+?>"),replacement = "")
+                                ?.replace("</a>","")
+                                ?.replace("<br>","<br><br>")
+
         return article
     }
 }

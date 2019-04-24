@@ -36,13 +36,6 @@ internal object ArticleImageConverter {
                 }
                 .filter { entry.indexOf(it) == entry.size-1 }
                 .forEach { stringBuilder.append(DATA_BRIDGE) }
-
-        /*for (i in entry.indices) {
-            stringBuilder.append(entry[i].link + PARAM_BRIDGE + entry[i].captin)
-            if (i != entry.size - 1) {
-                stringBuilder.append(DATA_BRIDGE)
-            }
-        }*/
         Log.d("ArticleImageConverter","stringBuilder: ${stringBuilder.toString()}")
         Log.d("ArticleImageConverter","entry: ${entry.toString()}")
         return stringBuilder.toString()

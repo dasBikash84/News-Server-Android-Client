@@ -58,6 +58,10 @@ class NewsDataRepository private constructor(context: Context) {
         return newsServerDatabase.articleDao.findAllByPageId(page.id)
     }
 
+    fun findArticleById(articleId:String):Article?{
+        return newsServerDatabase.articleDao.findById(articleId)
+    }
+
     fun downloadArticlesByPage(page: Page,lastArticleId:String?=null):List<Article>{
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val articleList:List<Article>

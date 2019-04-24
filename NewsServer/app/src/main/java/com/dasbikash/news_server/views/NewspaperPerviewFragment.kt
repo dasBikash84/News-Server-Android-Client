@@ -98,7 +98,7 @@ class NewspaperPerviewFragment : Fragment() {
                             Log.d(TAG, "newspaper: ${mNewspaper.name}, top page count: ${it.size}")
                             mListAdapter = TopPagePreviewListAdapter(this, mAppSettingsRepository, ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
                             mPagePreviewList.adapter = mListAdapter
-                            mListAdapter.submitList(it)
+                            mListAdapter.submitList(it.toList())
                         })
         )
 

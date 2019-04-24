@@ -5,12 +5,14 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
     android:overScrollMode="never"
-    android:scrollbars="horizontal"
-    android:padding="2dp">
-    <android.support.constraint.ConstraintLayout
+    android:paddingTop="?attr/actionBarSize"
+    android:scrollbars="horizontal">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <android.support.constraint.ConstraintLayout
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/article_title_block"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -20,25 +22,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/article_parent_tree_textview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingLeft="8dp"
-                android:paddingTop="0dp"
-                android:paddingRight="8dp"
-                android:paddingBottom="2dp"
-                android:textAlignment="center"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/article_details_textview"
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/article_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingLeft="8dp"
@@ -51,9 +36,9 @@
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/article_parent_tree_textview" />
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/article_publication_date_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -65,9 +50,9 @@
                 android:textSize="14sp"
                 android:textStyle="normal"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/article_details_textview" />
+                app:layout_constraintTop_toBottomOf="@+id/article_title" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/article_position_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -79,9 +64,10 @@
                 android:textSize="14sp"
                 android:textStyle="italic"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/article_details_textview" />
+                app:layout_constraintTop_toBottomOf="@+id/article_title" />
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <androidx.core.widget.NestedScrollView
             android:id="@+id/article_image_scroller"
             android:layout_width="match_parent"
@@ -107,8 +93,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
+            android:textIsSelectable="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/article_image_scroller" />
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

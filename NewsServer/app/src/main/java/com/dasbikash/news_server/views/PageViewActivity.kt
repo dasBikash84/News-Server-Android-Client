@@ -31,7 +31,10 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
@@ -82,6 +85,7 @@ class PageViewActivity : AppCompatActivity(),
 
     private lateinit var mPageViewContainer: CoordinatorLayout
     private lateinit var mArticleViewContainer: ViewPager
+    private lateinit var mFragmentStatePagerAdapter: FragmentStatePagerAdapter
     private lateinit var mArticleLoadingProgressBarMiddle: ProgressBar
 
     private lateinit var mArticlePreviewListAdapter: ArticlePreviewListAdapter
@@ -122,9 +126,38 @@ class PageViewActivity : AppCompatActivity(),
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(this)
         mArticleLoadingProgressBarMiddle.setOnClickListener { }
 
-        loadMoreArticles()
+        initViewPager()
 
+        loadMoreArticles()
         supportActionBar!!.setTitle(mPage.name)
+    }
+
+    private fun initViewPager() {
+
+        mFragmentStatePagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager){
+            override fun getItemPosition(`object`: Any): Int {
+                return PagerAdapter.POSITION_UNCHANGED
+            }
+            override fun getItem(position: Int): Fragment {
+                if (position == (mArticleList.size - 1)){
+                    loadMoreArticles()
+                }
+                return ArticleViewFragment.getInstance(mArticleList.get(position).id,mLanguage,mArticleList.size,position+1)
+            }
+            override fun getCount(): Int {
+                return mArticleList.size
+            }
+        }
+
+        mArticleViewContainer.addOnPageChangeListener(object : ViewPager.OnPageChangeListener{
+            override fun onPageScrollStateChanged(state: Int) {}
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
+            override fun onPageSelected(position: Int) {
+//                mArticlePreviewListHolder.scrollToPosition(position)
+            }
+        })
+        mArticleViewContainer.adapter = mFragmentStatePagerAdapter
+        mArticleViewContainer.setCurrentItem(0)
     }
 
     fun getArticleDownloaderObservable(): Observable<List<Article>> {
@@ -212,10 +245,17 @@ class PageViewActivity : AppCompatActivity(),
         mArticleList.clear()
         mArticleList.addAll(articleList)
         if (!::mArticlePreviewListAdapter.isInitialized) {
-            mArticlePreviewListAdapter = ArticlePreviewListAdapter(mLanguage)
+            mArticlePreviewListAdapter = ArticlePreviewListAdapter(mLanguage,{
+                mArticleViewContainer.currentItem = it
+            })
             mArticlePreviewListHolder.adapter = mArticlePreviewListAdapter
         }
         mArticlePreviewListAdapter.submitList(mArticleList.toList())
+        if (!::mFragmentStatePagerAdapter.isInitialized){
+            initViewPager()
+        }else{
+            mFragmentStatePagerAdapter.notifyDataSetChanged()
+        }
     }
 
     fun showShortSnack(message: String) {
@@ -241,7 +281,6 @@ class PageViewActivity : AppCompatActivity(),
         mArticleLoadingProgressBarDrawerHolder.setOnClickListener { }
         mLoadMoreArticleButton.setOnClickListener { loadMoreArticles() }
     }
-
 
     fun closeNavigationDrawer() {
         mDrawerLayout.closeDrawer(GravityCompat.START)

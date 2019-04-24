@@ -40,11 +40,14 @@ object ArticleDiffCallback: DiffUtil.ItemCallback<Article>(){
     }
 }
 
-class ArticlePreviewListAdapter(val mLanguage: Language) :
+class ArticlePreviewListAdapter(val mLanguage: Language,val clickAction:(position:Int)->Unit) :
         ListAdapter<Article, ArticlePreviewHolder>(ArticleDiffCallback) {
 
     override fun onBindViewHolder(holder: ArticlePreviewHolder, position: Int) {
         holder.bind(getItem(position),mLanguage)
+        holder.itemView.setOnClickListener{
+            clickAction(position)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticlePreviewHolder {
