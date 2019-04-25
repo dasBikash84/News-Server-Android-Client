@@ -14,57 +14,22 @@
 package com.dasbikash.news_server_data.repositories
 
 import android.content.Context
-import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
-import com.dasbikash.news_server_data.data_sources.NewsDataService
-import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
-import com.dasbikash.news_server_data.utills.ExceptionUtils
+import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
+import com.dasbikash.news_server_data.repositories.room_impls.NewsDataRepositoryRoomImpl
 
-class NewsDataRepository private constructor(context: Context) {
+interface NewsDataRepository{
 
-    private val newsDataService: NewsDataService = DataServiceImplProvider.getNewsDataServiceImpl()
-    private val newsServerDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
+    fun getLatestArticleByPageFromLocalDb(page: Page): Article?
 
-    private val TAG = "NewsDataRepository"
+    fun getLatestArticleByPage(page: Page): Article?
 
-    fun getLatestArticleByPageFromLocalDb(page: Page): Article? {
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        return newsServerDatabase.articleDao.getLatestArticleByPageId(page.id)
-    }
+    fun getArticlesByPage(page: Page):List<Article>
 
-    fun getLatestArticleByPage(page: Page): Article? {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+    fun findArticleById(articleId:String):Article?
 
-        newsDataService.getLatestArticlesByPage(page, 1).apply {
-            if (this.size > 0) {    return this.first()}
-        }
-
-        return null
-    }
-
-    fun getArticlesByPage(page: Page):List<Article>{
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        return newsServerDatabase.articleDao.findAllByPageId(page.id)
-    }
-
-    fun findArticleById(articleId:String):Article?{
-        return newsServerDatabase.articleDao.findById(articleId)
-    }
-
-    fun downloadArticlesByPage(page: Page,lastArticleId:String?=null):List<Article>{
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-
-        val articleList:List<Article>
-
-        if (lastArticleId != null){
-            articleList = newsDataService.getArticlesAfterLastId(page,lastArticleId)
-        }else{
-            articleList = newsDataService.getLatestArticlesByPage(page)
-        }
-        newsServerDatabase.articleDao.addArticles(articleList)
-        return articleList
-    }
+    fun downloadArticlesByPage(page: Page,lastArticleId:String?=null):List<Article>
 
     companion object {
 
@@ -73,11 +38,13 @@ class NewsDataRepository private constructor(context: Context) {
         @Volatile
         private lateinit var INSTANCE: NewsDataRepository
 
-        internal fun getInstance(context: Context): NewsDataRepository {
+        internal fun getImpl(context: Context,dbImplementation: DbImplementation): NewsDataRepository {
             if (!::INSTANCE.isInitialized) {
                 synchronized(NewsDataRepository::class.java) {
                     if (!::INSTANCE.isInitialized) {
-                        INSTANCE = NewsDataRepository(context)
+                        when(dbImplementation) {
+                            DbImplementation.ROOM -> INSTANCE = NewsDataRepositoryRoomImpl(context)
+                        }
                     }
                 }
             }

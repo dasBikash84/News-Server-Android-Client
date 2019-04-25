@@ -64,7 +64,7 @@ public class RealTimeDbTest {
     @Before
     public void init(){
         appContext = InstrumentationRegistry.getTargetContext();
-       /* mDatabase = FirebaseDatabase.getInstance();
+       /* mDatabase = FirebaseDatabase.getImpl();
         mRootReference = mDatabase.getReference();
         mAppSettingsReference = mRootReference.child(APP_SETTINGS_NODE);
         mCountriesSettingsReference = mAppSettingsReference.child(COUNTRIES_NODE);

@@ -15,116 +15,39 @@ package com.dasbikash.news_server_data.repositories
 
 import android.content.Context
 import androidx.lifecycle.LiveData
-import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
-import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
-import com.dasbikash.news_server_data.database.NewsServerDatabase
-import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
-import com.dasbikash.news_server_data.exceptions.OnMainThreadException
-import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
-import com.dasbikash.news_server_data.utills.ExceptionUtils
+import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
+import com.dasbikash.news_server_data.repositories.room_impls.AppSettingsRepositoryRoomImpl
 
-class AppSettingsRepository private constructor(context: Context) {
+interface AppSettingsRepository{
 
-//    private val TAG = "AppSettingsRepository"
+    fun loadAppSettings(context: Context)
+    fun isAppSettingsUpdated(context: Context): Boolean
+    fun isAppSettingsDataLoaded(): Boolean
 
-    private val mAppSettingsDataService: AppSettingsDataService = DataServiceImplProvider.getAppSettingsDataServiceImpl()
-    private val mDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
+    fun getNewsPapers():LiveData<List<Newspaper>>
 
-    private fun getCountryCount(): Int = mDatabase.countryDao.count
-    private fun getLanguageCount(): Int = mDatabase.languageDao.count
-    private fun getNewsPaperCount(): Int = mDatabase.newsPaperDao.count
-    private fun getPageCount(): Int = mDatabase.pageDao.count
-    private fun getPageGroupCount(): Int = mDatabase.pageGroupDao.count
+    fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page>
+    fun getChildPagesForTopLevelPage(topLevelPage: Page):List<Page>
+    fun findMatchingPages(it: String): List<Page>
 
-    @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-    @Throws(OnMainThreadException::class, NoInternertConnectionException::class)
-    fun loadAppSettings(context: Context) {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        val appSettings = mAppSettingsDataService.getAppSettings(context)
-
-        mDatabase.nukeAppSettings()
-
-        mDatabase.languageDao.addLanguages(ArrayList(appSettings.languages?.values))
-        mDatabase.countryDao.addCountries(ArrayList(appSettings.countries?.values))
-        mDatabase.newsPaperDao.addNewsPapers(ArrayList(appSettings.newspapers?.values))
-        mDatabase.pageDao.addPages(ArrayList(appSettings.pages?.values))
-        mDatabase.pageGroupDao.addPageGroups(ArrayList(appSettings.page_groups?.values))
-
-        val settingUpdateTimes = ArrayList(appSettings.update_time?.values)
-        mAppSettingsDataService.saveLocalAppSettingsUpdateTime(context, settingUpdateTimes[settingUpdateTimes.size - 1])
-    }
-
-    fun isAppSettingsUpdated(context: Context): Boolean {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        val localAppSettingsUpdateTime = mAppSettingsDataService.getLocalAppSettingsUpdateTime(context)
-        val appSettingsUpdateTime = mAppSettingsDataService.getServerAppSettingsUpdateTime(context)
-        return appSettingsUpdateTime > localAppSettingsUpdateTime
-    }
-
-    fun isAppSettingsDataLoaded(): Boolean {
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        return getLanguageCount() > 0 && getCountryCount() > 0 &&
-                getNewsPaperCount() > 0 && getPageCount() > 0 &&
-                getPageGroupCount() > 0
-    }
-
-    fun getNewsPapers():LiveData<List<Newspaper>>{
-        return mDatabase.newsPaperDao.findAll()
-    }
-
-    fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page> {
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        return mDatabase.pageDao.getTopPagesByNewsPaperId(newspaper.id)
-    }
-
-    fun getChildPagesForTopLevelPage(topLevelPage: Page):List<Page>{
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        return mDatabase.pageDao.getChildPagesByTopLevelPageId(topLevelPage.id)
-    }
-
-    fun getLanguageByPage(page: Page): Language {
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        val newspaper = mDatabase.newsPaperDao.findById(page.newsPaperId!!)
-        return mDatabase.languageDao.findByLanguageId(newspaper.languageId!!)
-    }
-
-    fun getTopPageforChildPage(it: Page): Page? {
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        return mDatabase.pageDao.findById(it.parentPageId ?: "")
-    }
-
-    fun getNewspaperByPage(page: Page): Newspaper {
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        return mDatabase.newsPaperDao.findById(page.newsPaperId ?: "")
-    }
-
-    fun findMatchingPages(it: String): List<Page> {
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        return mDatabase.pageDao.findByNameContent("%"+it+"%")
-    }
-
-    fun findArticleById(mFirstArticleId: String): Article? {
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        return mDatabase.articleDao.findById(mFirstArticleId)
-    }
-
-    fun findPageById(pageId:String): Page? {
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        return mDatabase.pageDao.findById(pageId)
-    }
+    fun getLanguageByPage(page: Page): Language
+    fun getNewspaperByPage(page: Page): Newspaper
+    fun findPageById(pageId:String): Page?
 
     companion object{
         @Volatile
         private lateinit var  INSTANCE:AppSettingsRepository
 
-        internal fun getInstance(context: Context):AppSettingsRepository{
+        internal fun getImpl(context: Context,dbImplementation: DbImplementation):AppSettingsRepository{
             if (!::INSTANCE.isInitialized) {
                 synchronized(AppSettingsRepository::class.java) {
                     if (!::INSTANCE.isInitialized) {
-                        INSTANCE = AppSettingsRepository(context)
+                        when(dbImplementation){
+                            DbImplementation.ROOM -> INSTANCE = AppSettingsRepositoryRoomImpl(context)
+                        }
                     }
                 }
             }

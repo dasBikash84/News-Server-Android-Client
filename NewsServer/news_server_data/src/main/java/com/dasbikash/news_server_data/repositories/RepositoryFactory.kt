@@ -14,16 +14,19 @@
 package com.dasbikash.news_server_data.repositories
 
 import android.content.Context
+import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
 
 object RepositoryFactory {
 
+    private val dbImplementation = DbImplementation.ROOM
+
     fun getUserSettingsRepository(context: Context):
-            UserSettingsRepository = UserSettingsRepository.getInstance(context)
+            UserSettingsRepository = UserSettingsRepository.getImpl(context, dbImplementation)
 
     fun getAppSettingsRepository(context: Context):
-            AppSettingsRepository = AppSettingsRepository.getInstance(context)
+            AppSettingsRepository = AppSettingsRepository.getImpl(context, dbImplementation)
 
     fun getNewsDataRepository(context: Context):
-            NewsDataRepository = NewsDataRepository.getInstance(context)
+            NewsDataRepository = NewsDataRepository.getImpl(context, dbImplementation)
 
 }
