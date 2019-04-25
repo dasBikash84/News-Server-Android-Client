@@ -16,6 +16,7 @@ package com.dasbikash.news_server.views
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,6 +46,8 @@ class ArticleViewFragment : Fragment() {
     private lateinit var mArticle: Article
     private var mTotalArticleCount: Int? = null
     private var mCurrentArticlePosition: Int? = null
+    private var mArticleTextSize:Int? = null
+    private var mTransientTextSize:Int? = null
 
     private lateinit var mArticleTitle:AppCompatTextView
     private lateinit var mArticlePublicationText:AppCompatTextView
@@ -66,6 +69,7 @@ class ArticleViewFragment : Fragment() {
         mLanguage = arguments!!.getSerializable(ARG_LANGUAGE) as Language
         mTotalArticleCount = arguments!!.getInt(ARG_TOTAL_ARTICLE_COUNT)
         mCurrentArticlePosition = arguments!!.getInt(ARG_CURRENT_ARTICLE_POSITION)
+        mTransientTextSize = arguments!!.getInt(ARG_TRANSIENT_TEXT_SIZE)
 
         findViewItems(view)
 
@@ -81,6 +85,11 @@ class ArticleViewFragment : Fragment() {
                                             ?.filter {
                                                 !(it.link?.isBlank() ?: true)
                                             }?.toList()
+                            if (mTransientTextSize!! >= DisplayUtils.MIN_ARTICLE_TEXT_SIZE) {
+                                mArticleTextSize = mTransientTextSize
+                            }else{
+                                mArticleTextSize = DisplayUtils.getArticleTextSize(context!!)
+                            }
                             DisplayUtils.getArticlePublicationDateString(mArticle,mLanguage,context!!) ?: ""
                         }
                         .observeOn(AndroidSchedulers.mainThread())
@@ -88,8 +97,12 @@ class ArticleViewFragment : Fragment() {
                             override fun onComplete() {}
                             @SuppressLint("SetTextI18n")
                             override fun onNext(dateString: String) {
+
+                                mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP,mArticleTextSize!!.toFloat())
+
                                 mArticleTitle.text = mArticle.title
                                 mArticlePublicationText.text = dateString
+//                                mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP)
                                 mArticlePosition.text = DisplayUtils
                                                             .getArticlePositionString(
                                                                     "${mCurrentArticlePosition} / ${mTotalArticleCount}",
@@ -131,14 +144,17 @@ class ArticleViewFragment : Fragment() {
         val ARG_LANGUAGE = "com.dasbikash.news_server.views.ArticleViewFragment.ARG_LANGUAGE"
         val ARG_TOTAL_ARTICLE_COUNT = "com.dasbikash.news_server.views.ArticleViewFragment.ARG_TOTAL_ARTICLE_COUNT"
         val ARG_CURRENT_ARTICLE_POSITION = "com.dasbikash.news_server.views.ArticleViewFragment.ARG_CURRENT_ARTICLE_POSITION"
+        val ARG_TRANSIENT_TEXT_SIZE = "com.dasbikash.news_server.views.ArticleViewFragment.ARG_TRANSIENT_TEXT_SIZE"
         val TAG = "ArticleViewFragment"
 
-        fun getInstance(articleId:String,language: Language,totalArticleCount:Int,currentArticlePosition:Int): ArticleViewFragment {
+        fun getInstance(articleId:String,language: Language,totalArticleCount:Int,
+                        currentArticlePosition:Int,transTextSize:Int): ArticleViewFragment {
             val args = Bundle()
             args.putString(ARG_ARTICLE_ID, articleId)
             args.putSerializable(ARG_LANGUAGE, language)
             args.putInt(ARG_TOTAL_ARTICLE_COUNT, totalArticleCount)
             args.putInt(ARG_CURRENT_ARTICLE_POSITION, currentArticlePosition)
+            args.putInt(ARG_TRANSIENT_TEXT_SIZE, transTextSize)
             val fragment = ArticleViewFragment()
             fragment.setArguments(args)
             return fragment

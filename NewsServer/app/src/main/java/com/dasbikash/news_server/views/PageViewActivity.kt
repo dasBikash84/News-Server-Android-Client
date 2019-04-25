@@ -16,7 +16,6 @@ package com.dasbikash.news_server.views
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Message
 import android.os.SystemClock
 import android.util.Log
 import android.view.Menu
@@ -38,6 +37,7 @@ import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
+import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.OnceSettableBoolean
 import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.views.view_helpers.ArticlePreviewListAdapter
@@ -52,6 +52,7 @@ import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
@@ -90,6 +91,15 @@ class PageViewActivity : AppCompatActivity(),
 
     private lateinit var mArticlePreviewListAdapter: ArticlePreviewListAdapter
 
+    private lateinit var mTextSizeChangeFrame: ConstraintLayout//text_size_change_frame
+    private lateinit var mTextSizeChangeCancelButton: MaterialButton//cancel_text_size_change
+    private lateinit var mTextSizeChangeOkButton: MaterialButton//plus_text_size_change
+    private lateinit var mTextSizeChangePlusButton: MaterialButton//minus_text_size_change
+    private lateinit var mTextSizeChangeMinusButton: MaterialButton//ok_text_size_change
+
+    private var transTextSize = 0
+    private val mTextSizeChangeStep = 2
+
     private lateinit var mAppSettingsRepository: AppSettingsRepository
     private lateinit var mUserSettingsRepository: UserSettingsRepository
     private lateinit var mNewsDataRepository: NewsDataRepository
@@ -100,7 +110,7 @@ class PageViewActivity : AppCompatActivity(),
 
     private var mIsPageOnFavList = false
 
-    private val disposable = CompositeDisposable()
+    private val mDisposable = CompositeDisposable()
     private val mArticleList = mutableListOf<Article>()
 
     private val MINIMUM_INIT_ARTICLE_COUNT = 5
@@ -117,45 +127,121 @@ class PageViewActivity : AppCompatActivity(),
         mPage = (intent!!.getParcelableExtra(EXTRA_PAGE_TO_DISPLAY)) as Page
 
         initDrawerComponents()
-        mPageViewContainer = findViewById(R.id.page_view_container)
-        mArticleViewContainer = findViewById(R.id.article_view_container)
-        mArticleLoadingProgressBarMiddle = findViewById(R.id.article_loading_progress_bar_middle)
+        initViewPager()
+        initTextChangeViewComponents()
 
         mAppSettingsRepository = RepositoryFactory.getAppSettingsRepository(this)
         mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(this)
-        mArticleLoadingProgressBarMiddle.setOnClickListener { }
-
-        initViewPager()
 
         loadMoreArticles()
         supportActionBar!!.setTitle(mPage.name)
     }
 
+    private fun initTextChangeViewComponents() {
+        mTextSizeChangeFrame = findViewById(R.id.text_size_change_frame)
+        mTextSizeChangeCancelButton = findViewById(R.id.cancel_text_size_change)
+        mTextSizeChangePlusButton = findViewById(R.id.plus_text_size_change)
+        mTextSizeChangeMinusButton = findViewById(R.id.minus_text_size_change)
+        mTextSizeChangeOkButton = findViewById(R.id.ok_text_size_change)
+
+        mTextSizeChangeFrame.setOnClickListener {}
+        mTextSizeChangeCancelButton.setOnClickListener { changeTextFontAction() }
+        mTextSizeChangePlusButton.setOnClickListener { incrementTextSize() }
+        mTextSizeChangeMinusButton.setOnClickListener { decrementTextSize() }
+        mTextSizeChangeOkButton.setOnClickListener { makeTextSizeEffective() }
+    }
+
+    private fun makeTextSizeEffective() {
+        mDisposable.add(
+                Observable.just(true)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            DisplayUtils.setArticleTextSize(this, transTextSize)
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe { changeTextFontAction() }
+        )
+    }
+
+    private fun decrementTextSize() {
+        if (transTextSize - mTextSizeChangeStep < DisplayUtils.MIN_ARTICLE_TEXT_SIZE) {
+            transTextSize = DisplayUtils.MIN_ARTICLE_TEXT_SIZE
+        } else {
+            transTextSize -= mTextSizeChangeStep
+        }
+        mFragmentStatePagerAdapter.notifyDataSetChanged()
+    }
+
+    private fun incrementTextSize() {
+        if (transTextSize + mTextSizeChangeStep > DisplayUtils.MAX_ARTICLE_TEXT_SIZE) {
+            transTextSize = DisplayUtils.MAX_ARTICLE_TEXT_SIZE
+        } else {
+            transTextSize += mTextSizeChangeStep
+        }
+        mFragmentStatePagerAdapter.notifyDataSetChanged()
+    }
+
+    private fun changeTextFontAction() {
+        if (mTextSizeChangeFrame.visibility == View.GONE) {
+            mDisposable.add(
+                    Observable.just(true)
+                            .subscribeOn(Schedulers.computation())
+                            .map {
+                                DisplayUtils.getArticleTextSize(this)
+                            }
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe {
+                                transTextSize = it
+                                mTextSizeChangeFrame.visibility = View.VISIBLE
+                                mTextSizeChangeFrame.bringToFront()
+                            }
+            )
+        } else {
+            transTextSize = 0
+            mFragmentStatePagerAdapter.notifyDataSetChanged()
+            mDisposable.add(
+                    Observable.just(true)
+                            .subscribeOn(Schedulers.computation())
+                            .map {
+                                SystemClock.sleep(100)
+                            }
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe { mTextSizeChangeFrame.visibility = View.GONE }
+            )
+        }
+    }
+
     private fun initViewPager() {
 
-        mFragmentStatePagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager){
+        mPageViewContainer = findViewById(R.id.page_view_container)
+        mArticleViewContainer = findViewById(R.id.article_view_container)
+        mArticleLoadingProgressBarMiddle = findViewById(R.id.article_loading_progress_bar_middle)
+        mArticleLoadingProgressBarMiddle.setOnClickListener { }
+
+        mFragmentStatePagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager) {
             override fun getItemPosition(`object`: Any): Int {
-                return PagerAdapter.POSITION_UNCHANGED
+                if (mTextSizeChangeFrame.visibility == View.GONE) {
+                    return PagerAdapter.POSITION_UNCHANGED
+                } else {
+                    return PagerAdapter.POSITION_NONE
+                }
             }
+
             override fun getItem(position: Int): Fragment {
-                if (position == (mArticleList.size - 1)){
+                if (position == (mArticleList.size - 1)) {
                     loadMoreArticles()
                 }
-                return ArticleViewFragment.getInstance(mArticleList.get(position).id,mLanguage,mArticleList.size,position+1)
+                return ArticleViewFragment
+                        .getInstance(mArticleList.get(position).id,
+                                mLanguage, mArticleList.size,
+                                position + 1, transTextSize)
             }
+
             override fun getCount(): Int {
                 return mArticleList.size
             }
         }
-
-        mArticleViewContainer.addOnPageChangeListener(object : ViewPager.OnPageChangeListener{
-            override fun onPageScrollStateChanged(state: Int) {}
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
-            override fun onPageSelected(position: Int) {
-//                mArticlePreviewListHolder.scrollToPosition(position)
-            }
-        })
         mArticleViewContainer.adapter = mFragmentStatePagerAdapter
         mArticleViewContainer.setCurrentItem(0)
     }
@@ -187,7 +273,7 @@ class PageViewActivity : AppCompatActivity(),
 
             loadWorkInProcessWindow()//showProgressBars()
 
-            disposable.add(
+            mDisposable.add(
                     getArticleDownloaderObservable()
                             .map {
                                 val newList = mNewsDataRepository.getArticlesByPage(mPage)
@@ -245,15 +331,15 @@ class PageViewActivity : AppCompatActivity(),
         mArticleList.clear()
         mArticleList.addAll(articleList)
         if (!::mArticlePreviewListAdapter.isInitialized) {
-            mArticlePreviewListAdapter = ArticlePreviewListAdapter(mLanguage,{
+            mArticlePreviewListAdapter = ArticlePreviewListAdapter(mLanguage, {
                 mArticleViewContainer.currentItem = it
             })
             mArticlePreviewListHolder.adapter = mArticlePreviewListAdapter
         }
         mArticlePreviewListAdapter.submitList(mArticleList.toList())
-        if (!::mFragmentStatePagerAdapter.isInitialized){
+        if (!::mFragmentStatePagerAdapter.isInitialized) {
             initViewPager()
-        }else{
+        } else {
             mFragmentStatePagerAdapter.notifyDataSetChanged()
         }
     }
@@ -291,8 +377,8 @@ class PageViewActivity : AppCompatActivity(),
         refreshFavStatus()
     }
 
-    private fun refreshFavStatus(doOnNext:()->Unit = {}) {
-        disposable.add(
+    private fun refreshFavStatus(doOnNext: () -> Unit = {}) {
+        mDisposable.add(
                 Observable.just(true)
                         .subscribeOn(Schedulers.io())
                         .map {
@@ -314,7 +400,7 @@ class PageViewActivity : AppCompatActivity(),
 
     override fun onPause() {
         super.onPause()
-        disposable.clear()
+        mDisposable.clear()
     }
 
     override fun onBackPressed() {
@@ -350,6 +436,10 @@ class PageViewActivity : AppCompatActivity(),
                     removePageFromFavListAction()
                     true
                 }
+                R.id.change_text_font_menu_item -> {
+                    changeTextFontAction()
+                    true
+                }
                 else -> super.onOptionsItemSelected(item)
             }
         }
@@ -374,7 +464,7 @@ class PageViewActivity : AppCompatActivity(),
 
         val positiveAction: () -> Unit = {
             loadWorkInProcessWindow()
-            disposable.add(
+            mDisposable.add(
                     Observable.just(mPage)
                             .subscribeOn(Schedulers.io())
                             .map {
@@ -388,6 +478,7 @@ class PageViewActivity : AppCompatActivity(),
                                 override fun onComplete() {
                                     removeWorkInProcessWindow()
                                 }
+
                                 override fun onNext(result: Boolean) {
                                     if (result) {
                                         when (action) {
@@ -434,7 +525,7 @@ class PageViewActivity : AppCompatActivity(),
                             negetiveButtonText = "Cancel",
                             doOnPositivePress = {
                                 launchSignInActivity({
-                                    refreshFavStatus({changeFavStatusDialog.show()})
+                                    refreshFavStatus({ changeFavStatusDialog.show() })
                                 })
                             }
                     )

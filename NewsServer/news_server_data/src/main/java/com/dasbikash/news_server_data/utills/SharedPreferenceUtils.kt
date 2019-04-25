@@ -15,7 +15,7 @@ package com.dasbikash.news_server_data.utills
 
 import android.content.Context
 
-internal object SharedPreferenceUtils {
+object SharedPreferenceUtils {
 
     private val TAG = "SharedPrefUtilsTest"
     const val SP_FILE_KEY = "com.dasbikash.news_server.SP_FILE_KEY"

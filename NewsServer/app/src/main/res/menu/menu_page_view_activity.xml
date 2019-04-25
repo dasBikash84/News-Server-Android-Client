@@ -15,6 +15,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/change_text_font_menu_item"
+        android:icon="@drawable/ic_font_size"
+        android:title="@string/change_text_font_menu_item_title"
+        app:showAsAction="ifRoom|collapseActionView"/>
+    <item
         android:id="@+id/remove_from_favourites_menu_item"
         android:icon="@drawable/ic_fav"
         android:title="@string/remove_from_favourites_menu_item_title"

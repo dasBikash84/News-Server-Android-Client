@@ -19,10 +19,17 @@ import android.widget.TextView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
+import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import java.text.SimpleDateFormat
 import java.util.concurrent.atomic.AtomicInteger
 
 object DisplayUtils {
+
+    private val ARTCILE_TEXT_SIZE_SP_KEY =
+            "com.dasbikash.news_server.utils.DisplayUtils.ARTCILE_TEXT_SIZE_SP_KEY"
+    val MIN_ARTICLE_TEXT_SIZE = 10
+    val MAX_ARTICLE_TEXT_SIZE = 26
+    val DEFAULT_ARTICLE_TEXT_SIZE = 16
 
     private val TWO_DAYS_IN_MS = (2 * 24 * 60 * 60 * 1000).toLong()
     private val DAY_IN_MS = (24 * 60 * 60 * 1000).toLong()
@@ -234,4 +241,28 @@ object DisplayUtils {
             textView.text = Html.fromHtml(text)
         }
     }
+
+    fun getArticleTextSize(context: Context):Int{
+        val textSize = SharedPreferenceUtils
+                            .getData(context,SharedPreferenceUtils.DefaultValues.DEFAULT_INT, ARTCILE_TEXT_SIZE_SP_KEY)
+                                as Int
+        if (textSize == 0){
+            setArticleTextSize(context,DEFAULT_ARTICLE_TEXT_SIZE)
+            return DEFAULT_ARTICLE_TEXT_SIZE
+        }
+        return textSize
+    }
+
+    fun setArticleTextSize(context: Context,textSize:Int){
+        var effectiveTextSize = 0
+        when{
+            textSize> MAX_ARTICLE_TEXT_SIZE -> effectiveTextSize = MAX_ARTICLE_TEXT_SIZE
+            textSize < MIN_ARTICLE_TEXT_SIZE -> effectiveTextSize = MIN_ARTICLE_TEXT_SIZE
+            else ->{
+                effectiveTextSize = textSize
+            }
+        }
+        SharedPreferenceUtils.saveData(context,effectiveTextSize, ARTCILE_TEXT_SIZE_SP_KEY)
+    }
+
 }

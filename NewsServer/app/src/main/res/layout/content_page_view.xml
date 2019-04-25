@@ -20,6 +20,94 @@
     tools:context=".views.PageViewActivity"
     tools:showIn="@layout/app_bar_page_view">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/text_size_change_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@android:color/transparent"
+        android:visibility="gone">
+            <LinearLayout
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                android:baselineAligned="false">
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="160dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:layout_gravity="center">
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/cancel_text_size_change"
+                        android:text="@string/cancel_text"
+                        android:gravity="center"
+                        android:layout_gravity="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:textSize="18sp"
+                        android:textAllCaps="false"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="160dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:layout_gravity="center">
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/plus_text_size_change"
+                        android:text="@string/plus_text"
+                        android:gravity="center"
+                        android:layout_gravity="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:textSize="36sp"/>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/minus_text_size_change"
+                        android:text="@string/minus_text"
+                        android:gravity="center"
+                        android:layout_gravity="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:textSize="36sp"/>
+
+                </LinearLayout>
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="160dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:layout_gravity="center">
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/ok_text_size_change"
+                        android:text="@string/ok_text"
+                        android:gravity="center"
+                        android:layout_gravity="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:textSize="18sp"
+                        android:textAllCaps="false"/>
+
+                </LinearLayout>
+            </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/article_view_container"
         android:layout_width="match_parent"
