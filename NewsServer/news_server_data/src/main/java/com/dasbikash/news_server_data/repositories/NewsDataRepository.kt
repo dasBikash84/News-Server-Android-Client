@@ -16,7 +16,6 @@ package com.dasbikash.news_server_data.repositories
 import android.content.Context
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.NewsDataService
-import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc.NewsDataServiceUtils
 import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
@@ -37,17 +36,8 @@ class NewsDataRepository private constructor(context: Context) {
     fun getLatestArticleByPage(page: Page): Article? {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
 
-        var latestArticle: Article? = null
-        newsDataService.getLatestArticlesByPageId(page.id, 1).apply {
-            if (this.size > 0) {
-                latestArticle = this.first()
-            }
-        }
-
-        latestArticle?.let {
-            NewsDataServiceUtils.processFetchedArticleData(it, page)
-            newsServerDatabase.articleDao.addArticles(it)
-            return it
+        newsDataService.getLatestArticlesByPage(page, 1).apply {
+            if (this.size > 0) {    return this.first()}
         }
 
         return null
@@ -64,14 +54,13 @@ class NewsDataRepository private constructor(context: Context) {
 
     fun downloadArticlesByPage(page: Page,lastArticleId:String?=null):List<Article>{
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+
         val articleList:List<Article>
+
         if (lastArticleId != null){
-            articleList = newsDataService.getArticlesAfterLastId(page.id,lastArticleId)
+            articleList = newsDataService.getArticlesAfterLastId(page,lastArticleId)
         }else{
-            articleList = newsDataService.getLatestArticlesByPageId(page.id)
-        }
-        articleList.asSequence().forEach {
-            NewsDataServiceUtils.processFetchedArticleData(it, page)
+            articleList = newsDataService.getLatestArticlesByPage(page)
         }
         newsServerDatabase.articleDao.addArticles(articleList)
         return articleList

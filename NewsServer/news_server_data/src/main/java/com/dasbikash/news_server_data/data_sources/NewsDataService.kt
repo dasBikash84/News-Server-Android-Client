@@ -13,7 +13,9 @@
 
 package com.dasbikash.news_server_data.data_sources
 
+import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc.NewsDataServiceUtils
 import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.Page
 
 internal interface NewsDataService {
 
@@ -21,15 +23,33 @@ internal interface NewsDataService {
         const val DEFAULT_ARTICLE_REQUEST_SIZE = 5
     }
 
-    //latest article from each top level page of any newspaper
-    fun getLatestArticleByTopLevelPageId(topLevelPageId:String):Article
-
     //Latest articles from any page
-    fun getLatestArticlesByPageId(pageId:String,
-                                  articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>
+    fun getRawLatestArticlesByPage(page: Page,
+                                   articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>
 
     //Articles after last article ID
-    fun getArticlesAfterLastId(pageId:String,lastArticleId:String,
-                               articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>
+    fun getRawArticlesAfterLastId(page: Page, lastArticleId:String,
+                                  articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>
+
+
+
+    fun getLatestArticlesByPage(page: Page,
+                                articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>{
+        val articleList = getRawLatestArticlesByPage(page,articleRequestSize)
+        if (articleList.size >0){
+            articleList.asSequence().forEach { NewsDataServiceUtils.processFetchedArticleData(it, page) }
+        }
+        return articleList
+    }
+
+    fun getArticlesAfterLastId(page: Page, lastArticleId:String,
+                                  articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>{
+
+        val articleList = getRawArticlesAfterLastId(page,lastArticleId,articleRequestSize)
+        if (articleList.size >0){
+            articleList.asSequence().forEach { NewsDataServiceUtils.processFetchedArticleData(it, page) }
+        }
+        return articleList
+    }
 
 }

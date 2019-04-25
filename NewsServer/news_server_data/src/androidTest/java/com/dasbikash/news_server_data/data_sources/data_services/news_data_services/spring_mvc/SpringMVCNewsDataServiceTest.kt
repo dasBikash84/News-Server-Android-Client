@@ -35,7 +35,6 @@ class SpringMVCNewsDataServiceTest {
 
     @Test
     fun getLatestArticleByTopLevelPageId() {
-        Log.d(TAG, SpringMVCNewsDataService.getLatestArticleByTopLevelPageId("PAGE_ID_815").toString())
     }
 
     @Test

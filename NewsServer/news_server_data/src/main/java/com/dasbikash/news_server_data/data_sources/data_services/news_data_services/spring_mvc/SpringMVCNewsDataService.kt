@@ -19,6 +19,7 @@ import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.exceptions.DataServerNotAvailableExcepption
 import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.Page
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -29,62 +30,32 @@ internal object SpringMVCNewsDataService : NewsDataService {
 
     private val springMVCWebService = SpringMVCWebService.RETROFIT.create(SpringMVCWebService::class.java)
 
-
-    override fun getLatestArticleByTopLevelPageId(topLevelPageId: String): Article {
-
-        val lock = Object()
-        var article:Article?=null
-        var dataServerException: DataServerException? = null
-
-        springMVCWebService
-                .getLatestArticleByTopLevelPageId(topLevelPageId)
-                .enqueue(object : Callback<Article?> {
-                    override fun onFailure(call: Call<Article?>, throwable: Throwable) {
-                        dataServerException = DataServerNotAvailableExcepption(throwable)
-                        synchronized(lock) { lock.notify() }
-
-                    }
-                    override fun onResponse(call: Call<Article?>, response: Response<Article?>) {
-                        if (response.isSuccessful) {
-                            article = response.body()
-                        } else {
-                            dataServerException = DataNotFoundException()
-                        }
-                        synchronized(lock) { lock.notify() }
-                    }
-                })
-
-        synchronized(lock) { lock.wait() }
-        dataServerException?.let { throw it }
-        return article!!
-    }
-
-    override fun getLatestArticlesByPageId(pageId: String, articleRequestSize: Int): List<Article> {
+    override fun getRawLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
 
         val lock = Object()
         val articles = mutableListOf<Article>()
         var dataServerException: DataServerException? = null
 
-        Log.d(TAG,"getLatestArticlesByPageId for: ${pageId}")
+        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id}")
 
         springMVCWebService
-                .getLatestArticlesByPageId(pageId, articleRequestSize)
+                .getLatestArticlesByPageId(page.id, articleRequestSize)
                 .enqueue(object : Callback<List<Article>?> {
                     override fun onFailure(call: Call<List<Article>?>, throwable: Throwable) {
-                        Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} onFailure")
+                        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} onFailure")
                         dataServerException = DataServerNotAvailableExcepption(throwable)
                         synchronized(lock) { lock.notify() }
                     }
 
                     override fun onResponse(call: Call<List<Article>?>, response: Response<List<Article>?>) {
-                        Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} onResponse")
+                        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} onResponse")
                         if (response.isSuccessful) {
 
-                            Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} onResponse isSuccessful")
+                            Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} onResponse isSuccessful")
                             response.body()?.let { articles.addAll(it) }
                         } else {
 
-                            Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} onResponse not Successful")
+                            Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} onResponse not Successful")
                             dataServerException = DataNotFoundException()
 
                         }
@@ -93,27 +64,27 @@ internal object SpringMVCNewsDataService : NewsDataService {
                 })
 
 
-        Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} before wait")
+        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before wait")
         synchronized(lock) { lock.wait(5000) }
 
-        Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} before throw it")
+        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before throw it")
         dataServerException?.let { throw it }
 
-        Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} before throw DataNotFoundException()")
+        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before throw DataNotFoundException()")
         if (articles.size == 0 ){throw DataNotFoundException()}
 
-        Log.d(TAG,"getLatestArticlesByPageId for: ${pageId} before return")
+        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before return")
         return articles
     }
 
-    override fun getArticlesAfterLastId(pageId: String, lastArticleId: String, articleRequestSize: Int): List<Article> {
+    override fun getRawArticlesAfterLastId(page: Page, lastArticleId: String, articleRequestSize: Int): List<Article> {
 
         val lock = Object()
         val articles = mutableListOf<Article>()
         var dataServerException: DataServerException? = null
 
         springMVCWebService
-                .getArticlesAfterLastId(pageId, lastArticleId, articleRequestSize)
+                .getArticlesAfterLastId(page.id, lastArticleId, articleRequestSize)
                 .enqueue(object : Callback<List<Article>?> {
                     override fun onFailure(call: Call<List<Article>?>, throwable: Throwable) {
                         dataServerException = DataServerNotAvailableExcepption(throwable)

@@ -13,24 +13,13 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc
 
-import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 import java.util.*
 
 internal object NewsDataServiceUtils {
 
-    fun processFetchedArticleData(article: Article,database: NewsServerDatabase):Article{
-//        ExceptionUtils.thowExceptionIfOnMainThred()
-
-        val page = database.pageDao.findById(article.pageId!!)
-
-        return NewsDataServiceUtils.processFetchedArticleData(article,page)
-    }
-
     fun processFetchedArticleData(article: Article,page: Page):Article{
-//        ExceptionUtils.thowExceptionIfOnMainThred()
-
         article.newsPaperId = page.newsPaperId
 
         val publicationDate = Calendar.getInstance()

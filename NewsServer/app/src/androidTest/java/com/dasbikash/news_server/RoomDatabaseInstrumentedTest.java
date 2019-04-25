@@ -52,12 +52,12 @@ public class RoomDatabaseInstrumentedTest {
 
     @Test
     public void  getLatestArticlesByPageId() {
-//        Log.d(TAG, newsDataRepository.getLatestArticlesByPageId("PAGE_ID_814",5).toString());
+//        Log.d(TAG, newsDataRepository.getRawLatestArticlesByPage("PAGE_ID_814",5).toString());
     }
 
     @Test
     public void  getArticlesAfterLastId() {
-//        Log.d(TAG, newsDataRepository.getArticlesAfterLastId("PAGE_ID_814","-6645600438004371204",1).toString());
+//        Log.d(TAG, newsDataRepository.getRawArticlesAfterLastId("PAGE_ID_814","-6645600438004371204",1).toString());
     }
 
 }
