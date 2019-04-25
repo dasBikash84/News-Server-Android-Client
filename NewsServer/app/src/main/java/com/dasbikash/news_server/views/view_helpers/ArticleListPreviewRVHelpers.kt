@@ -144,10 +144,10 @@ class LatestArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewMode
                             articlePublicationTime.visibility = View.VISIBLE
 
                             mArticle.previewImageLink?.let {
-                                Picasso.Builder(itemView.context).build().load(it).into(articlePreviewImage)
+                                Picasso.get().load(it).into(articlePreviewImage)
                                 articlePreviewImage.visibility = View.VISIBLE
                             } ?: let {
-                                Picasso.Builder(itemView.context).build().load(R.drawable.app_big_logo).into(articlePreviewImage)
+                                Picasso.get().load(R.drawable.app_big_logo).into(articlePreviewImage)
                                 articlePreviewImage.visibility = View.VISIBLE
                             }
 
