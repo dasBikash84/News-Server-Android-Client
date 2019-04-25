@@ -40,7 +40,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class ArticleViewFragment : Fragment() {
+class ArticleViewFragment : Fragment(){
 
     private lateinit var mLanguage: Language
     private lateinit var mArticle: Article
@@ -102,12 +102,9 @@ class ArticleViewFragment : Fragment() {
 
                                 mArticleTitle.text = mArticle.title
                                 mArticlePublicationText.text = dateString
-//                                mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP)
-                                mArticlePosition.text = DisplayUtils
-                                                            .getArticlePositionString(
-                                                                    "${mCurrentArticlePosition} / ${mTotalArticleCount}",
-                                                                    mLanguage)
+                                refreshArticlePositionText()
                                 DisplayUtils.displayHtmlText(mArticleText,mArticle.articleText!!)
+
                                 if(mArticle.imageLinkList != null && mArticle.imageLinkList!!.size > 0){
                                     mArticleImageListAdapter = ArticleImageListAdapter()
                                     mArticleImageHolder.adapter = mArticleImageListAdapter
@@ -122,6 +119,12 @@ class ArticleViewFragment : Fragment() {
                             }
                         })
         )
+    }
+
+    fun refreshArticlePositionText() {
+        mArticlePosition.text = DisplayUtils.getArticlePositionString(
+                        "${mCurrentArticlePosition} / ${mTotalArticleCount}",
+                                        mLanguage)
     }
 
     private fun findViewItems(view: View) {

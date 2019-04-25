@@ -220,7 +220,7 @@ class PageViewActivity : AppCompatActivity(),
         mArticleLoadingProgressBarMiddle.setOnClickListener { }
 
         mFragmentStatePagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager) {
-            override fun getItemPosition(`object`: Any): Int {
+            override fun getItemPosition(fragment: Any): Int {
                 if (mTextSizeChangeFrame.visibility == View.GONE) {
                     return PagerAdapter.POSITION_UNCHANGED
                 } else {
@@ -232,10 +232,10 @@ class PageViewActivity : AppCompatActivity(),
                 if (position == (mArticleList.size - 1)) {
                     loadMoreArticles()
                 }
-                return ArticleViewFragment
-                        .getInstance(mArticleList.get(position).id,
-                                mLanguage, mArticleList.size,
+                val fragment = ArticleViewFragment.getInstance(
+                                mArticleList.get(position).id,mLanguage, mArticleList.size,
                                 position + 1, transTextSize)
+                return fragment
             }
 
             override fun getCount(): Int {

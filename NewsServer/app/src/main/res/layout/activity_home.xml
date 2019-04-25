@@ -39,31 +39,41 @@
                 android:orientation="vertical"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:background="@color/colorPrimaryLight2"
-                android:paddingStart="32dp"
+                android:background="@color/white_smoke"
+                android:paddingStart="8dp"
                 android:paddingEnd="8dp"
-                android:paddingBottom="40dp">
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp">
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/log_in_sign_up_button"
-                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="160dp"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="@string/log_in_sign_up" />
+                    android:text="@string/log_in_sign_up"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginBottom="3dp"
+                    android:textColor="@color/article_title_color"/>
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/sign_out_button"
-                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="160dp"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="@string/sign_out" />
+                    android:text="@string/sign_out"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginBottom="3dp"
+                    android:textColor="@color/article_title_color"/>
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/customize_button"
-                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="160dp"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="@string/customize_button" />
+                    android:text="@string/customize_button"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginBottom="3dp"
+                    android:textColor="@color/article_title_color"/>
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
