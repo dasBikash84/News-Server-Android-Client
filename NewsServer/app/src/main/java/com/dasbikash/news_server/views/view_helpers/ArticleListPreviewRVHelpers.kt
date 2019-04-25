@@ -144,10 +144,10 @@ class LatestArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewMode
                             articlePublicationTime.visibility = View.VISIBLE
 
                             mArticle.previewImageLink?.let {
-                                Picasso.get().load(it).into(articlePreviewImage)
+                                Picasso.Builder(itemView.context).build().load(it).into(articlePreviewImage)
                                 articlePreviewImage.visibility = View.VISIBLE
                             } ?: let {
-                                Picasso.get().load(R.drawable.app_big_logo).into(articlePreviewImage)
+                                Picasso.Builder(itemView.context).build().load(R.drawable.app_big_logo).into(articlePreviewImage)
                                 articlePreviewImage.visibility = View.VISIBLE
                             }
 
@@ -155,7 +155,7 @@ class LatestArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewMode
                             itemView.setOnClickListener(View.OnClickListener {
                                 itemView.context.startActivity(
                                         PageViewActivity.getIntentForPageDisplay(
-                                                itemView.context, page/*, mArticle.id*/
+                                                itemView.context, page
                                         )
                                 )
                             })

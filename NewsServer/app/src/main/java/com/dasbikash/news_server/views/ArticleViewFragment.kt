@@ -199,7 +199,7 @@ class ArticleImageHolder(itemView: View):RecyclerView.ViewHolder(itemView){
 
     fun bind(articleImage: ArticleImage){
         if (articleImage.link !=null){
-            Picasso.get().load(articleImage.link).into(mArticleImage)
+            Picasso.Builder(itemView.context).build().load(articleImage.link).into(mArticleImage)
         }else{
             itemView.visibility = View.GONE
         }
