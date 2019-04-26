@@ -23,38 +23,44 @@ import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
 import com.dasbikash.news_server_data.repositories.room_impls.UserSettingsRepositoryRoomImpl
 import com.firebase.ui.auth.IdpResponse
 
-interface UserSettingsRepository{
+abstract class UserSettingsRepository{
 
-    fun processSignInRequestResult(data: Pair<Int, Intent?>, context: Context): Pair<SignInResult, Throwable?>
+    fun initUserSettings(context: Context){
+        if (checkIfLoggedIn()) {
+            updateUserSettingsIfModified(context)
+        }
+    }
 
-    fun updateUserSettingsIfModified(context: Context)
+    abstract fun processSignInRequestResult(data: Pair<Int, Intent?>, context: Context): Pair<SignInResult, Throwable?>
 
-    fun getCurrentUserName():String?
+    protected abstract fun updateUserSettingsIfModified(context: Context)
+
+    abstract fun getCurrentUserName():String?
 
     //Action methods
-    fun addPageToFavList(page: Page, context: Context): Boolean
+    abstract fun addPageToFavList(page: Page, context: Context): Boolean
 
-    fun removePageFromFavList(page: Page, context: Context): Boolean
+    abstract fun removePageFromFavList(page: Page, context: Context): Boolean
 
-    fun addPageGroup(pageGroup: PageGroup, context: Context):Boolean
+    abstract fun addPageGroup(pageGroup: PageGroup, context: Context):Boolean
 
-    fun deletePageGroup(pageGroup: PageGroup, context: Context):Boolean
+    abstract fun deletePageGroup(pageGroup: PageGroup, context: Context):Boolean
 
-    fun savePageGroup(oldId:String, pageGroup: PageGroup, context: Context):Boolean
+    abstract fun savePageGroup(oldId:String, pageGroup: PageGroup, context: Context):Boolean
 
-    fun checkIfOnFavList(mPage: Page): Boolean
+    abstract fun checkIfOnFavList(mPage: Page): Boolean
 
-    fun findPageGroupByName(pageGroupName: String): PageGroup
+    abstract fun findPageGroupByName(pageGroupName: String): PageGroup
 
-    fun checkIfLoggedIn(): Boolean
+    abstract fun checkIfLoggedIn(): Boolean
 
-    fun signOutUser()
+    abstract fun signOutUser()
 
-    fun getLogInIntent(): Intent?
+    abstract fun getLogInIntent(): Intent?
 
-    fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?>
+    abstract fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?>
 
-    fun getPageGroupListLive(): LiveData<List<PageGroup>>
+    abstract fun getPageGroupListLive(): LiveData<List<PageGroup>>
 
     companion object {
         val TAG = "UserSettingsRepository"

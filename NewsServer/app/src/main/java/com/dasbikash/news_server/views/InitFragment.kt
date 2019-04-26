@@ -155,19 +155,15 @@ class InitFragment : Fragment() {
             emitter.onNext(DataLoadingStatus.STARTING_SETTINGS_DATA_LOADING)
 
             val settingsRepo = RepositoryFactory.getAppSettingsRepository(context!!)
-
             settingsRepo.initAppSettings(context!!)
-
-            //App data loaded
+            //App settings data loaded
             emitter.onNext(DataLoadingStatus.SETTINGS_DATA_LOADED)
 
             //Check if user settings need to be checked
             val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
-            if (userSettingsRepository.checkIfLoggedIn()) {
-                emitter.onNext(DataLoadingStatus.USER_SETTINGS_GOING_TO_BE_LOADED)
-                //loadUserSettings if updated
-                userSettingsRepository.updateUserSettingsIfModified(context!!)
-            }
+            userSettingsRepository.initUserSettings(context!!)
+
+
             emitter.onNext(DataLoadingStatus.EXIT)
             Log.d(TAG, "subscribe: ")
             emitter.onComplete()

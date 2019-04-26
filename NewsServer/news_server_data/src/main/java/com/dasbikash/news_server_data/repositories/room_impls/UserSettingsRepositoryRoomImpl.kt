@@ -34,7 +34,7 @@ import com.firebase.ui.auth.IdpResponse
 import java.util.*
 
 class UserSettingsRepositoryRoomImpl internal constructor(context: Context) :
-        UserSettingsRepository {
+        UserSettingsRepository() {
 
     private val LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY =
             "com.dasbikash.news_server_data.repositories.UserSettingsRepository.LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY"
@@ -75,7 +75,6 @@ class UserSettingsRepositoryRoomImpl internal constructor(context: Context) :
                     is AuthServerException      -> return Pair(UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR, ex)
                     else                        -> throw ex
                 }
-
             }
         } else {
             when {
