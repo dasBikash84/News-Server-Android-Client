@@ -22,7 +22,7 @@ import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 
-class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDataRepository {
+class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDataRepository() {
 
     private val newsDataService: NewsDataService = DataServiceImplProvider.getNewsDataServiceImpl()
     private val newsServerDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
@@ -69,5 +69,10 @@ class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDa
         }
         newsServerDatabase.articleDao.addArticles(articleList)
         return articleList
+    }
+
+    override fun init(context: Context) {
+        super.init(context)
+        newsDataService.init(context,newsServerDatabase)
     }
 }

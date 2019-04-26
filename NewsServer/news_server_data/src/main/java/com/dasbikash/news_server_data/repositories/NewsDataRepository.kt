@@ -18,18 +18,23 @@ import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
 import com.dasbikash.news_server_data.repositories.room_impls.NewsDataRepositoryRoomImpl
+import com.dasbikash.news_server_data.utills.ExceptionUtils
 
-interface NewsDataRepository{
+abstract class NewsDataRepository{
 
-    fun getLatestArticleByPageFromLocalDb(page: Page): Article?
+    abstract fun getLatestArticleByPageFromLocalDb(page: Page): Article?
 
-    fun getLatestArticleByPage(page: Page): Article?
+    abstract fun getLatestArticleByPage(page: Page): Article?
 
-    fun getArticlesByPage(page: Page):List<Article>
+    abstract fun getArticlesByPage(page: Page):List<Article>
 
-    fun findArticleById(articleId:String):Article?
+    abstract fun findArticleById(articleId:String):Article?
 
-    fun downloadArticlesByPageAfterLastArticle(page: Page,lastArticle:Article?):List<Article>
+    abstract fun downloadArticlesByPageAfterLastArticle(page: Page,lastArticle:Article?):List<Article>
+
+    open fun init(context: Context){
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+    }
 
     companion object {
 

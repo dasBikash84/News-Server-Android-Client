@@ -13,8 +13,10 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.news_data_services.cloud_firestore
 
+import android.content.Context
 import android.util.Log
 import com.dasbikash.news_server_data.data_sources.NewsDataService
+import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.models.room_entity.Article
@@ -117,6 +119,11 @@ object CloudFireStoreNewsDataService : NewsDataService {
 
         Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before return")
         return articles
+
+    }
+
+    override fun init(context: Context) {
+        super.init(context)
 
     }
 }

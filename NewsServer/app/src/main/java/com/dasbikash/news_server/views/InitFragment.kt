@@ -69,10 +69,10 @@ class InitFragment : Fragment() {
     internal enum class DataLoadingStatus private constructor(val isSetProgressbarDeterminate: Boolean, val progressBarValue: Int) {
 
         WAITING_FOR_NETWORK_INIT(false, 0),
-        STARTING_SETTINGS_DATA_LOADING(true, 0),
-        NEED_TO_READ_DATA_FROM_SERVER(true, 20),
-        SETTINGS_DATA_LOADED(true, 75),
-        USER_SETTINGS_GOING_TO_BE_LOADED(true, 80),
+        STARTING_INITIALIZATION(true, 0),
+        APP_SETTINGS_DATA_LOADED(true, 40),
+        USER_SETTINGS_DATA_LOADED(true, 70),
+        NEWS_DATA_REPO_INITIATED(true, 100),
         EXIT(true, 100);
 
         override fun toString(): String {
@@ -152,20 +152,23 @@ class InitFragment : Fragment() {
             while (!NetConnectivityUtility.isInitialize);
 
             //Initialization started
-            emitter.onNext(DataLoadingStatus.STARTING_SETTINGS_DATA_LOADING)
+            emitter.onNext(DataLoadingStatus.STARTING_INITIALIZATION)
 
-            val settingsRepo = RepositoryFactory.getAppSettingsRepository(context!!)
-            settingsRepo.initAppSettings(context!!)
-            //App settings data loaded
-            emitter.onNext(DataLoadingStatus.SETTINGS_DATA_LOADED)
+            RepositoryFactory
+                    .getAppSettingsRepository(context!!)
+                    .initAppSettings(context!!)
+            emitter.onNext(DataLoadingStatus.APP_SETTINGS_DATA_LOADED)
 
-            //Check if user settings need to be checked
-            val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
-            userSettingsRepository.initUserSettings(context!!)
+            RepositoryFactory
+                    .getUserSettingsRepository(context!!)
+                    .initUserSettings(context!!)
+            emitter.onNext(DataLoadingStatus.USER_SETTINGS_DATA_LOADED)
 
+            RepositoryFactory
+                    .getNewsDataRepository(context!!)
+                    .init(context!!)
+            emitter.onNext(DataLoadingStatus.NEWS_DATA_REPO_INITIATED)
 
-            emitter.onNext(DataLoadingStatus.EXIT)
-            Log.d(TAG, "subscribe: ")
             emitter.onComplete()
         }
     }
