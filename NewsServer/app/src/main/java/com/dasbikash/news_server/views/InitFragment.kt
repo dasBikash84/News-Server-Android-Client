@@ -147,10 +147,8 @@ class InitFragment : Fragment() {
         return Observable.create { emitter ->
             SystemClock.sleep(initDelay)
 
-            //wait for network connection
+            //wait for network connection initialization
             emitter.onNext(DataLoadingStatus.WAITING_FOR_NETWORK_INIT)
-
-
             while (!NetConnectivityUtility.isInitialize);
 
             //Initialization started
@@ -158,11 +156,7 @@ class InitFragment : Fragment() {
 
             val settingsRepo = RepositoryFactory.getAppSettingsRepository(context!!)
 
-            if (!settingsRepo.isAppSettingsDataLoaded() || settingsRepo.isAppSettingsUpdated(context!!)) {
-                // going to load app data
-                emitter.onNext(DataLoadingStatus.NEED_TO_READ_DATA_FROM_SERVER)
-                settingsRepo.loadAppSettings(context!!)
-            }
+            settingsRepo.initAppSettings(context!!)
 
             //App data loaded
             emitter.onNext(DataLoadingStatus.SETTINGS_DATA_LOADED)

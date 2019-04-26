@@ -26,7 +26,7 @@ import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 
-class AppSettingsRepositoryRoomImpl internal constructor(context: Context): AppSettingsRepository {
+class AppSettingsRepositoryRoomImpl internal constructor(context: Context): AppSettingsRepository() {
 
     private val mAppSettingsDataService: AppSettingsDataService = DataServiceImplProvider.getAppSettingsDataServiceImpl()
     private val mDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)

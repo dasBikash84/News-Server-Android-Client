@@ -21,21 +21,27 @@ import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
 import com.dasbikash.news_server_data.repositories.room_impls.AppSettingsRepositoryRoomImpl
 
-interface AppSettingsRepository{
+abstract class AppSettingsRepository{
 
-    fun loadAppSettings(context: Context)
-    fun isAppSettingsUpdated(context: Context): Boolean
-    fun isAppSettingsDataLoaded(): Boolean
+    protected abstract fun isAppSettingsDataLoaded(): Boolean
+    protected abstract fun isAppSettingsUpdated(context: Context): Boolean
+    protected abstract fun loadAppSettings(context: Context)
 
-    fun getNewsPapers():LiveData<List<Newspaper>>
+    fun initAppSettings(context: Context){
+        if (isAppSettingsDataLoaded() || isAppSettingsUpdated(context)) {
+            loadAppSettings(context)
+        }
+    }
 
-    fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page>
-    fun getChildPagesForTopLevelPage(topLevelPage: Page):List<Page>
-    fun findMatchingPages(it: String): List<Page>
+    abstract fun getNewsPapers():LiveData<List<Newspaper>>
 
-    fun getLanguageByPage(page: Page): Language
-    fun getNewspaperByPage(page: Page): Newspaper
-    fun findPageById(pageId:String): Page?
+    abstract fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page>
+    abstract fun getChildPagesForTopLevelPage(topLevelPage: Page):List<Page>
+    abstract fun findMatchingPages(it: String): List<Page>
+
+    abstract fun getLanguageByPage(page: Page): Language
+    abstract fun getNewspaperByPage(page: Page): Newspaper
+    abstract fun findPageById(pageId:String): Page?
 
     companion object{
         @Volatile
