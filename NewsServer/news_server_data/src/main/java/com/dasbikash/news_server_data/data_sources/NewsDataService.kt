@@ -51,15 +51,4 @@ internal interface NewsDataService {
         }
         return articleList
     }
-
-    /*fun getArticlesAfterLastId(page: Page, lastArticleId:String,
-                                  articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>{
-
-        val articleList = getRawArticlesAfterLastId(page,lastArticleId,articleRequestSize)
-        if (articleList.size >0){
-            articleList.asSequence().forEach { NewsDataServiceUtils.processFetchedArticleData(it, page) }
-        }
-        return articleList
-    }*/
-
 }

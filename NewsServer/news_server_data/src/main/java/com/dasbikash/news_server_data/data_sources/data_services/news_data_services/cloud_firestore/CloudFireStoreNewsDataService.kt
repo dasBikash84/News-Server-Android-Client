@@ -15,17 +15,13 @@ package com.dasbikash.news_server_data.data_sources.data_services.news_data_serv
 
 import android.util.Log
 import com.dasbikash.news_server_data.data_sources.NewsDataService
-import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc.SpringMVCNewsDataService
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.QuerySnapshot
 
 object CloudFireStoreNewsDataService : NewsDataService {
 
@@ -88,6 +84,7 @@ object CloudFireStoreNewsDataService : NewsDataService {
 
 
         getArticleCollectionRef()
+                .whereEqualTo("pageId",page.id)
                 .whereLessThan("publicationTime",lastArticle.publicationDate!!)
                 .orderBy("publicationTime", Query.Direction.DESCENDING)
                 .limit(articleRequestSize.toLong())

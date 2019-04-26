@@ -54,4 +54,10 @@ data class Article(
     fun setCreated(time:Long){
         created = time
     }
+
+    override fun toString(): String {
+        return "Article(id='$id', pageId=$pageId, newsPaperId=$newsPaperId, title=$title, publicationTime=$publicationTime)"
+    }
+
+
 }
