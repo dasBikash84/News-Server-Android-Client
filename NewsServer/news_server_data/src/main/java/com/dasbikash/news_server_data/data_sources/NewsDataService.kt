@@ -13,7 +13,7 @@
 
 package com.dasbikash.news_server_data.data_sources
 
-import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc.NewsDataServiceUtils
+import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.NewsDataServiceUtils
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 
@@ -28,7 +28,7 @@ internal interface NewsDataService {
                                    articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>
 
     //Articles after last article ID
-    fun getRawArticlesAfterLastId(page: Page, lastArticleId:String,
+    fun getRawArticlesAfterLastArticle(page: Page, lastArticle:Article,
                                   articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>
 
 
@@ -42,7 +42,17 @@ internal interface NewsDataService {
         return articleList
     }
 
-    fun getArticlesAfterLastId(page: Page, lastArticleId:String,
+    fun getArticlesAfterLastArticle(page: Page, lastArticle:Article,
+                                  articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>{
+
+        val articleList = getRawArticlesAfterLastArticle(page,lastArticle,articleRequestSize)
+        if (articleList.size >0){
+            articleList.asSequence().forEach { NewsDataServiceUtils.processFetchedArticleData(it, page) }
+        }
+        return articleList
+    }
+
+    /*fun getArticlesAfterLastId(page: Page, lastArticleId:String,
                                   articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>{
 
         val articleList = getRawArticlesAfterLastId(page,lastArticleId,articleRequestSize)
@@ -50,6 +60,6 @@ internal interface NewsDataService {
             articleList.asSequence().forEach { NewsDataServiceUtils.processFetchedArticleData(it, page) }
         }
         return articleList
-    }
+    }*/
 
 }

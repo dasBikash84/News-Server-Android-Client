@@ -27,7 +27,8 @@ object DialogUtils {
         return getAlertDialogBuilder(context,alertDialogDetails).create()
     }
 
-    fun getAlertDialogBuilder(context: Context,alertDialogDetails: AlertDialogDetails):AlertDialog.Builder{
+    @Suppress("UNUSED_ANONYMOUS_PARAMETER")
+    fun getAlertDialogBuilder(context: Context, alertDialogDetails: AlertDialogDetails):AlertDialog.Builder{
         val dialogBuilder = AlertDialog.Builder(context)
 
         if (alertDialogDetails.title.isNotBlank()){

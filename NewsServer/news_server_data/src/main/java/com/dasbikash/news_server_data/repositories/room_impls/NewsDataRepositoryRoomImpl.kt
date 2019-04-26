@@ -38,7 +38,11 @@ class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDa
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
 
         newsDataService.getLatestArticlesByPage(page, 1).apply {
-            if (this.size > 0) {    return this.first()}
+            if (this.size > 0) {
+                val article = this.first()
+                newsServerDatabase.articleDao.addArticles(article)
+                return article
+            }
         }
 
         return null
@@ -53,13 +57,13 @@ class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDa
         return newsServerDatabase.articleDao.findById(articleId)
     }
 
-    override fun downloadArticlesByPage(page: Page, lastArticleId:String?):List<Article>{
+    override fun downloadArticlesByPageAfterLastArticle(page: Page, lastArticle:Article?):List<Article>{
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
 
         val articleList:List<Article>
 
-        if (lastArticleId != null){
-            articleList = newsDataService.getArticlesAfterLastId(page,lastArticleId)
+        if (lastArticle != null){
+            articleList = newsDataService.getArticlesAfterLastArticle(page,lastArticle)
         }else{
             articleList = newsDataService.getLatestArticlesByPage(page)
         }

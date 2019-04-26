@@ -256,14 +256,14 @@ class PageViewActivity : AppCompatActivity(),
                     if (!::mLanguage.isInitialized) {
                         mLanguage = mAppSettingsRepository.getLanguageByPage(mPage)
                     }
-                    var lastArticleId: String? = null
+                    var lastArticle: Article? = null
                     synchronized(mArticleList) {
                         if (!mArticleList.isEmpty()) {
-                            lastArticleId = mArticleList.last().id
-                            Log.d(TAG, "lastArticleId: ${lastArticleId}")
+                            lastArticle = mArticleList.last()
+                            Log.d(TAG, "lastArticleId: ${lastArticle!!.id}")
                         }
                     }
-                    mNewsDataRepository.downloadArticlesByPage(mPage, lastArticleId)
+                    mNewsDataRepository.downloadArticlesByPageAfterLastArticle(mPage, lastArticle)
                 }
     }
 

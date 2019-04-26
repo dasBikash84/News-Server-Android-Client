@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc
+package com.dasbikash.news_server_data.data_sources.data_services.news_data_services
 
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
@@ -22,15 +22,16 @@ internal object NewsDataServiceUtils {
     fun processFetchedArticleData(article: Article,page: Page):Article{
         article.newsPaperId = page.newsPaperId
 
-        val publicationDate = Calendar.getInstance()
+//        val publicationDate = Calendar.getInstance()
 
-        if (article.publicationTime != 0L){
+        /*if (article.publicationTime != 0L){
             publicationDate.timeInMillis = article.publicationTime
         } else if (article.modificationTime != 0L){
             publicationDate.timeInMillis = article.modificationTime
-        }
+        }*/
 
-        article.publicationDate = publicationDate.time
+        article.publicationDate = article.publicationTime
+//        article.publicationDate = publicationDate.time
 
         article.articleText = article.articleText
                                 ?.replace(Regex("(<br>)+"),"<br>")

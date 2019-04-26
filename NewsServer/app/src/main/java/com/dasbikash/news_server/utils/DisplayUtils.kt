@@ -234,6 +234,7 @@ object DisplayUtils {
         return str
     }
 
+    @Suppress("DEPRECATION")
     fun displayHtmlText(textView: TextView, text: String) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             textView.text = Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY)

@@ -29,7 +29,7 @@ interface NewsDataRepository{
 
     fun findArticleById(articleId:String):Article?
 
-    fun downloadArticlesByPage(page: Page,lastArticleId:String?=null):List<Article>
+    fun downloadArticlesByPageAfterLastArticle(page: Page,lastArticle:Article?):List<Article>
 
     companion object {
 

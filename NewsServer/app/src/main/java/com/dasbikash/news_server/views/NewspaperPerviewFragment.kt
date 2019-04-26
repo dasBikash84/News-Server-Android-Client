@@ -190,6 +190,7 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                             override fun onComplete() {}
                             override fun onNext(childPageList: Any) {
                                 if (childPageList is List<*>) {
+                                    @Suppress("UNCHECKED_CAST")
                                     holder.bind(page, childPageList as List<Page>, homeViewModel)
                                 }
                             }

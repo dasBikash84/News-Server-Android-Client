@@ -77,14 +77,14 @@ internal object SpringMVCNewsDataService : NewsDataService {
         return articles
     }
 
-    override fun getRawArticlesAfterLastId(page: Page, lastArticleId: String, articleRequestSize: Int): List<Article> {
+    override fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
 
         val lock = Object()
         val articles = mutableListOf<Article>()
         var dataServerException: DataServerException? = null
 
         springMVCWebService
-                .getArticlesAfterLastId(page.id, lastArticleId, articleRequestSize)
+                .getArticlesAfterLastId(page.id, lastArticle.id, articleRequestSize)
                 .enqueue(object : Callback<List<Article>?> {
                     override fun onFailure(call: Call<List<Article>?>, throwable: Throwable) {
                         dataServerException = DataServerNotAvailableExcepption(throwable)
