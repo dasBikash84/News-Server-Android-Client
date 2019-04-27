@@ -37,6 +37,8 @@ class FragmentArticlePreviewForPages : Fragment() {
 
     private lateinit var mPageListPreviewHolderRV:RecyclerView
 
+    private lateinit var mPagePreviewListAdapter: PagePreviewListAdapter
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_page_list_preview, container, false)
     }
@@ -54,12 +56,15 @@ class FragmentArticlePreviewForPages : Fragment() {
 
 //        Log.d("NpPerviewFragment", mPageList.map { "page: ${it.name} Np: ${it.newsPaperId} | " }.toList().toString()
 //                + "mArticlePreviewResId: ${mArticlePreviewResId}")
+        mPagePreviewListAdapter = PagePreviewListAdapter(mArticlePreviewResId!!,ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
 
-        val pagePreviewListAdapter = PagePreviewListAdapter(mArticlePreviewResId!!,ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
+        mPageListPreviewHolderRV.adapter = mPagePreviewListAdapter
+    }
 
-        mPageListPreviewHolderRV.adapter = pagePreviewListAdapter
+    override fun onResume() {
+        super.onResume()
 
-        pagePreviewListAdapter.submitList(mPageList.filter {
+        mPagePreviewListAdapter.submitList(mPageList.filter {
             @Suppress("SENSELESS_COMPARISON")
             it!=null
         }.toList())

@@ -281,8 +281,12 @@ internal object FirebaseRealtimeDBUtils {
                         synchronized(lock) { lock.notify() }
                     }
                 })
+        try {
+            synchronized(lock) { lock.wait() }
+        }catch (ex:InterruptedException){
+            ex.printStackTrace()
+        }
 
-        synchronized(lock) { lock.wait() }
         settingsServerException?.let { throw it }
 
         return lastUpdateTime

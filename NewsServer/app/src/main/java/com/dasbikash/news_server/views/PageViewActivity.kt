@@ -105,10 +105,11 @@ class PageViewActivity : AppCompatActivity(),
     private lateinit var mNewsDataRepository: NewsDataRepository
 
     private lateinit var mPage: Page
-    private lateinit var mNewspaper: Newspaper
     private lateinit var mLanguage: Language
 
     private var mIsPageOnFavList = false
+    private var mArticleLoadRunning = false
+    private var mWaitWindowShown = false
 
     private val mDisposable = CompositeDisposable()
     private val mArticleList = mutableListOf<Article>()
@@ -132,7 +133,6 @@ class PageViewActivity : AppCompatActivity(),
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(this)
 
         supportActionBar!!.setTitle(mPage.name)
-        loadMoreArticles()
 
         ViewModelProviders.of(this).get(PageViewViewModel::class.java)
                 .getArticleLiveDataForPage(mPage)
@@ -143,7 +143,114 @@ class PageViewActivity : AppCompatActivity(),
                         }
                     }
                 })
+        init()
 
+    }
+
+    private fun init(){
+        Observable.just(mPage)
+                .subscribeOn(Schedulers.io())
+                .map {
+                    if (!::mLanguage.isInitialized) {
+                        mLanguage = mAppSettingsRepository.getLanguageByPage(mPage)
+                    }
+                }
+                .subscribe()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshFavStatus()
+        loadMoreArticles()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mDisposable.clear()
+        removeWorkInProcessWindow()
+    }
+
+    override fun onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawer(GravityCompat.START)
+        } else {
+            if (!mWaitWindowShown) {
+                super.onBackPressed()
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_page_view_activity, menu)
+
+        menu.findItem(R.id.add_to_favourites_menu_item).setVisible(!mIsPageOnFavList)
+        menu.findItem(R.id.remove_from_favourites_menu_item).setVisible(mIsPageOnFavList)
+
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        if (!mWaitWindowShown) {
+            return when (item.itemId) {
+                R.id.add_to_favourites_menu_item -> {
+                    addPageToFavListAction()
+                    true
+                }
+                R.id.remove_from_favourites_menu_item -> {
+                    removePageFromFavListAction()
+                    true
+                }
+                R.id.change_text_font_menu_item -> {
+                    changeTextFontAction()
+                    true
+                }
+                else -> super.onOptionsItemSelected(item)
+            }
+        }
+        return false
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == LOG_IN_REQ_CODE) {
+            loadWorkInProcessWindow()
+            Observable.just(Pair(resultCode, data))
+                    .subscribeOn(Schedulers.io())
+                    .map { mUserSettingsRepository.processSignInRequestResult(it, this) }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(object : Observer<Pair<UserSettingsRepository.SignInResult, Throwable?>> {
+                        override fun onComplete() {
+                            actionAfterSuccessfulLogIn = null
+                            removeWorkInProcessWindow()
+                        }
+
+                        override fun onSubscribe(d: Disposable) {}
+                        override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult, Throwable?>) {
+                            when (processingResult.first) {
+                                UserSettingsRepository.SignInResult.SUCCESS -> {
+                                    showShortSnack("Welcome ${mUserSettingsRepository.getCurrentUserName()
+                                            ?: ""}")
+                                    actionAfterSuccessfulLogIn?.let {
+                                        it()
+                                    }
+                                }
+                                UserSettingsRepository.SignInResult.USER_ABORT -> showShortSnack("Log in aborted")
+                                UserSettingsRepository.SignInResult.SERVER_ERROR -> showShortSnack("Log in error. Details:${processingResult.second}")
+                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> showShortSnack("Error while User settings data saving. Details:${processingResult.second}")
+                            }
+                        }
+
+                        override fun onError(e: Throwable) {
+                            actionAfterSuccessfulLogIn = null
+                            showShortSnack("Error while User settings data saving. Error: ${e}")
+                            removeWorkInProcessWindow()
+                        }
+                    })
+        }
     }
 
     private fun initTextChangeViewComponents() {
@@ -153,11 +260,62 @@ class PageViewActivity : AppCompatActivity(),
         mTextSizeChangeMinusButton = findViewById(R.id.minus_text_size_change)
         mTextSizeChangeOkButton = findViewById(R.id.ok_text_size_change)
 
-        mTextSizeChangeFrame.setOnClickListener {}
+//        mTextSizeChangeFrame.setOnClickListener {}
         mTextSizeChangeCancelButton.setOnClickListener { changeTextFontAction() }
         mTextSizeChangePlusButton.setOnClickListener { incrementTextSize() }
         mTextSizeChangeMinusButton.setOnClickListener { decrementTextSize() }
         mTextSizeChangeOkButton.setOnClickListener { makeTextSizeEffective() }
+    }
+
+    private fun initViewPager() {
+
+        mPageViewContainer = findViewById(R.id.page_view_container)
+        mArticleViewContainer = findViewById(R.id.article_view_container)
+        mArticleLoadingProgressBarMiddle = findViewById(R.id.article_loading_progress_bar_middle)
+        mArticleLoadingProgressBarMiddle.setOnClickListener { }
+
+        mFragmentStatePagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager) {
+            override fun getItemPosition(fragment: Any): Int {
+                if (mTextSizeChangeFrame.visibility == View.GONE) {
+                    return PagerAdapter.POSITION_UNCHANGED
+                } else {
+                    return PagerAdapter.POSITION_NONE
+                }
+            }
+
+            override fun getItem(position: Int): Fragment {
+                if (position == (mArticleList.size - 1)) {
+                    loadMoreArticles()
+                }
+                val fragment = ArticleViewFragment.getInstance(
+                        mArticleList.get(position).id, mLanguage, transTextSize)
+                return fragment
+            }
+
+            override fun getCount(): Int {
+                return mArticleList.size
+            }
+        }
+        mArticleViewContainer.adapter = mFragmentStatePagerAdapter
+        mArticleViewContainer.setCurrentItem(0)
+    }
+
+    private fun initDrawerComponents() {
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        mDrawerLayout = findViewById(R.id.drawer_layout)
+        val toggle = ActionBarDrawerToggle(
+                this, mDrawerLayout, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close)
+        mDrawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+        findViewById<NavigationView>(R.id.nav_view).setOnClickListener(View.OnClickListener { closeNavigationDrawer() })
+
+        mArticleLoadingProgressBarDrawerHolder = mDrawerLayout.findViewById(R.id.article_loading_progress_bar_drawer_holder)
+        mArticlePreviewListHolder = mDrawerLayout.findViewById(R.id.article_preview_list_holder)
+        mLoadMoreArticleButton = mDrawerLayout.findViewById(R.id.load_more_articel_button)
+
+        mArticleLoadingProgressBarDrawerHolder.setOnClickListener { }
+        mLoadMoreArticleButton.setOnClickListener { loadMoreArticles() }
     }
 
     private fun makeTextSizeEffective() {
@@ -220,41 +378,7 @@ class PageViewActivity : AppCompatActivity(),
         }
     }
 
-    private fun initViewPager() {
-
-        mPageViewContainer = findViewById(R.id.page_view_container)
-        mArticleViewContainer = findViewById(R.id.article_view_container)
-        mArticleLoadingProgressBarMiddle = findViewById(R.id.article_loading_progress_bar_middle)
-        mArticleLoadingProgressBarMiddle.setOnClickListener { }
-
-        mFragmentStatePagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager) {
-            override fun getItemPosition(fragment: Any): Int {
-                if (mTextSizeChangeFrame.visibility == View.GONE) {
-                    return PagerAdapter.POSITION_UNCHANGED
-                } else {
-                    return PagerAdapter.POSITION_NONE
-                }
-            }
-
-            override fun getItem(position: Int): Fragment {
-                if (position == (mArticleList.size - 1)) {
-                    loadMoreArticles()
-                }
-                val fragment = ArticleViewFragment.getInstance(
-                        mArticleList.get(position).id, mLanguage, transTextSize)
-                return fragment
-            }
-
-            override fun getCount(): Int {
-                return mArticleList.size
-            }
-        }
-        mArticleViewContainer.adapter = mFragmentStatePagerAdapter
-        mArticleViewContainer.setCurrentItem(0)
-    }
-
-    private var mArticleLoadRunning = false
-    fun loadMoreArticles() {
+    private fun loadMoreArticles() {
 
         if (mArticleLoadRunning) return
 
@@ -333,37 +457,14 @@ class PageViewActivity : AppCompatActivity(),
         }
     }
 
-    fun showShortSnack(message: String) {
+    private fun showShortSnack(message: String) {
         Snackbar
                 .make(mPageViewContainer, message, Snackbar.LENGTH_SHORT)
                 .show()
     }
 
-    private fun initDrawerComponents() {
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        mDrawerLayout = findViewById(R.id.drawer_layout)
-        val toggle = ActionBarDrawerToggle(
-                this, mDrawerLayout, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close)
-        mDrawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-        findViewById<NavigationView>(R.id.nav_view).setOnClickListener(View.OnClickListener { closeNavigationDrawer() })
-
-        mArticleLoadingProgressBarDrawerHolder = mDrawerLayout.findViewById(R.id.article_loading_progress_bar_drawer_holder)
-        mArticlePreviewListHolder = mDrawerLayout.findViewById(R.id.article_preview_list_holder)
-        mLoadMoreArticleButton = mDrawerLayout.findViewById(R.id.load_more_articel_button)
-
-        mArticleLoadingProgressBarDrawerHolder.setOnClickListener { }
-        mLoadMoreArticleButton.setOnClickListener { loadMoreArticles() }
-    }
-
-    fun closeNavigationDrawer() {
+    private fun closeNavigationDrawer() {
         mDrawerLayout.closeDrawer(GravityCompat.START)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        refreshFavStatus()
     }
 
     private fun refreshFavStatus(doOnNext: () -> Unit = {}) {
@@ -385,58 +486,6 @@ class PageViewActivity : AppCompatActivity(),
                             override fun onError(e: Throwable) {}
                         })
         )
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mDisposable.clear()
-    }
-
-    override fun onBackPressed() {
-        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-            mDrawerLayout.closeDrawer(GravityCompat.START)
-        } else {
-            if (!mWaitWindowShown) {
-                super.onBackPressed()
-            }
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_page_view_activity, menu)
-
-        menu.findItem(R.id.add_to_favourites_menu_item).setVisible(!mIsPageOnFavList)
-        menu.findItem(R.id.remove_from_favourites_menu_item).setVisible(mIsPageOnFavList)
-
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        if (!mWaitWindowShown) {
-            return when (item.itemId) {
-                R.id.add_to_favourites_menu_item -> {
-                    addPageToFavListAction()
-                    true
-                }
-                R.id.remove_from_favourites_menu_item -> {
-                    removePageFromFavListAction()
-                    true
-                }
-                R.id.change_text_font_menu_item -> {
-                    changeTextFontAction()
-                    true
-                }
-                else -> super.onOptionsItemSelected(item)
-            }
-        }
-        return false
-    }
-
-    private enum class PAGE_FAV_STATUS_CHANGE_ACTION {
-        ADD, REMOVE
     }
 
     private fun changePageFavStatus(action: PAGE_FAV_STATUS_CHANGE_ACTION) {
@@ -529,46 +578,6 @@ class PageViewActivity : AppCompatActivity(),
     private fun addPageToFavListAction() =
             changePageFavStatus(PAGE_FAV_STATUS_CHANGE_ACTION.ADD)
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == LOG_IN_REQ_CODE) {
-            loadWorkInProcessWindow()
-            Observable.just(Pair(resultCode, data))
-                    .subscribeOn(Schedulers.io())
-                    .map { mUserSettingsRepository.processSignInRequestResult(it, this) }
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(object : Observer<Pair<UserSettingsRepository.SignInResult, Throwable?>> {
-                        override fun onComplete() {
-                            actionAfterSuccessfulLogIn = null
-                            removeWorkInProcessWindow()
-                        }
-
-                        override fun onSubscribe(d: Disposable) {}
-                        override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult, Throwable?>) {
-                            when (processingResult.first) {
-                                UserSettingsRepository.SignInResult.SUCCESS -> {
-                                    showShortSnack("Welcome ${mUserSettingsRepository.getCurrentUserName()
-                                            ?: ""}")
-                                    actionAfterSuccessfulLogIn?.let {
-                                        it()
-                                    }
-                                }
-                                UserSettingsRepository.SignInResult.USER_ABORT -> showShortSnack("Log in aborted")
-                                UserSettingsRepository.SignInResult.SERVER_ERROR -> showShortSnack("Log in error. Details:${processingResult.second}")
-                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> showShortSnack("Error while User settings data saving. Details:${processingResult.second}")
-                            }
-                        }
-
-                        override fun onError(e: Throwable) {
-                            actionAfterSuccessfulLogIn = null
-                            showShortSnack("Error while User settings data saving. Error: ${e}")
-                            removeWorkInProcessWindow()
-                        }
-                    })
-        }
-    }
-
     var actionAfterSuccessfulLogIn: (() -> Unit)? = null
 
     override fun launchSignInActivity(doOnSignIn: () -> Unit) {
@@ -578,16 +587,22 @@ class PageViewActivity : AppCompatActivity(),
         }
         actionAfterSuccessfulLogIn = doOnSignIn
     }
-
-    var mWaitWindowShown = false
     override fun loadWorkInProcessWindow() {
-        showProgressBars()
-        mWaitWindowShown = true
+        if (!mWaitWindowShown) {
+            showProgressBars()
+            mWaitWindowShown = true
+        }
     }
 
     override fun removeWorkInProcessWindow() {
-        mWaitWindowShown = false
-        hideProgressBars()
+        if(mWaitWindowShown) {
+            mWaitWindowShown = false
+            hideProgressBars()
+        }
+    }
+
+    private enum class PAGE_FAV_STATUS_CHANGE_ACTION {
+        ADD, REMOVE
     }
 }
 

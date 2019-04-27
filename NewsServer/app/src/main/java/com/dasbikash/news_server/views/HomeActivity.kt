@@ -221,6 +221,11 @@ class HomeActivity : AppCompatActivity(),
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        disableBackPressFlag = false
+    }
+
     /**
      * Trigger a navigation to the specified fragment, optionally adding a transaction to the back
      * stack to make this navigation reversible.

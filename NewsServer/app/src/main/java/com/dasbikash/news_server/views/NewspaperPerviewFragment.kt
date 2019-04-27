@@ -83,6 +83,10 @@ class NewspaperPerviewFragment : Fragment() {
                 }
             }
         })
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         mDisposable.add(
                 Observable.just(true)

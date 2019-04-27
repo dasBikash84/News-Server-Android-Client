@@ -44,6 +44,7 @@ class ArticleViewFragment : Fragment(){
 
     private lateinit var mLanguage: Language
     private lateinit var mArticle: Article
+    private lateinit var mArticleId:String
     private var mArticleTextSize:Int? = null
     private var mTransientTextSize:Int? = null
 
@@ -62,18 +63,30 @@ class ArticleViewFragment : Fragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val articleId:String = arguments!!.getString(ARG_ARTICLE_ID)!!
+        mArticleId = arguments!!.getString(ARG_ARTICLE_ID)!!
         mLanguage = arguments!!.getSerializable(ARG_LANGUAGE) as Language
         mTransientTextSize = arguments!!.getInt(ARG_TRANSIENT_TEXT_SIZE)
 
         findViewItems(view)
+    }
+
+    private fun findViewItems(view: View) {
+        mArticleTitle = view.findViewById(R.id.article_title)
+        mArticlePublicationText = view.findViewById(R.id.article_publication_date_text)
+        mArticleImageScroller = view.findViewById(R.id.article_image_scroller)
+        mArticleImageHolder = view.findViewById(R.id.article_image_holder)
+        mArticleText = view.findViewById(R.id.article_text)
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         mDisposable.add(
-                Observable.just(articleId)
+                Observable.just(mArticleId)
                         .subscribeOn(Schedulers.io())
                         .map {
                             val newsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
-                            mArticle = newsDataRepository.findArticleById(articleId)!!
+                            mArticle = newsDataRepository.findArticleById(mArticleId)!!
                             mArticle.imageLinkList =
                                     mArticle.imageLinkList
                                             ?.asSequence()
@@ -113,14 +126,6 @@ class ArticleViewFragment : Fragment(){
                             }
                         })
         )
-    }
-
-    private fun findViewItems(view: View) {
-        mArticleTitle = view.findViewById(R.id.article_title)
-        mArticlePublicationText = view.findViewById(R.id.article_publication_date_text)
-        mArticleImageScroller = view.findViewById(R.id.article_image_scroller)
-        mArticleImageHolder = view.findViewById(R.id.article_image_holder)
-        mArticleText = view.findViewById(R.id.article_text)
     }
 
     override fun onPause() {
