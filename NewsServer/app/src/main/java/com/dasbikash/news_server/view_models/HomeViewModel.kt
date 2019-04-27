@@ -14,7 +14,6 @@
 package com.dasbikash.news_server.view_models
 
 import android.app.Application
-import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -38,10 +37,6 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
     private val mAppSettingsRepository: AppSettingsRepository
     private val mUserSettingsRepository: UserSettingsRepository
     private val mNewsDataRepository:NewsDataRepository
-    private val mMostVisitedPages: LiveData<List<Page>>? = null
-    private val mFavouritePages: LiveData<List<Page>>? = null
-    private val mActiveNewspapers: LiveData<List<Newspaper>>? = null
-    private val mPageGroups: LiveData<List<PageGroup>>? = null
 
     private val disposable:CompositeDisposable = CompositeDisposable();
 
@@ -91,12 +86,12 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
                         Log.d(TAG,"Waiting for page: ${it.second.name}")
                         Thread.sleep(Random(System.currentTimeMillis()).nextLong(100L))
                     }while (currentArticleRequestCount.get() >= MAX_PARALLEL_ARTICLE_REQUEST)
-                    Log.d(TAG+"1","Going to increment count for page: ${it.second.name}")
+//                    Log.d(TAG+"1","Going to increment count for page: ${it.second.name}")
                     currentArticleRequestCount.incrementAndGet()
-                    Log.d(TAG+"1","Request send for page: ${it.second.name}")
+//                    Log.d(TAG+"1","Request send for page: ${it.second.name}")
                     val article = mNewsDataRepository.getLatestArticleByPage(it.second)
-                    Log.d(TAG+"1","Response received for page: ${it.second.name}")
-                    Log.d(TAG+"1","Going to decrement count for page: ${it.second.name}")
+//                    Log.d(TAG+"1","Response received for page: ${it.second.name}")
+//                    Log.d(TAG+"1","Going to decrement count for page: ${it.second.name}")
                     currentArticleRequestCount.decrementAndGet()
                     article?.let { return@map Pair(input.first,it) }
                     Pair(it.first,input.third)

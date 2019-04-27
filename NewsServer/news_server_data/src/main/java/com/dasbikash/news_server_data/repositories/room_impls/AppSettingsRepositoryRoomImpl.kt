@@ -14,6 +14,7 @@
 package com.dasbikash.news_server_data.repositories.room_impls
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
@@ -41,6 +42,7 @@ class AppSettingsRepositoryRoomImpl internal constructor(context: Context): AppS
     @Throws(OnMainThreadException::class, NoInternertConnectionException::class)
     override fun loadAppSettings(context: Context) {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        Log.d("DataService","loadAppSettings")
         val appSettings = mAppSettingsDataService.getAppSettings(context)
 
         mDatabase.nukeAppSettings()
@@ -52,21 +54,24 @@ class AppSettingsRepositoryRoomImpl internal constructor(context: Context): AppS
         mDatabase.pageGroupDao.addPageGroups(ArrayList(appSettings.page_groups?.values))
 
         val settingUpdateTimes = ArrayList(appSettings.update_time?.values)
-        mAppSettingsDataService.saveLocalAppSettingsUpdateTime(context, settingUpdateTimes[settingUpdateTimes.size - 1])
+        mAppSettingsDataService.saveLocalAppSettingsUpdateTime(context, settingUpdateTimes.max()!!)
     }
 
     override fun isAppSettingsUpdated(context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        Log.d("DataService","isAppSettingsUpdated")
         val localAppSettingsUpdateTime = mAppSettingsDataService.getLocalAppSettingsUpdateTime(context)
         val appSettingsUpdateTime = mAppSettingsDataService.getServerAppSettingsUpdateTime(context)
+        Log.d("DataService","localAppSettingsUpdateTime:${localAppSettingsUpdateTime}")
+        Log.d("DataService","appSettingsUpdateTime:${appSettingsUpdateTime}")
         return appSettingsUpdateTime > localAppSettingsUpdateTime
     }
 
     override fun isAppSettingsDataLoaded(): Boolean {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        Log.d("DataService","isAppSettingsDataLoaded")
         return getLanguageCount() > 0 && getCountryCount() > 0 &&
-                getNewsPaperCount() > 0 && getPageCount() > 0 &&
-                getPageGroupCount() > 0
+                getNewsPaperCount() > 0 && getPageCount() > 0
     }
 
     override fun getNewsPapers():LiveData<List<Newspaper>>{

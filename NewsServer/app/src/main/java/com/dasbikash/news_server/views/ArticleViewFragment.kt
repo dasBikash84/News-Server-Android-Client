@@ -44,14 +44,11 @@ class ArticleViewFragment : Fragment(){
 
     private lateinit var mLanguage: Language
     private lateinit var mArticle: Article
-    private var mTotalArticleCount: Int? = null
-    private var mCurrentArticlePosition: Int? = null
     private var mArticleTextSize:Int? = null
     private var mTransientTextSize:Int? = null
 
     private lateinit var mArticleTitle:AppCompatTextView
     private lateinit var mArticlePublicationText:AppCompatTextView
-    private lateinit var mArticlePosition:AppCompatTextView
     private lateinit var mArticleImageScroller: NestedScrollView
     private lateinit var mArticleText:AppCompatTextView
     private lateinit var mArticleImageHolder:RecyclerView
@@ -67,8 +64,6 @@ class ArticleViewFragment : Fragment(){
         super.onViewCreated(view, savedInstanceState)
         val articleId:String = arguments!!.getString(ARG_ARTICLE_ID)!!
         mLanguage = arguments!!.getSerializable(ARG_LANGUAGE) as Language
-        mTotalArticleCount = arguments!!.getInt(ARG_TOTAL_ARTICLE_COUNT)
-        mCurrentArticlePosition = arguments!!.getInt(ARG_CURRENT_ARTICLE_POSITION)
         mTransientTextSize = arguments!!.getInt(ARG_TRANSIENT_TEXT_SIZE)
 
         findViewItems(view)
@@ -102,7 +97,6 @@ class ArticleViewFragment : Fragment(){
 
                                 mArticleTitle.text = mArticle.title
                                 mArticlePublicationText.text = dateString
-                                refreshArticlePositionText()
                                 DisplayUtils.displayHtmlText(mArticleText,mArticle.articleText!!)
 
                                 if(mArticle.imageLinkList != null && mArticle.imageLinkList!!.size > 0){
@@ -121,16 +115,9 @@ class ArticleViewFragment : Fragment(){
         )
     }
 
-    fun refreshArticlePositionText() {
-        mArticlePosition.text = DisplayUtils.getArticlePositionString(
-                        "${mCurrentArticlePosition} / ${mTotalArticleCount}",
-                                        mLanguage)
-    }
-
     private fun findViewItems(view: View) {
         mArticleTitle = view.findViewById(R.id.article_title)
         mArticlePublicationText = view.findViewById(R.id.article_publication_date_text)
-        mArticlePosition = view.findViewById(R.id.article_position_text)
         mArticleImageScroller = view.findViewById(R.id.article_image_scroller)
         mArticleImageHolder = view.findViewById(R.id.article_image_holder)
         mArticleText = view.findViewById(R.id.article_text)
@@ -145,18 +132,13 @@ class ArticleViewFragment : Fragment(){
 
         val ARG_ARTICLE_ID = "com.dasbikash.news_server.views.ArticleViewFragment.ARG_ARTICLE_ID"
         val ARG_LANGUAGE = "com.dasbikash.news_server.views.ArticleViewFragment.ARG_LANGUAGE"
-        val ARG_TOTAL_ARTICLE_COUNT = "com.dasbikash.news_server.views.ArticleViewFragment.ARG_TOTAL_ARTICLE_COUNT"
-        val ARG_CURRENT_ARTICLE_POSITION = "com.dasbikash.news_server.views.ArticleViewFragment.ARG_CURRENT_ARTICLE_POSITION"
         val ARG_TRANSIENT_TEXT_SIZE = "com.dasbikash.news_server.views.ArticleViewFragment.ARG_TRANSIENT_TEXT_SIZE"
         val TAG = "ArticleViewFragment"
 
-        fun getInstance(articleId:String,language: Language,totalArticleCount:Int,
-                        currentArticlePosition:Int,transTextSize:Int): ArticleViewFragment {
+        fun getInstance(articleId:String,language: Language,transTextSize:Int): ArticleViewFragment {
             val args = Bundle()
             args.putString(ARG_ARTICLE_ID, articleId)
             args.putSerializable(ARG_LANGUAGE, language)
-            args.putInt(ARG_TOTAL_ARTICLE_COUNT, totalArticleCount)
-            args.putInt(ARG_CURRENT_ARTICLE_POSITION, currentArticlePosition)
             args.putInt(ARG_TRANSIENT_TEXT_SIZE, transTextSize)
             val fragment = ArticleViewFragment()
             fragment.setArguments(args)

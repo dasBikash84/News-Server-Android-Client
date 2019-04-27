@@ -13,11 +13,9 @@
 
 package com.dasbikash.news_server_data.database.daos
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.models.room_entity.PageArticleFetchStatus
 
 @Dao
 internal interface PageDao {
@@ -44,5 +42,9 @@ internal interface PageDao {
     @Query("SELECT * FROM Page WHERE name LIKE :nameContent")
     fun findByNameContent(nameContent: String): List<Page>
 
+    @Query("UPDATE Page SET articleFetchStatus='${PageArticleFetchStatus.NOT_SYNCED}'")
+    fun markAllNotSynced()
 
+    @Update
+    fun save(page: Page)
 }

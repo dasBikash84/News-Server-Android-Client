@@ -121,9 +121,4 @@ object CloudFireStoreNewsDataService : NewsDataService {
         return articles
 
     }
-
-    override fun init(context: Context) {
-        super.init(context)
-
-    }
 }

@@ -17,7 +17,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -134,7 +133,48 @@ class PageViewActivity : AppCompatActivity(),
         mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(this)
 
-        loadMoreArticles()
+        mDisposable.add(
+                Observable.just(mPage)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            mNewspaper = mAppSettingsRepository.getNewspaperByPage(mPage)
+                            mLanguage = mAppSettingsRepository.getLanguageByPage(mPage)
+                            mNewsDataRepository.getArticlesByPage(mPage)
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<List<Article>>() {
+                            override fun onComplete() {
+                                removeWorkInProcessWindow()//hideProgressBars()
+                            }
+
+                            override fun onNext(articleList: List<Article>) {
+                                if(!articleList.isEmpty()) {
+                                    postNewArticlesForDisplay(articleList)
+                                }
+                                loadMoreArticles()
+                            }
+
+                            override fun onError(throwable: Throwable) {
+                                removeWorkInProcessWindow()//hideProgressBars()
+                                when {
+                                    throwable is DataNotFoundException -> {
+                                        mHaveMoreArticle.set()
+                                        mLoadMoreArticleButton.visibility = View.GONE
+                                        showShortSnack("No more articles to display.")
+                                    }
+                                    throwable is DataServerNotAvailableExcepption -> {
+                                        showShortSnack("Remote server error! Please try again later.")
+                                    }
+                                    throwable is NoInternertConnectionException -> {
+                                        showShortSnack("No internet connection!!!")
+                                    }
+                                    else -> {
+                                        throw throwable
+                                    }
+                                }
+                            }
+                        })
+        )
         supportActionBar!!.setTitle(mPage.name)
     }
 
@@ -233,8 +273,7 @@ class PageViewActivity : AppCompatActivity(),
                     loadMoreArticles()
                 }
                 val fragment = ArticleViewFragment.getInstance(
-                                mArticleList.get(position).id,mLanguage, mArticleList.size,
-                                position + 1, transTextSize)
+                        mArticleList.get(position).id, mLanguage, transTextSize)
                 return fragment
             }
 
@@ -246,43 +285,26 @@ class PageViewActivity : AppCompatActivity(),
         mArticleViewContainer.setCurrentItem(0)
     }
 
-    fun getArticleDownloaderObservable(): Observable<List<Article>> {
-        return Observable.just(mPage)
-                .subscribeOn(Schedulers.io())
-                .map {
-                    if (!::mNewspaper.isInitialized) {
-                        mNewspaper = mAppSettingsRepository.getNewspaperByPage(mPage)
-                    }
-                    if (!::mLanguage.isInitialized) {
-                        mLanguage = mAppSettingsRepository.getLanguageByPage(mPage)
-                    }
-                    var lastArticle: Article? = null
-                    synchronized(mArticleList) {
-                        if (!mArticleList.isEmpty()) {
-                            lastArticle = mArticleList.last()
-                            Log.d(TAG, "lastArticleId: ${lastArticle!!.id}")
-                        }
-                    }
-                    mNewsDataRepository.downloadArticlesByPageAfterLastArticle(mPage, lastArticle)
-                }
-    }
-
+    private var mArticleLoadRunning = false
     fun loadMoreArticles() {
+
+        if (mArticleLoadRunning) return
 
         if (!mHaveMoreArticle.get()) {
 
             loadWorkInProcessWindow()//showProgressBars()
-
+            mArticleLoadRunning = true
             mDisposable.add(
-                    getArticleDownloaderObservable()
+                    Observable.just(mPage)
+                            .subscribeOn(Schedulers.io())
                             .map {
-                                val newList = mNewsDataRepository.getArticlesByPage(mPage)
-                                Log.d(TAG, "newList: ${newList.size}")
-                                newList
+                                mNewsDataRepository.getMoreArticlesByPage(mPage)
+                                mNewsDataRepository.getArticlesByPage(mPage)
                             }
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribeWith(object : DisposableObserver<List<Article>>() {
                                 override fun onComplete() {
+                                    mArticleLoadRunning = false
                                     removeWorkInProcessWindow()//hideProgressBars()
                                 }
 
@@ -291,6 +313,7 @@ class PageViewActivity : AppCompatActivity(),
                                 }
 
                                 override fun onError(throwable: Throwable) {
+                                    mArticleLoadRunning = false
                                     removeWorkInProcessWindow()//hideProgressBars()
                                     when {
                                         throwable is DataNotFoundException -> {

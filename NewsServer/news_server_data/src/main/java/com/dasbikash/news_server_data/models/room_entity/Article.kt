@@ -36,8 +36,6 @@ data class Article(
         var newsPaperId: String?=null, //Have to fill after fetch from server
         var title: String?=null,
         var articleText: String?=null,
-//        @Ignore
-//        var modificationTime: Long = 0L,
         @Ignore
         var publicationTime: Date? = null,
         @Expose(serialize = false, deserialize = false)

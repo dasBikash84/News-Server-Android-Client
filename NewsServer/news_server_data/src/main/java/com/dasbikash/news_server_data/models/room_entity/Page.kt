@@ -36,7 +36,10 @@ data class Page(
         @Ignore
         var active: Boolean = false,
         @Ignore
-        var linkFormat:String? = null
+        var linkFormat:String? = null,
+        @Expose(serialize = false,deserialize = false)
+        @com.google.firebase.firestore.Exclude
+        var articleFetchStatus: String = PageArticleFetchStatus.NOT_SYNCED
 ): Parcelable {
     @Exclude
     var hasChild:Boolean = false
@@ -102,6 +105,10 @@ data class Page(
     override fun toString(): String {
         return "Page(id='$id', newsPaperId=$newsPaperId, name=$name)"
     }
+}
 
-
+object PageArticleFetchStatus{
+    const val SYNCED_WITH_SERVER: String ="synced"
+    const val NOT_SYNCED: String ="notSynced"
+    const val END_REACHED: String ="atEnd"
 }

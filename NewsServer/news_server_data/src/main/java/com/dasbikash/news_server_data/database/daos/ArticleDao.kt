@@ -22,7 +22,7 @@ import com.dasbikash.news_server_data.models.room_entity.Article
 @Dao
 internal interface ArticleDao {
 
-    @Query("SELECT * FROM Article WHERE pageId=:pageId")
+    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationDate DESC")
     fun findAllByPageId(pageId: String): List<Article>
 
     @Query("SELECT * FROM Article WHERE id=:id")
@@ -37,6 +37,12 @@ internal interface ArticleDao {
     @Query("DELETE FROM Article")
     fun nukeTable()
 
-    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationDate DESC,created DESC  LIMIT 1")
-    fun getLatestArticleByPageId(pageId: String):Article
+    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationDate DESC limit 1")
+    fun getLatestArticleByPageId(pageId: String):Article?
+
+    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationDate ASC limit 1")
+    fun getLastArticleForSyncedPage(pageId: String): Article?
+
+    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY created DESC limit 1")
+    fun getLastArticleForDesyncedPage(pageId: String): Article?
 }

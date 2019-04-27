@@ -53,6 +53,4 @@ internal interface NewsDataService {
         }
         return articleList
     }
-
-    fun init(context: Context){}
 }

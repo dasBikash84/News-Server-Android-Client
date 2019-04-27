@@ -14,17 +14,15 @@
 package com.dasbikash.news_server_data.repositories.room_impls
 
 import android.content.Context
-import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
-import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.models.room_entity.PageArticleFetchStatus
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 
 class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDataRepository() {
 
-    private val newsDataService: NewsDataService = DataServiceImplProvider.getNewsDataServiceImpl()
     private val newsServerDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
 
     private val TAG = "NewsDataRepository"
@@ -32,20 +30,6 @@ class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDa
     override fun getLatestArticleByPageFromLocalDb(page: Page): Article? {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         return newsServerDatabase.articleDao.getLatestArticleByPageId(page.id)
-    }
-
-    override fun getLatestArticleByPage(page: Page): Article? {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-
-        newsDataService.getLatestArticlesByPage(page, 1).apply {
-            if (this.size > 0) {
-                val article = this.first()
-                newsServerDatabase.articleDao.addArticles(article)
-                return article
-            }
-        }
-
-        return null
     }
 
     override fun getArticlesByPage(page: Page):List<Article>{
@@ -57,22 +41,32 @@ class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDa
         return newsServerDatabase.articleDao.findById(articleId)
     }
 
-    override fun downloadArticlesByPageAfterLastArticle(page: Page, lastArticle:Article?):List<Article>{
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-
-        val articleList:List<Article>
-
-        if (lastArticle != null){
-            articleList = newsDataService.getArticlesAfterLastArticle(page,lastArticle)
-        }else{
-            articleList = newsDataService.getLatestArticlesByPage(page)
-        }
-        newsServerDatabase.articleDao.addArticles(articleList)
-        return articleList
+    override fun setPageAsNotSynced(page: Page) {
+        page.articleFetchStatus = PageArticleFetchStatus.NOT_SYNCED
+        newsServerDatabase.pageDao.save(page)
     }
 
-    override fun init(context: Context) {
-        super.init(context)
-        newsDataService.init(context,newsServerDatabase)
+    override fun setPageAsSynced(page: Page) {
+        page.articleFetchStatus = PageArticleFetchStatus.SYNCED_WITH_SERVER
+        newsServerDatabase.pageDao.save(page)
+    }
+
+    override fun setPageAsEndReached(page: Page) {
+        page.articleFetchStatus = PageArticleFetchStatus.END_REACHED
+        newsServerDatabase.pageDao.save(page)
+    }
+
+    override fun insertArticles(articles: List<Article>) {
+        newsServerDatabase.articleDao.addArticles(articles)
+    }
+
+    override fun getLastArticle(page: Page): Article? {
+        when(page.articleFetchStatus){
+            PageArticleFetchStatus.SYNCED_WITH_SERVER ->
+                    { return newsServerDatabase.articleDao.getLastArticleForSyncedPage(page.id) }
+            PageArticleFetchStatus.NOT_SYNCED->
+                    { return newsServerDatabase.articleDao.getLastArticleForDesyncedPage(page.id) }
+            else -> return null
+        }
     }
 }

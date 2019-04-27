@@ -28,7 +28,7 @@ abstract class AppSettingsRepository{
     protected abstract fun loadAppSettings(context: Context)
 
     fun initAppSettings(context: Context){
-        if (isAppSettingsDataLoaded() || isAppSettingsUpdated(context)) {
+        if (!isAppSettingsDataLoaded() || isAppSettingsUpdated(context)) {
             loadAppSettings(context)
         }
     }
