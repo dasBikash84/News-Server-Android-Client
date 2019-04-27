@@ -17,6 +17,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
@@ -70,6 +71,7 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
     }
 
     fun getLatestArticleProvider(requestPayload:Pair<UUID,Page>):Observable<Pair<UUID,Article?>>{
+        var amDisposed = false
         return Observable.just(requestPayload)
                 .subscribeOn(Schedulers.io())
                 .map {
@@ -84,12 +86,26 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
                     }
                     do {
                         Log.d(TAG,"Waiting for page: ${it.second.name}")
-                        Thread.sleep(Random(System.currentTimeMillis()).nextLong(100L))
+                        try {
+                            Thread.sleep(Random(System.currentTimeMillis()).nextLong(100L))
+                        }catch (ex:InterruptedException){
+                            ex.printStackTrace()
+                        }
                     }while (currentArticleRequestCount.get() >= MAX_PARALLEL_ARTICLE_REQUEST)
 //                    Log.d(TAG+"1","Going to increment count for page: ${it.second.name}")
                     currentArticleRequestCount.incrementAndGet()
 //                    Log.d(TAG+"1","Request send for page: ${it.second.name}")
-                    val article = mNewsDataRepository.getLatestArticleByPage(it.second)
+                    var article:Article? = null
+                    try {
+                        article = mNewsDataRepository.getLatestArticleByPage(it.second)
+                    }catch (ex:InterruptedException){
+                        ex.printStackTrace()
+                    }catch (ex:DataNotFoundException){
+                        ex.printStackTrace()
+                        if (!amDisposed){
+                            throw ex
+                        }
+                    }
 //                    Log.d(TAG+"1","Response received for page: ${it.second.name}")
 //                    Log.d(TAG+"1","Going to decrement count for page: ${it.second.name}")
                     currentArticleRequestCount.decrementAndGet()
@@ -99,7 +115,9 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
                     Log.d(TAG+"1","decrementAndGet after error:${it::class.java.canonicalName}")
                     currentArticleRequestCount.decrementAndGet()
                     throw it
-                }
+                }.doOnDispose({
+                    amDisposed = true
+                })
     }
 
 

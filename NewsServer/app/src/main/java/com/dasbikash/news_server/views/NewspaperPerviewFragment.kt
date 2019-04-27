@@ -101,7 +101,6 @@ class NewspaperPerviewFragment : Fragment() {
                             mListAdapter.submitList(it.toList())
                         })
         )
-
     }
 
     override fun onPause() {
@@ -128,7 +127,20 @@ class NewspaperPerviewFragment : Fragment() {
 class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                                 val appSettingsRepository: AppSettingsRepository,
                                 val homeViewModel: HomeViewModel) :
-        ListAdapter<Page, PagePreviewHolder>(PageDiffCallback) {
+        ListAdapter<Page, PagePreviewHolder>(PageDiffCallback),DefaultLifecycleObserver {
+
+    init {
+        lifecycleOwner.lifecycle.addObserver(this)
+    }
+
+    override fun onPause(owner: LifecycleOwner) {
+        disposable.clear()
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        disposable.clear()
+    }
+
 
     val childPageMap = mutableMapOf<Page, List<Page>>()
 
@@ -163,8 +175,7 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagePreviewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_child_page_list_preview, parent, false)
-        val holder = PagePreviewHolder(view)
-        lifecycleOwner.lifecycle.addObserver(holder)
+        val holder = PagePreviewHolder(lifecycleOwner,view)
         return holder
     }
 
@@ -182,7 +193,11 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                                         return@map childPageMap.get(it)
                                     }
                                 }
-                                Thread.sleep(100L)
+                                try {
+                                    Thread.sleep(10L)
+                                }catch (ex:InterruptedException){
+                                    ex.printStackTrace()
+                                }
                             } while (true)
                         }
                         .observeOn(AndroidSchedulers.mainThread())
@@ -194,7 +209,6 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                                     holder.bind(page, childPageList as List<Page>, homeViewModel)
                                 }
                             }
-
                             override fun onError(e: Throwable) {}
                         })
         )
@@ -205,11 +219,6 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
         holder.active = false
     }
 
-    override fun onFailedToRecycleView(holder: PagePreviewHolder): Boolean {
-        lifecycleOwner.lifecycle.removeObserver(holder)
-        return super.onFailedToRecycleView(holder)
-    }
-
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         disposable.clear()
@@ -217,27 +226,7 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
 
 }
 
-class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), DefaultLifecycleObserver {
-
-    override fun onPause(owner: LifecycleOwner) {
-        Log.d("NpPerviewFragment", "onPause: active = false for page:${mPage.name}")
-        active = false
-    }
-
-    override fun onStop(owner: LifecycleOwner) {
-        Log.d("NpPerviewFragment", "onStop: active = false for page:${mPage.name}")
-        active = false
-    }
-
-    override fun onDestroy(owner: LifecycleOwner) {
-        Log.d("NpPerviewFragment", "onDestroy: active = false for page:${mPage.name}")
-        active = false
-    }
-
-    override fun onResume(owner: LifecycleOwner) {
-        Log.d("NpPerviewFragment", "onResume: active = true at PagePreviewHolder")
-        active = true
-    }
+class PagePreviewHolder(val lifecycleOwner: LifecycleOwner,itemView: View) : RecyclerView.ViewHolder(itemView){
 
     companion object {
         val TAG = "NpPerviewFragment"
@@ -267,6 +256,7 @@ class PagePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), Def
         }
 
         val pagePreviewListAdapter = PagePreviewListAdapter(articlePreviewResId, homeViewModel)
+        lifecycleOwner.lifecycle.addObserver(pagePreviewListAdapter)
         mPageListPreviewHolderRV.adapter = pagePreviewListAdapter
         pagePreviewListAdapter.submitList(data)
     }
