@@ -13,17 +13,16 @@
 
 package com.dasbikash.news_server_data.database.daos
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.Page
 
 @Dao
 internal interface ArticleDao {
-
-    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationDate DESC")
-    fun findAllByPageId(pageId: String): List<Article>
 
     @Query("SELECT * FROM Article WHERE id=:id")
     fun findById(id: String): Article?
@@ -45,4 +44,7 @@ internal interface ArticleDao {
 
     @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY created DESC limit 1")
     fun getLastArticleForDesyncedPage(pageId: String): Article?
+
+    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationDate DESC")
+    fun getArticleLiveDataForPage(pageId:String): LiveData<List<Article>>
 }

@@ -31,6 +31,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
@@ -38,6 +39,7 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.OnceSettableBoolean
+import com.dasbikash.news_server.view_models.PageViewViewModel
 import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.views.view_helpers.ArticlePreviewListAdapter
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
@@ -64,7 +66,6 @@ import io.reactivex.schedulers.Schedulers
 
 class PageViewActivity : AppCompatActivity(),
         SignInHandler, WorkInProcessWindowOperator {
-
 
     companion object {
         const val TAG = "PageViewActivity"
@@ -112,9 +113,6 @@ class PageViewActivity : AppCompatActivity(),
     private val mDisposable = CompositeDisposable()
     private val mArticleList = mutableListOf<Article>()
 
-    private val MINIMUM_INIT_ARTICLE_COUNT = 5
-    private val ARTICLE_DOWNLOAD_CHUNCK_SIZE = 5
-
     private val mHaveMoreArticle = OnceSettableBoolean()
 
 
@@ -133,49 +131,19 @@ class PageViewActivity : AppCompatActivity(),
         mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(this)
 
-        mDisposable.add(
-                Observable.just(mPage)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            mNewspaper = mAppSettingsRepository.getNewspaperByPage(mPage)
-                            mLanguage = mAppSettingsRepository.getLanguageByPage(mPage)
-                            mNewsDataRepository.getArticlesByPage(mPage)
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<List<Article>>() {
-                            override fun onComplete() {
-                                removeWorkInProcessWindow()//hideProgressBars()
-                            }
-
-                            override fun onNext(articleList: List<Article>) {
-                                if(!articleList.isEmpty()) {
-                                    postNewArticlesForDisplay(articleList)
-                                }
-                                loadMoreArticles()
-                            }
-
-                            override fun onError(throwable: Throwable) {
-                                removeWorkInProcessWindow()//hideProgressBars()
-                                when {
-                                    throwable is DataNotFoundException -> {
-                                        mHaveMoreArticle.set()
-                                        mLoadMoreArticleButton.visibility = View.GONE
-                                        showShortSnack("No more articles to display.")
-                                    }
-                                    throwable is DataServerNotAvailableExcepption -> {
-                                        showShortSnack("Remote server error! Please try again later.")
-                                    }
-                                    throwable is NoInternertConnectionException -> {
-                                        showShortSnack("No internet connection!!!")
-                                    }
-                                    else -> {
-                                        throw throwable
-                                    }
-                                }
-                            }
-                        })
-        )
         supportActionBar!!.setTitle(mPage.name)
+        loadMoreArticles()
+
+        ViewModelProviders.of(this).get(PageViewViewModel::class.java)
+                .getArticleLiveDataForPage(mPage)
+                .observe(this,object : androidx.lifecycle.Observer<List<Article>>{
+                    override fun onChanged(articleList: List<Article>?) {
+                        articleList?.let {
+                            postArticlesForDisplay(articleList)
+                        }
+                    }
+                })
+
     }
 
     private fun initTextChangeViewComponents() {
@@ -298,8 +266,10 @@ class PageViewActivity : AppCompatActivity(),
                     Observable.just(mPage)
                             .subscribeOn(Schedulers.io())
                             .map {
-                                mNewsDataRepository.getMoreArticlesByPage(mPage)
-                                mNewsDataRepository.getArticlesByPage(mPage)
+                                if(!::mLanguage.isInitialized) {
+                                    mLanguage = mAppSettingsRepository.getLanguageByPage(mPage)
+                                }
+                                mNewsDataRepository.downloadMoreArticlesByPage(mPage)
                             }
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribeWith(object : DisposableObserver<List<Article>>() {
@@ -307,11 +277,7 @@ class PageViewActivity : AppCompatActivity(),
                                     mArticleLoadRunning = false
                                     removeWorkInProcessWindow()//hideProgressBars()
                                 }
-
-                                override fun onNext(articleList: List<Article>) {
-                                    postNewArticlesForDisplay(articleList)
-                                }
-
+                                override fun onNext(articleList: List<Article>) {}
                                 override fun onError(throwable: Throwable) {
                                     mArticleLoadRunning = false
                                     removeWorkInProcessWindow()//hideProgressBars()
@@ -350,7 +316,7 @@ class PageViewActivity : AppCompatActivity(),
         mArticleLoadingProgressBarMiddle.bringToFront()
     }
 
-    private fun postNewArticlesForDisplay(articleList: List<Article>) {
+    private fun postArticlesForDisplay(articleList: List<Article>) {
         mArticleList.clear()
         mArticleList.addAll(articleList)
         if (!::mArticlePreviewListAdapter.isInitialized) {

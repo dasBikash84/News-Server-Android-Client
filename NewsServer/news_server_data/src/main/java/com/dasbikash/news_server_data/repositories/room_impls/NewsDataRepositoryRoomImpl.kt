@@ -14,6 +14,7 @@
 package com.dasbikash.news_server_data.repositories.room_impls
 
 import android.content.Context
+import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
@@ -30,11 +31,6 @@ class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDa
     override fun getLatestArticleByPageFromLocalDb(page: Page): Article? {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         return newsServerDatabase.articleDao.getLatestArticleByPageId(page.id)
-    }
-
-    override fun getArticlesByPage(page: Page):List<Article>{
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        return newsServerDatabase.articleDao.findAllByPageId(page.id)
     }
 
     override fun findArticleById(articleId:String):Article?{
@@ -58,6 +54,10 @@ class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDa
 
     override fun insertArticles(articles: List<Article>) {
         newsServerDatabase.articleDao.addArticles(articles)
+    }
+
+    override fun getArticleLiveDataForPage(page: Page): LiveData<List<Article>> {
+        return newsServerDatabase.articleDao.getArticleLiveDataForPage(page.id)
     }
 
     override fun getLastArticle(page: Page): Article? {

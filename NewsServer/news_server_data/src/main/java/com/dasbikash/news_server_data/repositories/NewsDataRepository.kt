@@ -14,6 +14,7 @@
 package com.dasbikash.news_server_data.repositories
 
 import android.content.Context
+import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.database.NewsServerDatabase
@@ -30,7 +31,6 @@ abstract class NewsDataRepository{
     private val newsDataService: NewsDataService = DataServiceImplProvider.getNewsDataServiceImpl()
 
     abstract fun getLatestArticleByPageFromLocalDb(page: Page): Article?
-    abstract fun getArticlesByPage(page: Page):List<Article>
     abstract fun findArticleById(articleId:String):Article?
 
     abstract protected fun setPageAsNotSynced(page:Page)
@@ -62,7 +62,7 @@ abstract class NewsDataRepository{
         return article
     }
 
-    fun getMoreArticlesByPage(page: Page):List<Article>{
+    fun downloadMoreArticlesByPage(page: Page):List<Article>{
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val article = getLastArticle(page)
         article?.let {
@@ -85,6 +85,8 @@ abstract class NewsDataRepository{
         }
         throw DataNotFoundException()
     }
+
+    abstract fun getArticleLiveDataForPage(page: Page): LiveData<List<Article>>
 
     companion object {
 
