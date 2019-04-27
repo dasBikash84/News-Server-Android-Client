@@ -14,64 +14,64 @@
 package com.dasbikash.news_server_data.repositories.room_impls
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
-import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
-import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.database.NewsServerDatabase
-import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
-import com.dasbikash.news_server_data.exceptions.OnMainThreadException
-import com.dasbikash.news_server_data.models.room_entity.Language
-import com.dasbikash.news_server_data.models.room_entity.Newspaper
-import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 
 class AppSettingsRepositoryRoomImpl internal constructor(context: Context): AppSettingsRepository() {
 
-    private val mAppSettingsDataService: AppSettingsDataService = DataServiceImplProvider.getAppSettingsDataServiceImpl()
     private val mDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
 
-    private fun getCountryCount(): Int = mDatabase.countryDao.count
-    private fun getLanguageCount(): Int = mDatabase.languageDao.count
-    private fun getNewsPaperCount(): Int = mDatabase.newsPaperDao.count
-    private fun getPageCount(): Int = mDatabase.pageDao.count
-    private fun getPageGroupCount(): Int = mDatabase.pageGroupDao.count
-
-    @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-    @Throws(OnMainThreadException::class, NoInternertConnectionException::class)
-    override fun loadAppSettings(context: Context) {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        Log.d("DataService","loadAppSettings")
-        val appSettings = mAppSettingsDataService.getAppSettings(context)
-
-        mDatabase.nukeAppSettings()
-
-        mDatabase.languageDao.addLanguages(ArrayList(appSettings.languages?.values))
-        mDatabase.countryDao.addCountries(ArrayList(appSettings.countries?.values))
-        mDatabase.newsPaperDao.addNewsPapers(ArrayList(appSettings.newspapers?.values))
-        mDatabase.pageDao.addPages(ArrayList(appSettings.pages?.values))
-        mDatabase.pageGroupDao.addPageGroups(ArrayList(appSettings.page_groups?.values))
-
-        val settingUpdateTimes = ArrayList(appSettings.update_time?.values)
-        mAppSettingsDataService.saveLocalAppSettingsUpdateTime(context, settingUpdateTimes.max()!!)
-    }
-
-    override fun isAppSettingsUpdated(context: Context): Boolean {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        Log.d("DataService","isAppSettingsUpdated")
-        val localAppSettingsUpdateTime = mAppSettingsDataService.getLocalAppSettingsUpdateTime(context)
-        val appSettingsUpdateTime = mAppSettingsDataService.getServerAppSettingsUpdateTime(context)
-        Log.d("DataService","localAppSettingsUpdateTime:${localAppSettingsUpdateTime}")
-        Log.d("DataService","appSettingsUpdateTime:${appSettingsUpdateTime}")
-        return appSettingsUpdateTime > localAppSettingsUpdateTime
-    }
-
-    override fun isAppSettingsDataLoaded(): Boolean {
+    override fun getCountryCount(): Int {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        Log.d("DataService","isAppSettingsDataLoaded")
-        return getLanguageCount() > 0 && getCountryCount() > 0 &&
-                getNewsPaperCount() > 0 && getPageCount() > 0
+        return mDatabase.countryDao.count
+    }
+    override fun getLanguageCount(): Int {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        return mDatabase.languageDao.count
+    }
+    override fun getNewsPaperCount(): Int {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        return mDatabase.newsPaperDao.count
+    }
+    override fun getPageCount(): Int {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        return mDatabase.pageDao.count
+    }
+    override fun getPageGroupCount(): Int {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        return mDatabase.pageGroupDao.count
+    }
+
+    override fun nukeAppSettings() {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        mDatabase.nukeAppSettings()
+    }
+
+    override fun addLanguages(languages: List<Language>) {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        mDatabase.languageDao.addLanguages(languages)
+    }
+
+    override fun addCountries(countries: List<Country>) {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        mDatabase.countryDao.addCountries(countries)
+    }
+
+    override fun addNewsPapers(newspapers: List<Newspaper>) {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        mDatabase.newsPaperDao.addNewsPapers(newspapers)
+    }
+
+    override fun addPages(pages: List<Page>) {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        mDatabase.pageDao.addPages(ArrayList(pages))
+    }
+
+    override fun addPageGroups(pageGroups:List<PageGroup>) {
+        mDatabase.pageGroupDao.addPageGroups(pageGroups)
     }
 
     override fun getNewsPapers():LiveData<List<Newspaper>>{

@@ -26,7 +26,7 @@ internal interface UserPreferenceDataDao {
     fun add(vararg userPreferenceData: UserPreferenceData)
 
     @Query("SELECT * from UserPreferenceData")
-    fun findAll(): List<UserPreferenceData?>
+    fun findAll(): List<UserPreferenceData>
 
     @Query("SELECT * from UserPreferenceData LIMIT 1")
     fun findUserPreferenceStaticData(): UserPreferenceData?

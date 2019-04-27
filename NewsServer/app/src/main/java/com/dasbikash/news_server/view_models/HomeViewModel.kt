@@ -41,7 +41,7 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
 
     private val disposable:CompositeDisposable = CompositeDisposable();
 
-    private val MAX_PARALLEL_ARTICLE_REQUEST = 5
+    private val MAX_PARALLEL_ARTICLE_REQUEST = 10
     private var currentArticleRequestCount = AtomicInteger(0)
 
     private val MIN_ARTICLE_REFRESH_INTERVAL = 5 * 60 * 1000L
