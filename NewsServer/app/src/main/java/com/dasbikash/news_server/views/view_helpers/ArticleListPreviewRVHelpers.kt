@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
+import com.dasbikash.news_server.views.NewspaperPerviewFragment
 import com.dasbikash.news_server.views.PageViewActivity
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
@@ -79,6 +80,7 @@ class PagePreviewListAdapter(@LayoutRes val holderResId: Int, val homeViewModel:
                             @Suppress("UNCHECKED_CAST")
                             override fun onNext(articleData: Any) {
                                 if (articleData is Pair<*, *>) {
+                                    Log.d(NewspaperPerviewFragment.TAG,"art displayed for page: ${page.name} Np: ${page.newsPaperId}")
                                     val articleDataResult = articleData as Pair<String?, Article>
                                     holder.bind(page,articleDataResult.first,articleDataResult.second)
                                 }

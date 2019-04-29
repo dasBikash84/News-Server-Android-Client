@@ -17,6 +17,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import com.dasbikash.news_server.views.NewspaperPerviewFragment
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
@@ -80,10 +81,12 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
                 .map {
                     val input = it
                     it.third?.let {
+                        Log.d(NewspaperPerviewFragment.TAG,"Already dl art found for page: ${input.second.name} Np: ${input.second.newsPaperId}")
                         if (System.currentTimeMillis() - it.getCreated() < MIN_ARTICLE_REFRESH_INTERVAL) {
                             return@map Pair(input.first,it)
                         }
                     }
+                    Log.d(NewspaperPerviewFragment.TAG,"need to search art for page: ${input.second.name} Np: ${input.second.newsPaperId}")
                     do {
                         Log.d(TAG,"Waiting for page: ${it.second.name}")
                         try {
@@ -95,17 +98,21 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
 //                    Log.d(TAG+"1","Going to increment count for page: ${it.second.name}")
                     currentArticleRequestCount.incrementAndGet()
 //                    Log.d(TAG+"1","Request send for page: ${it.second.name}")
+                    Log.d(NewspaperPerviewFragment.TAG,"Going to search art for page: ${input.second.name} Np: ${input.second.newsPaperId}")
                     var article:Article? = null
                     try {
                         article = mNewsDataRepository.getLatestArticleByPage(it.second)
                     }catch (ex:InterruptedException){
+                        Log.d(NewspaperPerviewFragment.TAG,"InterruptedException Error in art search for page: ${input.second.name} Np: ${input.second.newsPaperId}")
                         ex.printStackTrace()
                     }catch (ex:DataNotFoundException){
                         ex.printStackTrace()
+                        Log.d(NewspaperPerviewFragment.TAG,"DataNotFoundException Error in art search for page: ${input.second.name} Np: ${input.second.newsPaperId}")
                         if (!amDisposed){
                             throw ex
                         }
                     }
+                    Log.d(NewspaperPerviewFragment.TAG,"art found for page: ${input.second.name} Np: ${input.second.newsPaperId}")
 //                    Log.d(TAG+"1","Response received for page: ${it.second.name}")
 //                    Log.d(TAG+"1","Going to decrement count for page: ${it.second.name}")
                     currentArticleRequestCount.decrementAndGet()

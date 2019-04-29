@@ -131,7 +131,7 @@ object DisplayUtils {
         var diffTs = System.currentTimeMillis()
         var publicationTimeString: String? = null
 
-        article.publicationDate?.let {
+        article.publicationTime?.let {
 
             diffTs = diffTs - it.time
 
@@ -148,7 +148,7 @@ object DisplayUtils {
             } else if (diffTs < TWO_DAYS_IN_MS) {
                 publicationTimeString = YESTERDAY_TIME_STRING
             } else {
-                publicationTimeString = simpleDateFormat.format(article.publicationDate?.time)
+                publicationTimeString = simpleDateFormat.format(article.publicationTime?.time)
             }
         }
 
@@ -255,7 +255,7 @@ object DisplayUtils {
     }
 
     fun setArticleTextSize(context: Context,textSize:Int){
-        var effectiveTextSize = 0
+        var effectiveTextSize:Int
         when{
             textSize> MAX_ARTICLE_TEXT_SIZE -> effectiveTextSize = MAX_ARTICLE_TEXT_SIZE
             textSize < MIN_ARTICLE_TEXT_SIZE -> effectiveTextSize = MIN_ARTICLE_TEXT_SIZE

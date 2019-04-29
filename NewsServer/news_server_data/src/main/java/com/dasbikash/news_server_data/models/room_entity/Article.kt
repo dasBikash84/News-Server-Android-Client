@@ -36,10 +36,8 @@ data class Article(
         var newsPaperId: String?=null, //Have to fill after fetch from server
         var title: String?=null,
         var articleText: String?=null,
-        @Ignore
+        var publicationTimeRTDB: Long? = null,
         var publicationTime: Date? = null,
-        @Expose(serialize = false, deserialize = false)
-        var publicationDate: Date ? = null, //have to fill after fetch from server
         var imageLinkList: List<ArticleImage>? = null,
         var previewImageLink: String? = null,
         @Expose(serialize = false, deserialize = false)

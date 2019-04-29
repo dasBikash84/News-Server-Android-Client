@@ -13,10 +13,8 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.news_data_services.cloud_firestore
 
-import android.content.Context
 import android.util.Log
 import com.dasbikash.news_server_data.data_sources.NewsDataService
-import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.models.room_entity.Article
@@ -66,7 +64,7 @@ object CloudFireStoreNewsDataService : NewsDataService {
                 }
 
         Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before wait")
-        synchronized(lock) { lock.wait(5000) }
+        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
 
         Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before throw it")
         dataServerException?.let { throw it }
@@ -87,7 +85,7 @@ object CloudFireStoreNewsDataService : NewsDataService {
 
         getArticleCollectionRef()
                 .whereEqualTo("pageId",page.id)
-                .whereLessThan("publicationTime",lastArticle.publicationDate!!)
+                .whereLessThan("publicationTime",lastArticle.publicationTime!!)
                 .orderBy("publicationTime", Query.Direction.DESCENDING)
                 .limit(articleRequestSize.toLong())
                 .get()
@@ -109,7 +107,7 @@ object CloudFireStoreNewsDataService : NewsDataService {
 
 
         Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before wait")
-        synchronized(lock) { lock.wait(5000) }
+        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
 
         Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before throw it")
         dataServerException?.let { throw it }

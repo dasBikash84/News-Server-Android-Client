@@ -65,7 +65,7 @@ internal object SpringMVCNewsDataService : NewsDataService {
 
 
         Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before wait")
-        synchronized(lock) { lock.wait(5000) }
+        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
 
         Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before throw it")
         dataServerException?.let { throw it }
@@ -102,7 +102,7 @@ internal object SpringMVCNewsDataService : NewsDataService {
                     }
                 })
 
-        synchronized(lock) { lock.wait() }
+        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
         dataServerException?.let { throw it }
         return articles
     }

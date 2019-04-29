@@ -110,7 +110,7 @@ class NewspaperPerviewFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         mDisposable.clear()
-        Log.d("NpPerviewFragment", "onPause():${mNewspaper.name}")
+//        Log.d("NpPerviewFragment", "onPause():${mNewspaper.name}")
     }
 
     companion object {
@@ -210,6 +210,7 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                             override fun onNext(childPageList: Any) {
                                 if (childPageList is List<*>) {
                                     @Suppress("UNCHECKED_CAST")
+                                    Log.d(NewspaperPerviewFragment.TAG,"bind for page: ${page.name} Np: ${page.newsPaperId}")
                                     holder.bind(page, childPageList as List<Page>, homeViewModel)
                                 }
                             }
@@ -233,7 +234,7 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
 class PagePreviewHolder(val lifecycleOwner: LifecycleOwner,itemView: View) : RecyclerView.ViewHolder(itemView){
 
     companion object {
-        val TAG = "NpPerviewFragment"
+        val TAG = "PagePreviewHolder"
     }
 
     var active = true

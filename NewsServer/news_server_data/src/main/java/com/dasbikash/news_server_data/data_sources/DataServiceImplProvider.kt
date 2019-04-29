@@ -15,6 +15,7 @@ package com.dasbikash.news_server_data.data_sources
 
 import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls.FirebaseAppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls.SpringMVCAppSettingsDataService
+import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.RealTimeDbNewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.cloud_firestore.CloudFireStoreNewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc.SpringMVCNewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.user_settings_data_services.FirebaseUserSettingsDataService
@@ -24,7 +25,7 @@ internal object DataServiceImplProvider {
 
     private val appSettingServiceOption = APP_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
     private val userSettingServiceOption = USER_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
-    private val newsDataServiceOption = NEWS_DATA_SERVICE_OPTIONS.CLOUD_FIRE_STORE
+    private val newsDataServiceOption = NEWS_DATA_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
 
     private lateinit var appSettingsDataService: AppSettingsDataService
     private lateinit var userSettingsDataService: UserSettingsDataService
@@ -59,6 +60,8 @@ internal object DataServiceImplProvider {
                             -> SpringMVCNewsDataService
                     NEWS_DATA_SERVICE_OPTIONS.CLOUD_FIRE_STORE
                             -> CloudFireStoreNewsDataService
+                    NEWS_DATA_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
+                            -> RealTimeDbNewsDataService
                 }
     }
 
@@ -96,5 +99,5 @@ enum class USER_SETTING_SERVICE_OPTIONS {
 }
 
 enum class NEWS_DATA_SERVICE_OPTIONS {
-    SPRING_MVC_REST_SERVICE,CLOUD_FIRE_STORE
+    SPRING_MVC_REST_SERVICE,CLOUD_FIRE_STORE,FIREBASE_REAL_TIME_DB
 }

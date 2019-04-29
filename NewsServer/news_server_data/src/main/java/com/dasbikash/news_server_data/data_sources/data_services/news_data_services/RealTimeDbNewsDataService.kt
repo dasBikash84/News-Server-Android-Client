@@ -13,25 +13,16 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.news_data_services
 
-import android.util.Log
+import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
-import java.util.*
 
-internal object NewsDataServiceUtils {
+object RealTimeDbNewsDataService : NewsDataService {
+    override fun getRawLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
-    val TAG = "NewsDataServiceUtils"
-
-    fun processFetchedArticleData(article: Article,page: Page):Article{
-        article.newsPaperId = page.newsPaperId
-
-        article.articleText = article.articleText
-                                ?.replace(Regex("(<br>)+"),"<br>")
-                                ?.replace(regex = Regex("<a.+?>"),replacement = "")
-                                ?.replace("</a>","")
-                                ?.replace("<br>","<br><br>")
-
-        Log.d(TAG,"article: ${article}")
-        return article
+    override fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

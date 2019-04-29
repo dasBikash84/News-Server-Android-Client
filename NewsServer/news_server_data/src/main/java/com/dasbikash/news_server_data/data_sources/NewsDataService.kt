@@ -23,6 +23,7 @@ internal interface NewsDataService {
 
     companion object {
         const val DEFAULT_ARTICLE_REQUEST_SIZE = 5
+        const val WAITING_MS_FOR_NET_RESPONSE = 30000L
     }
 
     //Latest articles from any page

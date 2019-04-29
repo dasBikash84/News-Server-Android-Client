@@ -278,17 +278,17 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        Log.d("NpPerviewFragment", "active = false for pageGroup:${mPageGroup.name}")
+//        Log.d("NpPerviewFragment", "active = false for pageGroup:${mPageGroup.name}")
         active = false
     }
 
     override fun onStop(owner: LifecycleOwner) {
-        Log.d("NpPerviewFragment", "active = false for pageGroup:${mPageGroup.name}")
+//        Log.d("NpPerviewFragment", "active = false for pageGroup:${mPageGroup.name}")
         active = false
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
-        Log.d("NpPerviewFragment", "active = false for pageGroup:${mPageGroup.name}")
+//        Log.d("NpPerviewFragment", "active = false for pageGroup:${mPageGroup.name}")
         active = false
     }
 

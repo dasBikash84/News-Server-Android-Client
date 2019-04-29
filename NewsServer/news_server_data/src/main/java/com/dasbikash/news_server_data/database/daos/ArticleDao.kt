@@ -36,15 +36,15 @@ internal interface ArticleDao {
     @Query("DELETE FROM Article")
     fun nukeTable()
 
-    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationDate DESC limit 1")
+    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationTime DESC limit 1")
     fun getLatestArticleByPageId(pageId: String):Article?
 
-    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationDate ASC limit 1")
+    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationTime ASC limit 1")
     fun getLastArticleForSyncedPage(pageId: String): Article?
 
     @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY created DESC limit 1")
     fun getLastArticleForDesyncedPage(pageId: String): Article?
 
-    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationDate DESC")
+    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationTime DESC")
     fun getArticleLiveDataForPage(pageId:String): LiveData<List<Article>>
 }
