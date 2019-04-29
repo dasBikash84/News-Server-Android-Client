@@ -105,7 +105,7 @@ public class RealTimeDbTest {
 
     /*@Test
     public void readLastUpdateTime(){
-       *//* FirebaseRealtimeDBUtils.INSTANCE.getServerAppSettingsUpdateTime().
+       *//* RealtimeDBUtils.INSTANCE.getServerAppSettingsUpdateTime().
                 subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) throws Exception {
@@ -118,7 +118,7 @@ public class RealTimeDbTest {
 
 //    @Test
 //    public void readAppSrttings(){
-//        FirebaseRealtimeDBUtils.INSTANCE.getServerAppSettingsData().
+//        RealtimeDBUtils.INSTANCE.getServerAppSettingsData().
 //                subscribe(new Consumer<DefaultAppSettings>() {
 //                    @Override
 //                    public void accept(DefaultAppSettings defaultAppSettings) throws Exception {

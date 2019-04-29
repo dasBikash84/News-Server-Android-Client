@@ -13,7 +13,6 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc
 
-import android.util.Log
 import androidx.test.runner.AndroidJUnit4
 import org.junit.After
 import org.junit.Before

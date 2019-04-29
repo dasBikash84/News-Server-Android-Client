@@ -15,15 +15,15 @@ package com.dasbikash.news_server_data.data_sources.data_services.app_settings_d
 
 import android.content.Context
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
-import com.dasbikash.news_server_data.data_sources.firebase.FirebaseRealtimeDBAppSettingsUtils
+import com.dasbikash.news_server_data.data_sources.firebase.RealtimeDBAppSettingsUtils
 import com.dasbikash.news_server_data.models.DefaultAppSettings
 
 internal object FirebaseAppSettingsDataService: AppSettingsDataService {
     override fun getServerAppSettingsUpdateTime(context: Context): Long {
-        return FirebaseRealtimeDBAppSettingsUtils.getServerAppSettingsUpdateTime()
+        return RealtimeDBAppSettingsUtils.getServerAppSettingsUpdateTime()
     }
 
     override fun getRawAppSettings(context: Context): DefaultAppSettings {
-        return FirebaseRealtimeDBAppSettingsUtils.getServerAppSettingsData()
+        return RealtimeDBAppSettingsUtils.getServerAppSettingsData()
     }
 }

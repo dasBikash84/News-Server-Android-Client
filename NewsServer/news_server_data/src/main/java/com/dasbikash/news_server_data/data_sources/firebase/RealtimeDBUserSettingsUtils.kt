@@ -28,7 +28,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 
-internal object FirebaseRealtimeDBUserSettingsUtils{
+internal object RealtimeDBUserSettingsUtils{
 
     private val MAX_SETTINGS_UPLOAD_RETRY = 3
     private val MAX_SETTINGS_UPLOAD_RETRY_SLEEP_PERIOD = 5000L
@@ -77,10 +77,10 @@ internal object FirebaseRealtimeDBUserSettingsUtils{
     }
 
     private fun getUserSettingsNodes(user: FirebaseUser) = object {
-        val rootUserSettingdNode = FirebaseRealtimeDBUtils.mUserSettingsRootReference.child(user.uid)
-        val favPageIdListRef = FirebaseRealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(FAV_PAGE_ID_LIST_NODE)
-        val pageGroupListRef = FirebaseRealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(PAGE_GROUP_LIST_NODE)
-        val updateLogRef = FirebaseRealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(UPDATE_LOG_NODE)
+        val rootUserSettingdNode = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid)
+        val favPageIdListRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(FAV_PAGE_ID_LIST_NODE)
+        val pageGroupListRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(PAGE_GROUP_LIST_NODE)
+        val updateLogRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(UPDATE_LOG_NODE)
     }
 
     fun uploadUserPreferenceData(userPreferenceData: UserPreferenceData){
@@ -145,7 +145,7 @@ internal object FirebaseRealtimeDBUserSettingsUtils{
                 break
 
             } catch (ex: UserSettingsUploadFailureException) {
-//                Log.d(FirebaseRealtimeDBUtils.TAG, "${remainingTries}")
+//                Log.d(RealtimeDBUtils.TAG, "${remainingTries}")
                 remainingTries--
                 if (remainingTries == 0) {
                     throw ex

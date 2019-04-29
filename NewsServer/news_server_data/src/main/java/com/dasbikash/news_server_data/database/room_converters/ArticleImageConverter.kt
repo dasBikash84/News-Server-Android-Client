@@ -25,17 +25,17 @@ internal object ArticleImageConverter {
 
     @TypeConverter
     @JvmStatic
-    fun fromArticleImage(entry: List<ArticleImage>): String {
+    fun fromArticleImage(entry: List<ArticleImage>?): String {
 
         val stringBuilder = StringBuilder("")
 
-        entry.asSequence()
-                .map {
+        entry?.asSequence()
+                ?.map {
                     stringBuilder.append(it.link).append(PARAM_BRIDGE).append(it.captin).append(DATA_BRIDGE)
                     it
                 }
-                .filter { entry.indexOf(it) == entry.size-1 }
-                .forEach { stringBuilder.append(DATA_BRIDGE) }
+                ?.filter { entry.indexOf(it) == entry.size-1 }
+                ?.forEach { stringBuilder.append(DATA_BRIDGE) }
         Log.d("ArticleImageConverter","stringBuilder: ${stringBuilder.toString()}")
         Log.d("ArticleImageConverter","entry: ${entry.toString()}")
         return stringBuilder.toString()

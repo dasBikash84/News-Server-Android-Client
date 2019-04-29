@@ -17,20 +17,14 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
 
-internal object FirebaseRealtimeDBUtils {
+internal object RealtimeDBUtils {
     private val TAG = "SettingsRepository"
 
     //App settings related nodes
     private const val APP_SETTINGS_NODE = "app_settings"
-    private const val COUNTRIES_NODE = "countries"
-    private const val LANGUAGES_NODE = "languages"
-    private const val NEWSPAPERS_NODE = "newspapers"
-    private const val PAGES_NODE = "pages"
-    private const val PAGE_GROUPS_NODE = "page_groups"
-    private const val SETTINGS_UPDATE_TIME_NODE = "update_time"
-
     //User settings related nodes
     private const val USER_SETTINGS_ROOT_NODE = "user_settings"
+    private const val ARTICLE_DATA_ROOT_NODE = "article_data"
 
     val mFBDataBase: FirebaseDatabase
 
@@ -39,15 +33,8 @@ internal object FirebaseRealtimeDBUtils {
     }
 
     val mRootReference = mFBDataBase.reference
-
     val mAppSettingsReference: DatabaseReference = mRootReference.child(APP_SETTINGS_NODE)
-    val mCountriesSettingsReference: DatabaseReference = mAppSettingsReference.child(COUNTRIES_NODE)
-    val mLanguagesSettingsReference: DatabaseReference = mAppSettingsReference.child(LANGUAGES_NODE)
-    val mNewspaperSettingsReference: DatabaseReference = mAppSettingsReference.child(NEWSPAPERS_NODE)
-    val mPagesSettingsReference: DatabaseReference = mAppSettingsReference.child(PAGES_NODE)
-    val mPageGroupsSettingsReference: DatabaseReference = mAppSettingsReference.child(PAGE_GROUPS_NODE)
-    val mSettingsUpdateTimeReference: DatabaseReference = mAppSettingsReference.child(SETTINGS_UPDATE_TIME_NODE)
-
     val mUserSettingsRootReference: DatabaseReference = mRootReference.child(USER_SETTINGS_ROOT_NODE)
+    val mArticleDataRootReference: DatabaseReference = mRootReference.child(ARTICLE_DATA_ROOT_NODE)
 }
 

@@ -18,10 +18,14 @@ import com.dasbikash.news_server_data.exceptions.SettingsServerException
 import com.dasbikash.news_server_data.models.DefaultAppSettings
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 
 
-internal object FirebaseRealtimeDBAppSettingsUtils{
+internal object RealtimeDBAppSettingsUtils{
+
+    private const val SETTINGS_UPDATE_TIME_NODE = "update_time"
+    val mSettingsUpdateTimeReference: DatabaseReference = RealtimeDBUtils.mAppSettingsReference.child(SETTINGS_UPDATE_TIME_NODE)
 
     fun getServerAppSettingsUpdateTime(): Long{
 
@@ -30,7 +34,8 @@ internal object FirebaseRealtimeDBAppSettingsUtils{
 
         var appSettingsNotFound: SettingsServerException? = null
 
-        FirebaseRealtimeDBUtils.mSettingsUpdateTimeReference.addListenerForSingleValueEvent(object : ValueEventListener {
+
+        mSettingsUpdateTimeReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(databaseError: DatabaseError) {
                 appSettingsNotFound = SettingsServerException(databaseError.message)
                 synchronized(lock) { lock.notify() }
@@ -62,7 +67,7 @@ internal object FirebaseRealtimeDBAppSettingsUtils{
 
         var appSettingsNotFound: SettingsServerException? = null
 
-        FirebaseRealtimeDBUtils.mAppSettingsReference.addListenerForSingleValueEvent(object : ValueEventListener {
+        RealtimeDBUtils.mAppSettingsReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
                 appSettingsNotFound = SettingsServerException(error.message)
                 synchronized(lock) { lock.notify() }

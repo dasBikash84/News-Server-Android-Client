@@ -14,15 +14,16 @@
 package com.dasbikash.news_server_data.data_sources.data_services.news_data_services
 
 import com.dasbikash.news_server_data.data_sources.NewsDataService
+import com.dasbikash.news_server_data.data_sources.firebase.RealTimeDbArticleDataUtils
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 
 object RealTimeDbNewsDataService : NewsDataService {
     override fun getRawLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return RealTimeDbArticleDataUtils.getLatestArticlesByPage(page,articleRequestSize)
     }
 
     override fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return RealTimeDbArticleDataUtils.getArticlesAfterLastArticle(page, lastArticle, articleRequestSize)
     }
 }

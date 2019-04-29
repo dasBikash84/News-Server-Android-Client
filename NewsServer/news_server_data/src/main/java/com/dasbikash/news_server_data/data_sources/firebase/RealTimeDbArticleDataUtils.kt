@@ -19,23 +19,13 @@ import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 
-object CloudFireStoreArticleDataUtils {
+object RealTimeDbArticleDataUtils {
 
     private val TAG = "DataService"
-
-    private const val ARTICLE_COLLECTION = "articles"
-
-    private fun getDbConnection(): FirebaseFirestore {
-        return FirebaseFirestore.getInstance()
-    }
-
-    private fun getArticleCollectionRef(): CollectionReference {
-        return getDbConnection().collection(ARTICLE_COLLECTION)
-    }
 
     fun getLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
 
@@ -43,25 +33,31 @@ object CloudFireStoreArticleDataUtils {
         val articles = mutableListOf<Article>()
         var dataServerException: DataServerException? = null
 
-        getArticleCollectionRef()
-                .whereEqualTo("pageId",page.id)
-                .orderBy("publicationTime", Query.Direction.DESCENDING)
-                .limit(articleRequestSize.toLong())
-                .get()
-                .addOnSuccessListener { documents ->
-                    Log.d(TAG,"addOnSuccessListener")
-                    for (document in documents) {
-                        if (document.exists()){
-                            articles.add(document.toObject(Article::class.java))
-                        }
+        RealtimeDBUtils.mArticleDataRootReference
+                .child(page.id)
+                .orderByChild("publicationTimeRTDB")
+                .limitToLast(1)
+                .addListenerForSingleValueEvent(object : ValueEventListener{
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.d(TAG,"onCancelled. Error msg: ${error.message}")
+                        dataServerException = DataNotFoundException(error.message)
+                        synchronized(lock) { lock.notify() }
                     }
-                    synchronized(lock) { lock.notify() }
-                }
-                .addOnFailureListener { exception ->
-                    Log.d(TAG,"addOnFailureListener. Eror msg: ${exception.message}")
-                    dataServerException = DataNotFoundException(exception)
-                    synchronized(lock) { lock.notify() }
-                }
+
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            Log.d(TAG,"onDataChange")
+                            Log.d(TAG,"data: ${dataSnapshot.value}")
+                            dataSnapshot.children.asSequence()
+                                    .take(1)
+                                    .forEach {
+//                                        Log.d(TAG,"children data: ${dataSnapshot.value}")
+                                        articles.add(it.getValue(Article::class.java)!!)
+                                    }
+                        }
+                        synchronized(lock) { lock.notify() }
+                    }
+                })
 
         Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before wait")
         synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
@@ -84,26 +80,30 @@ object CloudFireStoreArticleDataUtils {
         val articles = mutableListOf<Article>()
         var dataServerException: DataServerException? = null
 
-        getArticleCollectionRef()
-                .whereEqualTo("pageId",page.id)
-                .whereLessThan("publicationTime",lastArticle.publicationTime!!)
-                .orderBy("publicationTime", Query.Direction.DESCENDING)
-                .limit(articleRequestSize.toLong())
-                .get()
-                .addOnSuccessListener { documents ->
-                    Log.d(TAG,"addOnSuccessListener")
-                    for (document in documents) {
-                        if (document.exists()){
-                            articles.add(document.toObject(Article::class.java))
-                        }
+        RealtimeDBUtils.mArticleDataRootReference
+                .child(page.id)
+                .orderByChild("publicationTimeRTDB")
+                .endAt(lastArticle.publicationTimeRTDB!!.toDouble(),"publicationTimeRTDB")
+                .limitToLast(articleRequestSize+1)
+                .addListenerForSingleValueEvent(object : ValueEventListener{
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.d(TAG,"onCancelled. Error msg: ${error.message}")
+                        dataServerException = DataNotFoundException(error.message)
+                        synchronized(lock) { lock.notify() }
                     }
-                    synchronized(lock) { lock.notify() }
-                }
-                .addOnFailureListener { exception ->
-                    Log.d(TAG,"addOnFailureListener. Eror msg: ${exception.message}")
-                    dataServerException = DataNotFoundException(exception)
-                    synchronized(lock) { lock.notify() }
-                }
+
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            Log.d(TAG,"onDataChange")
+                            dataSnapshot.children.asSequence()
+                                    .take(dataSnapshot.children.count()-1)
+                                    .forEach {
+                                        articles.add(it.getValue(Article::class.java)!!)
+                                    }
+                        }
+                        synchronized(lock) { lock.notify() }
+                    }
+                })
 
         Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before wait")
         synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
@@ -118,6 +118,7 @@ object CloudFireStoreArticleDataUtils {
 
         Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before return")
         return articles
+
 
     }
 }

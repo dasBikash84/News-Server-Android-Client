@@ -15,15 +15,14 @@ package com.dasbikash.news_server_data.data_sources.data_services.user_settings_
 
 import android.content.Intent
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
-import com.dasbikash.news_server_data.data_sources.firebase.FirebaseRealtimeDBUserSettingsUtils
-import com.dasbikash.news_server_data.data_sources.firebase.FirebaseRealtimeDBUtils
+import com.dasbikash.news_server_data.data_sources.firebase.RealtimeDBUserSettingsUtils
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 
 internal object FirebaseUserSettingsDataService: UserSettingsDataService {
     override fun getCurrentUserName(): String? {
-        return FirebaseRealtimeDBUserSettingsUtils.getCurrentUserName()
+        return RealtimeDBUserSettingsUtils.getCurrentUserName()
     }
 
 
@@ -41,15 +40,15 @@ internal object FirebaseUserSettingsDataService: UserSettingsDataService {
     }
 
     override fun getLastUserSettingsUpdateTime(): Long {
-        return FirebaseRealtimeDBUserSettingsUtils.getLastUserSettingsUpdateTime()
+        return RealtimeDBUserSettingsUtils.getLastUserSettingsUpdateTime()
     }
 
     override fun getUserPreferenceData(): UserPreferenceData {
-        return FirebaseRealtimeDBUserSettingsUtils.getUserPreferenceData()
+        return RealtimeDBUserSettingsUtils.getUserPreferenceData()
     }
 
     override fun uploadUserPreferenceData(userPreferenceData: UserPreferenceData) {
-        return FirebaseRealtimeDBUserSettingsUtils.uploadUserPreferenceData(userPreferenceData)
+        return RealtimeDBUserSettingsUtils.uploadUserPreferenceData(userPreferenceData)
     }
 
     override fun getLogInIntent(): Intent? {
