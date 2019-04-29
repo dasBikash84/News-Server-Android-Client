@@ -47,7 +47,6 @@ class NewspaperPerviewFragment : Fragment() {
     private lateinit var mHomeViewModel: HomeViewModel
 
     private lateinit var mPagePreviewList: RecyclerView
-    private lateinit var mNestedScrollView: NestedScrollView
     private lateinit var mListAdapter: TopPagePreviewListAdapter
 
 
@@ -65,24 +64,10 @@ class NewspaperPerviewFragment : Fragment() {
 
         mNewspaper = arguments!!.getSerializable(ARG_NEWS_PAPAER) as Newspaper
         mPagePreviewList = view.findViewById(R.id.newspaper_page_preview_list)
-        mNestedScrollView = view.findViewById(R.id.page_preview_scroller)
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
 
         (activity as NavigationHost)
                 .showBottomNavigationView(true)
-
-        mNestedScrollView.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
-            override fun onScrollChange(v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
-                val remainingYOfRV = mPagePreviewList.height - scrollY - resources.displayMetrics.heightPixels
-                if (remainingYOfRV < resources.displayMetrics.heightPixels / 5) { //Hides scroller if 1/5 off Child recycler view is below scroller
-                    (activity as NavigationHost)
-                            .showBottomNavigationView(false)
-                } else {
-                    (activity as NavigationHost)
-                            .showBottomNavigationView(true)
-                }
-            }
-        })
     }
 
     override fun onResume() {
