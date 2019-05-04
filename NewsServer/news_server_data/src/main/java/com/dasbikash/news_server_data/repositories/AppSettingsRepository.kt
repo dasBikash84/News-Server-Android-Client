@@ -78,7 +78,7 @@ abstract class AppSettingsRepository{
         addPages(ArrayList(appSettings.pages?.values))
 
         if (getPageGroupCount() == 0){
-            addPageGroups(ArrayList(appSettings.page_groups?.values))
+            addPageGroups(ArrayList(appSettings.page_groups?.values ?: emptyList()))
         }
 
         val settingUpdateTimes = ArrayList(appSettings.update_time?.values)
