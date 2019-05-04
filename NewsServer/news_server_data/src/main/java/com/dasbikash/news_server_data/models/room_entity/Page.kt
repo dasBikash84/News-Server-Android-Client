@@ -21,52 +21,36 @@ import com.google.gson.annotations.Expose
 
 @Entity(
         foreignKeys = [
-            ForeignKey(entity = Newspaper::class, parentColumns = ["id"], childColumns = ["newsPaperId"])
+            ForeignKey(entity = Newspaper::class, parentColumns = ["id"], childColumns = ["newspaperId"])
         ],
         indices = [
-            Index("newsPaperId"), Index("parentPageId")
+            Index("newspaperId"), Index("parentPageId")
         ]
 )
 data class Page(
         @PrimaryKey
         var id: String="",
-        var newsPaperId: String?=null,
+        var newspaperId: String?=null,
         var parentPageId: String?=null,
         var name: String?=null,
-        @Ignore
-        var active: Boolean = false,
-        @Ignore
-        var linkFormat:String? = null,
         @Expose(serialize = false,deserialize = false)
         @com.google.firebase.firestore.Exclude
         var articleFetchStatus: String = PageArticleFetchStatus.NOT_SYNCED
 ): Parcelable {
-    @Exclude
     var hasChild:Boolean = false
-    @Exclude
-    private var hasData:Boolean = false
+    var hasData:Boolean = false
+    var topLevelPage:Boolean = false
 
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     constructor(parcel: Parcel) : this(
             parcel.readString(),
             parcel.readString(),
             parcel.readString(),
-            parcel.readString(),
-            parcel.readByte() != 0.toByte(),
-            parcel.readString()) {
+            parcel.readString()
+            ) {
+        topLevelPage = parcel.readByte() != 0.toByte()
         hasChild = parcel.readByte() != 0.toByte()
         hasData = parcel.readByte() != 0.toByte()
-    }
-
-    fun getHasData():Boolean{
-        if (linkFormat != null){ //will be used during initial write by room
-            return true
-        }
-        return hasData //Wiil be used on application runtime
-    }
-
-    fun setHasData(hasData:Boolean){
-        this.hasData = hasData
     }
 
     companion object {
@@ -89,11 +73,10 @@ data class Page(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(id)
-        parcel.writeString(newsPaperId)
+        parcel.writeString(newspaperId)
         parcel.writeString(parentPageId)
         parcel.writeString(name)
-        parcel.writeByte(if (active) 1 else 0)
-        parcel.writeString(linkFormat)
+        parcel.writeByte(if (topLevelPage) 1 else 0)
         parcel.writeByte(if (hasChild) 1 else 0)
         parcel.writeByte(if (hasData) 1 else 0)
     }
@@ -103,7 +86,7 @@ data class Page(
     }
 
     override fun toString(): String {
-        return "Page(id='$id', newsPaperId=$newsPaperId, name=$name)"
+        return "Page(id='$id', newspaperId=$newspaperId, name=$name)"
     }
 }
 

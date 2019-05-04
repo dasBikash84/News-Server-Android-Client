@@ -24,11 +24,11 @@ import java.util.*
 @Entity(
         foreignKeys = [
             ForeignKey(entity = Page::class, parentColumns = ["id"], childColumns = ["pageId"]),
-            ForeignKey(entity = Newspaper::class, parentColumns = ["id"], childColumns = ["newsPaperId"])
+            ForeignKey(entity = Newspaper::class, parentColumns = ["id"], childColumns = ["newspaperId"])
         ],
         indices = [
             Index(value = ["pageId"], name = "article_page_id_index"),
-            Index(value = ["newsPaperId"], name = "article_newsPaperId_index")
+            Index(value = ["newspaperId"], name = "article_newsPaperId_index")
         ]
 )
 data class Article(
@@ -36,7 +36,7 @@ data class Article(
         var id: String="",
         var pageId: String?=null,
         @Expose(serialize = false, deserialize = false)
-        var newsPaperId: String?=null, //Have to fill after fetch from server
+        var newspaperId: String?=null, //Have to fill after fetch from server
         var title: String?=null,
         var articleText: String?=null,
         var publicationTimeRTDB: Long? = null,
@@ -55,7 +55,7 @@ data class Article(
     }
 
     override fun toString(): String {
-        return "Article(id='$id', pageId=$pageId, newsPaperId=$newsPaperId, title=$title, publicationTime=$publicationTime)"
+        return "Article(id='$id', pageId=$pageId, newspaperId=$newspaperId, title=$title, publicationTime=$publicationTime)"
     }
 
 

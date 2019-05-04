@@ -22,7 +22,7 @@ internal object NewsDataServiceUtils {
     val TAG = "NewsDataServiceUtils"
 
     fun processFetchedArticleData(article: Article,page: Page):Article{
-        article.newsPaperId = page.newsPaperId
+        article.newspaperId = page.newspaperId
 
         article.articleText = article.articleText
                                 ?.replace(Regex("(<br>)+"),"<br>")

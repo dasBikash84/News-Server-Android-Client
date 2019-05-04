@@ -123,7 +123,11 @@ class InitFragment : Fragment() {
 
                             override fun onError(e: Throwable) {
                                 Log.d(TAG, "onError: " + e.javaClass.canonicalName!!)
-                                Log.d(TAG, "onError: " + Arrays.asList(e.stackTrace))
+                                Arrays.asList(e.stackTrace).asSequence().forEach {
+                                    it.iterator().forEach {
+                                        Log.d(TAG, "onError: " + it.toString())
+                                    }
+                                }
                                 e.printStackTrace()
                                 Toast.makeText(activity,"onError: " + e.javaClass.canonicalName!!,
                                                 Toast.LENGTH_SHORT).show()

@@ -23,7 +23,7 @@ internal object FirebaseAppSettingsDataService: AppSettingsDataService {
         return RealtimeDBAppSettingsUtils.getServerAppSettingsUpdateTime()
     }
 
-    override fun getRawAppSettings(context: Context): DefaultAppSettings {
+    override fun getAppSettings(context: Context): DefaultAppSettings {
         return RealtimeDBAppSettingsUtils.getServerAppSettingsData()
     }
 }

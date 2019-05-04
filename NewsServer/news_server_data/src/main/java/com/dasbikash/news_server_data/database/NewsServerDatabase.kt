@@ -62,6 +62,7 @@ internal abstract class NewsServerDatabase : RoomDatabase() {
     }
 
     fun nukeAppSettings(){
+        articleDao.nukeTable()
         pageDao.nukeTable()
         newsPaperDao.nukeTable()
         countryDao.nukeTable()

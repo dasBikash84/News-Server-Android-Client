@@ -28,7 +28,5 @@ data class Newspaper(
         var id: String="",
         var name: String?=null,
         var countryName: String?=null,
-        var languageId: String?=null,
-        @Ignore
-        var active: Boolean=false
+        var languageId: String?=null
 ) : Serializable

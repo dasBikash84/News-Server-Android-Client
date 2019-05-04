@@ -33,6 +33,7 @@ class DefaultAppSettings {
                 ", newspapers=" + newspapers +
                 ", pages=" + pages +
                 ", pageGroups=" + page_groups +
+                ", update_time=" + update_time +
                 '}'.toString()
     }
 }

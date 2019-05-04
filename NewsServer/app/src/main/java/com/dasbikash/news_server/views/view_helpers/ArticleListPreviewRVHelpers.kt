@@ -30,14 +30,11 @@ import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.views.NewspaperPerviewFragment
 import com.dasbikash.news_server.views.PageViewActivity
 import com.dasbikash.news_server_data.models.room_entity.Article
-import com.dasbikash.news_server_data.models.room_entity.Language
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.squareup.picasso.Picasso
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import java.util.*
 
@@ -74,20 +71,20 @@ class PagePreviewListAdapter(@LayoutRes val holderResId: Int, val homeViewModel:
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<Any>() {
                             override fun onComplete() {
-                                Log.d(TAG, "onComplete for page ${page.name} Np: ${page.newsPaperId} L2")
+                                Log.d(TAG, "onComplete for page ${page.name} Np: ${page.newspaperId} L2")
                             }
 
                             @Suppress("UNCHECKED_CAST")
                             override fun onNext(articleData: Any) {
                                 if (articleData is Pair<*, *>) {
-                                    Log.d(NewspaperPerviewFragment.TAG,"art displayed for page: ${page.name} Np: ${page.newsPaperId}")
+                                    Log.d(NewspaperPerviewFragment.TAG,"art displayed for page: ${page.name} Np: ${page.newspaperId}")
                                     val articleDataResult = articleData as Pair<String?, Article>
                                     holder.bind(page,articleDataResult.first,articleDataResult.second)
                                 }
                             }
 
                             override fun onError(e: Throwable) {
-                                Log.d(TAG, e.message + " for page Np: ${page.newsPaperId} ${page.name} L2")
+                                Log.d(TAG, e.message + " for page Np: ${page.newspaperId} ${page.name} L2")
                             }
                         })
         )

@@ -54,7 +54,7 @@ class FragmentArticlePreviewForPages : Fragment() {
             mPageListPreviewHolderRV.minimumWidth = resources.displayMetrics.widthPixels
         }
 
-//        Log.d("NpPerviewFragment", mPageList.map { "page: ${it.name} Np: ${it.newsPaperId} | " }.toList().toString()
+//        Log.d("NpPerviewFragment", mPageList.map { "page: ${it.name} Np: ${it.newspaperId} | " }.toList().toString()
 //                + "mArticlePreviewResId: ${mArticlePreviewResId}")
         mPagePreviewListAdapter = PagePreviewListAdapter(mArticlePreviewResId!!,ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
 

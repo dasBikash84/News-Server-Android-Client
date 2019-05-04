@@ -90,13 +90,13 @@ class AppSettingsRepositoryRoomImpl internal constructor(context: Context): AppS
 
     override fun getLanguageByPage(page: Page): Language {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        val newspaper = mDatabase.newsPaperDao.findById(page.newsPaperId!!)
+        val newspaper = mDatabase.newsPaperDao.findById(page.newspaperId!!)
         return mDatabase.languageDao.findByLanguageId(newspaper.languageId!!)
     }
 
     override fun getNewspaperByPage(page: Page): Newspaper {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        return mDatabase.newsPaperDao.findById(page.newsPaperId ?: "")
+        return mDatabase.newsPaperDao.findById(page.newspaperId ?: "")
     }
 
     override fun findMatchingPages(it: String): List<Page> {

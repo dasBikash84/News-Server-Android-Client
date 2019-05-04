@@ -19,7 +19,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -147,10 +146,10 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                                     appSettingsRepository
                                             .getChildPagesForTopLevelPage(it)
                                             .asSequence()
-                                            .filter { it.getHasData() }
+                                            .filter { it.hasData }
                                             .sortedBy { it.id }
                                             .toCollection(mutableListOf<Page>())
-                            if (it.getHasData()) {
+                            if (it.hasData) {
                                 childPages.add(0, it)
                             }
                             synchronized(childPageMap) {
@@ -195,7 +194,7 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                             override fun onNext(childPageList: Any) {
                                 if (childPageList is List<*>) {
                                     @Suppress("UNCHECKED_CAST")
-                                    Log.d(NewspaperPerviewFragment.TAG,"bind for page: ${page.name} Np: ${page.newsPaperId}")
+                                    Log.d(NewspaperPerviewFragment.TAG,"bind for page: ${page.name} Np: ${page.newspaperId}")
                                     holder.bind(page, childPageList as List<Page>, homeViewModel)
                                 }
                             }
