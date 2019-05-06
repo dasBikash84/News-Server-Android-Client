@@ -19,9 +19,9 @@ class ArticleImage(
         @Expose(deserialize = true,serialize = true)
         var link: String?=null,
         @Expose(deserialize = true,serialize = true)
-        var captin:String?=null
+        var caption:String?=null
 ){
         override fun toString(): String {
-                return "ArticleImage(link=$link, captin=$captin)"
+                return "ArticleImage(link=$link, caption=$caption)"
         }
 }

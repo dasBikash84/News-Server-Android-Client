@@ -31,7 +31,7 @@ internal object ArticleImageConverter {
 
         entry?.asSequence()
                 ?.map {
-                    stringBuilder.append(it.link).append(PARAM_BRIDGE).append(it.captin).append(DATA_BRIDGE)
+                    stringBuilder.append(it.link).append(PARAM_BRIDGE).append(it.caption).append(DATA_BRIDGE)
                     it
                 }
                 ?.filter { entry.indexOf(it) == entry.size-1 }
@@ -57,7 +57,7 @@ internal object ArticleImageConverter {
                 articleImage.link = dataFragments.get(0)
             } else if (dataFragments.size == 2) {
                 articleImage.link = dataFragments.get(0)
-                articleImage.captin = dataFragments.get(1)
+                articleImage.caption = dataFragments.get(1)
             }
             entryList.add(articleImage)
         }

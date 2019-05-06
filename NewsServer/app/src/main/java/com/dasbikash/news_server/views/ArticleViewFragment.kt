@@ -190,8 +190,8 @@ class ArticleImageHolder(itemView: View):RecyclerView.ViewHolder(itemView){
         }else{
             itemView.visibility = View.GONE
         }
-        if (articleImage.captin !=null){
-            mImageCaption.text = articleImage.captin
+        if (articleImage.caption !=null){
+            mImageCaption.text = articleImage.caption
         }else{
             mImageCaption.visibility = View.GONE
         }
