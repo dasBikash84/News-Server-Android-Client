@@ -22,7 +22,7 @@ internal object SpringMVCAppSettingsDataService: AppSettingsDataService {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getAppSettings(context: Context): DefaultAppSettings {
+    override fun getRawAppsettings(context: Context): DefaultAppSettings {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

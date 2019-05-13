@@ -22,7 +22,13 @@ internal interface AppSettingsDataService {
 
     fun getServerAppSettingsUpdateTime(context: Context): Long
 
-    fun getAppSettings(context: Context): DefaultAppSettings
+    fun getAppSettings(context: Context): DefaultAppSettings{
+        return AppSettingsDataServiceUtils.processDefaultAppSettingsData(
+                getRawAppsettings(context)
+        )
+    }
+
+    fun getRawAppsettings(context: Context):DefaultAppSettings
 
     //Default implementations
 

@@ -16,11 +16,84 @@ package com.dasbikash.news_server_data.data_sources.data_services.app_settings_d
 import android.content.Context
 import android.util.Log
 import com.dasbikash.news_server_data.models.DefaultAppSettings
+import com.dasbikash.news_server_data.models.room_entity.Newspaper
+import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 
 internal object AppSettingsDataServiceUtils {
 
     val TAG = "DbTest"
+
+
+    fun processDefaultAppSettingsData(defaultAppSettings: DefaultAppSettings):
+            DefaultAppSettings {
+
+        /*if (inputAppSettings.status == NetworkResponse.ResponseStatus.FAILURE){
+            return inputAppSettings
+        }*/
+
+        //val defaultAppSettings = inputAppSettings.payload
+
+        defaultAppSettings.newspapers?.let {
+
+            val filteredNewspaperMap = HashMap<String, Newspaper>()
+            val filteredPageMap = HashMap<String, Page>()
+
+
+            it.values
+                    .filter { it.active }
+                    .forEach {
+                        filteredNewspaperMap.put(it.id, it)
+                    }
+            defaultAppSettings.newspapers = filteredNewspaperMap
+
+            val inActiveNewspaperIds =
+                    it.values.filter { !it.active }.map { it.id }.toCollection(mutableListOf<String>())
+
+            Log.d(TAG,"inActiveNewspaperIds: ${inActiveNewspaperIds.size}")
+
+
+            defaultAppSettings.pages?.let {
+
+                val allPages = it.values
+
+                val inactiveTopPageIds =
+                        allPages
+                                .asSequence()
+                                .filter { it.parentPageId == Page.TOP_LEVEL_PAGE_PARENT_ID && !it.active }
+                                .map { it.id }
+                                .toCollection(mutableListOf<String>())
+
+                Log.d(TAG,"inactiveTopPageIds: ${inactiveTopPageIds.size}")
+                allPages
+                        .asSequence()
+                        .filter {
+                            it.active &&
+                                    !inActiveNewspaperIds.contains(it.newspaperId) &&
+                                    !inactiveTopPageIds.contains(it.parentPageId)
+                        }
+                        .forEach { filteredPageMap.put(it.id, it) }
+
+                filteredPageMap
+                        .values
+                        .filter {
+                            it.parentPageId == Page.TOP_LEVEL_PAGE_PARENT_ID
+                        }
+                        .forEach {
+                            val topPage = it
+                            if (filteredPageMap.values.count {it.parentPageId == topPage.id} > 0){
+                                topPage.hasChild = true
+                            }
+                        }
+
+                defaultAppSettings.pages = filteredPageMap
+                Log.d(TAG,"filteredPageMap: ${filteredPageMap.size}")
+
+            }
+        }
+        return defaultAppSettings
+    }
+
 
     val APP_SETTINGS_UPDATE_TIME_STAMP_SP_KEY =
             "com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls." +

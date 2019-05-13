@@ -29,4 +29,7 @@ data class Newspaper(
         var name: String?=null,
         var countryName: String?=null,
         var languageId: String?=null
-) : Serializable
+) : Serializable{
+    @Ignore
+    var active:Boolean = false
+}

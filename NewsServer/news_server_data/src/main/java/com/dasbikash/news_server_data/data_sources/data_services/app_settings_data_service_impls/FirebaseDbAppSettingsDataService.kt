@@ -19,11 +19,12 @@ import com.dasbikash.news_server_data.data_sources.firebase.RealtimeDBAppSetting
 import com.dasbikash.news_server_data.models.DefaultAppSettings
 
 internal object FirebaseAppSettingsDataService: AppSettingsDataService {
+
     override fun getServerAppSettingsUpdateTime(context: Context): Long {
         return RealtimeDBAppSettingsUtils.getServerAppSettingsUpdateTime()
     }
 
-    override fun getAppSettings(context: Context): DefaultAppSettings {
+    override fun getRawAppsettings(context: Context): DefaultAppSettings {
         return RealtimeDBAppSettingsUtils.getServerAppSettingsData()
     }
 }
