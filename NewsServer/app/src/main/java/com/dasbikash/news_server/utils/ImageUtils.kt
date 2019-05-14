@@ -29,12 +29,6 @@ object ImageUtils {
         }else{
             requestCreator = picasso.load(R.drawable.app_big_logo)
         }
-
-        requestCreator.error(R.drawable.app_big_logo)
-//                .resize(imageView.width * .95.toInt(), imageView.height * .95.toInt())
-//                .centerCrop()
-                .into(imageView)
-
-
+        requestCreator.error(R.drawable.app_big_logo).into(imageView)
     }
 }

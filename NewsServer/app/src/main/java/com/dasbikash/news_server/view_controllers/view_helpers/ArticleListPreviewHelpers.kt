@@ -88,12 +88,6 @@ class ArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                     articlePublicationTime.text = it
 
                     ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink)
-
-                    /*mArticle.previewImageLink?.let {
-                        Picasso.get().load(it).into(articlePreviewImage)
-                    } ?: let {
-                        Picasso.get().load(R.drawable.app_big_logo).into(articlePreviewImage)
-                    }*/
                 }
     }
 }

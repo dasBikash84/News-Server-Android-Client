@@ -221,25 +221,13 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
                                     articlePublicationTime.text = data.second
 
                                     ImageUtils.customLoader(articleImage,mArticle.previewImageLink)
+
                                     mArticle.previewImageLink?.let {
                                         articleImage.setOnClickListener {
                                             itemView.context.startActivity(
                                                     PageViewActivity.getIntentForPageDisplay(itemView.context, mPage))
                                         }
                                     }
-
-                                   /* mArticle.previewImageLink?.let {
-                                        ImageUtils.customLoader(it,articleImage)
-//                                        Picasso.get().load(it).into(articleImage)
-                                        articleImage.setOnClickListener {
-                                            itemView.context.startActivity(
-                                                    PageViewActivity.getIntentForPageDisplay(itemView.context, mPage, mArticle.id)
-                                            )
-                                        }
-                                    } ?: let {
-                                        ImageUtils.customLoader(articleImage)
-//                                        Picasso.get().load(R.drawable.app_big_logo).into(articleImage)
-                                    }*/
                                 }
                             }
 

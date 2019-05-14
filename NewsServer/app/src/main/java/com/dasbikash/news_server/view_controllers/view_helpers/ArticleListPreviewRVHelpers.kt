@@ -153,14 +153,6 @@ class LatestArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewMode
         ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink)
         articlePreviewImage.visibility = View.VISIBLE
 
-        /*mArticle.previewImageLink?.let {
-            Picasso.get().load(it).into(articlePreviewImage)
-            articlePreviewImage.visibility = View.VISIBLE
-        } ?: let {
-            Picasso.get().load(R.drawable.app_big_logo).into(articlePreviewImage)
-            articlePreviewImage.visibility = View.VISIBLE
-        }*/
-
         //Add click listner
         itemView.setOnClickListener(View.OnClickListener {
             itemView.context.startActivity(
