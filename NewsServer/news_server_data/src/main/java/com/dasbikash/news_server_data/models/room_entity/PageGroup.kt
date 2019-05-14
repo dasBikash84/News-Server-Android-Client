@@ -25,9 +25,11 @@ data class PageGroup  (
         var name: String="",
         @Ignore
         @Exclude
+        @com.google.firebase.firestore.Exclude
         var active: Boolean=true,
         var pageList: List<String>?=null,
         @Ignore
         @Exclude
+        @com.google.firebase.firestore.Exclude
         var pageEntityList: MutableList<Page> = mutableListOf()
 ): Serializable

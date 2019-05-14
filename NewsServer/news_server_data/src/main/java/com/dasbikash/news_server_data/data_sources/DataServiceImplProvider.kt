@@ -13,7 +13,8 @@
 
 package com.dasbikash.news_server_data.data_sources
 
-import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls.FirebaseDbAppSettingsDataService
+import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls.CloudFireStoreAppSettingsDataService
+import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls.RealTimeDbAppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls.SpringMVCAppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.RealTimeDbNewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.CloudFireStoreNewsDataService
@@ -23,9 +24,9 @@ import com.dasbikash.news_server_data.data_sources.data_services.user_settings_d
 
 internal object DataServiceImplProvider {
 
-    private val appSettingServiceOption = APP_SETTING_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
+    private val appSettingServiceOption = APP_SETTING_SERVICE_OPTIONS.CLOUD_FIRE_STORE
     private val userSettingServiceOption = USER_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
-    private val newsDataServiceOption = NEWS_DATA_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
+    private val newsDataServiceOption = NEWS_DATA_SERVICE_OPTIONS.CLOUD_FIRE_STORE
 
     private lateinit var appSettingsDataService: AppSettingsDataService
     private lateinit var userSettingsDataService: UserSettingsDataService
@@ -80,10 +81,13 @@ internal object DataServiceImplProvider {
                 when (appSettingServiceOption) {
 
                     APP_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
-                    -> FirebaseDbAppSettingsDataService
+                    -> RealTimeDbAppSettingsDataService
 
                     APP_SETTING_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
                     -> SpringMVCAppSettingsDataService
+
+                    APP_SETTING_SERVICE_OPTIONS.CLOUD_FIRE_STORE
+                    -> CloudFireStoreAppSettingsDataService
                 }
     }
 
@@ -91,7 +95,8 @@ internal object DataServiceImplProvider {
 
 enum class APP_SETTING_SERVICE_OPTIONS {
     FIREBASE_REAL_TIME_DB,
-    SPRING_MVC_REST_SERVICE
+    SPRING_MVC_REST_SERVICE,
+    CLOUD_FIRE_STORE
 }
 
 enum class USER_SETTING_SERVICE_OPTIONS {

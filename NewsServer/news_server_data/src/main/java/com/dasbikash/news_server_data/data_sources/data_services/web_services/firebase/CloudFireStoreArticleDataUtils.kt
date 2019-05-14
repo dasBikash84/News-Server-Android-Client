@@ -23,27 +23,17 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
-object CloudFireStoreArticleDataUtils {
+internal object CloudFireStoreArticleDataUtils {
 
     private val TAG = "DataService"
 
-    private const val ARTICLE_COLLECTION = "articles"
-
-    private fun getDbConnection(): FirebaseFirestore {
-        return FirebaseFirestore.getInstance()
-    }
-
-    private fun getArticleCollectionRef(): CollectionReference {
-        return getDbConnection().collection(ARTICLE_COLLECTION)
-    }
-
-    fun getLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
+    internal fun getLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
 
         val lock = Object()
         val articles = mutableListOf<Article>()
         var dataServerException: DataServerException? = null
 
-        getArticleCollectionRef()
+        CloudFireStoreConUtils.getArticleCollectionRef()
                 .whereEqualTo("pageId",page.id)
                 .orderBy("publicationTime", Query.Direction.DESCENDING)
                 .limit(articleRequestSize.toLong())
@@ -78,13 +68,15 @@ object CloudFireStoreArticleDataUtils {
         return articles
     }
 
-    fun getArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
+    internal fun getArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
+
+        Log.d(TAG,"getRawLatestArticlesByPage"+CloudFireStoreAppSettingsUtils.getServerAppSettingsUpdateTime())
 
         val lock = Object()
         val articles = mutableListOf<Article>()
         var dataServerException: DataServerException? = null
 
-        getArticleCollectionRef()
+        CloudFireStoreConUtils.getArticleCollectionRef()
                 .whereEqualTo("pageId",page.id)
                 .whereLessThan("publicationTime",lastArticle.publicationTime!!)
                 .orderBy("publicationTime", Query.Direction.DESCENDING)
