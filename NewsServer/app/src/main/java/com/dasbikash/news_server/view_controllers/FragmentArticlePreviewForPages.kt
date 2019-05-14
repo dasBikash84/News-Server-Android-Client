@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views
+package com.dasbikash.news_server.view_controllers
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -23,7 +23,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.view_models.HomeViewModel
-import com.dasbikash.news_server.views.view_helpers.PagePreviewListAdapter
+import com.dasbikash.news_server.view_controllers.view_helpers.PagePreviewListAdapter
 import com.dasbikash.news_server_data.models.room_entity.Page
 
 /**

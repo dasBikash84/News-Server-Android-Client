@@ -17,7 +17,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import com.dasbikash.news_server.views.NewspaperPerviewFragment
+import com.dasbikash.news_server.view_controllers.NewspaperPerviewFragment
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository

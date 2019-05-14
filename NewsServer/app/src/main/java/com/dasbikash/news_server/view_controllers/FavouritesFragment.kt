@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views
+package com.dasbikash.news_server.view_controllers
 
 import android.content.Context
 import android.os.Bundle
@@ -32,9 +32,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
+import com.dasbikash.news_server.utils.ImageUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
-import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
-import com.dasbikash.news_server.views.view_helpers.PageDiffCallback
+import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
+import com.dasbikash.news_server.view_controllers.view_helpers.PageDiffCallback
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.google.android.material.card.MaterialCardView
@@ -219,16 +220,26 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
                                     articleTitle.text = mArticle.title
                                     articlePublicationTime.text = data.second
 
+                                    ImageUtils.customLoader(articleImage,mArticle.previewImageLink)
                                     mArticle.previewImageLink?.let {
-                                        Picasso.get().load(it).into(articleImage)
                                         articleImage.setOnClickListener {
                                             itemView.context.startActivity(
-                                                    PageViewActivity.getIntentForPageDisplay(itemView.context, mPage/*, mArticle.id*/)
+                                                    PageViewActivity.getIntentForPageDisplay(itemView.context, mPage))
+                                        }
+                                    }
+
+                                   /* mArticle.previewImageLink?.let {
+                                        ImageUtils.customLoader(it,articleImage)
+//                                        Picasso.get().load(it).into(articleImage)
+                                        articleImage.setOnClickListener {
+                                            itemView.context.startActivity(
+                                                    PageViewActivity.getIntentForPageDisplay(itemView.context, mPage, mArticle.id)
                                             )
                                         }
                                     } ?: let {
-                                        Picasso.get().load(R.drawable.app_big_logo).into(articleImage)
-                                    }
+                                        ImageUtils.customLoader(articleImage)
+//                                        Picasso.get().load(R.drawable.app_big_logo).into(articleImage)
+                                    }*/
                                 }
                             }
 

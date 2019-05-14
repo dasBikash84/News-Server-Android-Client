@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views.view_helpers
+package com.dasbikash.news_server.view_controllers.view_helpers
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DisplayUtils
+import com.dasbikash.news_server.utils.ImageUtils
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
 import com.squareup.picasso.Picasso
@@ -86,11 +87,13 @@ class ArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                     articleTitle.text = mArticle.title
                     articlePublicationTime.text = it
 
-                    mArticle.previewImageLink?.let {
+                    ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink)
+
+                    /*mArticle.previewImageLink?.let {
                         Picasso.get().load(it).into(articlePreviewImage)
                     } ?: let {
                         Picasso.get().load(R.drawable.app_big_logo).into(articlePreviewImage)
-                    }
+                    }*/
                 }
     }
 }

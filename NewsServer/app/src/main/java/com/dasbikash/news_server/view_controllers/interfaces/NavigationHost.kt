@@ -11,23 +11,19 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views;
+package com.dasbikash.news_server.view_controllers.interfaces
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import androidx.fragment.app.Fragment
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
-import com.dasbikash.news_server.R;
-
-public class SettingsFragment extends Fragment {
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_settings,container,false);
-    }
+interface NavigationHost {
+    /**
+     * Trigger a navigation to the specified fragment, optionally adding a transaction to the back
+     * stack to make this navigation reversible.
+     */
+    fun navigateTo(fragment: Fragment, addToBackstack: Boolean=false)
+    fun addFragment(fragment: Fragment)
+    fun removeFragment(fragment: Fragment)
+    fun showBottomNavigationView(show: Boolean)
+    fun showAppBar(show: Boolean)
+    fun disableBackPress(disable:Boolean)
 }

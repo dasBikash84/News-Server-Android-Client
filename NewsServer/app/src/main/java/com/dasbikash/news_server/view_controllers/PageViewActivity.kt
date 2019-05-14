@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views
+package com.dasbikash.news_server.view_controllers
 
 import android.content.Context
 import android.content.Intent
@@ -40,14 +40,13 @@ import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.OnceSettableBoolean
 import com.dasbikash.news_server.view_models.PageViewViewModel
-import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
-import com.dasbikash.news_server.views.view_helpers.ArticlePreviewListAdapter
+import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
+import com.dasbikash.news_server.view_controllers.view_helpers.ArticlePreviewListAdapter
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerNotAvailableExcepption
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
-import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.NewsDataRepository

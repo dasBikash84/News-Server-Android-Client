@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views.view_helpers
+package com.dasbikash.news_server.view_controllers.view_helpers
 
 import androidx.recyclerview.widget.DiffUtil
 import com.dasbikash.news_server_data.models.room_entity.PageGroup

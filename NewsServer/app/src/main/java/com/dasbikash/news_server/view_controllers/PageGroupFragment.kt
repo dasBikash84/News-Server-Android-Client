@@ -11,10 +11,9 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views
+package com.dasbikash.news_server.view_controllers
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,9 +35,9 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.view_models.HomeViewModel
-import com.dasbikash.news_server.views.interfaces.NavigationHost
-import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
-import com.dasbikash.news_server.views.view_helpers.PageGroupDiffCallback
+import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
+import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
+import com.dasbikash.news_server.view_controllers.view_helpers.PageGroupDiffCallback
 import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.google.android.material.card.MaterialCardView

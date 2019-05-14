@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views
+package com.dasbikash.news_server.view_controllers
 
 import android.os.Bundle
 import android.view.LayoutInflater

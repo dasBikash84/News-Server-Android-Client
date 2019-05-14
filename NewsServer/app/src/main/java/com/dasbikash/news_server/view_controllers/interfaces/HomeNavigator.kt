@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views.interfaces
+package com.dasbikash.news_server.view_controllers.interfaces
 
 interface HomeNavigator {
 

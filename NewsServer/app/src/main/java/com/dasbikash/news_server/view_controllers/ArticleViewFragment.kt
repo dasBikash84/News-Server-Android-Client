@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views
+package com.dasbikash.news_server.view_controllers
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DisplayUtils
+import com.dasbikash.news_server.utils.ImageUtils
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.ArticleImage
 import com.dasbikash.news_server_data.models.room_entity.Language
@@ -186,14 +187,15 @@ class ArticleImageHolder(itemView: View):RecyclerView.ViewHolder(itemView){
 
     fun bind(articleImage: ArticleImage){
         if (articleImage.link !=null){
-            Picasso.get().load(articleImage.link).into(mArticleImage)
-        }else{
-            itemView.visibility = View.GONE
-        }
-        if (articleImage.caption !=null){
-            mImageCaption.text = articleImage.caption
-        }else{
-            mImageCaption.visibility = View.GONE
+            itemView.visibility = View.VISIBLE
+
+            ImageUtils.customLoader(mArticleImage,articleImage.link)
+
+            if (articleImage.caption !=null){
+                mImageCaption.text = articleImage.caption
+            }else{
+                mImageCaption.visibility = View.GONE
+            }
         }
     }
 }

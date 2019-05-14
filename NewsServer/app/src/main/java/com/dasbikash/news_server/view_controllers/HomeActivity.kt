@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views
+package com.dasbikash.news_server.view_controllers
 
 import android.content.Intent
 import android.os.Bundle
@@ -27,9 +27,9 @@ import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.OptionsIntentBuilderUtility
-import com.dasbikash.news_server.views.interfaces.HomeNavigator
-import com.dasbikash.news_server.views.interfaces.NavigationHost
-import com.dasbikash.news_server.views.interfaces.WorkInProcessWindowOperator
+import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
+import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
+import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility

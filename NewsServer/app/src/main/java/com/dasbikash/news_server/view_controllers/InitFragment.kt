@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views
+package com.dasbikash.news_server.view_controllers
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -31,7 +31,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.view_models.HomeViewModel
-import com.dasbikash.news_server.views.interfaces.HomeNavigator
+import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
 import com.dasbikash.news_server_data.exceptions.AuthServerException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.SettingsServerException

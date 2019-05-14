@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.views
+package com.dasbikash.news_server.view_controllers
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -27,9 +27,9 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.view_models.HomeViewModel
-import com.dasbikash.news_server.views.interfaces.NavigationHost
-import com.dasbikash.news_server.views.view_helpers.PageDiffCallback
-import com.dasbikash.news_server.views.view_helpers.PagePreviewListAdapter
+import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
+import com.dasbikash.news_server.view_controllers.view_helpers.PageDiffCallback
+import com.dasbikash.news_server.view_controllers.view_helpers.PagePreviewListAdapter
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
