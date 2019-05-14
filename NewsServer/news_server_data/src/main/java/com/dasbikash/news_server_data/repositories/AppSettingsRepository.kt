@@ -14,6 +14,7 @@
 package com.dasbikash.news_server_data.repositories
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
@@ -60,6 +61,8 @@ abstract class AppSettingsRepository{
 
         val localAppSettingsUpdateTime = mAppSettingsDataService.getLocalAppSettingsUpdateTime(context)
         val appSettingsUpdateTime = mAppSettingsDataService.getServerAppSettingsUpdateTime(context)
+
+        Log.d("DataService","appSettingsUpdateTime: "+appSettingsUpdateTime)
 
         return appSettingsUpdateTime > localAppSettingsUpdateTime
     }

@@ -17,14 +17,14 @@ package com.dasbikash.news_server_data.models
 import com.dasbikash.news_server_data.models.room_entity.*
 import java.util.*
 
-class DefaultAppSettings {
-
-    var countries: HashMap<String, Country>? = null
-    var languages: HashMap<String, Language>? = null
-    var newspapers: HashMap<String, Newspaper>? = null
-    var pages: HashMap<String, Page>? = null
-    var page_groups: HashMap<String, PageGroup>? = null
-    var update_time: HashMap<String, Long>? = null
+class DefaultAppSettings(
+        var countries: HashMap<String, Country>? = null,
+        var languages: HashMap<String, Language>? = null,
+        var newspapers: HashMap<String, Newspaper>? = null,
+        var pages: HashMap<String, Page>? = null,
+        var page_groups: HashMap<String, PageGroup>? = null,
+        var update_time: HashMap<String, Long>? = null
+) {
 
     override fun toString(): String {
         return "DefaultAppSettings{" +
@@ -32,7 +32,7 @@ class DefaultAppSettings {
                 ", languages=" + languages +
                 ", newspapers=" + newspapers +
                 ", pages=" + pages +
-                ", pageGroups=" + page_groups +
+                ", page_groups=" + page_groups +
                 ", update_time=" + update_time +
                 '}'.toString()
     }

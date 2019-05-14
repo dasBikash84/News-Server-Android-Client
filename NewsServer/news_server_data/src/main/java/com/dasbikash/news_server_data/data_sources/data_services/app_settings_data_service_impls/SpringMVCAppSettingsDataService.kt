@@ -15,14 +15,15 @@ package com.dasbikash.news_server_data.data_sources.data_services.app_settings_d
 
 import android.content.Context
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.spring_mvc.SpringMVCAppSettingsUtils
 import com.dasbikash.news_server_data.models.DefaultAppSettings
 
 internal object SpringMVCAppSettingsDataService: AppSettingsDataService {
     override fun getServerAppSettingsUpdateTime(context: Context): Long {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return SpringMVCAppSettingsUtils.getServerAppSettingsUpdateTime()
     }
 
     override fun getRawAppsettings(context: Context): DefaultAppSettings {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return SpringMVCAppSettingsUtils.getRawAppsettings()
     }
 }
