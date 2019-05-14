@@ -25,7 +25,8 @@ import com.dasbikash.news_server_data.database.room_converters.IntListConverter
 import com.dasbikash.news_server_data.database.room_converters.StringListConverter
 import com.dasbikash.news_server_data.models.room_entity.*
 
-@Database(entities = [Country::class, Language::class, Newspaper::class, Page::class, PageGroup::class, Article::class, UserPreferenceData::class, ArticleVisitHistory::class], version = 1, exportSchema = false)
+@Database(entities = [Country::class, Language::class, Newspaper::class, Page::class, PageGroup::class, Article::class, UserPreferenceData::class,
+                        ArticleVisitHistory::class,SavedArticle::class], version = 1, exportSchema = false)
 @TypeConverters(DateConverter::class, IntListConverter::class, StringListConverter::class, ArticleImageConverter::class)
 internal abstract class NewsServerDatabase : RoomDatabase() {
 
@@ -35,6 +36,7 @@ internal abstract class NewsServerDatabase : RoomDatabase() {
     abstract val pageDao: PageDao
     abstract val pageGroupDao: PageGroupDao
     abstract val articleDao: ArticleDao
+    abstract val savedArticleDao: SavedArticleDao
 
 
     abstract val userPreferenceDataDao: UserPreferenceDataDao
