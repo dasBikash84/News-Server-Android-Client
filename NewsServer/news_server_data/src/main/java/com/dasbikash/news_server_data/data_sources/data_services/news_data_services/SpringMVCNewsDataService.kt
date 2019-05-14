@@ -14,16 +14,17 @@
 package com.dasbikash.news_server_data.data_sources.data_services.news_data_services
 
 import com.dasbikash.news_server_data.data_sources.NewsDataService
-import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealTimeDbArticleDataUtils
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.spring_mvc.SpringMVCNewsDataUtils
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 
-object RealTimeDbNewsDataService : NewsDataService {
+internal object SpringMVCNewsDataService : NewsDataService {
+
     override fun getRawLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
-        return RealTimeDbArticleDataUtils.getLatestArticlesByPage(page,articleRequestSize)
+        return SpringMVCNewsDataUtils.getRawLatestArticlesByPage(page, articleRequestSize)
     }
 
     override fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
-        return RealTimeDbArticleDataUtils.getArticlesAfterLastArticle(page, lastArticle, articleRequestSize)
+        return SpringMVCNewsDataUtils.getRawArticlesAfterLastArticle(page, lastArticle, articleRequestSize)
     }
 }

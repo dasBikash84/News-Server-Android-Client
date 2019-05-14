@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.data_sources.firebase
+package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
 import android.os.SystemClock
 import com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service.UserIpDataService

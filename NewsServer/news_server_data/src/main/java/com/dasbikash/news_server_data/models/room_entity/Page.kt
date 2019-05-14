@@ -41,7 +41,7 @@ data class Page(
     var hasData:Boolean = false
     var topLevelPage:Boolean = false
     @Ignore
-    var active:Boolean = false
+    var active:Boolean = true
 
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     constructor(parcel: Parcel) : this(

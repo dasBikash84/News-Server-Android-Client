@@ -15,7 +15,7 @@ package com.dasbikash.news_server_data.data_sources.data_services.user_settings_
 
 import android.content.Intent
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
-import com.dasbikash.news_server_data.data_sources.firebase.RealtimeDBUserSettingsUtils
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBUserSettingsUtils
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth

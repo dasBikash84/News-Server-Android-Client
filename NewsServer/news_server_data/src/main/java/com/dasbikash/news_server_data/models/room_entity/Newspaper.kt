@@ -31,5 +31,5 @@ data class Newspaper(
         var languageId: String?=null
 ) : Serializable{
     @Ignore
-    var active:Boolean = false
+    var active:Boolean = true
 }

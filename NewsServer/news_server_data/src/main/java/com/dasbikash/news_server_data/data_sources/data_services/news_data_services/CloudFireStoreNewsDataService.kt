@@ -11,10 +11,10 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.data_sources.data_services.news_data_services.cloud_firestore
+package com.dasbikash.news_server_data.data_sources.data_services.news_data_services
 
 import com.dasbikash.news_server_data.data_sources.NewsDataService
-import com.dasbikash.news_server_data.data_sources.firebase.CloudFireStoreArticleDataUtils
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.CloudFireStoreArticleDataUtils
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 

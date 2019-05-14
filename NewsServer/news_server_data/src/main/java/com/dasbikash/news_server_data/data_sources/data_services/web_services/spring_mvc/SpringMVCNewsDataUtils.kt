@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc
+package com.dasbikash.news_server_data.data_sources.data_services.web_services.spring_mvc
 
 import android.util.Log
 import com.dasbikash.news_server_data.data_sources.NewsDataService
@@ -24,13 +24,13 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-internal object SpringMVCNewsDataService : NewsDataService {
+object SpringMVCNewsDataUtils {
 
     private val TAG = "DataService"
 
     private val springMVCWebService = SpringMVCWebService.RETROFIT.create(SpringMVCWebService::class.java)
 
-    override fun getRawLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
+    fun getRawLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
 
         val lock = Object()
         val articles = mutableListOf<Article>()
@@ -40,19 +40,19 @@ internal object SpringMVCNewsDataService : NewsDataService {
 
         springMVCWebService
                 .getLatestArticlesByPageId(page.id, articleRequestSize)
-                .enqueue(object : Callback<List<Article>?> {
-                    override fun onFailure(call: Call<List<Article>?>, throwable: Throwable) {
+                .enqueue(object : Callback<SpringMVCWebService.Articles?> {
+                    override fun onFailure(call: Call<SpringMVCWebService.Articles?>, throwable: Throwable) {
                         Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} onFailure")
                         dataServerException = DataServerNotAvailableExcepption(throwable)
                         synchronized(lock) { lock.notify() }
                     }
 
-                    override fun onResponse(call: Call<List<Article>?>, response: Response<List<Article>?>) {
+                    override fun onResponse(call: Call<SpringMVCWebService.Articles?>, response: Response<SpringMVCWebService.Articles?>) {
                         Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} onResponse")
                         if (response.isSuccessful) {
 
                             Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} onResponse isSuccessful")
-                            response.body()?.let { articles.addAll(it) }
+                            response.body()?.let { articles.addAll(it.articles) }
                         } else {
 
                             Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} onResponse not Successful")
@@ -71,13 +71,14 @@ internal object SpringMVCNewsDataService : NewsDataService {
         dataServerException?.let { throw it }
 
         Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before throw DataNotFoundException()")
-        if (articles.size == 0 ){throw DataNotFoundException()}
+        if (articles.size == 0 ){throw DataNotFoundException()
+        }
 
         Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before return")
         return articles
     }
 
-    override fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
+    fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
 
         val lock = Object()
         val articles = mutableListOf<Article>()
@@ -85,15 +86,15 @@ internal object SpringMVCNewsDataService : NewsDataService {
 
         springMVCWebService
                 .getArticlesAfterLastId(page.id, lastArticle.id, articleRequestSize)
-                .enqueue(object : Callback<List<Article>?> {
-                    override fun onFailure(call: Call<List<Article>?>, throwable: Throwable) {
+                .enqueue(object : Callback<SpringMVCWebService.Articles?> {
+                    override fun onFailure(call: Call<SpringMVCWebService.Articles?>, throwable: Throwable) {
                         dataServerException = DataServerNotAvailableExcepption(throwable)
                         synchronized(lock) { lock.notify() }
                     }
 
-                    override fun onResponse(call: Call<List<Article>?>, response: Response<List<Article>?>) {
+                    override fun onResponse(call: Call<SpringMVCWebService.Articles?>, response: Response<SpringMVCWebService.Articles?>) {
                         if (response.isSuccessful) {
-                            response.body()?.let { articles.addAll(it) }
+                            response.body()?.let { articles.addAll(it.articles) }
                         } else {
                             dataServerException = DataNotFoundException()
 

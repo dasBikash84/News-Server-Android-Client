@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc
+package com.dasbikash.news_server_data.data_sources.data_services.web_services.spring_mvc
 
 import com.dasbikash.news_server_data.models.room_entity.Article
 
@@ -24,21 +24,21 @@ import retrofit2.http.Query
 
 internal interface SpringMVCWebService {
 
-    @GET(TOP_LEVEL_PAGE_ARTICLE_URL)
-    fun getLatestArticleByTopLevelPageId(@Path("topLevelPageId") topLevelPageId: String): Call<Article>
+//    @GET(TOP_LEVEL_PAGE_ARTICLE_URL)
+//    fun getLatestArticleByTopLevelPageId(@Path("topLevelPageId") topLevelPageId: String): Call<Article>
 
     @GET(LATEST_ARTICLE_BY_PAGE_ID_URL)
     fun getLatestArticlesByPageId(@Path("pageId") pageId: String,
-                                  @Query("article_count") resultSize: Int?): Call<List<Article>>
+                                  @Query("article_count") resultSize: Int?): Call<Articles>
 
     @GET(ARTICLES_AFTER_LAST_ID_URL)
     fun getArticlesAfterLastId(@Path("pageId") pageId: String,
                                @Path("lastArticleId") lastArticleId: String,
-                               @Query("article_count") resultSize: Int?): Call<List<Article>>
+                               @Query("article_count") resultSize: Int?): Call<Articles>
 
     companion object {
 
-        const val BASE_URL = "http://192.168.0.103:8099/"
+        const val BASE_URL = "http://192.168.0.104:8099/"
         const val TOP_LEVEL_PAGE_ARTICLE_URL = "articles/top-level-page-id/{topLevelPageId}/latest-article"
         const val LATEST_ARTICLE_BY_PAGE_ID_URL = "articles/page-id/{pageId}"
         const val ARTICLES_AFTER_LAST_ID_URL = "articles/page-id/{pageId}/last-article-id/{lastArticleId}"
@@ -48,4 +48,6 @@ internal interface SpringMVCWebService {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
     }
+
+    class Articles(val articles:List<Article>)
 }
