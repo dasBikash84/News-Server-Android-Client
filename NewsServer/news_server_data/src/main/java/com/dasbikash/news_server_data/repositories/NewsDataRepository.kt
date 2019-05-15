@@ -41,6 +41,7 @@ abstract class NewsDataRepository{
     abstract fun checkIfAlreadySaved(article: Article):Boolean
     abstract fun getAllSavedArticle(): LiveData<List<SavedArticle>>
     abstract fun deleteSavedArticle(savedArticle: SavedArticle)
+    abstract fun findSavedArticleById(savedArticleId:String):SavedArticle?
 
     private fun insertArticle(article: Article){
         insertArticles(listOf(article))

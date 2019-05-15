@@ -48,6 +48,9 @@
                     android:scheme="http" />
             </intent-filter>
         </activity>
+        <activity android:name=".view_controllers.SavedArticleViewActivity"
+            android:screenOrientation="portrait"/>
+
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="@string/admob_app_id" />

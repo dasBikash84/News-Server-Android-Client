@@ -21,6 +21,7 @@ import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.ImageUtils
 import com.squareup.picasso.Picasso
+import java.io.File
 
 class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDataRepository() {
 
@@ -90,6 +91,14 @@ class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDa
     }
 
     override fun deleteSavedArticle(savedArticle: SavedArticle) {
+        savedArticle.imageLinkList?.let {
+            it.filter { !it.link.isNullOrEmpty() }.forEach {
+                File(it.link!!).delete()
+            }
+        }
+        savedArticle.previewImageLink?.let {
+            File(it).delete()
+        }
         newsServerDatabase.savedArticleDao.deleteOne(savedArticle)
     }
 
@@ -98,6 +107,10 @@ class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDa
             return true
         }
         return false
+    }
+
+    override fun findSavedArticleById(savedArticleId: String):SavedArticle? {
+        return newsServerDatabase.savedArticleDao.findById(savedArticleId)
     }
 
     override fun getLastArticle(page: Page): Article? {

@@ -29,15 +29,18 @@ data class SavedArticle(
         val pageId: String,
         var newspaperName: String,
         var title: String,
-        var articleText: String,
         var publicationTime: Date,
-        var imageLinkList: List<ArticleImage>?,
         var previewImageLink: String?
 ) : Serializable {
+    var imageLinkList: List<ArticleImage>?=null
+    var articleText: String?=null
     companion object{
         fun getInstance(article: Article,page: Page,newspaper: Newspaper,articleImageList:List<ArticleImage>?):SavedArticle{
-            return SavedArticle(article.id,page.name!!,page.id,newspaper.name!!,article.title!!,article.articleText!!,
-                                article.publicationTime!!,articleImageList,article.previewImageLink)
+            val savedArticle =  SavedArticle(article.id,page.name!!,page.id,newspaper.name!!,article.title!!,
+                                article.publicationTime!!,article.previewImageLink)
+            savedArticle.imageLinkList = articleImageList
+            savedArticle.articleText = article.articleText
+            return savedArticle
         }
     }
 

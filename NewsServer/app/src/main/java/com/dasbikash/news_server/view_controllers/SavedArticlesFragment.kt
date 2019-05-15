@@ -69,30 +69,15 @@ class SavedArticlesFragment : Fragment() {
 
         mListAdapter = SavedArticlePreviewListAdapter { item -> doOnArticleClick(item) }
         mSavedArticlePreviewHolder.adapter = mListAdapter
-        ItemTouchHelper(SavedArticleSwipeToDeleteCallback({
-            Observable.just(it)
-                    .subscribeOn(Schedulers.io())
-                    .map {
-                        mNewsDataRepository.deleteSavedArticle(it)
-                    }
-                    .subscribeWith(object : Observer<Unit>{
-                        override fun onComplete() {}
-                        override fun onSubscribe(d: Disposable) {}
-                        override fun onNext(t: Unit) {
-                            DisplayUtils.showShortSnack(getView() as CoordinatorLayout,"Article deleted.")
-                        }
-                        override fun onError(e: Throwable) {
-                            mListAdapter.notifyDataSetChanged()
-                        }
-                    })
-        },mListAdapter)).attachToRecyclerView(mSavedArticlePreviewHolder)
+        ItemTouchHelper(SavedArticleSwipeToDeleteCallback({item->savedArticleDeleteAction(item)},mListAdapter))
+                                            .attachToRecyclerView(mSavedArticlePreviewHolder)
 
         ViewModelProviders.of(activity!!).get(HomeViewModel::class.java).getSavedArticlesLiveData()
                 .observe(this,object : androidx.lifecycle.Observer<List<SavedArticle>>{
                     override fun onChanged(t: List<SavedArticle>?) {
                         t?.let {
                             mSavedArticleList.clear()
-                            mSavedArticleList.addAll(it)
+                            mSavedArticleList.addAll(it.sortedBy { it.newspaperName+it.pageName }.toList())
                             mListAdapter.submitList(mSavedArticleList.toList())
                         }
 
@@ -114,6 +99,25 @@ class SavedArticlesFragment : Fragment() {
 
     fun doOnArticleClick(savedArticle: SavedArticle) {
         LoggerUtils.debugLog("${savedArticle.title} clicked", this::class.java)
+        activity!!.startActivity(SavedArticleViewActivity.getIntent(savedArticle,context!!))
+    }
+
+    fun savedArticleDeleteAction(savedArticle: SavedArticle){
+        mDisposable.add(
+        Observable.just(savedArticle)
+                .subscribeOn(Schedulers.io())
+                .map {
+                    mNewsDataRepository.deleteSavedArticle(it)
+                }
+                .subscribeWith(object : DisposableObserver<Unit>(){
+                    override fun onComplete() {}
+                    override fun onNext(t: Unit) {
+                        DisplayUtils.showShortSnack(getView() as CoordinatorLayout,"Article deleted.")
+                    }
+                    override fun onError(e: Throwable) {
+                        mListAdapter.notifyDataSetChanged()
+                    }
+                }))
     }
 }
 

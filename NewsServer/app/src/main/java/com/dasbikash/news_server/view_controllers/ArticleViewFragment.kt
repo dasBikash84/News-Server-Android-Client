@@ -51,7 +51,6 @@ class ArticleViewFragment : Fragment() {
 
     private lateinit var mArticleTitle: AppCompatTextView
     private lateinit var mArticlePublicationText: AppCompatTextView
-    private lateinit var mArticleImageScroller: NestedScrollView
     private lateinit var mArticleText: AppCompatTextView
     private lateinit var mArticleImageHolder: RecyclerView
     private lateinit var mArticleImageListAdapter: ArticleImageListAdapter
@@ -83,7 +82,6 @@ class ArticleViewFragment : Fragment() {
     private fun findViewItems(view: View) {
         mArticleTitle = view.findViewById(R.id.article_title)
         mArticlePublicationText = view.findViewById(R.id.article_publication_date_text)
-        mArticleImageScroller = view.findViewById(R.id.article_image_scroller)
         mArticleImageHolder = view.findViewById(R.id.article_image_holder)
         mArticleText = view.findViewById(R.id.article_text)
         mWaitScreen = view.findViewById(R.id.wait_screen_for_data_loading)
@@ -141,9 +139,9 @@ class ArticleViewFragment : Fragment() {
             mArticleImageListAdapter = ArticleImageListAdapter()
             mArticleImageHolder.adapter = mArticleImageListAdapter
             mArticleImageListAdapter.submitList(mArticle.imageLinkList)
-            mArticleImageScroller.visibility = View.VISIBLE
+            mArticleImageHolder.visibility = View.VISIBLE
         } else {
-            mArticleImageScroller.visibility = View.GONE
+            mArticleImageHolder.visibility = View.GONE
         }
         mWaitScreen.visibility = View.GONE
     }
