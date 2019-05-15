@@ -20,9 +20,11 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
+import com.dasbikash.news_server_data.models.room_entity.SavedArticle
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 object DisplayUtils {
@@ -125,15 +127,23 @@ object DisplayUtils {
         return positionString
     }
 
+    fun getSavedArticlePublicationDateString(savedArticle: SavedArticle, language: Language, context: Context): String? {
+        return getArticlePublicationDateStringFromPublicationTime(savedArticle.publicationTime,language,context)
+    }
+
 
     fun getArticlePublicationDateString(article: Article, language: Language, context: Context): String? {
+        return getArticlePublicationDateStringFromPublicationTime(article.publicationTime,language,context)
+    }
 
-        val simpleDateFormat = SimpleDateFormat(context.getResources().getString(R.string.display_date_format_short))
+    private fun getArticlePublicationDateStringFromPublicationTime(publicationTime:Date?,language: Language, context: Context):String?{
+
+        val simpleDateFormat = SimpleDateFormat(context.getResources().getString(R.string.display_date_format_long))
 
         var diffTs = System.currentTimeMillis()
         var publicationTimeString: String? = null
 
-        article.publicationTime?.let {
+        publicationTime?.let {
 
             diffTs = diffTs - it.time
 
@@ -141,16 +151,16 @@ object DisplayUtils {
                 publicationTimeString = JUST_NOW_TIME_STRING
             } else if (diffTs < HOUR_IN_MS) {
                 publicationTimeString = (diffTs / MINUTE_IN_MS).toInt().toString() + " " +
-                                        (if (diffTs > TWO_MINUTES_IN_MS) MINUTES_TIME_STRING else MINUTE_TIME_STRING) +
-                                        " " + AGO_TIME_STRING
+                        (if (diffTs > TWO_MINUTES_IN_MS) MINUTES_TIME_STRING else MINUTE_TIME_STRING) +
+                        " " + AGO_TIME_STRING
             } else if (diffTs < DAY_IN_MS) {
                 publicationTimeString = (diffTs / HOUR_IN_MS).toString() + " " +
-                                        (if (diffTs > TWO_HOURS_IN_MS) HOURS_TIME_STRING else HOUR_TIME_STRING) +
-                                        " " + AGO_TIME_STRING
+                        (if (diffTs > TWO_HOURS_IN_MS) HOURS_TIME_STRING else HOUR_TIME_STRING) +
+                        " " + AGO_TIME_STRING
             } else if (diffTs < TWO_DAYS_IN_MS) {
                 publicationTimeString = YESTERDAY_TIME_STRING
             } else {
-                publicationTimeString = simpleDateFormat.format(article.publicationTime?.time)
+                publicationTimeString = simpleDateFormat.format(publicationTime?.time)
             }
         }
 
@@ -159,6 +169,7 @@ object DisplayUtils {
         }
 
         return publicationTimeString
+
     }
 
     private fun convertToBanglaTimeString(publicationTimeStringInput: String): String {

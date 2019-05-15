@@ -17,6 +17,7 @@ import android.widget.ImageView
 import com.dasbikash.news_server.R
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.RequestCreator
+import java.io.File
 
 object ImageUtils {
 
@@ -25,7 +26,11 @@ object ImageUtils {
         val requestCreator:RequestCreator
 
         if (url != null){
-            requestCreator = picasso.load(url)
+            if (url.startsWith("/data")){
+                requestCreator = picasso.load(File(url))
+            }else {
+                requestCreator = picasso.load(url)
+            }
         }else{
             requestCreator = picasso.load(R.drawable.app_big_logo)
         }

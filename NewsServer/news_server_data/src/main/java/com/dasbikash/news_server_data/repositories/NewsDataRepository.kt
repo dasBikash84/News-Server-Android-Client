@@ -39,7 +39,7 @@ abstract class NewsDataRepository{
 
     abstract fun saveArticleToLocalDisk(article: Article,context: Context): SavedArticle
     abstract fun checkIfAlreadySaved(article: Article):Boolean
-    abstract fun getAllSavedArticle(): List<SavedArticle>
+    abstract fun getAllSavedArticle(): LiveData<List<SavedArticle>>
     abstract fun deleteSavedArticle(savedArticle: SavedArticle)
 
     private fun insertArticle(article: Article){

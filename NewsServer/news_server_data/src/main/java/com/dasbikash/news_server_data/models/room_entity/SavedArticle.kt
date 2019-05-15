@@ -21,15 +21,12 @@ import com.google.gson.annotations.Expose
 import java.io.Serializable
 import java.util.*
 
-@Entity(
-//        foreignKeys = [
-//            ForeignKey(entity = Article::class, parentColumns = ["id"], childColumns = ["id"])
-//        ]
-)
+@Entity
 data class SavedArticle(
         @PrimaryKey
         val id: String,
         val pageName: String,
+        val pageId: String,
         var newspaperName: String,
         var title: String,
         var articleText: String,
@@ -39,7 +36,7 @@ data class SavedArticle(
 ) : Serializable {
     companion object{
         fun getInstance(article: Article,page: Page,newspaper: Newspaper,articleImageList:List<ArticleImage>?):SavedArticle{
-            return SavedArticle(article.id,page.name!!,newspaper.name!!,article.title!!,article.articleText!!,
+            return SavedArticle(article.id,page.name!!,page.id,newspaper.name!!,article.title!!,article.articleText!!,
                                 article.publicationTime!!,articleImageList,article.previewImageLink)
         }
     }

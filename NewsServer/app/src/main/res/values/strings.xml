@@ -138,9 +138,9 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="bmi_home_title">Home</string>
     <string name="bmi_more_title">More</string>
-    <string name="bmi_saved_artiles_title">Saved-Articles</string>
+    <string name="bmi_saved_artiles_title">Saved</string>
     <string name="bmi_favourites_title">Favourites</string>
-    <string name="bmi_page_groups_title">Page-Groups</string>
+    <string name="bmi_page_groups_title">Groups</string>
     <string name="app_logo_on_initial_data_loading_page">App logo on Initial data loading page</string>
     <string name="no_internet_message">No internet connection!</string>
     <string name="log_in_app_menu_item_title">Log in/Sign up</string>

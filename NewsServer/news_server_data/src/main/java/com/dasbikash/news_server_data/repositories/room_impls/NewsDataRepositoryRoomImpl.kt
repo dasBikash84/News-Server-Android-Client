@@ -85,7 +85,7 @@ class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDa
         return savedArticle
     }
 
-    override fun getAllSavedArticle(): List<SavedArticle> {
+    override fun getAllSavedArticle(): LiveData<List<SavedArticle>> {
         return newsServerDatabase.savedArticleDao.findAll()
     }
 

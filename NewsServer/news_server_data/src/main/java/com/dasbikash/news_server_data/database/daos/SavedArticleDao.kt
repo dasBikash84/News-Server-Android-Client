@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.database.daos
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.dasbikash.news_server_data.models.room_entity.SavedArticle
 
@@ -29,7 +30,7 @@ internal interface SavedArticleDao {
     fun deleteOne(savedArticle: SavedArticle)
 
     @Query("SELECT * FROM SavedArticle")
-    fun findAll(): List<SavedArticle>
+    fun findAll(): LiveData<List<SavedArticle>>
 
     @Query("SELECT * FROM SavedArticle WHERE id=:id")
     fun findById(id:String): SavedArticle?

@@ -71,6 +71,10 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
         return mUserSettingsRepository.getPageGroupListLive()
     }
 
+    fun getSavedArticlesLiveData():LiveData<List<SavedArticle>>{
+        return mNewsDataRepository.getAllSavedArticle()
+    }
+
     fun getLatestArticleProvider(requestPayload:Pair<UUID,Page>):Observable<Pair<UUID,Article?>>{
         var amDisposed = false
         return Observable.just(requestPayload)
