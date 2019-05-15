@@ -97,7 +97,7 @@ class PageViewActivity : AppCompatActivity(),
     private lateinit var mTextSizeChangeMinusButton: MaterialButton//ok_text_size_change
 
     private var transTextSize = 0
-    private val mTextSizeChangeStep = 2
+    private val mTextSizeChangeStep = 1
 
     private lateinit var mAppSettingsRepository: AppSettingsRepository
     private lateinit var mUserSettingsRepository: UserSettingsRepository
@@ -173,9 +173,9 @@ class PageViewActivity : AppCompatActivity(),
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START)
         } else {
-            if (!mWaitWindowShown) {
+//            if (!mWaitWindowShown) {
                 super.onBackPressed()
-            }
+//            }
         }
     }
 
@@ -231,21 +231,19 @@ class PageViewActivity : AppCompatActivity(),
                         override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult, Throwable?>) {
                             when (processingResult.first) {
                                 UserSettingsRepository.SignInResult.SUCCESS -> {
-                                    showShortSnack("Welcome ${mUserSettingsRepository.getCurrentUserName()
-                                            ?: ""}")
-                                    actionAfterSuccessfulLogIn?.let {
-                                        it()
-                                    }
+                                    DisplayUtils.showShortSnack(mPageViewContainer,
+                                            "Welcome ${mUserSettingsRepository.getCurrentUserName() ?: ""}")
+                                    actionAfterSuccessfulLogIn?.let {it()}
                                 }
-                                UserSettingsRepository.SignInResult.USER_ABORT -> showShortSnack("Log in aborted")
-                                UserSettingsRepository.SignInResult.SERVER_ERROR -> showShortSnack("Log in error. Details:${processingResult.second}")
-                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> showShortSnack("Error while User settings data saving. Details:${processingResult.second}")
+                                UserSettingsRepository.SignInResult.USER_ABORT -> DisplayUtils.showShortSnack(mPageViewContainer,"Log in aborted")
+                                UserSettingsRepository.SignInResult.SERVER_ERROR -> DisplayUtils.showShortSnack(mPageViewContainer,"Log in error. Details:${processingResult.second}")
+                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> DisplayUtils.showShortSnack(mPageViewContainer,"Error while User settings data saving. Details:${processingResult.second}")
                             }
                         }
 
                         override fun onError(e: Throwable) {
                             actionAfterSuccessfulLogIn = null
-                            showShortSnack("Error while User settings data saving. Error: ${e}")
+                            DisplayUtils.showShortSnack(mPageViewContainer,"Error while User settings data saving. Error: ${e}")
                             removeWorkInProcessWindow()
                         }
                     })
@@ -273,7 +271,8 @@ class PageViewActivity : AppCompatActivity(),
         mArticleLoadingProgressBarMiddle = findViewById(R.id.article_loading_progress_bar_middle)
         mArticleLoadingProgressBarMiddle.setOnClickListener { }
 
-        mFragmentStatePagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager) {
+        mFragmentStatePagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager,
+                FragmentStatePagerAdapter.BEHAVIOR_SET_USER_VISIBLE_HINT) {
             override fun getItemPosition(fragment: Any): Int {
                 if (mTextSizeChangeFrame.visibility == View.GONE) {
                     return PagerAdapter.POSITION_UNCHANGED
@@ -295,6 +294,15 @@ class PageViewActivity : AppCompatActivity(),
                 return mArticleList.size
             }
         }
+        mArticleViewContainer.addOnPageChangeListener(object : ViewPager.OnPageChangeListener{
+            override fun onPageScrollStateChanged(state: Int) {
+            }
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+            }
+            override fun onPageSelected(position: Int) {
+                invalidateOptionsMenu()
+            }
+        })
         mArticleViewContainer.adapter = mFragmentStatePagerAdapter
         mArticleViewContainer.setCurrentItem(0)
     }
@@ -408,13 +416,13 @@ class PageViewActivity : AppCompatActivity(),
                                         throwable is DataNotFoundException -> {
                                             mHaveMoreArticle.set()
                                             mLoadMoreArticleButton.visibility = View.GONE
-                                            showShortSnack("No more articles to display.")
+                                            DisplayUtils.showShortSnack(mPageViewContainer,"No more articles to display.")
                                         }
                                         throwable is DataServerNotAvailableExcepption -> {
-                                            showShortSnack("Remote server error! Please try again later.")
+                                            DisplayUtils.showShortSnack(mPageViewContainer,"Remote server error! Please try again later.")
                                         }
                                         throwable is NoInternertConnectionException -> {
-                                            showShortSnack("No internet connection!!!")
+                                            DisplayUtils.showShortSnack(mPageViewContainer,"No internet connection!!!")
                                         }
                                         else -> {
                                             throw throwable
@@ -456,11 +464,11 @@ class PageViewActivity : AppCompatActivity(),
         }
     }
 
-    private fun showShortSnack(message: String) {
+    /*fun showShortSnack(message: String) {
         Snackbar
                 .make(mPageViewContainer, message, Snackbar.LENGTH_SHORT)
                 .show()
-    }
+    }*/
 
     private fun closeNavigationDrawer() {
         mDrawerLayout.closeDrawer(GravityCompat.START)
@@ -521,11 +529,11 @@ class PageViewActivity : AppCompatActivity(),
                                         when (action) {
                                             PAGE_FAV_STATUS_CHANGE_ACTION.ADD -> {
                                                 mIsPageOnFavList = true
-                                                showShortSnack("${mPage.name} added to favourites")
+                                                DisplayUtils.showShortSnack(mPageViewContainer,"${mPage.name} added to favourites")
                                             }
                                             PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE -> {
                                                 mIsPageOnFavList = false
-                                                showShortSnack("${mPage.name} removed from favourites")
+                                                DisplayUtils.showShortSnack(mPageViewContainer,"${mPage.name} removed from favourites")
                                             }
                                         }
                                         invalidateOptionsMenu()
@@ -533,7 +541,7 @@ class PageViewActivity : AppCompatActivity(),
                                 }
 
                                 override fun onError(e: Throwable) {
-                                    showShortSnack("Error!! Please retry.")
+                                    DisplayUtils.showShortSnack(mPageViewContainer,"Error!! Please retry.")
                                     removeWorkInProcessWindow()
                                 }
                             })

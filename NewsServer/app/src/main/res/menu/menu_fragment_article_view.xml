@@ -15,18 +15,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/change_text_font_menu_item"
-        android:icon="@drawable/ic_font_size"
-        android:title="@string/change_text_font_menu_item_title"
-        app:showAsAction="ifRoom|collapseActionView"/>
-    <item
         android:id="@+id/save_article_locally_menu_item"
         android:icon="@drawable/ic_save"
         android:title="@string/save_article_locally_menu_item_title"
-        app:showAsAction="collapseActionView"/>
-    <item
-        android:id="@+id/delete_article_from_storage_menu_item"
-        android:icon="@drawable/ic_delete"
-        android:title="@string/delete_article_from_storage_menu_item_title"
         app:showAsAction="collapseActionView"/>
 </menu>

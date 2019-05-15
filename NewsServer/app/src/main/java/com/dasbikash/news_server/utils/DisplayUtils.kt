@@ -16,10 +16,12 @@ package com.dasbikash.news_server.utils
 import android.content.Context
 import android.text.Html
 import android.widget.TextView
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
+import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -264,6 +266,12 @@ object DisplayUtils {
             }
         }
         SharedPreferenceUtils.saveData(context,effectiveTextSize, ARTCILE_TEXT_SIZE_SP_KEY)
+    }
+
+    fun showShortSnack(coordinatorLayout: CoordinatorLayout,message: String) {
+        Snackbar
+                .make(coordinatorLayout, message, Snackbar.LENGTH_SHORT)
+                .show()
     }
 
 }

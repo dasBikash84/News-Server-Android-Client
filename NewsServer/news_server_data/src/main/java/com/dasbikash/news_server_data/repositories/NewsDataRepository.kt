@@ -19,9 +19,7 @@ import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
-import com.dasbikash.news_server_data.models.room_entity.Article
-import com.dasbikash.news_server_data.models.room_entity.Page
-import com.dasbikash.news_server_data.models.room_entity.PageArticleFetchStatus
+import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
 import com.dasbikash.news_server_data.repositories.room_impls.NewsDataRepositoryRoomImpl
 import com.dasbikash.news_server_data.utills.ExceptionUtils
@@ -37,7 +35,12 @@ abstract class NewsDataRepository{
     abstract protected fun setPageAsSynced(page:Page)
     abstract protected fun setPageAsEndReached(page:Page)
     abstract protected fun insertArticles(articles:List<Article>)
-    protected abstract fun getLastArticle(page: Page): Article?
+    abstract protected fun getLastArticle(page: Page): Article?
+
+    abstract fun saveArticleToLocalDisk(article: Article,context: Context): SavedArticle
+    abstract fun checkIfAlreadySaved(article: Article):Boolean
+    abstract fun getAllSavedArticle(): List<SavedArticle>
+    abstract fun deleteSavedArticle(savedArticle: SavedArticle)
 
     private fun insertArticle(article: Article){
         insertArticles(listOf(article))

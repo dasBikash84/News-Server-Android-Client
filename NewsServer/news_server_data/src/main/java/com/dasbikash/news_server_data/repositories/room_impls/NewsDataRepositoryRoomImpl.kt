@@ -16,11 +16,11 @@ package com.dasbikash.news_server_data.repositories.room_impls
 import android.content.Context
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.database.NewsServerDatabase
-import com.dasbikash.news_server_data.models.room_entity.Article
-import com.dasbikash.news_server_data.models.room_entity.Page
-import com.dasbikash.news_server_data.models.room_entity.PageArticleFetchStatus
+import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.utills.ExceptionUtils
+import com.dasbikash.news_server_data.utills.ImageUtils
+import com.squareup.picasso.Picasso
 
 class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDataRepository() {
 
@@ -58,6 +58,46 @@ class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDa
 
     override fun getArticleLiveDataForPage(page: Page): LiveData<List<Article>> {
         return newsServerDatabase.articleDao.getArticleLiveDataForPage(page.id)
+    }
+
+    override fun saveArticleToLocalDisk(article: Article,context: Context): SavedArticle {
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+
+        val page = newsServerDatabase.pageDao.findById(article.pageId!!)
+        val newspaper = newsServerDatabase.newsPaperDao.findById(article.newspaperId!!)
+
+        article.previewImageLink?.let {
+            article.previewImageLink = ImageUtils.urlToFile(it,article.id+"_preview",context)
+        }
+
+        val savedImageList = mutableListOf<ArticleImage>()
+
+        var i=0
+        article.imageLinkList?.asSequence()?.forEach {
+            val articleImage = it
+            i++
+            ImageUtils.urlToFile(it.link!!,article.id+"_"+i,context)?.let {
+                savedImageList.add(ArticleImage(it,articleImage.caption))
+            }
+        }
+        val savedArticle = SavedArticle.getInstance(article,page,newspaper,savedImageList)
+        newsServerDatabase.savedArticleDao.addArticles(savedArticle)
+        return savedArticle
+    }
+
+    override fun getAllSavedArticle(): List<SavedArticle> {
+        return newsServerDatabase.savedArticleDao.findAll()
+    }
+
+    override fun deleteSavedArticle(savedArticle: SavedArticle) {
+        newsServerDatabase.savedArticleDao.deleteOne(savedArticle)
+    }
+
+    override fun checkIfAlreadySaved(article: Article): Boolean {
+        newsServerDatabase.savedArticleDao.findById(article.id)?.let {
+            return true
+        }
+        return false
     }
 
     override fun getLastArticle(page: Page): Article? {

@@ -22,9 +22,9 @@ import java.io.Serializable
 import java.util.*
 
 @Entity(
-        foreignKeys = [
-            ForeignKey(entity = Article::class, parentColumns = ["id"], childColumns = ["id"])
-        ]
+//        foreignKeys = [
+//            ForeignKey(entity = Article::class, parentColumns = ["id"], childColumns = ["id"])
+//        ]
 )
 data class SavedArticle(
         @PrimaryKey
@@ -38,9 +38,14 @@ data class SavedArticle(
         var previewImageLink: String?
 ) : Serializable {
     companion object{
-        fun getInastance(article: Article,page: Page,newspaper: Newspaper):SavedArticle{
-            return SavedArticle(article.id,page.name!!,newspaper.name!!,article.title!!,article.articleText!!,article.publicationTime!!,
-                                    article.imageLinkList,article.previewImageLink)
+        fun getInstance(article: Article,page: Page,newspaper: Newspaper,articleImageList:List<ArticleImage>?):SavedArticle{
+            return SavedArticle(article.id,page.name!!,newspaper.name!!,article.title!!,article.articleText!!,
+                                article.publicationTime!!,articleImageList,article.previewImageLink)
         }
     }
+
+    override fun toString(): String {
+        return "SavedArticle(id='$id', pageName='$pageName', newspaperName='$newspaperName', title='$title')"
+    }
+
 }
