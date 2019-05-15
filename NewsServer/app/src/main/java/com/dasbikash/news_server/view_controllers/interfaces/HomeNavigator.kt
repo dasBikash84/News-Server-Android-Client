@@ -18,6 +18,6 @@ interface HomeNavigator {
     fun loadHomeFragment()
     fun loadPageGroupFragment()
     fun loadFavouritesFragment()
-    fun loadSettingsFragment()
+    fun loadSavedArticlesFragment()
     fun loadMoreFragment()
 }

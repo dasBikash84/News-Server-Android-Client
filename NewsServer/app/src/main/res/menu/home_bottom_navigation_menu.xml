@@ -17,27 +17,27 @@
     <item
         android:id="@+id/bottom_menu_item_home"
         android:icon="@drawable/ic_home_pink_24dp"
-        android:title="@string/ic_home_title"
+        android:title="@string/bmi_home_title"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/bottom_menu_item_page_group"
         android:icon="@drawable/ic_page_group_pink_24dp"
-        android:title="@string/ic_home_page_groups"
+        android:title="@string/bmi_page_groups_title"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/bottom_menu_item_favourites"
         android:icon="@drawable/ic_favorite_pink_24dp"
-        android:title="@string/ic_home_favourites"
+        android:title="@string/bmi_favourites_title"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/bottom_menu_item_settings"
-        android:icon="@drawable/ic_settings_pink_24dp"
-        android:title="@string/ic_home_settings"
+        android:id="@+id/bottom_menu_item_saved_articles"
+        android:icon="@drawable/ic_save"
+        android:title="@string/bmi_saved_artiles_title"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/bottom_menu_item_more"
         android:icon="@drawable/ic_more_vert_pink_24dp"
-        android:title="@string/ic_home_more"
+        android:title="@string/bmi_more_title"
         app:showAsAction="ifRoom" />
 
 </menu>

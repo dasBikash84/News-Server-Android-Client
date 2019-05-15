@@ -148,10 +148,10 @@ class HomeActivity : AppCompatActivity(),
                     }
                     true
                 }
-                R.id.bottom_menu_item_settings -> {
-                    if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is SettingsFragment)) {
+                R.id.bottom_menu_item_saved_articles -> {
+                    if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is SavedArticlesFragment)) {
                         mAppBar.visibility = View.VISIBLE
-                        loadSettingsFragment()
+                        loadSavedArticlesFragment()
                     }
                     true
                 }
@@ -264,8 +264,8 @@ class HomeActivity : AppCompatActivity(),
         navigateTo(FavouritesFragment())
     }
 
-    override fun loadSettingsFragment() {
-        navigateTo(SettingsFragment())
+    override fun loadSavedArticlesFragment() {
+        navigateTo(SavedArticlesFragment())
     }
 
     override fun loadMoreFragment() {
@@ -280,7 +280,7 @@ class HomeActivity : AppCompatActivity(),
                     return true
                 }
                 R.id.settings_menu_item -> {
-                    loadSettingsFragment()
+                    loadSavedArticlesFragment()
                     return true
                 }
                 R.id.log_in_app_menu_item -> {
