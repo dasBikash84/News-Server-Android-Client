@@ -32,9 +32,9 @@ import androidx.viewpager.widget.ViewPager
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.custom_views.ViewPagerTitleScroller
 import com.dasbikash.news_server.model.PagableNewsPaper
-import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.view_controllers.view_helpers.PageListAdapter
 import com.dasbikash.news_server.view_controllers.view_helpers.PageViewHolder
+import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.RepositoryFactory

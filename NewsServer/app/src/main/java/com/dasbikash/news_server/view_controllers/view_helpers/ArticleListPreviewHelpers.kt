@@ -27,7 +27,6 @@ import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.ImageUtils
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
-import com.squareup.picasso.Picasso
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers

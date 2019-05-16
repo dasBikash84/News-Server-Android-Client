@@ -26,10 +26,10 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.view_helpers.PageDiffCallback
 import com.dasbikash.news_server.view_controllers.view_helpers.PagePreviewListAdapter
+import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
@@ -205,7 +205,7 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
 
     override fun onViewRecycled(holder: PagePreviewHolder) {
         super.onViewRecycled(holder)
-        holder.active = false
+//        holder.active = false
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -221,7 +221,7 @@ class PagePreviewHolder(val lifecycleOwner: LifecycleOwner,itemView: View) : Rec
         val TAG = "PagePreviewHolder"
     }
 
-    var active = true
+//    var active = true
 
     lateinit var mPage: Page
 

@@ -33,17 +33,22 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.ImageUtils
-import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.view_controllers.view_helpers.PageDiffCallback
+import com.dasbikash.news_server.view_models.HomeViewModel
+import com.dasbikash.news_server_data.exceptions.DataNotFoundException
+import com.dasbikash.news_server_data.exceptions.DataServerException
+import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.LoggerUtils
+import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import com.google.android.material.card.MaterialCardView
-import com.squareup.picasso.Picasso
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.exceptions.CompositeException
 import io.reactivex.functions.Consumer
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
@@ -193,7 +198,6 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
 
         pageTitleHolder.setOnClickListener {
             if (!::mArticle.isInitialized) {
-                showChilds()
                 val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
                 val newsDataRepository = RepositoryFactory.getNewsDataRepository(itemView.context)
                 var language: Language
@@ -210,10 +214,9 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
                         .subscribeWith(object : DisposableObserver<Any>() {
                             override fun onComplete() {
                             }
-
                             override fun onNext(data: Any) {
-
                                 if (data is Pair<*, *>) {
+                                    showChilds()
                                     @Suppress("UNCHECKED_CAST")
                                     mArticle = (data as Pair<Article, String>).first
 
@@ -232,6 +235,20 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
                             }
 
                             override fun onError(e: Throwable) {
+                                when(e){
+                                    is NoInternertConnectionException ->{
+                                        NetConnectivityUtility.showNoInternetToast(itemView.context)
+                                    }
+                                    is DataNotFoundException ->{
+
+                                    }
+                                    is DataServerException ->{
+
+                                    }
+                                    else ->{
+
+                                    }
+                                }
                             }
                         })
             } else {

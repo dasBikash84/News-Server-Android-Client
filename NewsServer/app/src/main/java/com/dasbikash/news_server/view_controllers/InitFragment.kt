@@ -30,8 +30,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
+import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.exceptions.AuthServerException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.SettingsServerException

@@ -39,9 +39,9 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.OnceSettableBoolean
-import com.dasbikash.news_server.view_models.PageViewViewModel
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.view_controllers.view_helpers.ArticlePreviewListAdapter
+import com.dasbikash.news_server.view_models.PageViewViewModel
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerNotAvailableExcepption
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
@@ -52,9 +52,9 @@ import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
+import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView
-import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -412,17 +412,16 @@ class PageViewActivity : AppCompatActivity(),
                                 override fun onError(throwable: Throwable) {
                                     mArticleLoadRunning = false
                                     removeWorkInProcessWindow()//hideProgressBars()
-                                    when {
-                                        throwable is DataNotFoundException -> {
+                                    when(throwable) {
+                                         is DataNotFoundException -> {
                                             mHaveMoreArticle.set()
                                             mLoadMoreArticleButton.visibility = View.GONE
-                                            DisplayUtils.showShortSnack(mPageViewContainer,"No more articles to display.")
                                         }
-                                        throwable is DataServerNotAvailableExcepption -> {
+                                        is DataServerNotAvailableExcepption -> {
                                             DisplayUtils.showShortSnack(mPageViewContainer,"Remote server error! Please try again later.")
                                         }
-                                        throwable is NoInternertConnectionException -> {
-                                            DisplayUtils.showShortSnack(mPageViewContainer,"No internet connection!!!")
+                                        is NoInternertConnectionException -> {
+                                            NetConnectivityUtility.showNoInternetToast(this@PageViewActivity)
                                         }
                                         else -> {
                                             throw throwable

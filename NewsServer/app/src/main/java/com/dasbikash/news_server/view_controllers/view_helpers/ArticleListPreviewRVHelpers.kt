@@ -19,6 +19,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.LayoutRes
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -27,15 +28,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.ImageUtils
-import com.dasbikash.news_server.view_models.HomeViewModel
-import com.dasbikash.news_server.view_controllers.NewspaperPerviewFragment
 import com.dasbikash.news_server.view_controllers.PageViewActivity
+import com.dasbikash.news_server.view_models.HomeViewModel
+import com.dasbikash.news_server_data.exceptions.DataNotFoundException
+import com.dasbikash.news_server_data.exceptions.DataServerException
+import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
-import com.squareup.picasso.Picasso
+import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.exceptions.CompositeException
 import io.reactivex.observers.DisposableObserver
 import java.util.*
 
@@ -78,14 +82,23 @@ class PagePreviewListAdapter(@LayoutRes val holderResId: Int, val homeViewModel:
                             @Suppress("UNCHECKED_CAST")
                             override fun onNext(articleData: Any) {
                                 if (articleData is Pair<*, *>) {
-                                    Log.d(NewspaperPerviewFragment.TAG,"art displayed for page: ${page.name} Np: ${page.newspaperId}")
+                                    Log.d(TAG,"art displayed for page: ${page.name} Np: ${page.newspaperId}")
                                     val articleDataResult = articleData as Pair<String?, Article>
                                     holder.bind(page,articleDataResult.first,articleDataResult.second)
                                 }
                             }
 
                             override fun onError(e: Throwable) {
-                                Log.d(TAG, e.message + " for page Np: ${page.newspaperId} ${page.name} L2")
+                                if (e is CompositeException){
+                                    if(e.exceptions.filter { it is NoInternertConnectionException }.count() > 0){
+                                        NetConnectivityUtility.showNoInternetToast(holder.itemView.context)
+                                    }else if (e.exceptions.filter { it is DataNotFoundException }.count() > 0){
+                                        Log.d(TAG,"DataNotFoundException")
+                                    }else if (e.exceptions.filter { it is DataServerException }.count() > 0){
+                                        Log.d(TAG,"DataServerException")
+                                    }
+                                }
+                                Log.d(TAG, e.message + "${e::class.java.simpleName} for page Np: ${page.newspaperId} ${page.name} L2")
                             }
                         })
         )

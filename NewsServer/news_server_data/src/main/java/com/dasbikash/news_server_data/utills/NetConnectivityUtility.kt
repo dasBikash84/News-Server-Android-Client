@@ -22,11 +22,14 @@ import android.net.NetworkCapabilities
 import android.net.NetworkInfo
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 object NetConnectivityUtility : BroadcastReceiver() {
 
+    private var mNoInternertToastShown = false
+    private const val NO_INTERNET_TOAST_MESSAGE = "No internet connection!!!"
     private var mCurrentNetworkType = NetConnectivityUtility.NETWORK_TYPE.UN_INITIALIZED
 
     enum class NETWORK_TYPE {
@@ -40,13 +43,10 @@ object NetConnectivityUtility : BroadcastReceiver() {
 
     @Suppress("DEPRECATION")
     override fun onReceive(context: Context, intent: Intent?) {
-
-        Log.d(TAG, "onReceive")
-
         if (intent != null && intent.action != null &&
                 intent.action!!.equals(CONNECTIVITY_CHANGE_FILTER, ignoreCase = true)) {
             val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            var sActiveNetworkInfo: NetworkInfo?
+            val sActiveNetworkInfo: NetworkInfo?
 
                 sActiveNetworkInfo = connectivityManager.activeNetworkInfo
 
@@ -64,18 +64,13 @@ object NetConnectivityUtility : BroadcastReceiver() {
                         ConnectivityManager.TYPE_WIMAX -> NetConnectivityUtility.NETWORK_TYPE.WIMAX
                         else -> NetConnectivityUtility.NETWORK_TYPE.OTHER
                     }
-                    //Log.d(TAG, "onReceive Old: NETWORK_TYPE.WIFI");
-                    //Log.d(TAG, "onReceive Old: NETWORK_TYPE.MOBILE");
-                    //Log.d(TAG, "onReceive: NETWORK_TYPE.OTHER");
                 } else {
                     val network = connectivityManager.activeNetwork
                     val networkCapabilities = connectivityManager.getNetworkCapabilities(network)
                     if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI_AWARE)) {
                         mCurrentNetworkType = NetConnectivityUtility.NETWORK_TYPE.WIFI
-                        Log.d(TAG, "onReceive New: NETWORK_TYPE.WIFI")
                     } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
                         mCurrentNetworkType = NetConnectivityUtility.NETWORK_TYPE.MOBILE
-                        Log.d(TAG, "onReceive New: NETWORK_TYPE.MOBILE")
                     } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH)) {
                         mCurrentNetworkType = NetConnectivityUtility.NETWORK_TYPE.BLUETOOTH
                     } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
@@ -84,10 +79,10 @@ object NetConnectivityUtility : BroadcastReceiver() {
                         mCurrentNetworkType = NetConnectivityUtility.NETWORK_TYPE.OTHER
                     }
                 }
+                mNoInternertToastShown = false
                 generateNetworkAvailableBroadcast(context)
             } else {
                 mCurrentNetworkType = NetConnectivityUtility.NETWORK_TYPE.DC
-                Log.d(TAG, "onReceive New: NETWORK_TYPE.DC")
             }
         }
     }
@@ -120,16 +115,13 @@ object NetConnectivityUtility : BroadcastReceiver() {
         }
 
     fun initialize(context: Context){
-        Log.d(TAG, "init");
-        context.registerReceiver(
-                this, intentFilterForConnectivityChangeBroadcastReceiver)
+        context.registerReceiver(this, intentFilterForConnectivityChangeBroadcastReceiver)
     }
 
-
-    /*init {
-        Log.d(TAG, "init");
-        NewsServerApplication.getCONTEXT().registerReceiver(
-                this,intentFilterForConnectivityChangeBroadcastReceiver)
-    }*/
-
+    fun showNoInternetToast(context: Context){
+        if (!mNoInternertToastShown){
+            mNoInternertToastShown = true
+            Toast.makeText(context, NO_INTERNET_TOAST_MESSAGE,Toast.LENGTH_LONG).show()
+        }
+    }
 }

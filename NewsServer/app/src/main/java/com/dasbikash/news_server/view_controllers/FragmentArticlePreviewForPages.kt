@@ -22,8 +22,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server.view_controllers.view_helpers.PagePreviewListAdapter
+import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.models.room_entity.Page
 
 /**

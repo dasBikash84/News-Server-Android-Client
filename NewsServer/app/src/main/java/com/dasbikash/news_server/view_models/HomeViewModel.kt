@@ -17,7 +17,6 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import com.dasbikash.news_server.view_controllers.NewspaperPerviewFragment
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
@@ -27,6 +26,7 @@ import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import java.lang.Exception
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
@@ -38,9 +38,9 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
 
     private val mAppSettingsRepository: AppSettingsRepository
     private val mUserSettingsRepository: UserSettingsRepository
-    private val mNewsDataRepository:NewsDataRepository
+    private val mNewsDataRepository: NewsDataRepository
 
-    private val disposable:CompositeDisposable = CompositeDisposable();
+    private val disposable: CompositeDisposable = CompositeDisposable();
 
     private val MAX_PARALLEL_ARTICLE_REQUEST = 10
     private var currentArticleRequestCount = AtomicInteger(0)
@@ -59,76 +59,67 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
         disposable.clear()
     }
 
-    fun getNewsPapers():LiveData<List<Newspaper>>{
+    fun getNewsPapers(): LiveData<List<Newspaper>> {
         return mAppSettingsRepository.getNewsPapers()
     }
 
-    fun getUserPreferenceData():LiveData<UserPreferenceData?>{
+    fun getUserPreferenceData(): LiveData<UserPreferenceData?> {
         return mUserSettingsRepository.getUserPreferenceLiveData()
     }
 
-    fun getPageGroups():LiveData<List<PageGroup>>{
+    fun getPageGroups(): LiveData<List<PageGroup>> {
         return mUserSettingsRepository.getPageGroupListLive()
     }
 
-    fun getSavedArticlesLiveData():LiveData<List<SavedArticle>>{
+    fun getSavedArticlesLiveData(): LiveData<List<SavedArticle>> {
         return mNewsDataRepository.getAllSavedArticle()
     }
 
-    fun getLatestArticleProvider(requestPayload:Pair<UUID,Page>):Observable<Pair<UUID,Article?>>{
+    fun getLatestArticleProvider(requestPayload: Pair<UUID, Page>): Observable<Pair<UUID, Article?>> {
         var amDisposed = false
         return Observable.just(requestPayload)
                 .subscribeOn(Schedulers.io())
                 .map {
-                    Triple(it.first,it.second,mNewsDataRepository.getLatestArticleByPageFromLocalDb(it.second))
+                    Triple(it.first, it.second, mNewsDataRepository.getLatestArticleByPageFromLocalDb(it.second))
                 }
                 .map {
                     val input = it
+
                     it.third?.let {
-                        Log.d(NewspaperPerviewFragment.TAG,"Already dl art found for page: ${input.second.name} Np: ${input.second.newspaperId}")
                         if (System.currentTimeMillis() - it.getCreated() < MIN_ARTICLE_REFRESH_INTERVAL) {
-                            return@map Pair(input.first,it)
+                            return@map Pair(input.first, it)
                         }
                     }
-                    Log.d(NewspaperPerviewFragment.TAG,"need to search art for page: ${input.second.name} Np: ${input.second.newspaperId}")
+
                     do {
-                        Log.d(TAG,"Waiting for page: ${it.second.name}")
                         try {
                             Thread.sleep(Random(System.currentTimeMillis()).nextLong(100L))
-                        }catch (ex:InterruptedException){
-                            ex.printStackTrace()
+                        } catch (ex: InterruptedException) {
+                            if (!amDisposed) {
+                                throw ex
+                            }
                         }
-                    }while (currentArticleRequestCount.get() >= MAX_PARALLEL_ARTICLE_REQUEST)
-//                    Log.d(TAG+"1","Going to increment count for page: ${it.second.name}")
+                    } while (currentArticleRequestCount.get() >= MAX_PARALLEL_ARTICLE_REQUEST)
+
                     currentArticleRequestCount.incrementAndGet()
-//                    Log.d(TAG+"1","Request send for page: ${it.second.name}")
-                    Log.d(NewspaperPerviewFragment.TAG,"Going to search art for page: ${input.second.name} Np: ${input.second.newspaperId}")
-                    var article:Article? = null
+
+                    var article: Article? = null
                     try {
                         article = mNewsDataRepository.getLatestArticleByPage(it.second)
-                    }catch (ex:InterruptedException){
-                        Log.d(NewspaperPerviewFragment.TAG,"InterruptedException Error in art search for page: ${input.second.name} Np: ${input.second.newspaperId}")
-                        ex.printStackTrace()
-                    }catch (ex:DataNotFoundException){
-                        ex.printStackTrace()
-                        Log.d(NewspaperPerviewFragment.TAG,"DataNotFoundException Error in art search for page: ${input.second.name} Np: ${input.second.newspaperId}")
-                        if (!amDisposed){
+                    } catch (ex: Exception) {
+                        if (!amDisposed) {
                             throw ex
                         }
                     }
-                    Log.d(NewspaperPerviewFragment.TAG,"art found for page: ${input.second.name} Np: ${input.second.newspaperId}")
-//                    Log.d(TAG+"1","Response received for page: ${it.second.name}")
-//                    Log.d(TAG+"1","Going to decrement count for page: ${it.second.name}")
                     currentArticleRequestCount.decrementAndGet()
-                    article?.let { return@map Pair(input.first,it) }
-                    Pair(it.first,input.third)
+                    article?.let { return@map Pair(input.first, it) }
+                    Pair(it.first, input.third)
                 }.onErrorReturn {
-                    Log.d(TAG+"1","decrementAndGet after error:${it::class.java.canonicalName}")
                     currentArticleRequestCount.decrementAndGet()
                     throw it
-                }.doOnDispose({
+                }.doOnDispose{
                     amDisposed = true
-                })
+                }
     }
 
 
