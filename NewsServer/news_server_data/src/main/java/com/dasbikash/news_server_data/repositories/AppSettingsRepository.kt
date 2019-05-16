@@ -57,8 +57,7 @@ abstract class AppSettingsRepository{
     }
 
     private fun isAppSettingsUpdated(context: Context): Boolean {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         val localAppSettingsUpdateTime = mAppSettingsDataService.getLocalAppSettingsUpdateTime(context)
         val appSettingsUpdateTime = mAppSettingsDataService.getServerAppSettingsUpdateTime(context)
 
@@ -69,7 +68,7 @@ abstract class AppSettingsRepository{
 
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     private fun loadAppSettings(context: Context){
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
 
         val appSettings = mAppSettingsDataService.getAppSettings(context)
 
@@ -90,6 +89,9 @@ abstract class AppSettingsRepository{
 
 
     fun initAppSettings(context: Context){
+
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+
         if (!isAppSettingsDataLoaded() || isAppSettingsUpdated(context)) {
             loadAppSettings(context)
         }
