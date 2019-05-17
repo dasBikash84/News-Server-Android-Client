@@ -26,4 +26,8 @@ internal object SpringMVCAppSettingsDataService: AppSettingsDataService {
     override fun getRawAppsettings(context: Context): DefaultAppSettings {
         return SpringMVCAppSettingsUtils.getRawAppsettings()
     }
+
+    override fun ping(): Boolean {
+        return SpringMVCAppSettingsUtils.ping()
+    }
 }

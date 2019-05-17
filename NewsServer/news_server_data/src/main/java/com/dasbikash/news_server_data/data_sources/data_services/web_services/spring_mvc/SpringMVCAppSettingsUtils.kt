@@ -54,7 +54,7 @@ object SpringMVCAppSettingsUtils {
 
                             Log.d(TAG, "getServerAppSettingsUpdateTime onResponse isSuccessful")
                             response.body()?.let {
-                                Log.d(TAG, "getServerAppSettingsUpdateTime" + it.settingsUpdateLogs.get(0).updateTime)
+//                                Log.d(TAG, "getServerAppSettingsUpdateTime" + it.settingsUpdateLogs.get(0).updateTime)
                                 serverAppSettingsUpdateTime = it.settingsUpdateLogs.get(0).updateTime.time
                             }
                         } else {
@@ -362,5 +362,14 @@ object SpringMVCAppSettingsUtils {
 
         Log.d(TAG, "getCountries before return")
         return HashMap(countries)
+    }
+
+    fun ping(): Boolean {
+        try {
+            getLanguages()
+            return true
+        }catch (ex:Exception){
+            return false
+        }
     }
 }

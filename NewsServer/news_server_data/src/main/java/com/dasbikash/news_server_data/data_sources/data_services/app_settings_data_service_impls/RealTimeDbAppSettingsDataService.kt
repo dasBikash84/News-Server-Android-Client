@@ -27,4 +27,8 @@ internal object RealTimeDbAppSettingsDataService: AppSettingsDataService {
     override fun getRawAppsettings(context: Context): DefaultAppSettings {
         return RealtimeDBAppSettingsUtils.getServerAppSettingsData()
     }
+
+    override fun ping(): Boolean {
+        return RealtimeDBAppSettingsUtils.ping()
+    }
 }

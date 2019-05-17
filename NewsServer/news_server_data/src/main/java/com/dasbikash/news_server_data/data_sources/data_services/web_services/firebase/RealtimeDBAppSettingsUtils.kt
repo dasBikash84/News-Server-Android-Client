@@ -26,6 +26,7 @@ internal object RealtimeDBAppSettingsUtils{
 
     private const val SETTINGS_UPDATE_TIME_NODE = "update_time"
     val mSettingsUpdateTimeReference: DatabaseReference = RealtimeDBUtils.mAppSettingsReference.child(SETTINGS_UPDATE_TIME_NODE)
+    const val WAITING_MS_FOR_NET_RESPONSE = 30000L
 
     fun getServerAppSettingsUpdateTime(): Long{
 
@@ -53,16 +54,19 @@ internal object RealtimeDBAppSettingsUtils{
             }
         })
 
-        synchronized(lock) { lock.wait() }
+        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
         if (appSettingsNotFound != null) {
             throw appSettingsNotFound as SettingsServerException
+        }
+        if (data == 0L){
+            throw AppSettingsNotFound()
         }
 
         return data
     }
 
     fun getServerAppSettingsData(): DefaultAppSettings {
-        var data = DefaultAppSettings()
+        var data : DefaultAppSettings?=null
         val lock = Object()
 
         var appSettingsNotFound: SettingsServerException? = null
@@ -85,11 +89,23 @@ internal object RealtimeDBAppSettingsUtils{
             }
         })
 
-        synchronized(lock) { lock.wait() }
+        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
         if (appSettingsNotFound != null) {
             throw appSettingsNotFound as SettingsServerException
         }
+        if (data==null){
+            throw AppSettingsNotFound()
+        }
 
-        return data
+        return data!!
+    }
+
+    fun ping(): Boolean {
+        try {
+            getServerAppSettingsUpdateTime()
+            return true
+        }catch (ex:Exception){
+            return false
+        }
     }
 }

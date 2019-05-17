@@ -24,8 +24,10 @@ import com.dasbikash.news_server_data.data_sources.data_services.user_settings_d
 
 internal object DataServiceImplProvider {
 
-    private val appSettingServiceOption = APP_SETTING_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
-    private val newsDataServiceOption = NEWS_DATA_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
+//    private val appSettingServiceOption = APP_SETTING_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
+    private lateinit var appSettingServiceOption : APP_SETTING_SERVICE_OPTIONS
+//    private val newsDataServiceOption = NEWS_DATA_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
+    private lateinit var newsDataServiceOption : NEWS_DATA_SERVICE_OPTIONS
 
     private val userSettingServiceOption = USER_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
 
@@ -90,6 +92,28 @@ internal object DataServiceImplProvider {
                     APP_SETTING_SERVICE_OPTIONS.CLOUD_FIRE_STORE
                     -> CloudFireStoreAppSettingsDataService
                 }
+    }
+
+    fun initDataSourceImplementation():Boolean{
+        var currentResult:Boolean = false
+        if (SpringMVCAppSettingsDataService.ping()){
+            appSettingServiceOption = APP_SETTING_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
+            newsDataServiceOption = NEWS_DATA_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
+            currentResult = true
+        }else if(CloudFireStoreAppSettingsDataService.ping()){
+            appSettingServiceOption = APP_SETTING_SERVICE_OPTIONS.CLOUD_FIRE_STORE
+            newsDataServiceOption = NEWS_DATA_SERVICE_OPTIONS.CLOUD_FIRE_STORE
+            currentResult = true
+        }
+        if(RealTimeDbAppSettingsDataService.ping()){
+            if (!currentResult) {
+                appSettingServiceOption = APP_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
+                newsDataServiceOption = NEWS_DATA_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
+            }
+            return true
+        }else {
+            return false
+        }
     }
 
 }

@@ -40,7 +40,7 @@ internal object CloudFireStoreAppSettingsUtils{
                 .limit(1)
                 .get()
                 .addOnSuccessListener { documents ->
-                    Log.d(TAG,"getServerAppSettingsUpdateTime")
+                    //Log.d(TAG,"getServerAppSettingsUpdateTime")
                     for (document in documents) {
                         if (document.exists()){
                             lastSettingsUpdateTime = (document.get(SETTINGS_UPDATE_TIME_FIELD_NAME) as Timestamp).toDate().time
@@ -49,23 +49,23 @@ internal object CloudFireStoreAppSettingsUtils{
                     synchronized(lock) { lock.notify() }
                 }
                 .addOnFailureListener { exception ->
-                    Log.d(TAG,"getServerAppSettingsUpdateTime. Eror msg: ${exception.message}")
+                    //Log.d(TAG,"getServerAppSettingsUpdateTime. Eror msg: ${exception.message}")
                     dataServerException = DataNotFoundException(exception)
                     synchronized(lock) { lock.notify() }
                 }
 
-        Log.d(TAG,"getServerAppSettingsUpdateTime before wait")
+        //Log.d(TAG,"getServerAppSettingsUpdateTime before wait")
         synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
 
-        Log.d(TAG,"getServerAppSettingsUpdateTime before throw it")
+        //Log.d(TAG,"getServerAppSettingsUpdateTime before throw it")
         dataServerException?.let { throw it }
 
-        Log.d(TAG,"getServerAppSettingsUpdateTime before throw DataNotFoundException()")
+        //Log.d(TAG,"getServerAppSettingsUpdateTime before throw DataNotFoundException()")
         if (lastSettingsUpdateTime == null ){
             throw DataNotFoundException()
         }
 
-        Log.d(TAG,"getServerAppSettingsUpdateTime before return")
+        //Log.d(TAG,"getServerAppSettingsUpdateTime before return")
         return lastSettingsUpdateTime!!
     }
 
@@ -90,7 +90,7 @@ internal object CloudFireStoreAppSettingsUtils{
         CloudFireStoreConUtils.getCountrySettingsCollectionRef()
                 .get()
                 .addOnSuccessListener { documents ->
-                    Log.d(TAG,"getCountries")
+                    //Log.d(TAG,"getCountries")
                     for (document in documents) {
                         val country = document.toObject(Country::class.java)
                         countries.put(country.name,country)
@@ -98,23 +98,23 @@ internal object CloudFireStoreAppSettingsUtils{
                     synchronized(lock) { lock.notify() }
                 }
                 .addOnFailureListener { exception ->
-                    Log.d(TAG,"getCountries. Eror msg: ${exception.message}")
+                    //Log.d(TAG,"getCountries. Eror msg: ${exception.message}")
                     dataServerException = DataNotFoundException(exception)
                     synchronized(lock) { lock.notify() }
                 }
 
-        Log.d(TAG,"getCountries before wait")
+        //Log.d(TAG,"getCountries before wait")
         synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
 
-        Log.d(TAG,"getCountries before throw it")
+        //Log.d(TAG,"getCountries before throw it")
         dataServerException?.let { throw it }
 
-        Log.d(TAG,"getCountries before throw DataNotFoundException()")
+        //Log.d(TAG,"getCountries before throw DataNotFoundException()")
         if (countries.isEmpty()){
             throw DataNotFoundException()
         }
 
-        Log.d(TAG,"getCountries before return")
+        //Log.d(TAG,"getCountries before return")
         return HashMap(countries)
     }
 
@@ -127,7 +127,7 @@ internal object CloudFireStoreAppSettingsUtils{
         CloudFireStoreConUtils.getLanguageSettingsCollectionRef()
                 .get()
                 .addOnSuccessListener { documents ->
-                    Log.d(TAG,"getLanguages")
+                    //Log.d(TAG,"getLanguages")
                     for (document in documents) {
                         val language = document.toObject(Language::class.java)
                         languages.put(language.id,language)
@@ -135,23 +135,23 @@ internal object CloudFireStoreAppSettingsUtils{
                     synchronized(lock) { lock.notify() }
                 }
                 .addOnFailureListener { exception ->
-                    Log.d(TAG,"getLanguages. Eror msg: ${exception.message}")
+                    //Log.d(TAG,"getLanguages. Eror msg: ${exception.message}")
                     dataServerException = DataNotFoundException(exception)
                     synchronized(lock) { lock.notify() }
                 }
 
-        Log.d(TAG,"getLanguages before wait")
+        //Log.d(TAG,"getLanguages before wait")
         synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
 
-        Log.d(TAG,"getLanguages before throw it")
+        //Log.d(TAG,"getLanguages before throw it")
         dataServerException?.let { throw it }
 
-        Log.d(TAG,"getLanguages before throw DataNotFoundException()")
+        //Log.d(TAG,"getLanguages before throw DataNotFoundException()")
         if (languages.isEmpty()){
             throw DataNotFoundException()
         }
 
-        Log.d(TAG,"getLanguages before return")
+        //Log.d(TAG,"getLanguages before return")
         return HashMap(languages)
     }
 
@@ -164,7 +164,7 @@ internal object CloudFireStoreAppSettingsUtils{
         CloudFireStoreConUtils.getNewspaperSettingsCollectionRef()
                 .get()
                 .addOnSuccessListener { documents ->
-                    Log.d(TAG,"getNewspapers")
+                    //Log.d(TAG,"getNewspapers")
                     for (document in documents) {
                         val newspaper = document.toObject(Newspaper::class.java)
                         newspapers.put(newspaper.id,newspaper)
@@ -172,23 +172,23 @@ internal object CloudFireStoreAppSettingsUtils{
                     synchronized(lock) { lock.notify() }
                 }
                 .addOnFailureListener { exception ->
-                    Log.d(TAG,"getNewspapers. Eror msg: ${exception.message}")
+                    //Log.d(TAG,"getNewspapers. Eror msg: ${exception.message}")
                     dataServerException = DataNotFoundException(exception)
                     synchronized(lock) { lock.notify() }
                 }
 
-        Log.d(TAG,"getNewspapers before wait")
+        //Log.d(TAG,"getNewspapers before wait")
         synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
 
-        Log.d(TAG,"getNewspapers before throw it")
+        //Log.d(TAG,"getNewspapers before throw it")
         dataServerException?.let { throw it }
 
-        Log.d(TAG,"getNewspapers before throw DataNotFoundException()")
+        //Log.d(TAG,"getNewspapers before throw DataNotFoundException()")
         if (newspapers.isEmpty()){
             throw DataNotFoundException()
         }
 
-        Log.d(TAG,"getNewspapers before return")
+        //Log.d(TAG,"getNewspapers before return")
         return HashMap(newspapers)
     }
 
@@ -201,7 +201,7 @@ internal object CloudFireStoreAppSettingsUtils{
         CloudFireStoreConUtils.getPageSettingsCollectionRef()
                 .get()
                 .addOnSuccessListener { documents ->
-                    Log.d(TAG,"getPages")
+                    //Log.d(TAG,"getPages")
                     for (document in documents) {
                         val page = document.toObject(Page::class.java)
                         pages.put(page.id,page)
@@ -209,23 +209,23 @@ internal object CloudFireStoreAppSettingsUtils{
                     synchronized(lock) { lock.notify() }
                 }
                 .addOnFailureListener { exception ->
-                    Log.d(TAG,"getPages. Eror msg: ${exception.message}")
+                    //Log.d(TAG,"getPages. Eror msg: ${exception.message}")
                     dataServerException = DataNotFoundException(exception)
                     synchronized(lock) { lock.notify() }
                 }
 
-        Log.d(TAG,"getPages before wait")
+        //Log.d(TAG,"getPages before wait")
         synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
 
-        Log.d(TAG,"getPages before throw it")
+        //Log.d(TAG,"getPages before throw it")
         dataServerException?.let { throw it }
 
-        Log.d(TAG,"getPages before throw DataNotFoundException()")
+        //Log.d(TAG,"getPages before throw DataNotFoundException()")
         if (pages.isEmpty()){
             throw DataNotFoundException()
         }
 
-        Log.d(TAG,"getPages before return")
+        //Log.d(TAG,"getPages before return")
         return HashMap(pages)
     }
 
@@ -238,7 +238,7 @@ internal object CloudFireStoreAppSettingsUtils{
         CloudFireStoreConUtils.getPageGroupSettingsCollectionRef()
                 .get()
                 .addOnSuccessListener { documents ->
-                    Log.d(TAG,"getPageGroups")
+                    //Log.d(TAG,"getPageGroups")
                     for (document in documents) {
                         val pageGroup = document.toObject(PageGroup::class.java)
                         pageGroups.put(pageGroup.name,pageGroup)
@@ -246,22 +246,31 @@ internal object CloudFireStoreAppSettingsUtils{
                     synchronized(lock) { lock.notify() }
                 }
                 .addOnFailureListener { exception ->
-                    Log.d(TAG,"getPageGroups. Eror msg: ${exception.message}")
+                    //Log.d(TAG,"getPageGroups. Eror msg: ${exception.message}")
                     dataServerException = DataNotFoundException(exception)
                     synchronized(lock) { lock.notify() }
                 }
 
-        Log.d(TAG,"getPageGroups before wait")
+        //Log.d(TAG,"getPageGroups before wait")
         synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
 
-        Log.d(TAG,"getPageGroups before throw it")
+        //Log.d(TAG,"getPageGroups before throw it")
         dataServerException?.let { throw it }
 
-        Log.d(TAG,"getPageGroups before throw DataNotFoundException()")
+        //Log.d(TAG,"getPageGroups before throw DataNotFoundException()")
 
-        Log.d(TAG,"getPageGroups before return")
+        //Log.d(TAG,"getPageGroups before return")
         return HashMap(pageGroups)
 
+    }
+
+    fun ping(): Boolean {
+        try {
+            getLanguages()
+            return true
+        }catch (ex:Exception){
+            return false
+        }
     }
 
 }

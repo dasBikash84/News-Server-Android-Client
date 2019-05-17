@@ -27,4 +27,8 @@ internal object CloudFireStoreAppSettingsDataService: AppSettingsDataService {
     override fun getRawAppsettings(context: Context): DefaultAppSettings {
         return CloudFireStoreAppSettingsUtils.getServerAppSettingsData()
     }
+
+    override fun ping(): Boolean {
+        return CloudFireStoreAppSettingsUtils.ping()
+    }
 }

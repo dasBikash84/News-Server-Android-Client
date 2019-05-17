@@ -68,7 +68,7 @@ internal object CloudFireStoreArticleDataUtils {
 
     internal fun getArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
 
-        Log.d(TAG,"getRawLatestArticlesByPage"+CloudFireStoreAppSettingsUtils.getServerAppSettingsUpdateTime())
+//        Log.d(TAG,"getRawLatestArticlesByPage"+CloudFireStoreAppSettingsUtils.getServerAppSettingsUpdateTime())
 
         val lock = Object()
         val articles = mutableListOf<Article>()

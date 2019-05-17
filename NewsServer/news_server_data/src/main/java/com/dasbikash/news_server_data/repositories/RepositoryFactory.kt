@@ -14,7 +14,10 @@
 package com.dasbikash.news_server_data.repositories
 
 import android.content.Context
+import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
+import com.dasbikash.news_server_data.exceptions.DataSourceNotFoundException
 import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
+import com.dasbikash.news_server_data.utills.ExceptionUtils
 
 object RepositoryFactory {
 
@@ -28,5 +31,12 @@ object RepositoryFactory {
 
     fun getNewsDataRepository(context: Context):
             NewsDataRepository = NewsDataRepository.getImpl(context, dbImplementation)
+
+    fun initDataSourceImplementation(){
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        if (!DataServiceImplProvider.initDataSourceImplementation()){
+            throw DataSourceNotFoundException()
+        }
+    }
 
 }

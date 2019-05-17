@@ -20,6 +20,8 @@ import com.dasbikash.news_server_data.models.DefaultAppSettings
 
 internal interface AppSettingsDataService {
 
+    fun ping():Boolean
+
     fun getServerAppSettingsUpdateTime(context: Context): Long
 
     fun getAppSettings(context: Context): DefaultAppSettings{
