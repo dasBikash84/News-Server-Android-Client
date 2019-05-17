@@ -15,6 +15,7 @@ package com.dasbikash.news_server_data.data_sources
 
 import android.content.Intent
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
+import com.google.firebase.auth.FirebaseUser
 
 internal interface UserSettingsDataService{
     fun getLastUserSettingsUpdateTime(): Long
@@ -24,4 +25,5 @@ internal interface UserSettingsDataService{
     fun uploadUserPreferenceData(userPreferenceData: UserPreferenceData)
     fun signOutUser()
     fun getCurrentUserName():String?
+//    fun getCurrentUser():FirebaseUser?
 }

@@ -20,12 +20,14 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
+import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.OptionsIntentBuilderUtility
 import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
@@ -42,6 +44,7 @@ import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import java.lang.StringBuilder
 
 class HomeActivity : AppCompatActivity(),
         NavigationHost, HomeNavigator, SignInHandler,WorkInProcessWindowOperator {
@@ -55,8 +58,9 @@ class HomeActivity : AppCompatActivity(),
     private lateinit var mLogInMenuHolder:ConstraintLayout
 
     private lateinit var mLogInButton:MaterialButton
+    private lateinit var mUserDetailsTextView: AppCompatTextView
     private lateinit var mSignOutButton:MaterialButton
-    private lateinit var mUserSettingEditButton:MaterialButton
+//    private lateinit var mUserSettingEditButton:MaterialButton
 
     private val LOG_IN_REQ_CODE = 7777
 
@@ -98,10 +102,11 @@ class HomeActivity : AppCompatActivity(),
             launchSignOutDialog()
             mLogInMenuHolder.visibility = View.GONE
         }
-        mUserSettingEditButton.setOnClickListener {
-            launchUserSettingEditDialog()
-            mLogInMenuHolder.visibility = View.GONE
-        }
+        mUserDetailsTextView.setOnClickListener({})
+//        mUserSettingEditButton.setOnClickListener {
+//            launchUserSettingEditDialog()
+//            mLogInMenuHolder.visibility = View.GONE
+//        }
 
         mLogInMenuHolder.setOnClickListener { mLogInMenuHolder.visibility = View.GONE }
     }
@@ -113,8 +118,9 @@ class HomeActivity : AppCompatActivity(),
         mCoordinatorLayout = findViewById(R.id.activity_home_coordinator_container)
 
         mLogInButton = findViewById(R.id.log_in_sign_up_button)
+        mUserDetailsTextView = findViewById(R.id.user_name_text)
         mSignOutButton = findViewById(R.id.sign_out_button)
-        mUserSettingEditButton = findViewById(R.id.customize_button)
+//        mUserSettingEditButton = findViewById(R.id.customize_button)
     }
 
     private fun initApp() {
@@ -155,13 +161,13 @@ class HomeActivity : AppCompatActivity(),
                     }
                     true
                 }
-                R.id.bottom_menu_item_more -> {
+                /*R.id.bottom_menu_item_more -> {
                     if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is MoreFragment)) {
                         mAppBar.visibility = View.VISIBLE
                         loadMoreFragment()
                     }
                     true
-                }
+                }*/
 
                 else -> false
             }
@@ -309,12 +315,16 @@ class HomeActivity : AppCompatActivity(),
             mLogInMenuHolder.bringToFront()
             if(mUserSettingsRepository.checkIfLoggedIn()){
                 mSignOutButton.visibility = View.VISIBLE
-                mUserSettingEditButton.visibility = View.VISIBLE
                 mLogInButton.visibility = View.GONE
+                mUserDetailsTextView.visibility = View.GONE
+                mUserSettingsRepository.getCurrentUserName()?.let {
+                    DisplayUtils.displayHtmlText(mUserDetailsTextView,StringBuilder("Logged in as <u>").append(it).append("</u>").toString())
+                    mUserDetailsTextView.visibility = View.VISIBLE
+                }
             }else{
                 mSignOutButton.visibility = View.GONE
-                mUserSettingEditButton.visibility = View.GONE
                 mLogInButton.visibility = View.VISIBLE
+                mUserDetailsTextView.visibility = View.GONE
             }
         }else{
             mLogInMenuHolder.visibility = View.GONE
@@ -340,8 +350,6 @@ class HomeActivity : AppCompatActivity(),
         menuInflater.inflate(R.menu.menu_layout_basic, menu)
         return super.onCreateOptionsMenu(menu)
     }
-
-
 
     private fun shareAppMenuItemAction() {
         startActivity(OptionsIntentBuilderUtility.getShareAppIntent(this))

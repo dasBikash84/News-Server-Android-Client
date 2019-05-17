@@ -30,6 +30,7 @@ import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import com.firebase.ui.auth.IdpResponse
+import com.google.firebase.auth.FirebaseUser
 import java.util.*
 
 abstract class UserSettingsRepository {
@@ -127,6 +128,10 @@ abstract class UserSettingsRepository {
     fun getCurrentUserName(): String? {
         return mUserSettingsDataService.getCurrentUserName()
     }
+
+//    fun getCurrentUser(): FirebaseUser? {
+//        return mUserSettingsDataService.getCurrentUser()
+//    }
 
     fun addPageToFavList(page: Page, context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()

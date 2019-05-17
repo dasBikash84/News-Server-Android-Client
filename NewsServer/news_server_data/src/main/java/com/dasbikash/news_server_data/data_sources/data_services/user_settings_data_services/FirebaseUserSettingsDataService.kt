@@ -19,6 +19,7 @@ import com.dasbikash.news_server_data.data_sources.data_services.web_services.fi
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 internal object FirebaseUserSettingsDataService: UserSettingsDataService {
     override fun getCurrentUserName(): String? {
@@ -60,4 +61,8 @@ internal object FirebaseUserSettingsDataService: UserSettingsDataService {
         }
         return null
     }
+
+//    override fun getCurrentUser(): FirebaseUser? {
+//        return FirebaseAuth.getInstance().currentUser
+//    }
 }
