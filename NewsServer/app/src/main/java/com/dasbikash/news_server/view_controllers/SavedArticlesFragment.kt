@@ -48,7 +48,6 @@ class SavedArticlesFragment : Fragment() {
 
     private lateinit var mSavedArticlePreviewHolder: RecyclerView
     private lateinit var mListAdapter: SavedArticlePreviewListAdapter
-    private val mSavedArticleList = mutableListOf<SavedArticle>()
 
     private lateinit var mNewsDataRepository: NewsDataRepository
 
@@ -74,19 +73,12 @@ class SavedArticlesFragment : Fragment() {
                 .observe(this,object : androidx.lifecycle.Observer<List<SavedArticle>>{
                     override fun onChanged(t: List<SavedArticle>?) {
                         t?.let {
-                            mSavedArticleList.clear()
-                            mSavedArticleList.addAll(it.sortedBy { it.newspaperName+it.pageName }.toList())
-                            mListAdapter.submitList(mSavedArticleList.toList())
+                            mListAdapter.submitList(it.sortedBy { it.newspaperName+it.pageName }.toList())
                         }
 
                     }
                 })
 
-    }
-
-    override fun onResume() {
-        super.onResume()
-        LoggerUtils.debugLog("onResume", this::class.java)
     }
 
     override fun onPause() {
@@ -133,9 +125,10 @@ class SavedArticlePreviewListAdapter(val clickAction: (savedArticle: SavedArticl
         ListAdapter<SavedArticle, SavedArticlePreviewHolder>(SavedArticleDiffCallback) {
 
     override fun onBindViewHolder(holder: SavedArticlePreviewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val item = getItem(position)
+        holder.bind(item)
         holder.itemView.setOnClickListener {
-            clickAction(getItem(position))
+            clickAction(item)
         }
     }
 
