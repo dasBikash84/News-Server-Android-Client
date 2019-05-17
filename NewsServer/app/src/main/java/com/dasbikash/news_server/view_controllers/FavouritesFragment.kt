@@ -42,6 +42,7 @@ import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import com.google.android.material.card.MaterialCardView
 import io.reactivex.Observable
@@ -307,7 +308,13 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
                         }
 
                         override fun onError(e: Throwable) {
-                            e.printStackTrace()
+//                            e.printStackTrace()
+                            if (e is NoInternertConnectionException) {
+                                NetConnectivityUtility.showNoInternetToast(viewHolder.itemView.context)
+                            }else {
+                                LoggerUtils.debugLog(e.message ?: e::class.java.simpleName+" Error",this@FavPageSwipeToDeleteCallback::class.java)
+                                DisplayUtils.showShortToast(viewHolder.itemView.context,"Error!! Please retry.")
+                            }
                             workInProcessWindowOperator.removeWorkInProcessWindow()
                             favouritePagesListAdapter.notifyDataSetChanged()
                         }

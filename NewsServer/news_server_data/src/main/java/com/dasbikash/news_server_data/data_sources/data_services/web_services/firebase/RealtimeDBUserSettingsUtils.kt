@@ -15,10 +15,7 @@ package com.dasbikash.news_server_data.data_sources.data_services.web_services.f
 
 import android.os.SystemClock
 import com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service.UserIpDataService
-import com.dasbikash.news_server_data.exceptions.SettingsServerException
-import com.dasbikash.news_server_data.exceptions.UserSettingsNotFoundException
-import com.dasbikash.news_server_data.exceptions.UserSettingsUploadFailureException
-import com.dasbikash.news_server_data.exceptions.WrongCredentialException
+import com.dasbikash.news_server_data.exceptions.*
 import com.dasbikash.news_server_data.models.UserSettingsUpdateDetails
 import com.dasbikash.news_server_data.models.UserSettingsUpdateTime
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
@@ -27,11 +24,13 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal object RealtimeDBUserSettingsUtils{
 
     private val MAX_SETTINGS_UPLOAD_RETRY = 3
     private val MAX_SETTINGS_UPLOAD_RETRY_SLEEP_PERIOD = 5000L
+    private const val MAX_WAITING_MS_FOR_NET_RESPONSE = 30000L
     private const val FAV_PAGE_ID_LIST_NODE = "favouritePageIds"
     private const val PAGE_GROUP_LIST_NODE = "pageGroups"
     private const val UPDATE_LOG_NODE = "updateLog"
@@ -53,7 +52,7 @@ internal object RealtimeDBUserSettingsUtils{
         var userSettingsException: SettingsServerException? = null
 
         getUserSettingsNodes(user)
-                .rootUserSettingdNode
+                .rootUserSettingsNode
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onCancelled(error: DatabaseError) {
                         userSettingsException = SettingsServerException(error.message)
@@ -71,13 +70,16 @@ internal object RealtimeDBUserSettingsUtils{
                         }
                     }
                 })
-        synchronized(lock) { lock.wait() }
+        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
         userSettingsException?.let { throw userSettingsException as SettingsServerException }
+        if (data == null){
+            throw SettingsServerUnavailable()
+        }
         return data!!
     }
 
     private fun getUserSettingsNodes(user: FirebaseUser) = object {
-        val rootUserSettingdNode = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid)
+        val rootUserSettingsNode = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid)
         val favPageIdListRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(FAV_PAGE_ID_LIST_NODE)
         val pageGroupListRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(PAGE_GROUP_LIST_NODE)
         val updateLogRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(UPDATE_LOG_NODE)
@@ -90,36 +92,49 @@ internal object RealtimeDBUserSettingsUtils{
 
         val userSettingsNodes = getUserSettingsNodes(user)
         val lock = Object()
-        var remainingTries = MAX_SETTINGS_UPLOAD_RETRY
+//        var remainingTries = MAX_SETTINGS_UPLOAD_RETRY
 
-        do {
-            try {
+//        do {
+//            try {
                 var userSettingsUploadFailureException: UserSettingsUploadFailureException? = null
+                val workDone = AtomicBoolean(false)
+
                 userSettingsNodes.favPageIdListRef
                         .setValue(userPreferenceData.favouritePageIds)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
+                                workDone.set(true)
                                 synchronized(lock) { lock.notify() }
                             } else {
-                                userSettingsUploadFailureException = UserSettingsUploadFailureException()
+                                userSettingsUploadFailureException = UserSettingsUploadFailureException(task.exception!!)
                                 synchronized(lock) { lock.notify() }
                             }
                         }
-                synchronized(lock) { lock.wait() }
+
+                workDone.set(false)
+                synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
                 userSettingsUploadFailureException?.let { throw it }
+                if (!workDone.get()){
+                    throw SettingsServerUnavailable()
+                }
 
                 userSettingsNodes.pageGroupListRef
                         .setValue(userPreferenceData.pageGroups)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
+                                workDone.set(true)
                                 synchronized(lock) { lock.notify() }
                             } else {
-                                userSettingsUploadFailureException = UserSettingsUploadFailureException()
+                                userSettingsUploadFailureException = UserSettingsUploadFailureException(task.exception!!)
                                 synchronized(lock) { lock.notify() }
                             }
                         }
-                synchronized(lock) { lock.wait() }
+                workDone.set(false)
+                synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
                 userSettingsUploadFailureException?.let { throw it }
+                if (!workDone.get()){
+                    throw SettingsServerUnavailable()
+                }
 
                 var ipAddress: String
                 try {
@@ -133,27 +148,32 @@ internal object RealtimeDBUserSettingsUtils{
                         .setValue(UserSettingsUpdateDetails(userIp = ipAddress))
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
+                                workDone.set(true)
                                 synchronized(lock) { lock.notify() }
                             } else {
-                                userSettingsUploadFailureException = UserSettingsUploadFailureException()
+                                userSettingsUploadFailureException = UserSettingsUploadFailureException(task.exception!!)
                                 synchronized(lock) { lock.notify() }
                             }
                         }
-                synchronized(lock) { lock.wait() }
+                workDone.set(false)
+                synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
                 userSettingsUploadFailureException?.let { throw it }
-
-                break
-
-            } catch (ex: UserSettingsUploadFailureException) {
-//                Log.d(RealtimeDBUtils.TAG, "${remainingTries}")
-                remainingTries--
-                if (remainingTries == 0) {
-                    throw ex
+                if (!workDone.get()){
+                    throw SettingsServerUnavailable()
                 }
-                SystemClock.sleep(MAX_SETTINGS_UPLOAD_RETRY_SLEEP_PERIOD)
-                continue
-            }
-        } while (remainingTries > 0)
+
+//                break
+//
+//            } catch (ex: UserSettingsUploadFailureException) {
+//                Log.d(RealtimeDBUtils.TAG, "${remainingTries}")
+//                remainingTries--
+//                if (remainingTries == 0) {
+//                    throw ex
+//                }
+//                SystemClock.sleep(MAX_SETTINGS_UPLOAD_RETRY_SLEEP_PERIOD)
+//                continue
+//            }
+//        } while (remainingTries > 0)
     }
 
     fun getLastUserSettingsUpdateTime(): Long {
@@ -185,11 +205,11 @@ internal object RealtimeDBUserSettingsUtils{
                         synchronized(lock) { lock.notify() }
                     }
                 })
-        try {
-            synchronized(lock) { lock.wait() }
-        }catch (ex:InterruptedException){
-            ex.printStackTrace()
-        }
+//        try {
+            synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+//        }catch (ex:InterruptedException){
+//            ex.printStackTrace()
+//        }
 
         settingsServerException?.let { throw it }
 

@@ -236,14 +236,14 @@ class PageViewActivity : AppCompatActivity(),
                                     actionAfterSuccessfulLogIn?.let {it()}
                                 }
                                 UserSettingsRepository.SignInResult.USER_ABORT -> DisplayUtils.showShortSnack(mPageViewContainer,"Log in aborted")
-                                UserSettingsRepository.SignInResult.SERVER_ERROR -> DisplayUtils.showShortSnack(mPageViewContainer,"Log in error. Details:${processingResult.second}")
-                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> DisplayUtils.showShortSnack(mPageViewContainer,"Error while User settings data saving. Details:${processingResult.second}")
+                                UserSettingsRepository.SignInResult.SERVER_ERROR -> DisplayUtils.showShortSnack(mPageViewContainer,"Log in error.")//* Details:${processingResult.second}*/")
+                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> DisplayUtils.showShortSnack(mPageViewContainer,"Log in error.")//"Error while User settings data saving. Details:${processingResult.second}")
                             }
                         }
 
                         override fun onError(e: Throwable) {
                             actionAfterSuccessfulLogIn = null
-                            DisplayUtils.showShortSnack(mPageViewContainer,"Error while User settings data saving. Error: ${e}")
+                            DisplayUtils.showShortSnack(mPageViewContainer,"Log in error.")//"Error while User settings data saving. Error: ${e}")
                             removeWorkInProcessWindow()
                         }
                     })
@@ -540,7 +540,11 @@ class PageViewActivity : AppCompatActivity(),
                                 }
 
                                 override fun onError(e: Throwable) {
-                                    DisplayUtils.showShortSnack(mPageViewContainer,"Error!! Please retry.")
+                                    if (e is NoInternertConnectionException) {
+                                        NetConnectivityUtility.showNoInternetToast(this@PageViewActivity)
+                                    }else {
+                                        DisplayUtils.showShortSnack(mPageViewContainer, "Error!! Please retry.")
+                                    }
                                     removeWorkInProcessWindow()
                                 }
                             })

@@ -16,6 +16,7 @@ package com.dasbikash.news_server.utils
 import android.content.Context
 import android.text.Html
 import android.widget.TextView
+import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server_data.models.room_entity.Article
@@ -282,6 +283,24 @@ object DisplayUtils {
     fun showShortSnack(coordinatorLayout: CoordinatorLayout,message: String) {
         Snackbar
                 .make(coordinatorLayout, message, Snackbar.LENGTH_SHORT)
+                .show()
+    }
+
+    fun showLongSnack(coordinatorLayout: CoordinatorLayout,message: String) {
+        Snackbar
+                .make(coordinatorLayout, message, Snackbar.LENGTH_LONG)
+                .show()
+    }
+
+    fun showShortToast(context: Context,message: String) {
+        Toast
+                .makeText(context,message, Toast.LENGTH_SHORT)
+                .show()
+    }
+
+    fun showLongToast(context: Context,message: String) {
+        Toast
+                .makeText(context,message, Toast.LENGTH_LONG)
                 .show()
     }
 

@@ -28,6 +28,7 @@ import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
 import com.dasbikash.news_server_data.repositories.room_impls.UserSettingsRepositoryRoomImpl
 import com.dasbikash.news_server_data.utills.ExceptionUtils
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import com.firebase.ui.auth.IdpResponse
 import java.util.*
@@ -59,7 +60,7 @@ abstract class UserSettingsRepository {
         }
 
         if (idpResponse.isNewUser) {
-            Log.d(TAG, "New user")
+            LoggerUtils.debugLog( "New user",this::class.java)
             return uploadUserPreferenceData(context, getUserPreferenceDataFromLocalDB())
         } else {
 //            download And Save User Settings From Server
@@ -69,14 +70,14 @@ abstract class UserSettingsRepository {
 
     private fun uploadUserPreferenceData(context: Context, userPreferenceData: UserPreferenceData) {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        Log.d(TAG, "uploadUserPreferenceData")
+        LoggerUtils.debugLog( "uploadUserPreferenceData",this::class.java)
         mUserSettingsDataService.uploadUserPreferenceData(userPreferenceData)
         saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
     }
 
     private fun saveLastUserSettingsUpdateTime(updateTs: Long, context: Context) {
         ExceptionUtils.checkRequestValidityBeforeLocalDiskAccess()
-        Log.d("HomeActivity", "saveLastUserSettingsUpdateTime: ${updateTs}")
+        LoggerUtils.debugLog( "saveLastUserSettingsUpdateTime: ${updateTs}",this::class.java)
         SharedPreferenceUtils.saveData(context, updateTs, LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY)
     }
     private fun getLastUserSettingsUpdateTime(context: Context): Long {
@@ -86,7 +87,7 @@ abstract class UserSettingsRepository {
     }
     @Suppress("SENSELESS_COMPARISON")
     private fun getServerUserPreferenceData(): UserPreferenceData {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+//        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
 
         val userPreferenceData = mUserSettingsDataService.getUserPreferenceData()
         //Remove if any null entry found
@@ -132,7 +133,7 @@ abstract class UserSettingsRepository {
 
     fun addPageToFavList(page: Page, context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        Log.d(TAG, "addPageToFavList: ${page.name}")
+        LoggerUtils.debugLog( "addPageToFavList: ${page.name}",this::class.java)
         //Before update fetch current settings from server
         updateUserSettingsIfModified(context)
 
@@ -150,7 +151,7 @@ abstract class UserSettingsRepository {
 
     fun removePageFromFavList(page: Page, context: Context): Boolean{
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        Log.d(TAG, "removePageFromFavList: ${page.name}")
+        LoggerUtils.debugLog( "removePageFromFavList: ${page.name}",this::class.java)
         //Before update fetch current settings from server
         updateUserSettingsIfModified(context)
 
@@ -167,7 +168,7 @@ abstract class UserSettingsRepository {
 
     fun addPageGroup(pageGroup: PageGroup, context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        Log.d(TAG, "addPageGroup: ${pageGroup.name}")
+        LoggerUtils.debugLog( "addPageGroup: ${pageGroup.name}",this::class.java)
         //Before update fetch current settings from server
         updateUserSettingsIfModified(context)
 
@@ -180,7 +181,7 @@ abstract class UserSettingsRepository {
 
     fun deletePageGroup(pageGroup: PageGroup, context: Context): Boolean{
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        Log.d(TAG, "deletePageGroup: ${pageGroup.name}")
+        LoggerUtils.debugLog( "deletePageGroup: ${pageGroup.name}",this::class.java)
         //Before update fetch current settings from server
         updateUserSettingsIfModified(context)
 
@@ -196,7 +197,7 @@ abstract class UserSettingsRepository {
 
     fun savePageGroup(oldId: String, pageGroup: PageGroup, context: Context): Boolean{
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        Log.d(TAG, "savePageGroup: ${pageGroup.name}")
+        LoggerUtils.debugLog( "savePageGroup: ${pageGroup.name}",this::class.java)
         //Before update fetch current settings from server
         updateUserSettingsIfModified(context)
 
@@ -212,7 +213,7 @@ abstract class UserSettingsRepository {
 
     fun checkIfOnFavList(mPage: Page): Boolean{
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        Log.d(TAG, "checkIfOnFavList: ${mPage.name}")
+        LoggerUtils.debugLog( "checkIfOnFavList: ${mPage.name}",this::class.java)
         val userPreferenceDataList = getLocalPreferenceData()
         if (userPreferenceDataList.size > 0) {
             return userPreferenceDataList.get(0).favouritePageIds.contains(mPage.id)
@@ -220,12 +221,11 @@ abstract class UserSettingsRepository {
         return false
     }
 
-    fun updateUserSettingsIfModified(context: Context) {
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        Log.d(TAG,"updateUserSettingsIfModified")
+    private fun updateUserSettingsIfModified(context: Context) {
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        LoggerUtils.debugLog("updateUserSettingsIfModified",this::class.java)
 
         if (mUserSettingsDataService.getLastUserSettingsUpdateTime() > getLastUserSettingsUpdateTime(context)) {
-            Log.d(TAG,"mUserSettingsDataService.getLastUserSettingsUpdateTime() > getLastUserSettingsUpdateTime(context)")
             val userPreferenceData = getServerUserPreferenceData()
             userPreferenceData.id = UUID.randomUUID().toString()
             nukeUserPreferenceDataTable()

@@ -39,8 +39,11 @@ import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.view_controllers.view_helpers.PageGroupDiffCallback
 import com.dasbikash.news_server.view_models.HomeViewModel
+import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.LoggerUtils
+import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import com.google.android.material.card.MaterialCardView
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -220,6 +223,13 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                                                     }
 
                                                     override fun onError(e: Throwable) {
+                                                        e.printStackTrace()
+                                                        if (e is NoInternertConnectionException) {
+                                                            NetConnectivityUtility.showNoInternetToast(itemView.context)
+                                                        }else {
+                                                            LoggerUtils.debugLog(e.message ?: e.cause.toString() ?: e::class.java.simpleName+" Error",this::class.java)
+                                                            DisplayUtils.showShortToast(itemView.context!!,"Error!! Please retry.")
+                                                        }
                                                         workInProcessWindowOperator.removeWorkInProcessWindow()
                                                     }
                                                 })

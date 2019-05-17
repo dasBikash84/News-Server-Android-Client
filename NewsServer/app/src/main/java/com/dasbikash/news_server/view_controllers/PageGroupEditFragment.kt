@@ -30,16 +30,20 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
+import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.view_controllers.view_helpers.PageListAdapter
 import com.dasbikash.news_server.view_controllers.view_helpers.PageViewHolder
+import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.LoggerUtils
+import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
@@ -208,6 +212,7 @@ class PageGroupEditFragment : Fragment() {
             OPERATING_MODE.EDIT -> {
                 mPageGroupNameEditText.setText(mPageGroupName)
                 mCurrentPageList.addAll(mPageGroup.pageEntityList)
+                Log.d(TAG, "pageEntityList: ${mPageGroup.pageEntityList.map { it.name }.toList()}")
                 Log.d(TAG, "mCurrentPageList: ${mCurrentPageList.map { it.name }.toList()}")
             }
             OPERATING_MODE.CREATE -> {
@@ -315,28 +320,31 @@ class PageGroupEditFragment : Fragment() {
 
         val newPageGroupName = mPageGroupNameEditText.text.toString()
 
+        val pageGroupForEdit:PageGroup
         var oldName = ""
         if (mMode == OPERATING_MODE.CREATE) {
-            mPageGroup = PageGroup()
+            pageGroupForEdit = PageGroup()
         } else {
             oldName = mPageGroup.name
+            pageGroupForEdit = mPageGroup.copy()
         }
-        mPageGroup.name = newPageGroupName.trim()
-        mPageGroup.pageList = mCurrentPageList.map { it.id }.toList()
+        pageGroupForEdit.name = newPageGroupName.trim()
+        pageGroupForEdit.pageList = mCurrentPageList.map { it.id }.toList()
 
         val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
 
         (activity as WorkInProcessWindowOperator).loadWorkInProcessWindow()
+
         mDisposable.add(
                 Observable.just(true)
                         .subscribeOn(Schedulers.io())
                         .map {
                             when (mMode) {
                                 OPERATING_MODE.CREATE -> {
-                                    return@map userSettingsRepository.addPageGroup(mPageGroup, context!!)
+                                    return@map userSettingsRepository.addPageGroup(pageGroupForEdit, context!!)
                                 }
                                 OPERATING_MODE.EDIT -> {
-                                    return@map userSettingsRepository.savePageGroup(oldName, mPageGroup, context!!)
+                                    return@map userSettingsRepository.savePageGroup(oldName, pageGroupForEdit, context!!)
                                 }
                             }
                         }
@@ -355,9 +363,16 @@ class PageGroupEditFragment : Fragment() {
                             }
 
                             override fun onError(e: Throwable) {
+//                            e.printStackTrace()
+                                if (e is NoInternertConnectionException) {
+                                    NetConnectivityUtility.showNoInternetToast(this@PageGroupEditFragment.context!!)
+                                }else {
+                                    LoggerUtils.debugLog(e.message ?: e::class.java.simpleName+" Error",this::class.java)
+                                    DisplayUtils.showShortToast(this@PageGroupEditFragment.context!!,"Error!! Please retry.")
+                                }
 
                                 (activity as WorkInProcessWindowOperator).removeWorkInProcessWindow()
-                                Toast.makeText(context, "Error!! Please retry!!", Toast.LENGTH_SHORT).show()
+//                                Toast.makeText(context, "Error!! Please retry!!", Toast.LENGTH_SHORT).show()
                             }
                         })
         )

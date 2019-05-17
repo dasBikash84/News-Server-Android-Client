@@ -20,36 +20,43 @@ import retrofit2.Response
 
 internal object UserIpDataService {
 
+    private const val MAX_WAITING_MS_FOR_NET_RESPONSE = 30000L
+
     private val TAG = "UserIpDataService"
 
     private val userIpWebService
             = UserIpWebService.RETROFIT.create(UserIpWebService::class.java)
 
+    private var ipAddress:String?=null
+
     fun getIpAddress(): String {
+
+        ipAddress?.let { return ipAddress!! }
+
         val lock = Object()
         val call = userIpWebService.getIpAddress()
 
         var result:String? = null
-        var dataNotFoundException:DataNotFoundException?=null
 
         call.enqueue(object : Callback<IpAddress>{
             override fun onFailure(call: Call<IpAddress>, t: Throwable) {
-                dataNotFoundException = DataNotFoundException(t)
                 synchronized(lock){lock.notify()}
             }
             override fun onResponse(call: Call<IpAddress>, response: Response<IpAddress>) {
                 if (response.isSuccessful){
-                    result = response.body()!!.ip!!
-                }else{
-                    dataNotFoundException = DataNotFoundException()
+                    ipAddress = response.body()!!.ip!!
+                    result = ipAddress
                 }
+
                 synchronized(lock){lock.notify()}
             }
         })
 
-        synchronized(lock){lock.wait()}
-        dataNotFoundException?.let { throw it }
+        synchronized(lock){lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE)}
 
+        if (result.isNullOrEmpty()){
+            throw DataNotFoundException()
+        }
         return result!!
     }
 }

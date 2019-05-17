@@ -17,7 +17,7 @@ import android.util.Log
 
 object LoggerUtils {
     val opMode = OpMode.DEBUG
-    val TAG = "News-Server | "
+    val TAG = "NS | "
 
     fun printStackTrace(ex:Throwable){
         if (opMode==LoggerUtils.OpMode.DEBUG){
@@ -26,7 +26,9 @@ object LoggerUtils {
     }
 
     fun <T> debugLog(message:String,type:Class<T>){
-        Log.d(TAG+type.simpleName,message)
+        if (opMode==LoggerUtils.OpMode.DEBUG) {
+            Log.d(TAG + type.simpleName, message)
+        }
     }
 
     enum class OpMode{
