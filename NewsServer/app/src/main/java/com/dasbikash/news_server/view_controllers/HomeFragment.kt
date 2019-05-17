@@ -183,17 +183,8 @@ class HomeFragment : Fragment() {
                             })
                     )
                 }
-
             })
-
     }
-
-    override fun onPause() {
-        super.onPause()
-//        mDisposable.clear()
-    }
-
-
     companion object {
         val TAG = "HomeFragment"
     }

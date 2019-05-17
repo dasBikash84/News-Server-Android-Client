@@ -308,7 +308,6 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
                         }
 
                         override fun onError(e: Throwable) {
-//                            e.printStackTrace()
                             if (e is NoInternertConnectionException) {
                                 NetConnectivityUtility.showNoInternetToast(viewHolder.itemView.context)
                             }else {

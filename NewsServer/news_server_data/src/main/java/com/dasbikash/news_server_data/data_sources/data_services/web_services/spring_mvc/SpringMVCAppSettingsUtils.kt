@@ -140,11 +140,6 @@ object SpringMVCAppSettingsUtils {
         Log.d(TAG, "getPageGroups before throw it")
         dataServerException?.let { throw it }
 
-//        Log.d(TAG, "getPageGroups before throw DataNotFoundException()")
-//        if (pageGroups == null) {
-//            throw DataNotFoundException()
-//        }
-
         Log.d(TAG, "getPageGroups before return")
         return pageGroups!!
     }

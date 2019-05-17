@@ -42,7 +42,7 @@ import io.reactivex.observers.DisposableObserver
 import java.util.*
 
 class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holderResId: Int, val homeViewModel: HomeViewModel) :
-        ListAdapter<Page, LatestArticlePreviewHolder>(PageDiffCallback)/*,DefaultLifecycleObserver*/ {
+        ListAdapter<Page, LatestArticlePreviewHolder>(PageDiffCallback){
 
     val TAG = "ArticlePreviewHolder"
 
@@ -106,14 +106,6 @@ class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holde
         super.onDetachedFromRecyclerView(recyclerView)
         mDisposable.clear()
     }
-
-//    override fun onPause(owner: LifecycleOwner) {
-//        mDisposable.clear()
-//    }
-//
-//    override fun onDestroy(owner: LifecycleOwner) {
-//        mDisposable.clear()
-//    }
 
 }
 

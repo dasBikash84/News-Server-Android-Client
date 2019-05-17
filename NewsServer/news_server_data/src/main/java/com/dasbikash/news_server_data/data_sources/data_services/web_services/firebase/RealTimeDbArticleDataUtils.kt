@@ -51,7 +51,6 @@ object RealTimeDbArticleDataUtils {
                             dataSnapshot.children.asSequence()
                                     .take(1)
                                     .forEach {
-//                                        Log.d(TAG,"children data: ${dataSnapshot.value}")
                                         articles.add(it.getValue(Article::class.java)!!)
                                     }
                         }

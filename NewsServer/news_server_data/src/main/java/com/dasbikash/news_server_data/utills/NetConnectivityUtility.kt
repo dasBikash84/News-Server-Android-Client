@@ -21,9 +21,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkInfo
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
-
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 object NetConnectivityUtility : BroadcastReceiver() {

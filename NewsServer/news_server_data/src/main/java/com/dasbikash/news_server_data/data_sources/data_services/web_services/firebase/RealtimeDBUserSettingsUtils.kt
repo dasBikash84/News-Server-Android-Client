@@ -13,7 +13,6 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
-import android.os.SystemClock
 import com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service.UserIpDataService
 import com.dasbikash.news_server_data.exceptions.*
 import com.dasbikash.news_server_data.models.UserSettingsUpdateDetails
@@ -26,16 +25,14 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal object RealtimeDBUserSettingsUtils{
+internal object RealtimeDBUserSettingsUtils {
 
-    private val MAX_SETTINGS_UPLOAD_RETRY = 3
-    private val MAX_SETTINGS_UPLOAD_RETRY_SLEEP_PERIOD = 5000L
     private const val MAX_WAITING_MS_FOR_NET_RESPONSE = 30000L
     private const val FAV_PAGE_ID_LIST_NODE = "favouritePageIds"
     private const val PAGE_GROUP_LIST_NODE = "pageGroups"
     private const val UPDATE_LOG_NODE = "updateLog"
 
-    fun getCurrentUserName():String?{
+    fun getCurrentUserName(): String? {
         FirebaseAuth.getInstance().currentUser?.let {
             return it.displayName
         }
@@ -44,7 +41,9 @@ internal object RealtimeDBUserSettingsUtils{
 
     fun getUserPreferenceData(): UserPreferenceData {
         val user = FirebaseAuth.getInstance().currentUser
-        if (user==null || user.isAnonymous) { throw WrongCredentialException() }
+        if (user == null || user.isAnonymous) {
+            throw WrongCredentialException()
+        }
 
         var data: UserPreferenceData? = null
         val lock = Object()
@@ -72,7 +71,7 @@ internal object RealtimeDBUserSettingsUtils{
                 })
         synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
         userSettingsException?.let { throw userSettingsException as SettingsServerException }
-        if (data == null){
+        if (data == null) {
             throw SettingsServerUnavailable()
         }
         return data!!
@@ -85,101 +84,89 @@ internal object RealtimeDBUserSettingsUtils{
         val updateLogRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(UPDATE_LOG_NODE)
     }
 
-    fun uploadUserPreferenceData(userPreferenceData: UserPreferenceData){
+    fun uploadUserPreferenceData(userPreferenceData: UserPreferenceData) {
 
         val user = FirebaseAuth.getInstance().currentUser
-        if (user==null || user.isAnonymous) { throw WrongCredentialException() }
+        if (user == null || user.isAnonymous) {
+            throw WrongCredentialException()
+        }
 
         val userSettingsNodes = getUserSettingsNodes(user)
         val lock = Object()
-//        var remainingTries = MAX_SETTINGS_UPLOAD_RETRY
 
-//        do {
-//            try {
-                var userSettingsUploadFailureException: UserSettingsUploadFailureException? = null
-                val workDone = AtomicBoolean(false)
+        var userSettingsUploadFailureException: UserSettingsUploadFailureException? = null
+        val workDone = AtomicBoolean(false)
 
-                userSettingsNodes.favPageIdListRef
-                        .setValue(userPreferenceData.favouritePageIds)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                workDone.set(true)
-                                synchronized(lock) { lock.notify() }
-                            } else {
-                                userSettingsUploadFailureException = UserSettingsUploadFailureException(task.exception!!)
-                                synchronized(lock) { lock.notify() }
-                            }
-                        }
-
-                workDone.set(false)
-                synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
-                userSettingsUploadFailureException?.let { throw it }
-                if (!workDone.get()){
-                    throw SettingsServerUnavailable()
+        userSettingsNodes.favPageIdListRef
+                .setValue(userPreferenceData.favouritePageIds)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        workDone.set(true)
+                        synchronized(lock) { lock.notify() }
+                    } else {
+                        userSettingsUploadFailureException = UserSettingsUploadFailureException(task.exception!!)
+                        synchronized(lock) { lock.notify() }
+                    }
                 }
 
-                userSettingsNodes.pageGroupListRef
-                        .setValue(userPreferenceData.pageGroups)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                workDone.set(true)
-                                synchronized(lock) { lock.notify() }
-                            } else {
-                                userSettingsUploadFailureException = UserSettingsUploadFailureException(task.exception!!)
-                                synchronized(lock) { lock.notify() }
-                            }
-                        }
-                workDone.set(false)
-                synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
-                userSettingsUploadFailureException?.let { throw it }
-                if (!workDone.get()){
-                    throw SettingsServerUnavailable()
-                }
+        workDone.set(false)
+        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+        userSettingsUploadFailureException?.let { throw it }
+        if (!workDone.get()) {
+            throw SettingsServerUnavailable()
+        }
 
-                var ipAddress: String
-                try {
-                    ipAddress = UserIpDataService.getIpAddress()
-                } catch (ex: Throwable) {
-                    ipAddress = UserSettingsUpdateDetails.NULL_IP
+        userSettingsNodes.pageGroupListRef
+                .setValue(userPreferenceData.pageGroups)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        workDone.set(true)
+                        synchronized(lock) { lock.notify() }
+                    } else {
+                        userSettingsUploadFailureException = UserSettingsUploadFailureException(task.exception!!)
+                        synchronized(lock) { lock.notify() }
+                    }
                 }
+        workDone.set(false)
+        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+        userSettingsUploadFailureException?.let { throw it }
+        if (!workDone.get()) {
+            throw SettingsServerUnavailable()
+        }
 
-                userSettingsNodes.updateLogRef
-                        .push()
-                        .setValue(UserSettingsUpdateDetails(userIp = ipAddress))
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                workDone.set(true)
-                                synchronized(lock) { lock.notify() }
-                            } else {
-                                userSettingsUploadFailureException = UserSettingsUploadFailureException(task.exception!!)
-                                synchronized(lock) { lock.notify() }
-                            }
-                        }
-                workDone.set(false)
-                synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
-                userSettingsUploadFailureException?.let { throw it }
-                if (!workDone.get()){
-                    throw SettingsServerUnavailable()
+        var ipAddress: String
+        try {
+            ipAddress = UserIpDataService.getIpAddress()
+        } catch (ex: Throwable) {
+            ipAddress = UserSettingsUpdateDetails.NULL_IP
+        }
+
+        userSettingsNodes.updateLogRef
+                .push()
+                .setValue(UserSettingsUpdateDetails(userIp = ipAddress))
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        workDone.set(true)
+                        synchronized(lock) { lock.notify() }
+                    } else {
+                        userSettingsUploadFailureException = UserSettingsUploadFailureException(task.exception!!)
+                        synchronized(lock) { lock.notify() }
+                    }
                 }
-
-//                break
-//
-//            } catch (ex: UserSettingsUploadFailureException) {
-//                Log.d(RealtimeDBUtils.TAG, "${remainingTries}")
-//                remainingTries--
-//                if (remainingTries == 0) {
-//                    throw ex
-//                }
-//                SystemClock.sleep(MAX_SETTINGS_UPLOAD_RETRY_SLEEP_PERIOD)
-//                continue
-//            }
-//        } while (remainingTries > 0)
+        workDone.set(false)
+        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+        userSettingsUploadFailureException?.let { throw it }
+        if (!workDone.get()) {
+            throw SettingsServerUnavailable()
+        }
     }
 
     fun getLastUserSettingsUpdateTime(): Long {
 
         val user = FirebaseAuth.getInstance().currentUser
-        if (user==null || user.isAnonymous) { throw WrongCredentialException() }
+        if (user == null || user.isAnonymous) {
+            throw WrongCredentialException()
+        }
 
         val userSettingsUpdateLogNode = getUserSettingsNodes(user).updateLogRef
         val lock = Object()
@@ -197,19 +184,16 @@ internal object RealtimeDBUserSettingsUtils{
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         try {
                             if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
-                                lastUpdateTime = dataSnapshot.children.last().getValue(UserSettingsUpdateTime::class.java)?.timeStamp ?: 0L
+                                lastUpdateTime = dataSnapshot.children.last().getValue(UserSettingsUpdateTime::class.java)?.timeStamp
+                                        ?: 0L
                             }
-                        }catch (ex:Exception){
+                        } catch (ex: Exception) {
                             settingsServerException = UserSettingsNotFoundException(ex)
                         }
                         synchronized(lock) { lock.notify() }
                     }
                 })
-//        try {
-            synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
-//        }catch (ex:InterruptedException){
-//            ex.printStackTrace()
-//        }
+        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
 
         settingsServerException?.let { throw it }
 

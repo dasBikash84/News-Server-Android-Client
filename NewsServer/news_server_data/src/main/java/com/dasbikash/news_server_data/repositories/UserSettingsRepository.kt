@@ -16,7 +16,6 @@ package com.dasbikash.news_server_data.repositories
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
@@ -63,7 +62,6 @@ abstract class UserSettingsRepository {
             LoggerUtils.debugLog( "New user",this::class.java)
             return uploadUserPreferenceData(context, getUserPreferenceDataFromLocalDB())
         } else {
-//            download And Save User Settings From Server
             return updateUserSettingsIfModified(context)
         }
     }
@@ -87,7 +85,6 @@ abstract class UserSettingsRepository {
     }
     @Suppress("SENSELESS_COMPARISON")
     private fun getServerUserPreferenceData(): UserPreferenceData {
-//        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
 
         val userPreferenceData = mUserSettingsDataService.getUserPreferenceData()
         //Remove if any null entry found
@@ -143,7 +140,7 @@ abstract class UserSettingsRepository {
         }
         userPreferenceData.favouritePageIds.add(page.id)
         uploadUserPreferenceData(context,userPreferenceData)
-//        mDatabase.userPreferenceDataDao.save(userPreferenceData)
+
         saveUserPreferenceDataToLocalDb(userPreferenceData)
 
         return true

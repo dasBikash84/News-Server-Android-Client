@@ -363,7 +363,6 @@ class PageGroupEditFragment : Fragment() {
                             }
 
                             override fun onError(e: Throwable) {
-//                            e.printStackTrace()
                                 if (e is NoInternertConnectionException) {
                                     NetConnectivityUtility.showNoInternetToast(this@PageGroupEditFragment.context!!)
                                 }else {
@@ -372,7 +371,6 @@ class PageGroupEditFragment : Fragment() {
                                 }
 
                                 (activity as WorkInProcessWindowOperator).removeWorkInProcessWindow()
-//                                Toast.makeText(context, "Error!! Please retry!!", Toast.LENGTH_SHORT).show()
                             }
                         })
         )

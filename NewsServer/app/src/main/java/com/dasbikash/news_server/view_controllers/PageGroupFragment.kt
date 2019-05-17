@@ -282,17 +282,14 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
     }
 
     override fun onPause(owner: LifecycleOwner) {
-//        Log.d("NpPerviewFragment", "active = false for pageGroup:${mPageGroup.name}")
         active = false
     }
 
     override fun onStop(owner: LifecycleOwner) {
-//        Log.d("NpPerviewFragment", "active = false for pageGroup:${mPageGroup.name}")
         active = false
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
-//        Log.d("NpPerviewFragment", "active = false for pageGroup:${mPageGroup.name}")
         active = false
     }
 
@@ -324,7 +321,6 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                     }
                     if (fragment != null && active) {
                         fragmentManager.beginTransaction().replace(frameLayout.id, fragment).commit()
-//                        fragmentManager.executePendingTransactions()
                     }
                 } catch (ex: Exception) {
                     ex.printStackTrace()

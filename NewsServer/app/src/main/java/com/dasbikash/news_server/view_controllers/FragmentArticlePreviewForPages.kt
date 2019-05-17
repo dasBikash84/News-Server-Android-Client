@@ -26,9 +26,7 @@ import com.dasbikash.news_server.view_controllers.view_helpers.PagePreviewListAd
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.models.room_entity.Page
 
-/**
- *
- */
+
 class FragmentArticlePreviewForPages : Fragment() {
 
     val mPageList = mutableListOf<Page>()
@@ -54,8 +52,6 @@ class FragmentArticlePreviewForPages : Fragment() {
             mPageListPreviewHolderRV.minimumWidth = resources.displayMetrics.widthPixels
         }
 
-//        Log.d("NpPerviewFragment", mPageList.map { "page: ${it.name} Np: ${it.newspaperId} | " }.toList().toString()
-//                + "mArticlePreviewResId: ${mArticlePreviewResId}")
         mPagePreviewListAdapter = PagePreviewListAdapter(this,mArticlePreviewResId!!,ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
 
         mPageListPreviewHolderRV.adapter = mPagePreviewListAdapter

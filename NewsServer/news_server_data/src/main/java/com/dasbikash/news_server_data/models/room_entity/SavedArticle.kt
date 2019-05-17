@@ -14,10 +14,7 @@
 package com.dasbikash.news_server_data.models.room_entity
 
 import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.google.gson.annotations.Expose
 import java.io.Serializable
 import java.util.*
 

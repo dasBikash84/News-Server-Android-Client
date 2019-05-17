@@ -165,7 +165,6 @@ class PageViewActivity : AppCompatActivity(),
 
     override fun onPause() {
         super.onPause()
-//        mDisposable.clear()
         removeWorkInProcessWindow()
     }
 
@@ -173,9 +172,7 @@ class PageViewActivity : AppCompatActivity(),
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START)
         } else {
-//            if (!mWaitWindowShown) {
-                super.onBackPressed()
-//            }
+            super.onBackPressed()
         }
     }
 
@@ -189,9 +186,6 @@ class PageViewActivity : AppCompatActivity(),
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         if (!mWaitWindowShown) {
             return when (item.itemId) {
                 R.id.add_to_favourites_menu_item -> {
@@ -257,7 +251,6 @@ class PageViewActivity : AppCompatActivity(),
         mTextSizeChangeMinusButton = findViewById(R.id.minus_text_size_change)
         mTextSizeChangeOkButton = findViewById(R.id.ok_text_size_change)
 
-//        mTextSizeChangeFrame.setOnClickListener {}
         mTextSizeChangeCancelButton.setOnClickListener { changeTextFontAction() }
         mTextSizeChangePlusButton.setOnClickListener { incrementTextSize() }
         mTextSizeChangeMinusButton.setOnClickListener { decrementTextSize() }
@@ -462,12 +455,6 @@ class PageViewActivity : AppCompatActivity(),
             mFragmentStatePagerAdapter.notifyDataSetChanged()
         }
     }
-
-    /*fun showShortSnack(message: String) {
-        Snackbar
-                .make(mPageViewContainer, message, Snackbar.LENGTH_SHORT)
-                .show()
-    }*/
 
     private fun closeNavigationDrawer() {
         mDrawerLayout.closeDrawer(GravityCompat.START)

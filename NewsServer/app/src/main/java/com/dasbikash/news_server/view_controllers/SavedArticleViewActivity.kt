@@ -95,7 +95,6 @@ class SavedArticleViewActivity : AppCompatActivity() {
                                 mSavedArticleList.add(it)
                             }
                             mFragmentStatePagerAdapter.notifyDataSetChanged()
-//                            mSavedArticlePager.setCurrentItem(0)
                             mTargetSavedArticleId?.let {
                                 LoggerUtils.debugLog(it, this@SavedArticleViewActivity::class.java)
                                 val index = mSavedArticleList.indexOf(mSavedArticleList.filter { it.id.equals(mTargetSavedArticleId) }.first())
@@ -109,7 +108,6 @@ class SavedArticleViewActivity : AppCompatActivity() {
     }
 
     fun deleteArticle(savedArticle: SavedArticle) {
-//        LoggerUtils.debugLog("Need to delete: ${it}",this::class.java)
         if (mSavedArticleList.contains(savedArticle)) {
             mDisposable.add(
                     Observable.just(savedArticle)

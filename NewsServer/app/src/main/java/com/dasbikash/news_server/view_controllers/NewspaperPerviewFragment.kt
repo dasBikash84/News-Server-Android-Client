@@ -108,20 +108,7 @@ class NewspaperPerviewFragment : Fragment() {
 class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                                 val appSettingsRepository: AppSettingsRepository,
                                 val homeViewModel: HomeViewModel) :
-        ListAdapter<Page, PagePreviewHolder>(PageDiffCallback)/*,DefaultLifecycleObserver*/ {
-
-//    init {
-//        lifecycleOwner.lifecycle.addObserver(this)
-//    }
-
-//    override fun onPause(owner: LifecycleOwner) {
-//        disposable.clear()
-//    }
-//
-//    override fun onDestroy(owner: LifecycleOwner) {
-//        disposable.clear()
-//    }
-
+        ListAdapter<Page, PagePreviewHolder>(PageDiffCallback){
 
     val childPageMap = mutableMapOf<Page, List<Page>>()
 
@@ -196,11 +183,6 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
         )
     }
 
-//    override fun onViewRecycled(holder: PagePreviewHolder) {
-//        super.onViewRecycled(holder)
-//        holder.active = false
-//    }
-
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         disposable.clear()
@@ -213,8 +195,6 @@ class PagePreviewHolder(val lifecycleOwner: LifecycleOwner,itemView: View) : Rec
     companion object {
         val TAG = "PagePreviewHolder"
     }
-
-//    var active = true
 
     lateinit var mPage: Page
 
@@ -238,7 +218,6 @@ class PagePreviewHolder(val lifecycleOwner: LifecycleOwner,itemView: View) : Rec
         }
 
         val pagePreviewListAdapter = PagePreviewListAdapter(lifecycleOwner,articlePreviewResId, homeViewModel)
-//        lifecycleOwner.lifecycle.addObserver(pagePreviewListAdapter)
         mPageListPreviewHolderRV.adapter = pagePreviewListAdapter
         pagePreviewListAdapter.submitList(data)
     }

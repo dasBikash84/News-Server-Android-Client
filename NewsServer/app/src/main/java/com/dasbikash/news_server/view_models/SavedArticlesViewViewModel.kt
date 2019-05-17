@@ -25,8 +25,6 @@ class SavedArticlesViewViewModel(private val mApplication: Application) : Androi
 
     private val mNewsDataRepository:NewsDataRepository
 
-//    private val disposable:CompositeDisposable = CompositeDisposable()
-
     init {
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(mApplication)
     }
@@ -34,10 +32,5 @@ class SavedArticlesViewViewModel(private val mApplication: Application) : Androi
     fun getSavedArticlesLiveData():LiveData<List<SavedArticle>>{
         return mNewsDataRepository.getAllSavedArticle()
     }
-
-//    override fun onCleared() {
-//        super.onCleared()
-//        disposable.clear()
-//    }
 
 }

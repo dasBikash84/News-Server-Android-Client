@@ -22,7 +22,6 @@ import com.dasbikash.news_server_data.repositories.NewsDataRepository;
 import com.dasbikash.news_server_data.repositories.RepositoryFactory;
 
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -42,22 +41,6 @@ public class RoomDatabaseInstrumentedTest {
     public void createDb() {
         context = ApplicationProvider.getApplicationContext();
         newsDataRepository = RepositoryFactory.INSTANCE.getNewsDataRepository(context);
-    }
-
-
-    @Test
-    public void getLatestArticleByTopLevelPageIdTest(){
-//        Log.d(TAG, newsDataRepository.getLatestArticleByTopLevelPageId("PAGE_ID_815").toString());
-    }
-
-    @Test
-    public void  getLatestArticlesByPageId() {
-//        Log.d(TAG, newsDataRepository.getRawLatestArticlesByPage("PAGE_ID_814",5).toString());
-    }
-
-    @Test
-    public void  getArticlesAfterLastId() {
-//        Log.d(TAG, newsDataRepository.getRawArticlesAfterLastId("PAGE_ID_814","-6645600438004371204",1).toString());
     }
 
 }

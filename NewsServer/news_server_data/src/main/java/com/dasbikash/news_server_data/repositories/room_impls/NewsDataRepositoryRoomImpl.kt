@@ -20,7 +20,6 @@ import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.ImageUtils
-import com.squareup.picasso.Picasso
 import java.io.File
 
 class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDataRepository() {

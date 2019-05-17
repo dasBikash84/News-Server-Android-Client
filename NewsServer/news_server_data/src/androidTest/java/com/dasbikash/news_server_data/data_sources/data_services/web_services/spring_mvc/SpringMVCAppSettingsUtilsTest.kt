@@ -28,11 +28,4 @@ class SpringMVCAppSettingsUtilsTest {
     @After
     fun tearDown() {
     }
-
-//    @Test
-//    fun getServerAppSettingsUpdateTime() {
-//         Context of the app under test.
-//        val appContext = InstrumentationRegistry.getTargetContext()
-//        println(SpringMVCAppSettingsUtils.getServerAppSettingsUpdateTime(appContext))
-//    }
 }

@@ -28,12 +28,6 @@ internal object AppSettingsDataServiceUtils {
     fun processDefaultAppSettingsData(defaultAppSettings: DefaultAppSettings):
             DefaultAppSettings {
 
-        /*if (inputAppSettings.status == NetworkResponse.ResponseStatus.FAILURE){
-            return inputAppSettings
-        }*/
-
-        //val defaultAppSettings = inputAppSettings.payload
-
         defaultAppSettings.newspapers?.let {
 
             val filteredNewspaperMap = HashMap<String, Newspaper>()

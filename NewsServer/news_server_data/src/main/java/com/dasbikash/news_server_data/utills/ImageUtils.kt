@@ -37,8 +37,4 @@ object ImageUtils {
             return null
         }
     }
-
-    /*fun urlToFile(url: URL){
-
-    }*/
 }

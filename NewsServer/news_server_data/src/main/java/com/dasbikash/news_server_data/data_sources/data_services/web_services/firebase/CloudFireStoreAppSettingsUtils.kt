@@ -29,9 +29,6 @@ internal object CloudFireStoreAppSettingsUtils{
 
     private const val SETTINGS_UPDATE_TIME_FIELD_NAME = "updateTime"
 
-//    private const val SETTINGS_UPDATE_TIME_NODE = "update_time"
-//    val mSettingsUpdateTimeReference: DatabaseReference = RealtimeDBUtils.mAppSettingsReference.child(SETTINGS_UPDATE_TIME_NODE)
-
     fun getServerAppSettingsUpdateTime(): Long{
 
         val lock = Object()
@@ -46,7 +43,6 @@ internal object CloudFireStoreAppSettingsUtils{
                     Log.d(TAG,"getServerAppSettingsUpdateTime")
                     for (document in documents) {
                         if (document.exists()){
-//                            articles.add(document.toObject(Article::class.java))
                             lastSettingsUpdateTime = (document.get(SETTINGS_UPDATE_TIME_FIELD_NAME) as Timestamp).toDate().time
                         }
                     }
@@ -262,9 +258,6 @@ internal object CloudFireStoreAppSettingsUtils{
         dataServerException?.let { throw it }
 
         Log.d(TAG,"getPageGroups before throw DataNotFoundException()")
-//        if (pageGroups.isEmpty()){
-//            throw DataNotFoundException()
-//        }
 
         Log.d(TAG,"getPageGroups before return")
         return HashMap(pageGroups)

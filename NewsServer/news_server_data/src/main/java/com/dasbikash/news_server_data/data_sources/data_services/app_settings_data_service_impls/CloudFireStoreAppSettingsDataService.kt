@@ -16,7 +16,6 @@ package com.dasbikash.news_server_data.data_sources.data_services.app_settings_d
 import android.content.Context
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.CloudFireStoreAppSettingsUtils
-import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBAppSettingsUtils
 import com.dasbikash.news_server_data.models.DefaultAppSettings
 
 internal object CloudFireStoreAppSettingsDataService: AppSettingsDataService {
