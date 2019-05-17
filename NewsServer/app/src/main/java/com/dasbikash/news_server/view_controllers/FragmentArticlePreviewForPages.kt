@@ -56,7 +56,7 @@ class FragmentArticlePreviewForPages : Fragment() {
 
 //        Log.d("NpPerviewFragment", mPageList.map { "page: ${it.name} Np: ${it.newspaperId} | " }.toList().toString()
 //                + "mArticlePreviewResId: ${mArticlePreviewResId}")
-        mPagePreviewListAdapter = PagePreviewListAdapter(mArticlePreviewResId!!,ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
+        mPagePreviewListAdapter = PagePreviewListAdapter(this,mArticlePreviewResId!!,ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
 
         mPageListPreviewHolderRV.adapter = mPagePreviewListAdapter
     }

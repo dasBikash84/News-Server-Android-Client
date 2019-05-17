@@ -31,6 +31,7 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.ImageUtils
+import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.models.room_entity.SavedArticle
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
@@ -39,7 +40,6 @@ import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
@@ -51,7 +51,7 @@ class SavedArticlesFragment : Fragment() {
 
     private lateinit var mNewsDataRepository: NewsDataRepository
 
-    private val mDisposable = CompositeDisposable()
+    private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         LoggerUtils.debugLog("onCreateView", this::class.java)
@@ -79,12 +79,6 @@ class SavedArticlesFragment : Fragment() {
                     }
                 })
 
-    }
-
-    override fun onPause() {
-        super.onPause()
-        LoggerUtils.debugLog("onPause", this::class.java)
-        mDisposable.clear()
     }
 
     fun doOnArticleClick(savedArticle: SavedArticle) {

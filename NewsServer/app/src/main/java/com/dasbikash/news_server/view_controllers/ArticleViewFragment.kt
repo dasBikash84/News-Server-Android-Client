@@ -28,6 +28,7 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.ImageUtils
+import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.ArticleImage
 import com.dasbikash.news_server_data.models.room_entity.Language
@@ -35,7 +36,6 @@ import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
@@ -55,7 +55,7 @@ class ArticleViewFragment : Fragment() {
     private lateinit var mArticleImageListAdapter: ArticleImageListAdapter
     private lateinit var mWaitScreen:LinearLayoutCompat
 
-    private val mDisposable = CompositeDisposable()
+    private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -155,11 +155,6 @@ class ArticleViewFragment : Fragment() {
         }else {
             initArticleData { displayArticle() }
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mDisposable.clear()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

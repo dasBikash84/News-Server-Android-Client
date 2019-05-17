@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
+import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
@@ -41,7 +42,6 @@ import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
@@ -65,7 +65,7 @@ class PageGroupEditFragment : Fragment() {
     private val mSearchResultPageList = mutableListOf<Page>()
     private lateinit var mPageGroup: PageGroup
 
-    private val mDisposable = CompositeDisposable()
+    private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_page_group_edit, container, false)
@@ -361,11 +361,6 @@ class PageGroupEditFragment : Fragment() {
                             }
                         })
         )
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mDisposable.clear()
     }
 
     companion object {

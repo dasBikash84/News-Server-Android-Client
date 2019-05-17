@@ -22,12 +22,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
+import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server_data.models.room_entity.SavedArticle
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
@@ -44,7 +44,7 @@ class SavedArticleViewFragment : Fragment() {
     private lateinit var mSavedArticle: SavedArticle
     private lateinit var mArticleId: String
 
-    private val mDisposable = CompositeDisposable()
+    private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
     private lateinit var mSavedArticleViewActivity: SavedArticleViewActivity
 
@@ -128,11 +128,6 @@ class SavedArticleViewFragment : Fragment() {
                             override fun onError(e: Throwable) {}
                         })
         )
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mDisposable.clear()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

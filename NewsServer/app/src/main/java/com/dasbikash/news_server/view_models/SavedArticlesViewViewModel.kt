@@ -19,14 +19,13 @@ import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.models.room_entity.SavedArticle
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
-import io.reactivex.disposables.CompositeDisposable
 
 
 class SavedArticlesViewViewModel(private val mApplication: Application) : AndroidViewModel(mApplication) {
 
     private val mNewsDataRepository:NewsDataRepository
 
-    private val disposable:CompositeDisposable = CompositeDisposable()
+//    private val disposable:CompositeDisposable = CompositeDisposable()
 
     init {
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(mApplication)
@@ -36,9 +35,9 @@ class SavedArticlesViewViewModel(private val mApplication: Application) : Androi
         return mNewsDataRepository.getAllSavedArticle()
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        disposable.clear()
-    }
+//    override fun onCleared() {
+//        super.onCleared()
+//        disposable.clear()
+//    }
 
 }

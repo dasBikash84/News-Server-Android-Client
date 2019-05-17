@@ -38,6 +38,7 @@ import androidx.viewpager.widget.ViewPager
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
+import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.utils.OnceSettableBoolean
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.view_controllers.view_helpers.ArticlePreviewListAdapter
@@ -58,7 +59,6 @@ import com.google.android.material.navigation.NavigationView
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
@@ -110,7 +110,7 @@ class PageViewActivity : AppCompatActivity(),
     private var mArticleLoadRunning = false
     private var mWaitWindowShown = false
 
-    private val mDisposable = CompositeDisposable()
+    private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
     private val mArticleList = mutableListOf<Article>()
 
     private val mHaveMoreArticle = OnceSettableBoolean()
@@ -165,7 +165,7 @@ class PageViewActivity : AppCompatActivity(),
 
     override fun onPause() {
         super.onPause()
-        mDisposable.clear()
+//        mDisposable.clear()
         removeWorkInProcessWindow()
     }
 

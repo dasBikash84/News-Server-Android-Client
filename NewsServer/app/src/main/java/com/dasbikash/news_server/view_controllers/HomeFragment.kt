@@ -32,6 +32,7 @@ import androidx.viewpager.widget.ViewPager
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.custom_views.ViewPagerTitleScroller
 import com.dasbikash.news_server.model.PagableNewsPaper
+import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.view_controllers.view_helpers.PageListAdapter
 import com.dasbikash.news_server.view_controllers.view_helpers.PageViewHolder
 import com.dasbikash.news_server.view_models.HomeViewModel
@@ -40,7 +41,6 @@ import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_home.*
@@ -60,7 +60,7 @@ class HomeFragment : Fragment() {
 
     private val mNewsPapers = mutableListOf<PagableNewsPaper>()
 
-    private val mDisposable = CompositeDisposable()
+    private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_home, container, false)
@@ -190,7 +190,7 @@ class HomeFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        mDisposable.clear()
+//        mDisposable.clear()
     }
 
 

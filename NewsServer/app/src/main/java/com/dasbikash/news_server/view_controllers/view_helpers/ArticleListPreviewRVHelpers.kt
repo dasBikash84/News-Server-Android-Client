@@ -19,15 +19,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.LayoutRes
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.ImageUtils
+import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.view_controllers.PageViewActivity
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
@@ -38,17 +37,16 @@ import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.exceptions.CompositeException
 import io.reactivex.observers.DisposableObserver
 import java.util.*
 
-class PagePreviewListAdapter(@LayoutRes val holderResId: Int, val homeViewModel: HomeViewModel) :
-        ListAdapter<Page, LatestArticlePreviewHolder>(PageDiffCallback),DefaultLifecycleObserver {
+class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holderResId: Int, val homeViewModel: HomeViewModel) :
+        ListAdapter<Page, LatestArticlePreviewHolder>(PageDiffCallback)/*,DefaultLifecycleObserver*/ {
 
     val TAG = "ArticlePreviewHolder"
 
-    val mDisposable = CompositeDisposable()
+    val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(lifecycleOwner)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LatestArticlePreviewHolder {
         val view = LayoutInflater.from(parent.context).inflate(holderResId, parent, false)
@@ -109,13 +107,13 @@ class PagePreviewListAdapter(@LayoutRes val holderResId: Int, val homeViewModel:
         mDisposable.clear()
     }
 
-    override fun onPause(owner: LifecycleOwner) {
-        mDisposable.clear()
-    }
-
-    override fun onDestroy(owner: LifecycleOwner) {
-        mDisposable.clear()
-    }
+//    override fun onPause(owner: LifecycleOwner) {
+//        mDisposable.clear()
+//    }
+//
+//    override fun onDestroy(owner: LifecycleOwner) {
+//        mDisposable.clear()
+//    }
 
 }
 
