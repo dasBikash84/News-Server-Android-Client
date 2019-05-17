@@ -55,7 +55,7 @@ class InitFragment : Fragment() {
     private lateinit var mNoInternetMessage: TextView
 
     private var mRetryDelayForRemoteDBError = 0L
-    private var mRetryCountForRemoteDBError = 0L
+    private var mRetryCountForError = 0L
 
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
@@ -189,8 +189,8 @@ class InitFragment : Fragment() {
                 registerBrodcastReceivers()
             }
             is SettingsServerException  -> {
-                mRetryCountForRemoteDBError++
-                mRetryDelayForRemoteDBError += RETRY_DELAY_FOR_REMOTE_ERROR_INC_VALUE * mRetryCountForRemoteDBError
+                mRetryCountForError++
+                mRetryDelayForRemoteDBError += INCREMENTAL_RETRY_DELAY_MS * mRetryCountForError
                 initSettingsDataLoading(mRetryDelayForRemoteDBError)
             }
             is AuthServerException -> {
@@ -201,10 +201,9 @@ class InitFragment : Fragment() {
                 })
             }
             is DataSourceNotFoundException -> {
-                /*mRetryCountForRemoteDBError++
-                mRetryDelayForRemoteDBError += RETRY_DELAY_FOR_REMOTE_ERROR_INC_VALUE * mRetryCountForRemoteDBError
-                initSettingsDataLoading(mRetryDelayForRemoteDBError)*/
-                throw throwable
+                mRetryCountForError++
+                mRetryDelayForRemoteDBError += INCREMENTAL_RETRY_DELAY_MS * mRetryCountForError
+                initSettingsDataLoading(mRetryDelayForRemoteDBError)
             }
         }
     }
@@ -221,7 +220,7 @@ class InitFragment : Fragment() {
 
     companion object {
         private val TAG = "InitFragment"
-        private const val RETRY_DELAY_FOR_REMOTE_ERROR_INC_VALUE = 3000L
+        private const val INCREMENTAL_RETRY_DELAY_MS = 3000L
     }
 
 }
