@@ -13,6 +13,8 @@
 
 package com.dasbikash.news_server.view_controllers.view_helpers
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -35,6 +37,7 @@ import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.exceptions.CompositeException
@@ -147,11 +150,14 @@ class LatestArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewMode
 
         mArticle = article
 
-        articleTitle.text = mArticle.title
-        articleTitle.visibility = View.VISIBLE
+        Handler(Looper.getMainLooper()).postDelayed({
+            articleTitle.text = mArticle.title
+            articleTitle.visibility = View.VISIBLE
 
-        articlePublicationTime.text = dateString
-        articlePublicationTime.visibility = View.VISIBLE
+            articlePublicationTime.text = dateString
+            articlePublicationTime.visibility = View.VISIBLE
+            LoggerUtils.debugLog("Page: ${page.name} dateString: ${dateString}",this::class.java)
+        },10L)
 
         ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink)
         articlePreviewImage.visibility = View.VISIBLE

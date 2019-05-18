@@ -28,11 +28,14 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/page_title"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
             android:gravity="center|center_vertical"
-            android:padding="2dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:lines="1"
@@ -42,7 +45,7 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/article_preview_image"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="160dp"
             android:background="@android:color/white"
             android:gravity="center"
@@ -54,11 +57,14 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/article_title"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
             android:gravity="center"
-            android:padding="2dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:textColor="@android:color/black"
             android:textSize="14sp"
             android:lines="1"
@@ -68,13 +74,17 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/article_time"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
             android:gravity="center"
             android:textColor="@android:color/black"
             android:textSize="12sp"
             android:lines="1"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

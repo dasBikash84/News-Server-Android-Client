@@ -108,7 +108,7 @@ class NewspaperPerviewFragment : Fragment() {
 class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                                 val appSettingsRepository: AppSettingsRepository,
                                 val homeViewModel: HomeViewModel) :
-        ListAdapter<Page, PagePreviewHolder>(PageDiffCallback){
+        ListAdapter<Page, PagePreviewHolder>(PageDiffCallback) {
 
     val childPageMap = mutableMapOf<Page, List<Page>>()
 
@@ -118,32 +118,32 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
         super.onCurrentListChanged(previousList, currentList)
         if (currentList.size > 0) {
             disposable.add(
-                Observable.fromIterable(currentList)
-                    .subscribeOn(Schedulers.io())
-                    .forEach {
-                        it?.let {
-                            val childPages =
-                                    appSettingsRepository
-                                            .getChildPagesForTopLevelPage(it)
-                                            .asSequence()
-                                            .filter { it.hasData }
-                                            .sortedBy { it.id }
-                                            .toCollection(mutableListOf<Page>())
-                            if (it.hasData) {
-                                childPages.add(0, it)
+                    Observable.fromIterable(currentList)
+                            .subscribeOn(Schedulers.io())
+                            .forEach {
+                                    it.let {
+                                        val childPages =
+                                                appSettingsRepository
+                                                        .getChildPagesForTopLevelPage(it)
+                                                        .asSequence()
+                                                        .filter { it.hasData }
+                                                        .sortedBy { it.id }
+                                                        .toCollection(mutableListOf<Page>())
+                                        if (it.hasData) {
+                                            childPages.add(0, it)
+                                        }
+                                        synchronized(childPageMap) {
+                                            childPageMap.put(it, childPages)
+                                        }
+                                    }
                             }
-                            synchronized(childPageMap) {
-                                childPageMap.put(it, childPages)
-                            }
-                        }
-                    }
             )
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PagePreviewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_child_page_list_preview, parent, false)
-        val holder = PagePreviewHolder(lifecycleOwner,view)
+        val holder = PagePreviewHolder(lifecycleOwner, view)
         return holder
     }
 
@@ -163,7 +163,7 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                                 }
                                 try {
                                     Thread.sleep(10L)
-                                }catch (ex:InterruptedException){
+                                } catch (ex: InterruptedException) {
                                     ex.printStackTrace()
                                 }
                             } while (true)
@@ -174,10 +174,11 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                             override fun onNext(childPageList: Any) {
                                 if (childPageList is List<*>) {
                                     @Suppress("UNCHECKED_CAST")
-                                    Log.d(NewspaperPerviewFragment.TAG,"bind for page: ${page.name} Np: ${page.newspaperId}")
+                                    Log.d(NewspaperPerviewFragment.TAG, "bind for page: ${page.name} Np: ${page.newspaperId} with ${childPageList.size} childs")
                                     holder.bind(page, childPageList as List<Page>, homeViewModel)
                                 }
                             }
+
                             override fun onError(e: Throwable) {}
                         })
         )
@@ -190,7 +191,7 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
 
 }
 
-class PagePreviewHolder(val lifecycleOwner: LifecycleOwner,itemView: View) : RecyclerView.ViewHolder(itemView){
+class PagePreviewHolder(val lifecycleOwner: LifecycleOwner, itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     companion object {
         val TAG = "PagePreviewHolder"
@@ -202,6 +203,7 @@ class PagePreviewHolder(val lifecycleOwner: LifecycleOwner,itemView: View) : Rec
 
     init {
         mPageListPreviewHolderRV = itemView.findViewById(R.id.mPageListPreviewHolder)
+        mPageListPreviewHolderRV.minimumWidth = itemView.resources.displayMetrics.widthPixels
     }
 
     @SuppressLint("CheckResult")
@@ -210,14 +212,13 @@ class PagePreviewHolder(val lifecycleOwner: LifecycleOwner,itemView: View) : Rec
         val articlePreviewResId: Int
         if (data.size == 1) {
             articlePreviewResId = R.layout.view_article_preview_holder_parent_width
-            mPageListPreviewHolderRV.minimumWidth = itemView.resources.displayMetrics.widthPixels
         } else if (data.size > 1) {
             articlePreviewResId = R.layout.view_article_preview_holder_custom_width
         } else {
             return
         }
 
-        val pagePreviewListAdapter = PagePreviewListAdapter(lifecycleOwner,articlePreviewResId, homeViewModel)
+        val pagePreviewListAdapter = PagePreviewListAdapter(lifecycleOwner, articlePreviewResId, homeViewModel)
         mPageListPreviewHolderRV.adapter = pagePreviewListAdapter
         pagePreviewListAdapter.submitList(data)
     }
