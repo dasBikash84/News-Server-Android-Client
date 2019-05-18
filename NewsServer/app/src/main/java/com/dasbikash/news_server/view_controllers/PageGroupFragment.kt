@@ -310,10 +310,12 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                 try {
                     val fragment = when {
                         this.pageEntityList.size == 1 -> {
-                            FragmentArticlePreviewForPages.getInstanceForScreenFillPreview(this.pageEntityList.first())
+                            FragmentArticlePreviewForPages
+                                    .getInstanceForScreenFillPreview(this.pageEntityList.first(),this.pageEntityList.size)
                         }
                         this.pageEntityList.size > 1 -> {
-                            FragmentArticlePreviewForPages.getInstanceForCustomWidthPreview(this.pageEntityList.filter { it != null }.toList())
+                            FragmentArticlePreviewForPages
+                                    .getInstanceForCustomWidthPreview(this.pageEntityList.filter { it != null }.toList(),this.pageEntityList.size)
                         }
                         else -> {
                             null

@@ -31,7 +31,8 @@ class FragmentArticlePreviewForPages : Fragment() {
 
     val mPageList = mutableListOf<Page>()
     @LayoutRes
-    var mArticlePreviewResId: Int? = 0
+    private var mArticlePreviewResId: Int? = 0
+    private var mShowNewsPaperName: Int? = 0
 
     private lateinit var mPageListPreviewHolderRV:RecyclerView
 
@@ -45,6 +46,7 @@ class FragmentArticlePreviewForPages : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         mPageList.addAll(arguments!!.getParcelableArrayList<Page>(ARG_PAGE_LIST)!!)
         mArticlePreviewResId = arguments!!.getInt(ARG_ARTICLE_PREVIEW_RES_ID)
+        mShowNewsPaperName = arguments!!.getInt(ARG_SHOW_NP_NAME_FLAG)
 
         mPageListPreviewHolderRV = view.findViewById(R.id.mPageListPreviewHolder)
 
@@ -52,7 +54,8 @@ class FragmentArticlePreviewForPages : Fragment() {
             mPageListPreviewHolderRV.minimumWidth = resources.displayMetrics.widthPixels
         }
 
-        mPagePreviewListAdapter = PagePreviewListAdapter(this,mArticlePreviewResId!!,ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
+        mPagePreviewListAdapter =
+                PagePreviewListAdapter(this,mArticlePreviewResId!!,ViewModelProviders.of(activity!!).get(HomeViewModel::class.java),mShowNewsPaperName!!)
 
         mPageListPreviewHolderRV.adapter = mPagePreviewListAdapter
     }
@@ -70,9 +73,10 @@ class FragmentArticlePreviewForPages : Fragment() {
 
         val ARG_PAGE_LIST = "com.dasbikash.news_server.views.FragmentArticlePreviewForPages.ARG_PAGE_LIST"
         val ARG_ARTICLE_PREVIEW_RES_ID = "com.dasbikash.news_server.views.FragmentArticlePreviewForPages.ARG_ARTICLE_PREVIEW_RES_ID"
+        val ARG_SHOW_NP_NAME_FLAG = "com.dasbikash.news_server.views.FragmentArticlePreviewForPages.ARG_SHOW_NP_NAME_FLAG"
         val TAG = "FragAPreviewForPages"
 
-        private fun getInstance(pages: List<Page>, @LayoutRes resId: Int): FragmentArticlePreviewForPages {
+        private fun getInstance(pages: List<Page>, @LayoutRes resId: Int,showNewsPaperName:Int): FragmentArticlePreviewForPages {
 
             if (pages.isEmpty()) {
                 throw IllegalArgumentException()
@@ -81,18 +85,19 @@ class FragmentArticlePreviewForPages : Fragment() {
             val args = Bundle()
             args.putParcelableArrayList(ARG_PAGE_LIST, ArrayList(pages))
             args.putInt(ARG_ARTICLE_PREVIEW_RES_ID, resId)
+            args.putInt(ARG_SHOW_NP_NAME_FLAG, showNewsPaperName)
             val fragment = FragmentArticlePreviewForPages()
             fragment.setArguments(args)
 
             return fragment
         }
 
-        fun getInstanceForScreenFillPreview(page: Page): FragmentArticlePreviewForPages {
-            return getInstance(listOf(page), R.layout.view_article_preview_holder_parent_width)
+        fun getInstanceForScreenFillPreview(page: Page,showNewsPaperName:Int=0): FragmentArticlePreviewForPages {
+            return getInstance(listOf(page), R.layout.view_article_preview_holder_parent_width,showNewsPaperName)
         }
 
-        fun getInstanceForCustomWidthPreview(pages: List<Page>): FragmentArticlePreviewForPages {
-            return getInstance(pages, R.layout.view_article_preview_holder_custom_width)
+        fun getInstanceForCustomWidthPreview(pages: List<Page>,showNewsPaperName:Int=0): FragmentArticlePreviewForPages {
+            return getInstance(pages, R.layout.view_article_preview_holder_custom_width,showNewsPaperName)
         }
 
     }

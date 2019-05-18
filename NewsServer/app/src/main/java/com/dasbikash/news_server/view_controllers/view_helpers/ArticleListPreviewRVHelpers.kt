@@ -35,16 +35,21 @@ import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.exceptions.CompositeException
 import io.reactivex.observers.DisposableObserver
+import io.reactivex.schedulers.Schedulers
+import java.lang.StringBuilder
 import java.util.*
 
-class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holderResId: Int, val homeViewModel: HomeViewModel) :
+class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holderResId: Int,
+                             val homeViewModel: HomeViewModel,val showNewsPaperName:Int=0) :
         ListAdapter<Page, LatestArticlePreviewHolder>(PageDiffCallback){
 
     val TAG = "ArticlePreviewHolder"
@@ -53,7 +58,7 @@ class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holde
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LatestArticlePreviewHolder {
         val view = LayoutInflater.from(parent.context).inflate(holderResId, parent, false)
-        return LatestArticlePreviewHolder(view, homeViewModel)
+        return LatestArticlePreviewHolder(view, homeViewModel,showNewsPaperName)
     }
 
     override fun onBindViewHolder(holder: LatestArticlePreviewHolder, position: Int) {
@@ -112,7 +117,7 @@ class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holde
 
 }
 
-class LatestArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel) : RecyclerView.ViewHolder(itemView) {
+class LatestArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel,val showNewsPaperName:Int=0) : RecyclerView.ViewHolder(itemView) {
 
     companion object {
         val TAG = "ArticlePreviewHolder"
@@ -138,8 +143,22 @@ class LatestArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewMode
     fun disableDisplay(page: Page) {
         mPage = page
 
-        pageTitle.text = page.name
-        pageTitle.visibility = View.VISIBLE
+        if (showNewsPaperName>0){
+            Observable.just(page)
+                    .subscribeOn(Schedulers.io())
+                    .map {
+                        val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
+                        appSettingsRepository.getNewspaperByPage(page)
+                    }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe {
+                        pageTitle.text = StringBuilder(page.name).append(" | ").append(it.name).toString()
+                        pageTitle.visibility = View.VISIBLE
+                    }
+        }else {
+            pageTitle.text = page.name
+            pageTitle.visibility = View.VISIBLE
+        }
 
         articlePreviewImage.visibility = View.INVISIBLE
         articleTitle.visibility = View.INVISIBLE

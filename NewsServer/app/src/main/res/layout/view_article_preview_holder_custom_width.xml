@@ -38,7 +38,7 @@
             android:paddingEnd="8dp"
             android:textColor="@android:color/black"
             android:textSize="18sp"
-            android:lines="1"
+            android:lines="2"
             app:layout_constraintBottom_toTopOf="@+id/article_preview_image"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
