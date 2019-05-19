@@ -27,57 +27,57 @@ import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
 import com.dasbikash.news_server_data.repositories.room_impls.NewsDataRepositoryRoomImpl
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 
-abstract class NewsDataRepository{
+abstract class NewsDataRepository {
 
     private val newsDataService: NewsDataService = DataServiceImplProvider.getNewsDataServiceImpl()
 
     abstract fun getLatestArticleByPageFromLocalDb(page: Page): Article?
-    abstract fun findArticleById(articleId:String):Article?
+    abstract fun findArticleById(articleId: String): Article?
 
-    abstract protected fun setPageAsNotSynced(page:Page)
-    abstract protected fun setPageAsSynced(page:Page)
-    abstract protected fun setPageAsEndReached(page:Page)
-    abstract protected fun insertArticles(articles:List<Article>)
+    abstract protected fun setPageAsNotSynced(page: Page)
+    abstract protected fun setPageAsSynced(page: Page)
+    abstract protected fun setPageAsEndReached(page: Page)
+    abstract protected fun insertArticles(articles: List<Article>)
     abstract protected fun getLastArticle(page: Page): Article?
 
-    abstract fun saveArticleToLocalDisk(article: Article,context: Context): SavedArticle
-    abstract fun checkIfAlreadySaved(article: Article):Boolean
+    abstract fun saveArticleToLocalDisk(article: Article, context: Context): SavedArticle
+    abstract fun checkIfAlreadySaved(article: Article): Boolean
     abstract fun getAllSavedArticle(): LiveData<List<SavedArticle>>
     abstract fun deleteSavedArticle(savedArticle: SavedArticle)
-    abstract fun findSavedArticleById(savedArticleId:String):SavedArticle?
+    abstract fun findSavedArticleById(savedArticleId: String): SavedArticle?
 
-    private fun insertArticle(article: Article){
+    private fun insertArticle(article: Article) {
         insertArticles(listOf(article))
     }
 
-    fun init(context: Context){
+    fun init(context: Context) {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val db = NewsServerDatabase.getDatabase(context)
         db.pageDao.markAllNotSynced()
         db.articleDao.nukeTable()
     }
 
-    fun getLatestArticleByPage(page: Page):Article{
+    fun getLatestArticleByPage(page: Page): Article {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val article = newsDataService.getLatestArticlesByPage(page, 1).first()
-        if (findArticleById(article.id) == null){
+        if (findArticleById(article.id) == null) {
             setPageAsNotSynced(page)
             insertArticle(article)
-        }else{
+        } else {
             setPageAsSynced(page)
         }
         return article
     }
 
-    fun downloadMoreArticlesByPage(page: Page):List<Article>{
+    fun downloadMoreArticlesByPage(page: Page): List<Article> {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val article = getLastArticle(page)
         article?.let {
             try {
-                val articles = newsDataService.getArticlesAfterLastArticle(page,it)
-                if (page.articleFetchStatus == PageArticleFetchStatus.NOT_SYNCED){
-                    for (articleData in articles){
-                        if (findArticleById(articleData.id) !=null){
+                val articles = newsDataService.getArticlesAfterLastArticle(page, it)
+                if (page.articleFetchStatus == PageArticleFetchStatus.NOT_SYNCED) {
+                    for (articleData in articles) {
+                        if (findArticleById(articleData.id) != null) {
                             setPageAsSynced(page)
                             break
                         }
@@ -85,7 +85,7 @@ abstract class NewsDataRepository{
                 }
                 insertArticles(articles)
                 return articles
-            }catch (ex:DataNotFoundException){
+            } catch (ex: DataNotFoundException) {
                 setPageAsEndReached(page)
                 throw ex
             }
@@ -102,14 +102,23 @@ abstract class NewsDataRepository{
         @Volatile
         private lateinit var INSTANCE: NewsDataRepository
 
-        internal fun getImpl(context: Context,dbImplementation: DbImplementation): NewsDataRepository {
+        internal fun getImpl(context: Context, dbImplementation: DbImplementation): NewsDataRepository {
             if (!::INSTANCE.isInitialized) {
                 synchronized(NewsDataRepository::class.java) {
                     if (!::INSTANCE.isInitialized) {
-                        when(dbImplementation) {
+                        when (dbImplementation) {
                             DbImplementation.ROOM -> INSTANCE = NewsDataRepositoryRoomImpl(context)
                         }
                     }
+                }
+            }
+            return INSTANCE
+        }
+
+        internal fun getFreshImpl(context: Context, dbImplementation: DbImplementation): NewsDataRepository {
+            synchronized(NewsDataRepository::class.java) {
+                when (dbImplementation) {
+                    DbImplementation.ROOM -> INSTANCE = NewsDataRepositoryRoomImpl(context)
                 }
             }
             return INSTANCE

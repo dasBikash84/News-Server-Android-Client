@@ -19,6 +19,7 @@ import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.models.DefaultAppSettings
 import com.dasbikash.news_server_data.models.room_entity.*
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.Query
 
@@ -264,6 +265,7 @@ internal object CloudFireStoreAppSettingsUtils{
 
     fun ping(): Boolean {
         try {
+            LoggerUtils.debugLog("ping",this::class.java)
             getLanguages()
             return true
         }catch (ex:Exception){

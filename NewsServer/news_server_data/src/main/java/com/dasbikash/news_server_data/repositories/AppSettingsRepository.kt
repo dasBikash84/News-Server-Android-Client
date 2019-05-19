@@ -24,16 +24,16 @@ import com.dasbikash.news_server_data.repositories.room_impls.AppSettingsReposit
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 
-abstract class AppSettingsRepository{
+abstract class AppSettingsRepository {
 
     private val mAppSettingsDataService: AppSettingsDataService = DataServiceImplProvider.getAppSettingsDataServiceImpl()
 
     abstract protected fun nukeAppSettings()
-    abstract protected fun addLanguages(languages:List<Language>)
-    abstract protected fun addCountries(countries:List<Country>)
-    abstract protected fun addNewsPapers(newspapers:List<Newspaper>)
-    abstract protected fun addPages(pages:List<Page>)
-    abstract protected fun addPageGroups(pageGroups:List<PageGroup>)
+    abstract protected fun addLanguages(languages: List<Language>)
+    abstract protected fun addCountries(countries: List<Country>)
+    abstract protected fun addNewsPapers(newspapers: List<Newspaper>)
+    abstract protected fun addPages(pages: List<Page>)
+    abstract protected fun addPageGroups(pageGroups: List<PageGroup>)
 
     abstract protected fun getCountryCount(): Int
     abstract protected fun getLanguageCount(): Int
@@ -41,14 +41,14 @@ abstract class AppSettingsRepository{
     abstract protected fun getPageCount(): Int
     abstract protected fun getPageGroupCount(): Int
 
-    abstract fun getNewsPapers():LiveData<List<Newspaper>>
+    abstract fun getNewsPapers(): LiveData<List<Newspaper>>
     abstract fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page>
-    abstract fun getChildPagesForTopLevelPage(topLevelPage: Page):List<Page>
+    abstract fun getChildPagesForTopLevelPage(topLevelPage: Page): List<Page>
     abstract fun findMatchingPages(it: String): List<Page>
 
     abstract fun getLanguageByPage(page: Page): Language
     abstract fun getNewspaperByPage(page: Page): Newspaper
-    abstract fun findPageById(pageId:String): Page?
+    abstract fun findPageById(pageId: String): Page?
 
 
     private fun isAppSettingsDataLoaded(): Boolean {
@@ -62,13 +62,13 @@ abstract class AppSettingsRepository{
         val localAppSettingsUpdateTime = mAppSettingsDataService.getLocalAppSettingsUpdateTime(context)
         val appSettingsUpdateTime = mAppSettingsDataService.getServerAppSettingsUpdateTime(context)
 
-        LoggerUtils.debugLog("appSettingsUpdateTime: "+appSettingsUpdateTime,this::class.java)
+        LoggerUtils.debugLog("appSettingsUpdateTime: " + appSettingsUpdateTime, this::class.java)
 
         return appSettingsUpdateTime > localAppSettingsUpdateTime
     }
 
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-    private fun loadAppSettings(context: Context){
+    private fun loadAppSettings(context: Context) {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
 
         val appSettings = mAppSettingsDataService.getAppSettings(context)
@@ -80,7 +80,7 @@ abstract class AppSettingsRepository{
         addNewsPapers(ArrayList(appSettings.newspapers?.values))
         addPages(ArrayList(appSettings.pages?.values))
 
-        if (getPageGroupCount() == 0){
+        if (getPageGroupCount() == 0) {
             addPageGroups(ArrayList(appSettings.page_groups?.values ?: emptyList()))
         }
 
@@ -89,7 +89,7 @@ abstract class AppSettingsRepository{
     }
 
 
-    fun initAppSettings(context: Context){
+    fun initAppSettings(context: Context) {
 
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
 
@@ -99,18 +99,27 @@ abstract class AppSettingsRepository{
     }
 
 
-    companion object{
+    companion object {
         @Volatile
-        private lateinit var  INSTANCE:AppSettingsRepository
+        private lateinit var INSTANCE: AppSettingsRepository
 
-        internal fun getImpl(context: Context,dbImplementation: DbImplementation):AppSettingsRepository{
+        internal fun getImpl(context: Context, dbImplementation: DbImplementation): AppSettingsRepository {
             if (!::INSTANCE.isInitialized) {
                 synchronized(AppSettingsRepository::class.java) {
                     if (!::INSTANCE.isInitialized) {
-                        when(dbImplementation){
+                        when (dbImplementation) {
                             DbImplementation.ROOM -> INSTANCE = AppSettingsRepositoryRoomImpl(context)
                         }
                     }
+                }
+            }
+            return INSTANCE
+        }
+
+        internal fun getFreshImpl(context: Context, dbImplementation: DbImplementation): AppSettingsRepository {
+            synchronized(AppSettingsRepository::class.java) {
+                when (dbImplementation) {
+                    DbImplementation.ROOM -> INSTANCE = AppSettingsRepositoryRoomImpl(context)
                 }
             }
             return INSTANCE

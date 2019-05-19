@@ -163,7 +163,7 @@ class InitFragment : Fragment() {
             RepositoryFactory.initDataSourceImplementation()
 
             RepositoryFactory
-                    .getAppSettingsRepository(context!!)
+                    .getFreshAppSettingsRepository(context!!)
                     .initAppSettings(context!!)
             emitter.onNext(DataLoadingStatus.APP_SETTINGS_DATA_LOADED)
 
@@ -173,7 +173,7 @@ class InitFragment : Fragment() {
             emitter.onNext(DataLoadingStatus.USER_SETTINGS_DATA_LOADED)
 
             RepositoryFactory
-                    .getNewsDataRepository(context!!)
+                    .getFreshNewsDataRepository(context!!)
                     .init(context!!)
             emitter.onNext(DataLoadingStatus.NEWS_DATA_REPO_INITIATED)
 

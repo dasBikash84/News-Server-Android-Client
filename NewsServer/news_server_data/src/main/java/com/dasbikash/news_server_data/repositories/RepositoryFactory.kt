@@ -26,6 +26,12 @@ object RepositoryFactory {
     fun getUserSettingsRepository(context: Context):
             UserSettingsRepository = UserSettingsRepository.getImpl(context, dbImplementation)
 
+    fun getFreshAppSettingsRepository(context: Context):
+            AppSettingsRepository = AppSettingsRepository.getFreshImpl(context, dbImplementation)
+
+    fun getFreshNewsDataRepository(context: Context):
+            NewsDataRepository = NewsDataRepository.getFreshImpl(context, dbImplementation)
+
     fun getAppSettingsRepository(context: Context):
             AppSettingsRepository = AppSettingsRepository.getImpl(context, dbImplementation)
 

@@ -28,6 +28,8 @@ import java.util.*
 
 internal object SpringMVCAppSettingsUtils {
 
+    const val WAITING_MS_FOR_NET_RESPONSE = 5000L
+
     private val springMVCWebService = SpringMVCWebService.RETROFIT.create(SpringMVCWebService::class.java)
 
     fun getServerAppSettingsUpdateTime(): Long {
@@ -295,7 +297,7 @@ internal object SpringMVCAppSettingsUtils {
 
 
         LoggerUtils.debugLog( "getLanguages before wait",this::class.java)
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
 
         LoggerUtils.debugLog( "getLanguages before throw it",this::class.java)
         dataServerException?.let { throw it }
@@ -366,6 +368,7 @@ internal object SpringMVCAppSettingsUtils {
 
     fun ping(): Boolean {
         try {
+            LoggerUtils.debugLog("ping",this::class.java)
             getLanguages()
             return true
         }catch (ex:Exception){

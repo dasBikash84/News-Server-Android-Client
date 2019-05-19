@@ -20,13 +20,12 @@ import com.dasbikash.news_server_data.data_sources.data_services.news_data_servi
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.RealTimeDbNewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.SpringMVCNewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.user_settings_data_services.FirebaseUserSettingsDataService
+import com.dasbikash.news_server_data.utills.LoggerUtils
 
 
 internal object DataServiceImplProvider {
 
-//    private val appSettingServiceOption = APP_SETTING_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
     private lateinit var appSettingServiceOption : APP_SETTING_SERVICE_OPTIONS
-//    private val newsDataServiceOption = NEWS_DATA_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
     private lateinit var newsDataServiceOption : NEWS_DATA_SERVICE_OPTIONS
 
     private val userSettingServiceOption = USER_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
@@ -35,12 +34,8 @@ internal object DataServiceImplProvider {
     private lateinit var userSettingsDataService: UserSettingsDataService
     private lateinit var newsDataService: NewsDataService
 
-    fun getAppSettingsDataServiceImpl(): AppSettingsDataService {
-        if (!::appSettingsDataService.isInitialized) {
-            initAppSettingsDataService()
-        }
-        return appSettingsDataService
-    }
+    fun getAppSettingsDataServiceImpl()= appSettingsDataService
+    fun getNewsDataServiceImpl() = newsDataService
 
     fun getUserSettingsDataServiceImpl(): UserSettingsDataService {
         if (!::userSettingsDataService.isInitialized) {
@@ -49,49 +44,31 @@ internal object DataServiceImplProvider {
         return userSettingsDataService
     }
 
-    fun getNewsDataServiceImpl():NewsDataService{
-        if (!::newsDataService.isInitialized) {
-            initNewsDataService()
-        }
-        return newsDataService
-    }
 
     private fun initNewsDataService() {
         newsDataService =
-                when (newsDataServiceOption) {
-
-                    NEWS_DATA_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
-                            -> SpringMVCNewsDataService
-                    NEWS_DATA_SERVICE_OPTIONS.CLOUD_FIRE_STORE
-                            -> CloudFireStoreNewsDataService
-                    NEWS_DATA_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
-                            -> RealTimeDbNewsDataService
-                }
+            when (newsDataServiceOption) {
+                NEWS_DATA_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE -> SpringMVCNewsDataService
+                NEWS_DATA_SERVICE_OPTIONS.CLOUD_FIRE_STORE -> CloudFireStoreNewsDataService
+                NEWS_DATA_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB -> RealTimeDbNewsDataService
+            }
     }
 
     private fun initUserSettingsDataService() {
         userSettingsDataService =
-                when (userSettingServiceOption) {
-
-                    USER_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
-                            -> FirebaseUserSettingsDataService
-                }
+            when (userSettingServiceOption) {
+                USER_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB -> FirebaseUserSettingsDataService
+            }
     }
 
     private fun initAppSettingsDataService() {
 
         appSettingsDataService =
-                when (appSettingServiceOption) {
-
-                    APP_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
-                    -> RealTimeDbAppSettingsDataService
-
-                    APP_SETTING_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
-                    -> SpringMVCAppSettingsDataService
-
-                    APP_SETTING_SERVICE_OPTIONS.CLOUD_FIRE_STORE
-                    -> CloudFireStoreAppSettingsDataService
-                }
+            when (appSettingServiceOption) {
+                APP_SETTING_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE -> SpringMVCAppSettingsDataService
+                APP_SETTING_SERVICE_OPTIONS.CLOUD_FIRE_STORE -> CloudFireStoreAppSettingsDataService
+                APP_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB -> RealTimeDbAppSettingsDataService
+            }
     }
 
     fun initDataSourceImplementation():Boolean{
@@ -110,6 +87,12 @@ internal object DataServiceImplProvider {
                 appSettingServiceOption = APP_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
                 newsDataServiceOption = NEWS_DATA_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
             }
+            LoggerUtils.debugLog("appSettingServiceOption:${appSettingServiceOption.name}",this::class.java)
+            LoggerUtils.debugLog("newsDataServiceOption:${newsDataServiceOption.name}",this::class.java)
+            LoggerUtils.debugLog("userSettingServiceOption:${userSettingServiceOption.name}",this::class.java)
+            initAppSettingsDataService()
+            initNewsDataService()
+            initUserSettingsDataService()
             return true
         }else {
             return false

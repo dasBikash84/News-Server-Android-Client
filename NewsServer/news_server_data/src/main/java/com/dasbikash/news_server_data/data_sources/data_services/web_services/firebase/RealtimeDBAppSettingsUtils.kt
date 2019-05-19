@@ -16,6 +16,7 @@ package com.dasbikash.news_server_data.data_sources.data_services.web_services.f
 import com.dasbikash.news_server_data.exceptions.AppSettingsNotFound
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
 import com.dasbikash.news_server_data.models.DefaultAppSettings
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -102,6 +103,7 @@ internal object RealtimeDBAppSettingsUtils{
 
     fun ping(): Boolean {
         try {
+            LoggerUtils.debugLog("ping",this::class.java)
             getServerAppSettingsUpdateTime()
             return true
         }catch (ex:Exception){
