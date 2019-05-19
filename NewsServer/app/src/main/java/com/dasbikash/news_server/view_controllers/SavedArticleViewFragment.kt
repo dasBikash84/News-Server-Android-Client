@@ -105,7 +105,7 @@ class SavedArticleViewFragment : Fragment() {
                             }
                         }
                         .doOnError {
-                            it.printStackTrace()
+                            LoggerUtils.printStackTrace(it)
                             throw it
                         }
                         .observeOn(AndroidSchedulers.mainThread())

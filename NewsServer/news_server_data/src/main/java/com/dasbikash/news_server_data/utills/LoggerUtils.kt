@@ -16,8 +16,8 @@ package com.dasbikash.news_server_data.utills
 import android.util.Log
 
 object LoggerUtils {
-    private val opMode = OpMode.DEBUG
-    private const val TAG = "NS>> "
+    private val opMode = OpMode.RELEASE
+    private const val TAG = "NS>>"
     private const val MAX_TAG_LENGTH = 23
 
     fun printStackTrace(ex:Throwable){
@@ -27,8 +27,12 @@ object LoggerUtils {
     }
 
     fun <T> debugLog(message:String,type:Class<T>){
-        if (opMode==LoggerUtils.OpMode.DEBUG) {
-            Log.d(TAG + type.simpleName.substring(0,MAX_TAG_LENGTH- TAG.length), message)
+        if (opMode == OpMode.DEBUG) {
+            var classNameEndIndex = type.simpleName.length
+            if (classNameEndIndex > (MAX_TAG_LENGTH- TAG.length)){
+                classNameEndIndex = MAX_TAG_LENGTH- TAG.length
+            }
+            Log.d(TAG + type.simpleName.substring(0,classNameEndIndex), message)
         }
     }
 

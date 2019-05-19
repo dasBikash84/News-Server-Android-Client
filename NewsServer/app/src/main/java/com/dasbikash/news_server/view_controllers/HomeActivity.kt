@@ -34,6 +34,7 @@ import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -373,7 +374,7 @@ class HomeActivity : AppCompatActivity(),
                         override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult,Throwable?>) {
                             when(processingResult.first){
                                 UserSettingsRepository.SignInResult.SUCCESS -> {
-                                    Log.d(TAG,"User settings data saved.")
+                                    LoggerUtils.debugLog("User settings data saved.",this::class.java)
                                     actionAfterSuccessfulLogIn?.let {
                                         it()
                                     }
@@ -385,7 +386,7 @@ class HomeActivity : AppCompatActivity(),
                         }
                         override fun onError(e: Throwable) {
                             actionAfterSuccessfulLogIn = null
-                            Log.d(TAG,"Error while User settings data saving. Error: ${e}")
+                            LoggerUtils.debugLog("Error while User settings data saving. Error: ${e}",this::class.java)
                         }
                     })
         }

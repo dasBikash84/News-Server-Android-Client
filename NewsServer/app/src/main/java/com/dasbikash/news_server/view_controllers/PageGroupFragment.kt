@@ -223,7 +223,7 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                                                     }
 
                                                     override fun onError(e: Throwable) {
-                                                        e.printStackTrace()
+                                                        LoggerUtils.printStackTrace(e)
                                                         if (e is NoInternertConnectionException) {
                                                             NetConnectivityUtility.showNoInternetToast(itemView.context)
                                                         }else {
@@ -325,7 +325,7 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                         fragmentManager.beginTransaction().replace(frameLayout.id, fragment).commit()
                     }
                 } catch (ex: Exception) {
-                    ex.printStackTrace()
+                    LoggerUtils.printStackTrace(ex)
                 }
             }
 

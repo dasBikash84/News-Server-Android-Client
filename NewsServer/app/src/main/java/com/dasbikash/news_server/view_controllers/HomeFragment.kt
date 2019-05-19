@@ -39,6 +39,7 @@ import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
@@ -129,7 +130,7 @@ class HomeFragment : Fragment() {
                                 override fun onNext(t: MutableList<PagableNewsPaper>) {
 
                                     mViewPagerTitleScroller.initView(mNewsPapers.toList(), R.layout.view_page_label) {
-                                        Log.d(TAG, "${it.keyString} clicked")
+                                        LoggerUtils.debugLog( "${it.keyString} clicked",this::class.java)
                                         mHomeViewPager.setCurrentItem(mNewsPapers.indexOf(it),true)
                                     }
                                     mHomeViewPager.adapter = mFragmentStatePagerAdapter

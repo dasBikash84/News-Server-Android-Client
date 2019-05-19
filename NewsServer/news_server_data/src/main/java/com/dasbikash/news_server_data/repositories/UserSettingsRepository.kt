@@ -108,7 +108,7 @@ abstract class UserSettingsRepository {
                 doPostLogInProcessing(UserLogInResponse(response), context)
                 return Pair(SignInResult.SUCCESS, null)
             } catch (ex: Exception) {
-                ex.printStackTrace()
+                LoggerUtils.printStackTrace(ex)
                 when (ex) {
                     is SettingsServerException -> return Pair(SignInResult.SETTINGS_UPLOAD_ERROR, ex)
                     is AuthServerException -> return Pair(SignInResult.SETTINGS_UPLOAD_ERROR, ex)

@@ -16,6 +16,7 @@ package com.dasbikash.news_server_data.database.room_converters
 import android.util.Log
 import androidx.room.TypeConverter
 import com.dasbikash.news_server_data.models.room_entity.ArticleImage
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import java.util.*
 
 internal object ArticleImageConverter {
@@ -36,8 +37,8 @@ internal object ArticleImageConverter {
                 }
                 ?.filter { entry.indexOf(it) == entry.size-1 }
                 ?.forEach { stringBuilder.append(DATA_BRIDGE) }
-        Log.d("ArticleImageConverter","stringBuilder: ${stringBuilder.toString()}")
-        Log.d("ArticleImageConverter","entry: ${entry.toString()}")
+        LoggerUtils.debugLog("stringBuilder: ${stringBuilder.toString()}",this::class.java)
+        LoggerUtils.debugLog("entry: ${entry.toString()}",this::class.java)
         return stringBuilder.toString()
     }
 
@@ -61,8 +62,8 @@ internal object ArticleImageConverter {
             }
             entryList.add(articleImage)
         }
-        Log.d("ArticleImageConverter","entryCatString: ${entryCatString.toString()}")
-        Log.d("ArticleImageConverter","entryList: ${entryList}")
+        LoggerUtils.debugLog("entryCatString: ${entryCatString.toString()}",this::class.java)
+        LoggerUtils.debugLog("entryList: ${entryList}",this::class.java)
 
         return entryList
     }

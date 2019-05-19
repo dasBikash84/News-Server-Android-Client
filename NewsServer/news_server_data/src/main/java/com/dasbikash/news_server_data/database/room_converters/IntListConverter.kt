@@ -14,6 +14,7 @@
 package com.dasbikash.news_server_data.database.room_converters
 
 import androidx.room.TypeConverter
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import java.util.*
 
 internal object IntListConverter {
@@ -43,7 +44,7 @@ internal object IntListConverter {
                 try {
                     entry.add(Integer.parseInt(entryStr))
                 } catch (e: NumberFormatException) {
-                    e.printStackTrace()
+                    LoggerUtils.printStackTrace(e)
                 }
 
             }

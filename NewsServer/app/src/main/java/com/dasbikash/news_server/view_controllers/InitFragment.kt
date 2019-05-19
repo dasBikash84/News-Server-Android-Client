@@ -39,6 +39,7 @@ import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -112,7 +113,7 @@ class InitFragment : Fragment() {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<DataLoadingStatus>() {
                             override fun onNext(loadingStatus: DataLoadingStatus) {
-                                Log.d(TAG, "onNext: $loadingStatus")
+                                LoggerUtils.debugLog( "onNext: $loadingStatus",this::class.java)
                                 if (loadingStatus.isSetProgressbarDeterminate) {
                                     mProgressBar.isIndeterminate = false
                                     mProgressBar.progress = loadingStatus.progressBarValue
@@ -128,7 +129,7 @@ class InitFragment : Fragment() {
                                         Log.d(TAG, "onError: " + it.toString())
                                     }
                                 }
-                                e.printStackTrace()
+                                LoggerUtils.printStackTrace(e)
                                 Toast.makeText(activity,"onError: " + e.javaClass.canonicalName!!,
                                                 Toast.LENGTH_SHORT).show()
                                 doOnError(e)

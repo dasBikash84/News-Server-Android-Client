@@ -22,6 +22,7 @@ import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
 import com.dasbikash.news_server_data.repositories.room_impls.AppSettingsRepositoryRoomImpl
 import com.dasbikash.news_server_data.utills.ExceptionUtils
+import com.dasbikash.news_server_data.utills.LoggerUtils
 
 abstract class AppSettingsRepository{
 
@@ -61,7 +62,7 @@ abstract class AppSettingsRepository{
         val localAppSettingsUpdateTime = mAppSettingsDataService.getLocalAppSettingsUpdateTime(context)
         val appSettingsUpdateTime = mAppSettingsDataService.getServerAppSettingsUpdateTime(context)
 
-        Log.d("DataService","appSettingsUpdateTime: "+appSettingsUpdateTime)
+        LoggerUtils.debugLog("appSettingsUpdateTime: "+appSettingsUpdateTime,this::class.java)
 
         return appSettingsUpdateTime > localAppSettingsUpdateTime
     }

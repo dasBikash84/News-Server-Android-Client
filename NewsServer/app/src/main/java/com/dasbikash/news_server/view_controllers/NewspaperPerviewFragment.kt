@@ -34,6 +34,7 @@ import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
@@ -164,7 +165,7 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                                 try {
                                     Thread.sleep(10L)
                                 } catch (ex: InterruptedException) {
-                                    ex.printStackTrace()
+                                    LoggerUtils.printStackTrace(ex)
                                 }
                             } while (true)
                         }

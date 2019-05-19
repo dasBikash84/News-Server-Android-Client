@@ -13,9 +13,9 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.news_data_services
 
-import android.util.Log
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.utills.LoggerUtils
 
 internal object NewsDataServiceUtils {
 
@@ -30,7 +30,7 @@ internal object NewsDataServiceUtils {
                                 ?.replace("</a>","")
                                 ?.replace("<br>","<br><br>")
 
-        Log.d(TAG,"article: ${article}")
+        LoggerUtils.debugLog("article: ${article}",this::class.java)
         return article
     }
 }

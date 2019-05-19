@@ -18,6 +18,7 @@ import android.util.Log
 import com.dasbikash.news_server_data.models.DefaultAppSettings
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 
 internal object AppSettingsDataServiceUtils {
@@ -44,7 +45,7 @@ internal object AppSettingsDataServiceUtils {
             val inActiveNewspaperIds =
                     it.values.filter { !it.active }.map { it.id }.toCollection(mutableListOf<String>())
 
-            Log.d(TAG,"inActiveNewspaperIds: ${inActiveNewspaperIds.size}")
+            LoggerUtils.debugLog("inActiveNewspaperIds: ${inActiveNewspaperIds.size}",this::class.java)
 
 
             defaultAppSettings.pages?.let {
@@ -58,7 +59,7 @@ internal object AppSettingsDataServiceUtils {
                                 .map { it.id }
                                 .toCollection(mutableListOf<String>())
 
-                Log.d(TAG,"inactiveTopPageIds: ${inactiveTopPageIds.size}")
+                LoggerUtils.debugLog("inactiveTopPageIds: ${inactiveTopPageIds.size}",this::class.java)
                 allPages
                         .asSequence()
                         .filter {
@@ -81,7 +82,7 @@ internal object AppSettingsDataServiceUtils {
                         }
 
                 defaultAppSettings.pages = filteredPageMap
-                Log.d(TAG,"filteredPageMap: ${filteredPageMap.size}")
+                LoggerUtils.debugLog("filteredPageMap: ${filteredPageMap.size}",this::class.java)
 
             }
         }
