@@ -112,7 +112,7 @@ class PageViewActivity : AppCompatActivity(),
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
     private val mArticleList = mutableListOf<Article>()
 
-    private val mHaveMoreArticle = OnceSettableBoolean()
+    private val mInvHaveMoreArticle = OnceSettableBoolean()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -381,7 +381,7 @@ class PageViewActivity : AppCompatActivity(),
 
         if (mArticleLoadRunning) return
 
-        if (!mHaveMoreArticle.get()) {
+        if (!mInvHaveMoreArticle.get()) {
 
             loadWorkInProcessWindow()//showProgressBars()
             mArticleLoadRunning = true
@@ -391,6 +391,9 @@ class PageViewActivity : AppCompatActivity(),
                             .map {
                                 if(!::mLanguage.isInitialized) {
                                     mLanguage = mAppSettingsRepository.getLanguageByPage(mPage)
+                                }
+                                if (mArticleList.isEmpty()){
+                                    mNewsDataRepository.getLatestArticleByPage(mPage)
                                 }
                                 mNewsDataRepository.downloadMoreArticlesByPage(mPage)
                             }
@@ -406,7 +409,7 @@ class PageViewActivity : AppCompatActivity(),
                                     removeWorkInProcessWindow()//hideProgressBars()
                                     when(throwable) {
                                          is DataNotFoundException -> {
-                                            mHaveMoreArticle.set()
+                                            mInvHaveMoreArticle.set()
                                             mLoadMoreArticleButton.visibility = View.GONE
                                         }
                                         is DataServerNotAvailableExcepption -> {
