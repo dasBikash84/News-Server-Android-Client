@@ -28,7 +28,7 @@ import com.dasbikash.news_server_data.models.room_entity.*
 @Database(entities = [Country::class, Language::class, Newspaper::class, Page::class, PageGroup::class, Article::class, UserPreferenceData::class,
                         ArticleVisitHistory::class,SavedArticle::class], version = 1, exportSchema = false)
 @TypeConverters(DateConverter::class, IntListConverter::class, StringListConverter::class, ArticleImageConverter::class)
-internal abstract class NewsServerDatabase : RoomDatabase() {
+internal abstract class NewsServerDatabase internal constructor(): RoomDatabase() {
 
     abstract val countryDao: CountryDao
     abstract val languageDao: LanguageDao
@@ -48,7 +48,7 @@ internal abstract class NewsServerDatabase : RoomDatabase() {
         @Volatile
         private lateinit var INSTANCE: NewsServerDatabase
 
-        fun getDatabase(context: Context): NewsServerDatabase {
+        internal fun getDatabase(context: Context): NewsServerDatabase {
             if (!::INSTANCE.isInitialized) {
                 synchronized(NewsServerDatabase::class.java) {
                     if (!::INSTANCE.isInitialized) {

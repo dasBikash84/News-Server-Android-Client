@@ -22,7 +22,7 @@ open class AuthServerException : NewsServerException {
     constructor(cause: Throwable) : super(cause) {}
 }
 
-open class AuthServerUnavailable : AuthServerException {
+class AuthServerUnavailable : AuthServerException {
 
     constructor() {}
 
@@ -31,7 +31,7 @@ open class AuthServerUnavailable : AuthServerException {
     constructor(cause: Throwable) : super(cause) {}
 }
 
-open class WrongCredentialException : AuthServerException {
+class WrongCredentialException : AuthServerException {
 
     constructor() {}
 

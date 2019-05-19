@@ -16,17 +16,17 @@ package com.dasbikash.news_server_data.database.room_converters
 import androidx.room.TypeConverter
 import java.util.*
 
-object DateConverter {
+internal object DateConverter {
 
     @TypeConverter
     @JvmStatic
-    fun fromDate(date: Date): Long {
+    internal fun fromDate(date: Date): Long {
         return date.time
     }
 
     @TypeConverter
     @JvmStatic
-    fun toDate(timeStamp: Long?): Date {
+    internal fun toDate(timeStamp: Long?): Date {
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = timeStamp!!
         return calendar.time

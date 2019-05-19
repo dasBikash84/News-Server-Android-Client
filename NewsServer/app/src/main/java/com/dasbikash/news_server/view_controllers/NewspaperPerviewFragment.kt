@@ -171,9 +171,9 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<Any>() {
                             override fun onComplete() {}
+                            @Suppress("UNCHECKED_CAST")
                             override fun onNext(childPageList: Any) {
                                 if (childPageList is List<*>) {
-                                    @Suppress("UNCHECKED_CAST")
                                     Log.d(NewspaperPerviewFragment.TAG, "bind for page: ${page.name} Np: ${page.newspaperId} with ${childPageList.size} childs")
                                     holder.bind(page, childPageList as List<Page>, homeViewModel)
                                 }

@@ -24,7 +24,7 @@ object ExceptionUtils {
             throw OnMainThreadException()
         }
     }
-    fun thowExceptionIfNoInternetConnection(){
+    private fun thowExceptionIfNoInternetConnection(){
         if (!NetConnectivityUtility.isConnected) {
             throw NoInternertConnectionException();
         }

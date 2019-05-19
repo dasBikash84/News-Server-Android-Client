@@ -16,7 +16,7 @@ package com.dasbikash.news_server_data.data_sources.data_services.web_services.f
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 
-object CloudFireStoreConUtils {
+internal object CloudFireStoreConUtils {
 
     private const val LANGUAGES_COLLECTION_LABEL= "languages"
     private const val COUNTRIES_COLLECTION_LABEL = "countries"

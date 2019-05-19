@@ -25,7 +25,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 
-object SpringMVCAppSettingsUtils {
+internal object SpringMVCAppSettingsUtils {
 
     private val TAG = "DataService"
     private val springMVCWebService = SpringMVCWebService.RETROFIT.create(SpringMVCWebService::class.java)

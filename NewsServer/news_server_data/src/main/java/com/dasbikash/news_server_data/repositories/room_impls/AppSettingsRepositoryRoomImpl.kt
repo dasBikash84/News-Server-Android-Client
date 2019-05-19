@@ -19,7 +19,7 @@ import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 
-class AppSettingsRepositoryRoomImpl internal constructor(context: Context): AppSettingsRepository() {
+internal class AppSettingsRepositoryRoomImpl internal constructor(context: Context): AppSettingsRepository() {
 
     private val mDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
 

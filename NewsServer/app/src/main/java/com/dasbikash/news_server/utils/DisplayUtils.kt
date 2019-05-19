@@ -161,7 +161,7 @@ object DisplayUtils {
             } else if (diffTs < TWO_DAYS_IN_MS) {
                 publicationTimeString = YESTERDAY_TIME_STRING
             } else {
-                publicationTimeString = simpleDateFormat.format(publicationTime?.time)
+                publicationTimeString = simpleDateFormat.format(publicationTime.time)
             }
         }
 

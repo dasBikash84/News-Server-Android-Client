@@ -200,7 +200,7 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
                         .subscribeOn(Schedulers.io())
                         .map {
                             val article = newsDataRepository.getLatestArticleByPage(it)
-                            article?.let {
+                            article.let {
                                 language = appSettingsRepository.getLanguageByPage(mPage)
                                 return@map Pair(it, DisplayUtils.getArticlePublicationDateString(article, language, itemView.context))
                             }

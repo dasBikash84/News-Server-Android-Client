@@ -22,7 +22,7 @@ internal object IntListConverter {
 
     @TypeConverter
     @JvmStatic
-    fun fromIntList(entry: List<Int>): String {
+    internal fun fromIntList(entry: List<Int>): String {
         val stringBuilder = StringBuilder("")
         for (i in entry.indices) {
             stringBuilder.append(entry[i])
@@ -35,7 +35,7 @@ internal object IntListConverter {
 
     @TypeConverter
     @JvmStatic
-    fun toIntList(entryListString: String?): List<Int> {
+    internal fun toIntList(entryListString: String?): List<Int> {
         val entry = ArrayList<Int>()
 
         if (entryListString != null) {

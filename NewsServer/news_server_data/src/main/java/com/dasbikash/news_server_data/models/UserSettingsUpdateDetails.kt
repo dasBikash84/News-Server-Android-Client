@@ -16,7 +16,7 @@ package com.dasbikash.news_server_data.models
 import android.os.Build
 import com.google.firebase.database.ServerValue
 
-data class UserSettingsUpdateDetails(
+internal data class UserSettingsUpdateDetails(
         val timeStamp: Map<String,String> = ServerValue.TIMESTAMP,
         var userIp:String,
         var deviceDetails:String = "BRAND: ${Build.BRAND} Manufacture: ${Build.MANUFACTURER} " +
@@ -27,6 +27,6 @@ data class UserSettingsUpdateDetails(
     }
 }
 
-class UserSettingsUpdateTime(
+internal class UserSettingsUpdateTime(
         var timeStamp: Long = 0L
 )

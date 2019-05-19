@@ -30,7 +30,7 @@ object NetConnectivityUtility : BroadcastReceiver() {
     private const val NO_INTERNET_TOAST_MESSAGE = "No internet connection!!!"
     private var mCurrentNetworkType = NetConnectivityUtility.NETWORK_TYPE.UN_INITIALIZED
 
-    enum class NETWORK_TYPE {
+    private enum class NETWORK_TYPE {
         MOBILE, WIFI, WIMAX, ETHERNET, BLUETOOTH, DC, OTHER, UN_INITIALIZED
     }
 
@@ -87,11 +87,13 @@ object NetConnectivityUtility : BroadcastReceiver() {
 
     private val TAG = "NetConnectivityUtility"
 
-    val NETWORK_AVAILABLE_BROADCAST = "NetConnectivityUtility.net_available"
+    private val NETWORK_AVAILABLE_BROADCAST = "NetConnectivityUtility.net_available"
+
     val intentFilterForNetworkAvailableBroadcastReceiver: IntentFilter
         get() = IntentFilter(NETWORK_AVAILABLE_BROADCAST)
 
-    val CONNECTIVITY_CHANGE_FILTER = "android.net.conn.CONNECTIVITY_CHANGE"
+    private val CONNECTIVITY_CHANGE_FILTER = "android.net.conn.CONNECTIVITY_CHANGE"
+
     private val intentFilterForConnectivityChangeBroadcastReceiver: IntentFilter
         get() = IntentFilter(CONNECTIVITY_CHANGE_FILTER)
 
@@ -100,13 +102,11 @@ object NetConnectivityUtility : BroadcastReceiver() {
             return mCurrentNetworkType == NetConnectivityUtility.NETWORK_TYPE.MOBILE
         }
 
-    @JvmStatic
     val isConnected: Boolean
         get() {
             return mCurrentNetworkType != NetConnectivityUtility.NETWORK_TYPE.DC
         }
 
-    @JvmStatic
     val isInitialize: Boolean
         get() {
             return mCurrentNetworkType != NetConnectivityUtility.NETWORK_TYPE.UN_INITIALIZED

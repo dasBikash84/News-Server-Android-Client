@@ -22,7 +22,7 @@ internal object StringListConverter {
 
     @TypeConverter
     @JvmStatic
-    fun fromStringList(entry: List<String>): String {
+    internal fun fromStringList(entry: List<String>): String {
 
         val stringBuilder = StringBuilder("")
 
@@ -40,7 +40,7 @@ internal object StringListConverter {
 
     @TypeConverter
     @JvmStatic
-    fun toStringList(entryListString: String?): List<String> {
+    internal fun toStringList(entryListString: String?): List<String> {
 
         val entry = ArrayList<String>()
 

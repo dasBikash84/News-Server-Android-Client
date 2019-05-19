@@ -23,7 +23,7 @@ import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 import java.util.*
 
-class UserSettingsRepositoryRoomImpl internal constructor(context: Context) :
+internal class UserSettingsRepositoryRoomImpl internal constructor(context: Context) :
         UserSettingsRepository() {
 
     private val mDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)

@@ -22,7 +22,7 @@ import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.ImageUtils
 import java.io.File
 
-class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDataRepository() {
+internal class NewsDataRepositoryRoomImpl internal constructor(context: Context) : NewsDataRepository() {
 
     private val newsServerDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
 

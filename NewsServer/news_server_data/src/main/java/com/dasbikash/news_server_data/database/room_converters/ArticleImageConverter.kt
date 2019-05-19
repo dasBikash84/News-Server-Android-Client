@@ -25,7 +25,7 @@ internal object ArticleImageConverter {
 
     @TypeConverter
     @JvmStatic
-    fun fromArticleImage(entry: List<ArticleImage>?): String {
+    internal fun fromArticleImage(entry: List<ArticleImage>?): String {
 
         val stringBuilder = StringBuilder("")
 
@@ -43,7 +43,7 @@ internal object ArticleImageConverter {
 
     @TypeConverter
     @JvmStatic
-    fun toArticleImage(entryCatString: String): List<ArticleImage> {
+    internal fun toArticleImage(entryCatString: String): List<ArticleImage> {
 
         val entryList = ArrayList<ArticleImage>()
 

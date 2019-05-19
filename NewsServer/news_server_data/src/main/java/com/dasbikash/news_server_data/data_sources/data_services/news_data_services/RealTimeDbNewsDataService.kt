@@ -18,7 +18,7 @@ import com.dasbikash.news_server_data.data_sources.data_services.web_services.fi
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 
-object RealTimeDbNewsDataService : NewsDataService {
+internal object RealTimeDbNewsDataService : NewsDataService {
     override fun getRawLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
         return RealTimeDbArticleDataUtils.getLatestArticlesByPage(page,articleRequestSize)
     }
