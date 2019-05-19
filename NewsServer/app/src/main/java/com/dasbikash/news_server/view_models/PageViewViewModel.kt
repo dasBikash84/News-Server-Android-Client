@@ -27,8 +27,6 @@ import io.reactivex.disposables.CompositeDisposable
 
 class PageViewViewModel(private val mApplication: Application) : AndroidViewModel(mApplication) {
 
-    val TAG = "PageViewViewModel"
-
     private val mAppSettingsRepository: AppSettingsRepository
     private val mUserSettingsRepository: UserSettingsRepository
     private val mNewsDataRepository:NewsDataRepository

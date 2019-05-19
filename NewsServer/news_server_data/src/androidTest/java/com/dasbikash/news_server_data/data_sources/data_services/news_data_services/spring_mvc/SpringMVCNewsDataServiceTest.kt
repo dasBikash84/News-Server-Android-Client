@@ -22,8 +22,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SpringMVCNewsDataServiceTest {
 
-    val TAG = "DataServiceTest"
-
     @Before
     fun setUp() {
     }

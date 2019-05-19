@@ -19,8 +19,6 @@ import com.dasbikash.news_server_data.utills.LoggerUtils
 
 internal object NewsDataServiceUtils {
 
-    val TAG = "NewsDataServiceUtils"
-
     fun processFetchedArticleData(article: Article,page: Page):Article{
         article.newspaperId = page.newspaperId
 

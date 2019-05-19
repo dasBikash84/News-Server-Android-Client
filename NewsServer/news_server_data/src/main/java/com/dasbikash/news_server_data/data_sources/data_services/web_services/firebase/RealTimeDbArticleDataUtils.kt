@@ -19,13 +19,12 @@ import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 
 internal object RealTimeDbArticleDataUtils {
-
-    private val TAG = "DataService"
 
     fun getLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
 
@@ -39,15 +38,15 @@ internal object RealTimeDbArticleDataUtils {
                 .limitToLast(1)
                 .addListenerForSingleValueEvent(object : ValueEventListener{
                     override fun onCancelled(error: DatabaseError) {
-                        Log.d(TAG,"onCancelled. Error msg: ${error.message}")
+                        LoggerUtils.debugLog("onCancelled. Error msg: ${error.message}",this::class.java)
                         dataServerException = DataNotFoundException(error.message)
                         synchronized(lock) { lock.notify() }
                     }
 
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         if (dataSnapshot.exists()) {
-                            Log.d(TAG,"onDataChange")
-                            Log.d(TAG,"data: ${dataSnapshot.value}")
+                            LoggerUtils.debugLog("onDataChange",this::class.java)
+                            LoggerUtils.debugLog("data: ${dataSnapshot.value}",this::class.java)
                             dataSnapshot.children.asSequence()
                                     .take(1)
                                     .forEach {
@@ -58,18 +57,18 @@ internal object RealTimeDbArticleDataUtils {
                     }
                 })
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before wait")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before wait",this::class.java)
         synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before throw it")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before throw it",this::class.java)
         dataServerException?.let { throw it }
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before throw DataNotFoundException()")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before throw DataNotFoundException()",this::class.java)
         if (articles.size == 0 ){
             throw DataNotFoundException()
         }
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before return")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before return",this::class.java)
         return articles
     }
 
@@ -86,14 +85,14 @@ internal object RealTimeDbArticleDataUtils {
                 .limitToLast(articleRequestSize+1)
                 .addListenerForSingleValueEvent(object : ValueEventListener{
                     override fun onCancelled(error: DatabaseError) {
-                        Log.d(TAG,"onCancelled. Error msg: ${error.message}")
+                        LoggerUtils.debugLog("onCancelled. Error msg: ${error.message}",this::class.java)
                         dataServerException = DataNotFoundException(error.message)
                         synchronized(lock) { lock.notify() }
                     }
 
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         if (dataSnapshot.exists()) {
-                            Log.d(TAG,"onDataChange")
+                            LoggerUtils.debugLog("onDataChange",this::class.java)
                             dataSnapshot.children.asSequence()
                                     .take(dataSnapshot.children.count()-1)
                                     .forEach {
@@ -104,20 +103,18 @@ internal object RealTimeDbArticleDataUtils {
                     }
                 })
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before wait")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before wait",this::class.java)
         synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before throw it")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before throw it",this::class.java)
         dataServerException?.let { throw it }
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before throw DataNotFoundException()")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before throw DataNotFoundException()",this::class.java)
         if (articles.size == 0 ){
             throw DataNotFoundException()
         }
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before return")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before return",this::class.java)
         return articles
-
-
     }
 }

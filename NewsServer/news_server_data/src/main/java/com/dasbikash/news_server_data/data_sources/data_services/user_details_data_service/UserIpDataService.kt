@@ -22,8 +22,6 @@ internal object UserIpDataService {
 
     private const val MAX_WAITING_MS_FOR_NET_RESPONSE = 30000L
 
-    private val TAG = "UserIpDataService"
-
     private val userIpWebService
             = UserIpWebService.RETROFIT.create(UserIpWebService::class.java)
 

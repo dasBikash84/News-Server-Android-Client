@@ -74,7 +74,6 @@ class FragmentArticlePreviewForPages : Fragment() {
         val ARG_PAGE_LIST = "com.dasbikash.news_server.views.FragmentArticlePreviewForPages.ARG_PAGE_LIST"
         val ARG_ARTICLE_PREVIEW_RES_ID = "com.dasbikash.news_server.views.FragmentArticlePreviewForPages.ARG_ARTICLE_PREVIEW_RES_ID"
         val ARG_SHOW_NP_NAME_FLAG = "com.dasbikash.news_server.views.FragmentArticlePreviewForPages.ARG_SHOW_NP_NAME_FLAG"
-        val TAG = "FragAPreviewForPages"
 
         private fun getInstance(pages: List<Page>, @LayoutRes resId: Int,showNewsPaperName:Int): FragmentArticlePreviewForPages {
 

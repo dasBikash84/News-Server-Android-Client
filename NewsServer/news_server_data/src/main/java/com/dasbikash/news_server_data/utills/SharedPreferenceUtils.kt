@@ -17,7 +17,6 @@ import android.content.Context
 
 object SharedPreferenceUtils {
 
-    private val TAG = "SharedPrefUtilsTest"
     const val SP_FILE_KEY = "com.dasbikash.news_server.SP_FILE_KEY"
 
     enum class DefaultValues private constructor(val value: Any) {

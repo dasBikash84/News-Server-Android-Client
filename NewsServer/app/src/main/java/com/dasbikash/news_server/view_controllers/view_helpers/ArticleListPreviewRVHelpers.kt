@@ -52,8 +52,6 @@ class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holde
                              val homeViewModel: HomeViewModel,val showNewsPaperName:Int=0) :
         ListAdapter<Page, LatestArticlePreviewHolder>(PageDiffCallback){
 
-    val TAG = "ArticlePreviewHolder"
-
     val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(lifecycleOwner)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LatestArticlePreviewHolder {
@@ -82,13 +80,13 @@ class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holde
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<Any>() {
                             override fun onComplete() {
-                                Log.d(TAG, "onComplete for page ${page.name} Np: ${page.newspaperId} L2")
+                                LoggerUtils.debugLog( "onComplete for page ${page.name} Np: ${page.newspaperId} L2",this::class.java)
                             }
 
                             @Suppress("UNCHECKED_CAST")
                             override fun onNext(articleData: Any) {
                                 if (articleData is Pair<*, *>) {
-                                    Log.d(TAG,"art displayed for page: ${page.name} Np: ${page.newspaperId}")
+                                    LoggerUtils.debugLog("art displayed for page: ${page.name} Np: ${page.newspaperId}",this::class.java)
                                     val articleDataResult = articleData as Pair<String?, Article>
                                     holder.bind(page,articleDataResult.first,articleDataResult.second)
                                 }
@@ -99,12 +97,12 @@ class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holde
                                     if(e.exceptions.filter { it is NoInternertConnectionException }.count() > 0){
                                         NetConnectivityUtility.showNoInternetToast(holder.itemView.context)
                                     }else if (e.exceptions.filter { it is DataNotFoundException }.count() > 0){
-                                        Log.d(TAG,"DataNotFoundException")
+                                        LoggerUtils.debugLog("DataNotFoundException",this::class.java)
                                     }else if (e.exceptions.filter { it is DataServerException }.count() > 0){
-                                        Log.d(TAG,"DataServerException")
+                                        LoggerUtils.debugLog("DataServerException",this::class.java)
                                     }
                                 }
-                                Log.d(TAG, e.message + "${e::class.java.simpleName} for page Np: ${page.newspaperId} ${page.name} L2")
+                                LoggerUtils.debugLog( e.message + "${e::class.java.simpleName} for page Np: ${page.newspaperId} ${page.name} L2",this::class.java)
                             }
                         })
         )

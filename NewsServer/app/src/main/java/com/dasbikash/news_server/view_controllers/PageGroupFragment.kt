@@ -52,8 +52,6 @@ import io.reactivex.schedulers.Schedulers
 
 class PageGroupFragment : Fragment() {
 
-    private val TAG = "PageGroupFragment"
-
     private lateinit var mPageGroupListScroller: NestedScrollView
     private lateinit var mPageGroupListHolder: RecyclerView
 

@@ -379,9 +379,12 @@ class HomeActivity : AppCompatActivity(),
                                         it()
                                     }
                                 }
-                                UserSettingsRepository.SignInResult.USER_ABORT -> Log.d(TAG,"Log in canceled by user")
-                                UserSettingsRepository.SignInResult.SERVER_ERROR -> Log.d(TAG,"Log in error. Details:${processingResult.second}")
-                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> Log.d(TAG,"Error while saving User settings data. Details:${processingResult.second}")
+                                UserSettingsRepository.SignInResult.USER_ABORT -> LoggerUtils.debugLog("Log in canceled by user",
+                                                                                                            this@HomeActivity::class.java)
+                                UserSettingsRepository.SignInResult.SERVER_ERROR -> LoggerUtils.debugLog("Log in error. Details:${processingResult.second}",
+                                                                                                            this@HomeActivity::class.java)
+                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> LoggerUtils.debugLog("Error while saving User settings data. Details:${processingResult.second}",
+                                                                                                            this@HomeActivity::class.java)
                             }
                         }
                         override fun onError(e: Throwable) {
@@ -390,9 +393,6 @@ class HomeActivity : AppCompatActivity(),
                         }
                     })
         }
-    }
-    companion object{
-        val TAG = "HomeActivity"
     }
 
 }

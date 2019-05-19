@@ -85,8 +85,6 @@ object NetConnectivityUtility : BroadcastReceiver() {
         }
     }
 
-    private val TAG = "NetConnectivityUtility"
-
     private val NETWORK_AVAILABLE_BROADCAST = "NetConnectivityUtility.net_available"
 
     val intentFilterForNetworkAvailableBroadcastReceiver: IntentFilter

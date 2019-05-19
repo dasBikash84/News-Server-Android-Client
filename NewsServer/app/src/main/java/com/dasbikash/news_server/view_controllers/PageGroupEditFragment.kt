@@ -183,7 +183,7 @@ class PageGroupEditFragment : Fragment() {
                                         ?.map { appSettingsRepository.findPageById(it) }
                                         ?.forEach {
                                             it?.let {
-                                                Log.d(TAG, "Page found: ${it.name}")
+                                                LoggerUtils.debugLog( "Page found: ${it.name}",this::class.java)
                                                 mPageGroup.pageEntityList.add(it)
                                             }
                                         }
@@ -206,14 +206,14 @@ class PageGroupEditFragment : Fragment() {
     private fun initView() {
         mCurrentPageList.clear()
         mSearchResultPageList.clear()
-        Log.d(TAG, "initView")
+        LoggerUtils.debugLog( "initView",this::class.java)
 
         when (mMode) {
             OPERATING_MODE.EDIT -> {
                 mPageGroupNameEditText.setText(mPageGroupName)
                 mCurrentPageList.addAll(mPageGroup.pageEntityList)
-                Log.d(TAG, "pageEntityList: ${mPageGroup.pageEntityList.map { it.name }.toList()}")
-                Log.d(TAG, "mCurrentPageList: ${mCurrentPageList.map { it.name }.toList()}")
+                LoggerUtils.debugLog( "pageEntityList: ${mPageGroup.pageEntityList.map { it.name }.toList()}",this::class.java)
+                LoggerUtils.debugLog( "mCurrentPageList: ${mCurrentPageList.map { it.name }.toList()}",this::class.java)
             }
             OPERATING_MODE.CREATE -> {
                 mPageGroupNameEditText.setText("")
@@ -251,7 +251,7 @@ class PageGroupEditFragment : Fragment() {
             labelStringBuilder.append("${newspaper.name}")
             mPageLabelTextView.text = labelStringBuilder.toString()
             itemView.setOnClickListener {
-                Log.d(TAG, "I am clicked")
+                LoggerUtils.debugLog( "I am clicked",this::class.java)
                 if (!mCurrentPageList.contains(mPage)) {
                     mCurrentPageList.add(0, mPage)
                     mCurrentPageListAdapter.submitList(mCurrentPageList.toList())
@@ -270,10 +270,10 @@ class PageGroupEditFragment : Fragment() {
         }
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-            Log.d(TAG, "Page to remove: ${(viewHolder as CurrentPageViewHolder).mPage.name}")
+            LoggerUtils.debugLog( "Page to remove: ${(viewHolder as CurrentPageViewHolder).mPage.name}",this::class.java)
             if (mCurrentPageList.remove((viewHolder).mPage)) {
-                Log.d(TAG, "Page to removed:")
-                Log.d(TAG, "mCurrentPageList: ${mCurrentPageList.map { it.name }.toList()}")
+                LoggerUtils.debugLog( "Page to removed:",this::class.java)
+                LoggerUtils.debugLog( "mCurrentPageList: ${mCurrentPageList.map { it.name }.toList()}",this::class.java)
                 mCurrentPageListAdapter.submitList(mCurrentPageList.toList())
             }
         }
@@ -377,7 +377,6 @@ class PageGroupEditFragment : Fragment() {
     }
 
     companion object {
-        val TAG = "PageGroupEditFragment"
         const val ARG_PAGE_GROUP_NAME = "com.dasbikash.news_server.views.PageGroupEditFragment.ARG_PAGE_GROUP_NAME"
 
         fun getInstance(pageGroupName: String = ""): PageGroupEditFragment {

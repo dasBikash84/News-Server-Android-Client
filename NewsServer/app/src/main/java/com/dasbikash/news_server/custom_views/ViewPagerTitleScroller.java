@@ -33,13 +33,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.dasbikash.news_server_data.utills.LoggerUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class ViewPagerTitleScroller extends RecyclerView {
-
-    public static final String TAG = "ViewPagerTitleScroller";
 
     private final List<PageKey> mPageKeys = new ArrayList<>();
     private ListAdapter<PageKey, TitleViewHolder> mListAdapter;
@@ -72,12 +72,12 @@ public class ViewPagerTitleScroller extends RecyclerView {
         mListAdapter = new ListAdapter<PageKey, TitleViewHolder>(new DiffUtil.ItemCallback<PageKey>() {
             @Override
             public boolean areItemsTheSame(@NonNull PageKey oldItem, @NonNull PageKey newItem) {
-                return newItem.equals(oldItem);
+                return newItem.getKeyString().equals(oldItem.getKeyString());
             }
 
             @Override
             public boolean areContentsTheSame(@NonNull PageKey oldItem, @NonNull PageKey newItem) {
-                return newItem.equals(oldItem);
+                return newItem.getKeyString().equals(oldItem.getKeyString());
             }
         }) {
             @NonNull
@@ -184,7 +184,7 @@ public class ViewPagerTitleScroller extends RecyclerView {
         makeItemActive(pageKey);
 
         if (mTitleClickListner ==null) {
-            Log.d(TAG, "Empty click action.");
+            LoggerUtils.INSTANCE.debugLog( "Empty click action.",this.getClass());
         }else {
             mTitleClickListner.onTitleClick(pageKey);
         }

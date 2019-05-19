@@ -123,10 +123,10 @@ class InitFragment : Fragment() {
                             }
 
                             override fun onError(e: Throwable) {
-                                Log.d(TAG, "onError: " + e.javaClass.canonicalName!!)
+                                LoggerUtils.debugLog( "onError: " + e.javaClass.canonicalName!!,this::class.java)
                                 Arrays.asList(e.stackTrace).asSequence().forEach {
                                     it.iterator().forEach {
-                                        Log.d(TAG, "onError: " + it.toString())
+                                        LoggerUtils.debugLog( "onError: " + it.toString(),this::class.java)
                                     }
                                 }
                                 LoggerUtils.printStackTrace(e)
@@ -220,7 +220,6 @@ class InitFragment : Fragment() {
     }
 
     companion object {
-        private val TAG = "InitFragment"
         private const val INCREMENTAL_RETRY_DELAY_MS = 3000L
     }
 

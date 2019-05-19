@@ -112,8 +112,6 @@ object DisplayUtils {
                                         arrayOf("অপরাহ্ণ", "pm")
                                     )
 
-    val TAG = "DisplayUtils"
-
     fun dpToPx(dp: Int,context: Context): Float =
         (dp * context.getResources().getDisplayMetrics().density)
 

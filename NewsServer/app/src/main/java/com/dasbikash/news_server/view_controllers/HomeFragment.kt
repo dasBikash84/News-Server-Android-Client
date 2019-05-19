@@ -186,9 +186,6 @@ class HomeFragment : Fragment() {
                 }
             })
     }
-    companion object {
-        val TAG = "HomeFragment"
-    }
 }
 
 

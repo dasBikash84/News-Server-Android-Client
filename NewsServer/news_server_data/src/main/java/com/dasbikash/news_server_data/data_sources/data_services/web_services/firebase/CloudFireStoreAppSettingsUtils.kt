@@ -25,8 +25,6 @@ import com.google.firebase.firestore.Query
 
 internal object CloudFireStoreAppSettingsUtils{
 
-    private val TAG = "DataService"
-
     private const val SETTINGS_UPDATE_TIME_FIELD_NAME = "updateTime"
 
     fun getServerAppSettingsUpdateTime(): Long{

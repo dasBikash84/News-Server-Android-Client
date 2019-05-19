@@ -83,7 +83,7 @@ class NewspaperPerviewFragment : Fragment() {
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe({
-                            Log.d(TAG, "newspaper: ${mNewspaper.name}, top page count: ${it.size}")
+                            LoggerUtils.debugLog( "newspaper: ${mNewspaper.name}, top page count: ${it.size}",this::class.java)
                             mListAdapter = TopPagePreviewListAdapter(this, mAppSettingsRepository, ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
                             mPagePreviewList.adapter = mListAdapter
                             mListAdapter.submitList(it.toList())
@@ -94,7 +94,6 @@ class NewspaperPerviewFragment : Fragment() {
     companion object {
 
         val ARG_NEWS_PAPAER = "com.dasbikash.news_server.views.NewspaperPerviewFragment.ARG_NEWS_PAPAER"
-        val TAG = "NpPerviewFragment"
 
         fun getInstance(newspaper: Newspaper): NewspaperPerviewFragment {
             val args = Bundle()
@@ -175,7 +174,8 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                             @Suppress("UNCHECKED_CAST")
                             override fun onNext(childPageList: Any) {
                                 if (childPageList is List<*>) {
-                                    Log.d(NewspaperPerviewFragment.TAG, "bind for page: ${page.name} Np: ${page.newspaperId} with ${childPageList.size} childs")
+                                    LoggerUtils.debugLog("bind for page: ${page.name} Np: ${page.newspaperId} with ${childPageList.size} childs",
+                                                        this@TopPagePreviewListAdapter::class.java)
                                     holder.bind(page, childPageList as List<Page>, homeViewModel)
                                 }
                             }
@@ -193,10 +193,6 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
 }
 
 class PagePreviewHolder(val lifecycleOwner: LifecycleOwner, itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-    companion object {
-        val TAG = "PagePreviewHolder"
-    }
 
     lateinit var mPage: Page
 

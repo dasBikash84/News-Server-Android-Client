@@ -32,8 +32,6 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class RoomDatabaseInstrumentedTest {
 
-    private final String TAG = "DataServiceTest";
-
     Context context;
     NewsDataRepository newsDataRepository;
 

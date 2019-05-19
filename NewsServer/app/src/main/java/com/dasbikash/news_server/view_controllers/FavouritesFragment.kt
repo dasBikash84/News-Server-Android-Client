@@ -109,10 +109,6 @@ class FavouritesFragment : Fragment() {
                 })
 
     }
-
-    companion object {
-        val TAG = "FavouritesFragment"
-    }
 }
 
 class FavouritePagesListAdapter(val context: Context) :
@@ -142,12 +138,12 @@ class FavouritePagesListAdapter(val context: Context) :
 
     override fun onViewAttachedToWindow(holder: FavouritePagePreviewHolder) {
         super.onViewAttachedToWindow(holder)
-        Log.d("FavouritesFragment", "onViewAttachedToWindow")
+        LoggerUtils.debugLog( "onViewAttachedToWindow",this::class.java)
     }
 
     override fun onViewDetachedFromWindow(holder: FavouritePagePreviewHolder) {
         super.onViewDetachedFromWindow(holder)
-        Log.d("FavouritesFragment", "onViewDetachedFromWindow")
+        LoggerUtils.debugLog( "onViewDetachedFromWindow",this::class.java)
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

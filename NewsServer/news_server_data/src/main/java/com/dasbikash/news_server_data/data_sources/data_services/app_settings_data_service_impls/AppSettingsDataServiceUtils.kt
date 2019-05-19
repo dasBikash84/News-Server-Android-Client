@@ -23,9 +23,6 @@ import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 
 internal object AppSettingsDataServiceUtils {
 
-    val TAG = "DbTest"
-
-
     fun processDefaultAppSettingsData(defaultAppSettings: DefaultAppSettings):
             DefaultAppSettings {
 

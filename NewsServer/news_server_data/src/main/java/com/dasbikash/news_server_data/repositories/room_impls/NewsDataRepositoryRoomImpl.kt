@@ -26,8 +26,6 @@ internal class NewsDataRepositoryRoomImpl internal constructor(context: Context)
 
     private val newsServerDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
 
-    private val TAG = "NewsDataRepository"
-
     override fun getLatestArticleByPageFromLocalDb(page: Page): Article? {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         return newsServerDatabase.articleDao.getLatestArticleByPageId(page.id)

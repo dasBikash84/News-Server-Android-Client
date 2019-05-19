@@ -18,8 +18,6 @@ import com.google.firebase.database.FirebaseDatabase
 
 
 internal object RealtimeDBUtils {
-    private val TAG = "SettingsRepository"
-
     //App settings related nodes
     private const val APP_SETTINGS_NODE = "app_settings"
     //User settings related nodes

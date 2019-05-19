@@ -21,6 +21,7 @@ import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.dasbikash.news_server_data.utills.ExceptionUtils
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import java.util.*
 
 internal class UserSettingsRepositoryRoomImpl internal constructor(context: Context) :
@@ -38,7 +39,7 @@ internal class UserSettingsRepositoryRoomImpl internal constructor(context: Cont
         mDatabase.pageGroupDao.findAllStatic()
                 .asSequence()
                 .forEach { userPreferenceData.pageGroups.put(it.name, it) }
-        Log.d(TAG,"getUserPreferenceDataFromLocalDB: ${userPreferenceData}")
+        LoggerUtils.debugLog("getUserPreferenceDataFromLocalDB: ${userPreferenceData}",this::class.java)
         return userPreferenceData
     }
 
@@ -79,8 +80,5 @@ internal class UserSettingsRepositoryRoomImpl internal constructor(context: Cont
 
     override fun getPageGroupListLive(): LiveData<List<PageGroup>> {
         return mDatabase.pageGroupDao.findAllLive()
-    }
-    companion object {
-        val TAG = "UserSettingsRepository"
     }
 }

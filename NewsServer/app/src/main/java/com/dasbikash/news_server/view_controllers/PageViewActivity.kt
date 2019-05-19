@@ -67,7 +67,6 @@ class PageViewActivity : AppCompatActivity(),
         SignInHandler, WorkInProcessWindowOperator {
 
     companion object {
-        const val TAG = "PageViewActivity"
         const val LOG_IN_REQ_CODE = 7777
         const val EXTRA_PAGE_TO_DISPLAY = "com.dasbikash.news_server.views.PageViewActivity.EXTRA_PAGE_TO_DISPLAY"
 

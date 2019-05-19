@@ -250,7 +250,6 @@ abstract class UserSettingsRepository {
     }
 
     companion object {
-        val TAG = "UserSettingsRepository"
         @Volatile
         private lateinit var INSTANCE: UserSettingsRepository
 

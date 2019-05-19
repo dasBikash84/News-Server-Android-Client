@@ -19,11 +19,10 @@ import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.google.firebase.firestore.Query
 
 internal object CloudFireStoreArticleDataUtils {
-
-    private val TAG = "DataService"
 
     internal fun getLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
 
@@ -37,7 +36,7 @@ internal object CloudFireStoreArticleDataUtils {
                 .limit(articleRequestSize.toLong())
                 .get()
                 .addOnSuccessListener { documents ->
-                    Log.d(TAG,"addOnSuccessListener")
+                    LoggerUtils.debugLog("addOnSuccessListener",this::class.java)
                     for (document in documents) {
                         if (document.exists()){
                             articles.add(document.toObject(Article::class.java))
@@ -46,29 +45,27 @@ internal object CloudFireStoreArticleDataUtils {
                     synchronized(lock) { lock.notify() }
                 }
                 .addOnFailureListener { exception ->
-                    Log.d(TAG,"addOnFailureListener. Eror msg: ${exception.message}")
+                    LoggerUtils.debugLog("addOnFailureListener. Eror msg: ${exception.message}",this::class.java)
                     dataServerException = DataNotFoundException(exception)
                     synchronized(lock) { lock.notify() }
                 }
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before wait")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before wait",this::class.java)
         synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before throw it")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before throw it",this::class.java)
         dataServerException?.let { throw it }
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before throw DataNotFoundException()")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before throw DataNotFoundException()",this::class.java)
         if (articles.size == 0 ){
             throw DataNotFoundException()
         }
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before return")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before return",this::class.java)
         return articles
     }
 
     internal fun getArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
-
-//        Log.d(TAG,"getRawLatestArticlesByPage"+CloudFireStoreAppSettingsUtils.getServerAppSettingsUpdateTime())
 
         val lock = Object()
         val articles = mutableListOf<Article>()
@@ -81,7 +78,7 @@ internal object CloudFireStoreArticleDataUtils {
                 .limit(articleRequestSize.toLong())
                 .get()
                 .addOnSuccessListener { documents ->
-                    Log.d(TAG,"addOnSuccessListener")
+                    LoggerUtils.debugLog("addOnSuccessListener",this::class.java)
                     for (document in documents) {
                         if (document.exists()){
                             articles.add(document.toObject(Article::class.java))
@@ -90,23 +87,23 @@ internal object CloudFireStoreArticleDataUtils {
                     synchronized(lock) { lock.notify() }
                 }
                 .addOnFailureListener { exception ->
-                    Log.d(TAG,"addOnFailureListener. Eror msg: ${exception.message}")
+                    LoggerUtils.debugLog("addOnFailureListener. Eror msg: ${exception.message}",this::class.java)
                     dataServerException = DataNotFoundException(exception)
                     synchronized(lock) { lock.notify() }
                 }
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before wait")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before wait",this::class.java)
         synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before throw it")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before throw it",this::class.java)
         dataServerException?.let { throw it }
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before throw DataNotFoundException()")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before throw DataNotFoundException()",this::class.java)
         if (articles.size == 0 ){
             throw DataNotFoundException()
         }
 
-        Log.d(TAG,"getRawLatestArticlesByPage for: ${page.id} before return")
+        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before return",this::class.java)
         return articles
 
     }

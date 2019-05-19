@@ -225,7 +225,6 @@ class ArticleViewFragment : Fragment() {
         val ARG_ARTICLE_ID = "com.dasbikash.news_server.views.ArticleViewFragment.ARG_ARTICLE_ID"
         val ARG_LANGUAGE = "com.dasbikash.news_server.views.ArticleViewFragment.ARG_LANGUAGE"
         val ARG_TRANSIENT_TEXT_SIZE = "com.dasbikash.news_server.views.ArticleViewFragment.ARG_TRANSIENT_TEXT_SIZE"
-        val TAG = "ArticleViewFragment"
 
         fun getInstance(articleId: String, language: Language, transTextSize: Int): ArticleViewFragment {
             val args = Bundle()

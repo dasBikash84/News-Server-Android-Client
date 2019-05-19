@@ -31,8 +31,6 @@ import kotlin.random.Random
 
 class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mApplication) {
 
-    val TAG = "HomeViewModel"
-
     private val mAppSettingsRepository: AppSettingsRepository
     private val mUserSettingsRepository: UserSettingsRepository
     private val mNewsDataRepository: NewsDataRepository
