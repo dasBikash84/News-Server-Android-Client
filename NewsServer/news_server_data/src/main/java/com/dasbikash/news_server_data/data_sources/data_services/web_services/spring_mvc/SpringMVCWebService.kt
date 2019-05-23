@@ -56,7 +56,7 @@ internal interface SpringMVCWebService {
 
     companion object {
 
-        const val BASE_URL = "http://192.168.0.104:8099/"
+        const val BASE_URL = "http://192.168.0.104:8097/"
         //        const val TOP_LEVEL_PAGE_ARTICLE_URL = "articles/top-level-page-id/{topLevelPageId}/latest-article"
         const val LANGUAGES_PATH = "languages"
         const val COUNTRIES_PATH = "countries"

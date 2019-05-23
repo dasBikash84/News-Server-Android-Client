@@ -39,12 +39,6 @@ internal object AppSettingsDataServiceUtils {
                     }
             defaultAppSettings.newspapers = filteredNewspaperMap
 
-            val inActiveNewspaperIds =
-                    it.values.filter { !it.active }.map { it.id }.toCollection(mutableListOf<String>())
-
-            LoggerUtils.debugLog("inActiveNewspaperIds: ${inActiveNewspaperIds.size}",this::class.java)
-
-
             defaultAppSettings.pages?.let {
 
                 val allPages = it.values
@@ -61,8 +55,8 @@ internal object AppSettingsDataServiceUtils {
                         .asSequence()
                         .filter {
                             it.active &&
-                                    !inActiveNewspaperIds.contains(it.newspaperId) &&
-                                    !inactiveTopPageIds.contains(it.parentPageId)
+                            !inactiveTopPageIds.contains(it.parentPageId) &&
+                            filteredNewspaperMap.values.map { it.id }.contains(it.newspaperId)
                         }
                         .forEach { filteredPageMap.put(it.id, it) }
 
