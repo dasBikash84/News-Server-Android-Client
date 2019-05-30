@@ -118,8 +118,8 @@ class HomeFragment : Fragment() {
                             .subscribeOn(Schedulers.computation())
                             .map {
                                 newspapers
+                                        ?.sortedBy { it.getPosition() }
                                         ?.map { PagableNewsPaper(it) }
-                                        ?.sortedBy { it.newspaper.id }
                                         ?.forEach { mNewsPapers.add(it) }
                                 return@map mNewsPapers
                             }

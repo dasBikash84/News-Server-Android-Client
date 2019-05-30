@@ -14,6 +14,7 @@
 package com.dasbikash.news_server_data.models.room_entity
 
 import androidx.room.*
+import com.google.firebase.firestore.Exclude
 import java.io.Serializable
 
 @Entity(
@@ -32,4 +33,14 @@ data class Newspaper(
 ) : Serializable{
     @Ignore
     var active:Boolean = true
+    @Exclude
+    @com.google.firebase.database.Exclude
+    @Ignore
+    private var position:Int?=null
+    fun getPosition():Int{
+        return id.subSequence(NP_ID_PREAMBLE.length,id.length).toString().toIntOrNull()!!
+    }
+    companion object{
+        private const val NP_ID_PREAMBLE = "NP_ID_"
+    }
 }
