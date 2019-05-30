@@ -24,7 +24,8 @@
         android:id="@+id/settings_menu_item"
         android:icon="@drawable/ic_settings_white_24dp"
         android:title="@string/settings_menu_item_title"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom"
+        android:visible="false"/>
     <item
         android:id="@+id/log_in_app_menu_item"
         android:icon="@drawable/ic_account_circle_black_24dp"

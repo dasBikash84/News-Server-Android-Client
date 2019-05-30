@@ -15,9 +15,11 @@
 <resources>
     <color name="colorPrimary">#7e57c2</color>
     <color name="titleScrollerBG">#7e57c2</color>
-    <color name="colorPrimaryLight">#d1c4e9</color>
-    <color name="colorPrimaryLight2">#b39ddb</color>
-    <color name="colorPageBackground">#ede7f6</color>
+    <!--<color name="colorPrimaryLight2">#d1c4e9</color>-->
+    <color name="colorPrimaryLight2">#7ab1e6</color>
+    <color name="colorPrimaryLight">#b39ddb</color>
+    <!--<color name="colorPageBackground">#ede7f6</color>-->
+    <color name="colorPageBackground">#f5f5f5</color>
     <color name="colorPrimaryDark">#140078</color>
     <color name="colorAccent">#7ab1e6</color>
     <color name="navItem">#FFFFFF</color>
@@ -35,5 +37,9 @@
     <color name="ghost_white">#f8f8ff</color>
     <color name="snow_white">#fffafa</color>
     <color name="snow_white2">#eee9e9</color>
+    <color name="snow_white3">#cdc9c9</color>
+    <color name="dark_orange">#ff8c00</color>
+    <color name="dark_green">#006400</color>
     <color name="white_smoke">#f5f5f5</color>
+    <color name="article_title_block_bg">#faf0e6</color>
 </resources>

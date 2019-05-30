@@ -16,7 +16,6 @@ package com.dasbikash.news_server.view_controllers
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -129,7 +128,7 @@ class HomeFragment : Fragment() {
                                 }
                                 override fun onNext(t: MutableList<PagableNewsPaper>) {
 
-                                    mViewPagerTitleScroller.initView(mNewsPapers.toList(), R.layout.view_page_label) {
+                                    mViewPagerTitleScroller.initView(mNewsPapers.toList()) {
                                         LoggerUtils.debugLog( "${it.keyString} clicked",this::class.java)
                                         mHomeViewPager.setCurrentItem(mNewsPapers.indexOf(it),true)
                                     }

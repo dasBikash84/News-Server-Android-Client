@@ -31,7 +31,8 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:layout_marginTop="60dp"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        android:background="@color/colorPageBackground">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -72,7 +73,7 @@
                 android:paddingTop="16dp"
                 android:paddingBottom="60dp"
                 android:scrollbarSize="0dp"
-                android:scrollbars="vertical"
+                android:scrollbars="none"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">

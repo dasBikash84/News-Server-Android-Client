@@ -18,14 +18,12 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
-import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
@@ -33,6 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.dasbikash.news_server.R;
 import com.dasbikash.news_server_data.utills.LoggerUtils;
 
 import java.util.ArrayList;
@@ -43,9 +42,6 @@ public class ViewPagerTitleScroller extends RecyclerView {
 
     private final List<PageKey> mPageKeys = new ArrayList<>();
     private ListAdapter<PageKey, TitleViewHolder> mListAdapter;
-
-    @LayoutRes
-    private Integer textViewId = null;
 
     @ColorInt
     private int onColor = Color.WHITE;
@@ -58,10 +54,12 @@ public class ViewPagerTitleScroller extends RecyclerView {
         super(context);
         doInit(context);
     }
+
     public ViewPagerTitleScroller(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         doInit(context);
     }
+
     public ViewPagerTitleScroller(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         doInit(context);
@@ -83,20 +81,16 @@ public class ViewPagerTitleScroller extends RecyclerView {
             @NonNull
             @Override
             public TitleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                if (textViewId ==null){
-                    return new TitleViewHolder(new TextView(context));
-                }else {
-                    LayoutInflater layoutInflater = LayoutInflater.from(context);
-                    return new TitleViewHolder(
-                            layoutInflater.inflate(textViewId,parent,false)
-                    );
-                }
+                LayoutInflater layoutInflater = LayoutInflater.from(context);
+                return new TitleViewHolder(
+                        layoutInflater.inflate(R.layout.view_page_label, parent, false)
+                );
             }
 
             @Override
             public void onBindViewHolder(@NonNull TitleViewHolder holder, int position) {
                 holder.bind(mPageKeys.get(position));
-                if (position == 0 && mTitleViewHolders.size() <2){
+                if (position == 0 && mTitleViewHolders.size() < 2) {
                     holder.setTextColorToOnColor();
                 }
             }
@@ -105,19 +99,16 @@ public class ViewPagerTitleScroller extends RecyclerView {
     }
 
     public void initView(List<PageKey> pageKeys,
-                         @LayoutRes int layoutId,
-                         TitleClickListner titleClickListner){
-        textViewId = layoutId;
+                         TitleClickListner titleClickListner) {
         setTitleList(pageKeys);
         mTitleClickListner = titleClickListner;
     }
 
     public void initView(List<PageKey> pageKeys,
-                         @LayoutRes int layoutId,
                          TitleClickListner titleClickListner,
                          @ColorInt int onColor,
-                         @ColorInt int offColor){
-        initView(pageKeys,layoutId, titleClickListner);
+                         @ColorInt int offColor) {
+        initView(pageKeys, titleClickListner);
         this.onColor = onColor;
         this.offColor = offColor;
     }
@@ -133,11 +124,13 @@ public class ViewPagerTitleScroller extends RecyclerView {
     private class TitleViewHolder extends RecyclerView.ViewHolder {
 
         private TextView textView;
+        private View bottomBar;
         private PageKey mPageKey;
 
         private TitleViewHolder(View view) {
             super(view);
-            textView  = (TextView) itemView;
+            textView = itemView.findViewById(R.id.title_text_view);
+            bottomBar = itemView.findViewById(R.id.bottom_bar);
             itemView.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -147,22 +140,28 @@ public class ViewPagerTitleScroller extends RecyclerView {
             mTitleViewHolders.add(this);
         }
 
-        void bind(PageKey pageKey){
+        void bind(PageKey pageKey) {
             mPageKey = pageKey;
             textView.setText(pageKey.getKeyString());
-            if (activeItem !=null && activeItem == mPageKey){
+            if (activeItem != null && activeItem == mPageKey) {
                 setTextColorToOnColor();
-            }else {
+            } else {
                 setTextColorToOffColor();
             }
         }
 
-        void setTextColorToOffColor(){
+        void setTextColorToOffColor() {
             textView.setTextColor(offColor);
+            bottomBar.setVisibility(View.GONE);
         }
 
-        void setTextColorToOnColor(){
+        void setTextColorToOnColor() {
+            if (activeItem == null) {
+                activeItem = mPageKey;
+            }
             textView.setTextColor(onColor);
+            bottomBar.setVisibility(View.VISIBLE);
+            bottomBar.bringToFront();
         }
 
         @Override
@@ -179,23 +178,21 @@ public class ViewPagerTitleScroller extends RecyclerView {
         }
     }
 
-    void doOnTitleClick(PageKey pageKey){
+    void doOnTitleClick(PageKey pageKey) {
 
-        makeItemActive(pageKey);
-
-        if (mTitleClickListner ==null) {
-            LoggerUtils.INSTANCE.debugLog( "Empty click action.",this.getClass());
-        }else {
+        if (mTitleClickListner == null) {
+            LoggerUtils.INSTANCE.debugLog("Empty click action.", this.getClass());
+        } else {
             mTitleClickListner.onTitleClick(pageKey);
         }
     }
 
-    private void makeItemActive(PageKey pageKey){
+    private void makeItemActive(PageKey pageKey) {
         for (TitleViewHolder holder :
                 mTitleViewHolders) {
-            if (holder.mPageKey.equals(pageKey)){
+            if (holder.mPageKey.equals(pageKey)) {
                 holder.setTextColorToOnColor();
-            }else {
+            } else {
                 holder.setTextColorToOffColor();
             }
         }
@@ -204,6 +201,7 @@ public class ViewPagerTitleScroller extends RecyclerView {
     private PageKey activeItem;
 
     public void setCurrentItem(PageKey pageKey) {
+        LoggerUtils.INSTANCE.debugLog("setCurrentItem: " + pageKey.getKeyString(), this.getClass());
         activeItem = pageKey;
         scrollToPosition(mPageKeys.indexOf(pageKey));
         new Handler(Looper.getMainLooper())
