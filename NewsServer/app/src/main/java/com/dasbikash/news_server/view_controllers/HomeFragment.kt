@@ -54,6 +54,8 @@ class HomeFragment : Fragment() {
     private lateinit var mPageSearchResultHolder:RecyclerView
     private lateinit var mPageSearchResultContainer:ViewGroup
 
+    private var backPressTaskTag:String?=null
+
     private var mSearchResultListAdapter = SearchResultListAdapter()
 
     private lateinit var mHomeViewModel: HomeViewModel
@@ -164,6 +166,13 @@ class HomeFragment : Fragment() {
                                                                             mPageSearchResultContainer.visibility = View.GONE
                                                                         })
                                                                         mSearchResultListAdapter.submitList(pageList)
+                                                                        if (pageList.size>0){
+                                                                            if (backPressTaskTag!=null){
+                                                                                (activity as BackPressQueueManager).removeTaskFromQueue(backPressTaskTag!!)
+                                                                            }
+                                                                            backPressTaskTag =
+                                                                                    (activity as BackPressQueueManager).addTaskToQueue { mSearchResultListAdapter.submitList(emptyList()) }
+                                                                        }
                                                                     }
                                                                     override fun onError(e: Throwable) {}
 
