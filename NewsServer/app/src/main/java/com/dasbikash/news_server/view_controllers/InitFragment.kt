@@ -131,8 +131,8 @@ class InitFragment : Fragment() {
                                     }
                                 }
                                 LoggerUtils.printStackTrace(e)
-                                Toast.makeText(activity, "onError: " + e.javaClass.canonicalName!!,
-                                        Toast.LENGTH_SHORT).show()
+//                                Toast.makeText(activity, "onError: " + e.javaClass.canonicalName!!,
+//                                        Toast.LENGTH_SHORT).show()
                                 doOnError(e)
                             }
 
@@ -202,7 +202,9 @@ class InitFragment : Fragment() {
                         Observable.just(true)
                                 .subscribeOn(Schedulers.io())
                                 .map {
-                                    userSettingsRepository.signOutUser(context!!)
+                                    if (userSettingsRepository.checkIfLoggedIn()) {
+                                        userSettingsRepository.signOutUser(context!!)
+                                    }
                                 }
                                 .onErrorReturn {
                                     if (!amDisposed){
@@ -240,8 +242,6 @@ class InitFragment : Fragment() {
                                     }
                                 })
                 )
-
-
             }
             is DataSourceNotFoundException -> {
                 mRetryCountForError++
@@ -249,6 +249,11 @@ class InitFragment : Fragment() {
                 initSettingsDataLoading(mRetryDelayForRemoteDBError)
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        unregisterBrodcastReceivers()
     }
 
 
