@@ -196,11 +196,21 @@ class SearchResultListAdapter(): PageListAdapter<SearchResultEntryViewHolder>(){
     }
 }
 class SearchResultEntryViewHolder(itemView: View): PageViewHolder(itemView){
+
+    private val textView: TextView
+    private val bottomBar: View
+
+    init {
+        textView = itemView.findViewById(R.id.title_text_view)
+        bottomBar = itemView.findViewById(R.id.bottom_bar)
+        bottomBar.visibility=View.GONE
+    }
+
     override fun bind(page: Page, parentPage: Page?, newspaper: Newspaper) {
         val pageLabelBuilder = StringBuilder(page.name!!).append(" | ")
         parentPage?.let { pageLabelBuilder.append(it.name).append(" | ") }
         pageLabelBuilder.append(newspaper.name)
-        (itemView as TextView).setText(pageLabelBuilder.toString())
+        textView.setText(pageLabelBuilder.toString())
 
         itemView.setOnClickListener {
             itemView.context
