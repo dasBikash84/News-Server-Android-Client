@@ -67,6 +67,10 @@ internal object RealtimeDbUserSettingsDataService: UserSettingsDataService {
         return RealtimeDBAppSettingsUtils.getServerAppSettingsData().page_groups?.toMap() ?: emptyMap()
     }
 
+    override fun checkIfLoogedAsAdmin(): Boolean {
+        return RealtimeDBUserSettingsUtils.checkIfLoogedAsAdmin()
+    }
+
     //    override fun getCurrentUser(): FirebaseUser? {
 //        return FirebaseAuth.getInstance().currentUser
 //    }

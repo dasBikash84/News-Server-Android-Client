@@ -72,18 +72,21 @@ internal object DataServiceImplProvider {
     }
 
     fun initDataSourceImplementation():Boolean{
-        var currentResult:Boolean = false
-        if (SpringMVCAppSettingsDataService.ping()){
+
+        var appDataSettingsServiceInitialized = false
+
+        if (getUserSettingsDataServiceImpl().getLogInStatus() && getUserSettingsDataServiceImpl().checkIfLoogedAsAdmin() &&
+                SpringMVCAppSettingsDataService.ping()){
             appSettingServiceOption = APP_SETTING_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
             newsDataServiceOption = NEWS_DATA_SERVICE_OPTIONS.SPRING_MVC_REST_SERVICE
-            currentResult = true
+            appDataSettingsServiceInitialized = true
         }else if(CloudFireStoreAppSettingsDataService.ping()){
             appSettingServiceOption = APP_SETTING_SERVICE_OPTIONS.CLOUD_FIRE_STORE
             newsDataServiceOption = NEWS_DATA_SERVICE_OPTIONS.CLOUD_FIRE_STORE
-            currentResult = true
+            appDataSettingsServiceInitialized = true
         }
         if(RealTimeDbAppSettingsDataService.ping()){
-            if (!currentResult) {
+            if (!appDataSettingsServiceInitialized) {
                 appSettingServiceOption = APP_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
                 newsDataServiceOption = NEWS_DATA_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB
             }

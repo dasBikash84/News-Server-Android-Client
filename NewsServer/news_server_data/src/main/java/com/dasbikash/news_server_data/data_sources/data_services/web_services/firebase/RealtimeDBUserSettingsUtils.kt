@@ -18,6 +18,7 @@ import com.dasbikash.news_server_data.exceptions.*
 import com.dasbikash.news_server_data.models.UserSettingsUpdateDetails
 import com.dasbikash.news_server_data.models.UserSettingsUpdateTime
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
@@ -150,5 +151,43 @@ internal object RealtimeDBUserSettingsUtils {
         settingsServerException?.let { throw it }
 
         return lastUpdateTime
+    }
+
+    fun checkIfLoogedAsAdmin():Boolean{
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null || user.isAnonymous) {
+            return false
+        }
+
+        val userSettingsUpdateLogNode = RealtimeDBUtils.mAdminListReference
+        val lock = Object()
+
+        var settingsServerException: SettingsServerException? = UserSettingsNotFoundException()
+
+        userSettingsUpdateLogNode
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onCancelled(databaseError: DatabaseError) {
+                        settingsServerException = SettingsServerException(databaseError.message)
+                        synchronized(lock) { lock.notify() }
+                    }
+
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        try {
+                            if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
+                                settingsServerException = null
+                            }
+                        } catch (ex: Exception) {
+                            settingsServerException = UserSettingsNotFoundException(ex)
+                        }
+                        synchronized(lock) { lock.notify() }
+                    }
+                })
+
+        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+
+        settingsServerException?.let { return false }
+
+        return true
+
     }
 }

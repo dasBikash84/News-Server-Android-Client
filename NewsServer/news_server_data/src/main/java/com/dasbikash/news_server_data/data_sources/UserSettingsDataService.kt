@@ -26,5 +26,6 @@ internal interface UserSettingsDataService{
     fun signOutUser()
     fun getCurrentUserName():String?
     fun getDefaultPageGroupSettings():Map<String, PageGroup>
+    fun checkIfLoogedAsAdmin():Boolean
 //    fun getCurrentUser():FirebaseUser?
 }

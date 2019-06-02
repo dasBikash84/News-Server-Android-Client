@@ -23,6 +23,7 @@ internal object RealtimeDBUtils {
     //User settings related nodes
     private const val USER_SETTINGS_ROOT_NODE = "user_settings"
     private const val ARTICLE_DATA_ROOT_NODE = "article_data"
+    private const val ADMION_LIST_NODE = "admin_list"
 
     val mFBDataBase: FirebaseDatabase
 
@@ -34,5 +35,6 @@ internal object RealtimeDBUtils {
     val mAppSettingsReference: DatabaseReference = mRootReference.child(APP_SETTINGS_NODE)
     val mUserSettingsRootReference: DatabaseReference = mRootReference.child(USER_SETTINGS_ROOT_NODE)
     val mArticleDataRootReference: DatabaseReference = mRootReference.child(ARTICLE_DATA_ROOT_NODE)
+    val mAdminListReference: DatabaseReference = mRootReference.child(ADMION_LIST_NODE)
 }
 
