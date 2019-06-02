@@ -42,34 +42,28 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:16.0.1'
     implementation 'com.firebaseui:firebase-ui-auth:4.3.1'
 
-    implementation 'com.google.firebase:firebase-firestore:19.0.0'
+    implementation 'com.google.firebase:firebase-firestore:19.0.2'
 
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:2.19.0'
     // Core library
-    androidTestImplementation 'androidx.test:core:1.1.0'
+    androidTestImplementation 'androidx.test:core:1.2.0'
     // AndroidJUnitRunner and JUnit Rules
-    androidTestImplementation 'androidx.test:runner:1.1.1'
-    androidTestImplementation 'androidx.test:rules:1.1.1'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test:rules:1.2.0'
     //    implementation 'io.reactivex.rxjava2:rxjava:2.2.6'
-    def room_version = "2.1.0-beta01"
+    def room_version = "2.1.0-rc01"
     implementation "androidx.room:room-runtime:$room_version"
-    //annotationProcessor "androidx.room:room-compiler:$room_version"
-    // For Kotlin use kapt instead of annotationProcessor
     kapt "androidx.room:room-compiler:$room_version"
-    // For Kotlin use kapt instead of annotationProcessor
-    // optional - Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$room_version"
-    // optional - RxJava support for Room
-    //implementation "androidx.room:room-rxjava2:$room_version"
-    // Test helpers
     testImplementation "androidx.room:room-testing:$room_version"
+
     def archLifecycleVersion = '1.1.1'
     implementation "android.arch.lifecycle:extensions:$archLifecycleVersion"
     annotationProcessor "android.arch.lifecycle:compiler:$archLifecycleVersion"
     implementation 'com.google.code.gson:gson:2.8.5'
-    //    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.6'

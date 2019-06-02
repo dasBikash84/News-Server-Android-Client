@@ -26,7 +26,7 @@ import com.google.firebase.database.ValueEventListener
 
 internal object RealTimeDbArticleDataUtils {
 
-    fun getLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
+    fun getLatestArticlesByPage(page: Page, articleRequestSize: Int=1): List<Article> {
 
         val lock = Object()
         val articles = mutableListOf<Article>()
@@ -35,7 +35,7 @@ internal object RealTimeDbArticleDataUtils {
         RealtimeDBUtils.mArticleDataRootReference
                 .child(page.id)
                 .orderByChild("publicationTimeRTDB")
-                .limitToLast(1)
+                .limitToLast(articleRequestSize)
                 .addListenerForSingleValueEvent(object : ValueEventListener{
                     override fun onCancelled(error: DatabaseError) {
                         LoggerUtils.debugLog("onCancelled. Error msg: ${error.message}",this::class.java)
@@ -48,7 +48,7 @@ internal object RealTimeDbArticleDataUtils {
                             LoggerUtils.debugLog("onDataChange",this::class.java)
                             LoggerUtils.debugLog("data: ${dataSnapshot.value}",this::class.java)
                             dataSnapshot.children.asSequence()
-                                    .take(1)
+                                    .take(articleRequestSize)
                                     .forEach {
                                         articles.add(it.getValue(Article::class.java)!!)
                                     }
