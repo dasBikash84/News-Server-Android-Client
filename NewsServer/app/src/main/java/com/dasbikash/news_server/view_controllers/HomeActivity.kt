@@ -18,7 +18,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -32,6 +31,8 @@ import com.dasbikash.news_server.utils.OptionsIntentBuilderUtility
 import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
+import com.dasbikash.news_server_data.exceptions.DataNotFoundException
+import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
@@ -45,6 +46,7 @@ import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.exceptions.CompositeException
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
@@ -99,11 +101,11 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
     private fun setViewItemOnClickListners() {
         mLogInButton.setOnClickListener {
             launchSignInActivity()
-            mLogInMenuHolder.visibility = View.GONE
+            hideLogInMenuHolder()
         }
         mSignOutButton.setOnClickListener {
             launchSignOutDialog()
-            mLogInMenuHolder.visibility = View.GONE
+            hideLogInMenuHolder()
         }
         mUserDetailsTextView.setOnClickListener({})
 //        mUserSettingEditButton.setOnClickListener {
@@ -111,7 +113,9 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
 //            mLogInMenuHolder.visibility = View.GONE
 //        }
 
-        mLogInMenuHolder.setOnClickListener { mLogInMenuHolder.visibility = View.GONE }
+        mLogInMenuHolder.setOnClickListener {
+            hideLogInMenuHolder()
+        }
     }
 
     private fun findViewItems() {
@@ -267,15 +271,14 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
         if (!isWaitWindowShown()) {
             when (item.itemId) {
                 R.id.share_app_menu_item -> {
-                    shareAppMenuItemAction()
+                    shareAppMenuItemClickAction()
                     return true
                 }
                 R.id.settings_menu_item -> {
-                    loadSavedArticlesFragment()
                     return true
                 }
                 R.id.log_in_app_menu_item -> {
-                    logInAppMenuItemAction()
+                    logInAppMenuItemClickAction()
                     return true
                 }
             }
@@ -293,7 +296,9 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    private fun logInAppMenuItemAction() {
+    private var backPressActionTagForLogInMenuHolder:String?=null
+
+    private fun logInAppMenuItemClickAction() {
 
         if (mLogInMenuHolder.visibility == View.GONE) {
             mLogInMenuHolder.visibility = View.VISIBLE
@@ -311,8 +316,20 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                 mLogInButton.visibility = View.VISIBLE
                 mUserDetailsTextView.visibility = View.GONE
             }
+            if (backPressActionTagForLogInMenuHolder!=null){
+                removeTaskFromQueue(backPressActionTagForLogInMenuHolder!!)
+            }
+            backPressActionTagForLogInMenuHolder =
+                    addTaskToQueue { mLogInMenuHolder.visibility = View.GONE }
         } else {
-            mLogInMenuHolder.visibility = View.GONE
+            hideLogInMenuHolder()
+        }
+    }
+
+    private fun hideLogInMenuHolder() {
+        mLogInMenuHolder.visibility = View.GONE
+        if (backPressActionTagForLogInMenuHolder != null) {
+            removeTaskFromQueue(backPressActionTagForLogInMenuHolder!!)
         }
     }
 
@@ -348,17 +365,17 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                             override fun onComplete() {}
 
                             override fun onNext(t: Unit) {
-                                Snackbar.make(mCoordinatorLayout, "You are now signed out.", Snackbar.LENGTH_SHORT).show()
+                                Snackbar.make(mCoordinatorLayout, "Signed out.", Snackbar.LENGTH_SHORT).show()
                                 removeWorkInProcessWindow()
                             }
 
                             override fun onError(e: Throwable) {
-                                when (e) {
-                                    is NoInternertConnectionException -> {
+                                if (e is CompositeException){
+                                    if(e.exceptions.filter { it is NoInternertConnectionException }.count() > 0){
                                         NetConnectivityUtility.showNoInternetToast(this@HomeActivity)
                                     }
-                                    else -> {
-                                        Snackbar.make(mCoordinatorLayout, "Signed out. Please retry.", Snackbar.LENGTH_SHORT).show()
+                                    else {
+                                        Snackbar.make(mCoordinatorLayout, "Sign out Error!! Please retry.", Snackbar.LENGTH_SHORT).show()
                                     }
                                 }
                                 removeWorkInProcessWindow()
@@ -372,7 +389,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
         return super.onCreateOptionsMenu(menu)
     }
 
-    private fun shareAppMenuItemAction() {
+    private fun shareAppMenuItemClickAction() {
         startActivity(OptionsIntentBuilderUtility.getShareAppIntent(this))
     }
 
