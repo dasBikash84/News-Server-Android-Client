@@ -24,6 +24,7 @@ import android.widget.Button
 import android.widget.ProgressBar
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -87,6 +88,8 @@ class PageViewActivity : AppCompatActivity(),
     private lateinit var mFragmentStatePagerAdapter: FragmentStatePagerAdapter
     private lateinit var mArticleLoadingProgressBarMiddle: ProgressBar
 
+    private lateinit var mWaitScreen: LinearLayoutCompat
+
     private lateinit var mArticlePreviewListAdapter: ArticlePreviewListAdapter
 
     private lateinit var mTextSizeChangeFrame: ConstraintLayout//text_size_change_frame
@@ -126,6 +129,8 @@ class PageViewActivity : AppCompatActivity(),
         initViewPager()
         initTextChangeViewComponents()
 
+        mWaitScreen = findViewById(R.id.wait_screen_for_settings_change)
+
         mAppSettingsRepository = RepositoryFactory.getAppSettingsRepository(this)
         mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(this)
@@ -143,6 +148,15 @@ class PageViewActivity : AppCompatActivity(),
                 })
         init()
 
+    }
+
+    private fun showWaitScreen(){
+        mWaitScreen.visibility = View.VISIBLE
+        mWaitScreen.bringToFront()
+    }
+
+    private fun hideWaitScreen(){
+        mWaitScreen.visibility = View.GONE
     }
 
     private fun init(){
@@ -496,7 +510,8 @@ class PageViewActivity : AppCompatActivity(),
         val negetiveActionText = "Cancel"
 
         val positiveAction: () -> Unit = {
-            loadWorkInProcessWindow()
+//            loadWorkInProcessWindow()
+            showWaitScreen()
             mDisposable.add(
                     Observable.just(mPage)
                             .subscribeOn(Schedulers.io())
@@ -509,7 +524,8 @@ class PageViewActivity : AppCompatActivity(),
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribeWith(object : DisposableObserver<Boolean>() {
                                 override fun onComplete() {
-                                    removeWorkInProcessWindow()
+//                                    removeWorkInProcessWindow()
+                                    hideWaitScreen()
                                 }
 
                                 override fun onNext(result: Boolean) {
@@ -534,7 +550,8 @@ class PageViewActivity : AppCompatActivity(),
                                     }else {
                                         DisplayUtils.showShortSnack(mPageViewContainer, "Error!! Please retry.")
                                     }
-                                    removeWorkInProcessWindow()
+//                                    removeWorkInProcessWindow()
+                                    hideWaitScreen()
                                 }
                             })
             )

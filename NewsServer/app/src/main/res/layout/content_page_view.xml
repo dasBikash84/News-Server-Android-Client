@@ -20,6 +20,25 @@
     tools:context=".view_controllers.PageViewActivity"
     tools:showIn="@layout/app_bar_page_view">
 
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/wait_screen_for_settings_change"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <androidx.core.widget.ContentLoadingProgressBar
+            style="@android:style/Widget.DeviceDefault.ProgressBar"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:paddingStart="60dp"
+            android:paddingEnd="60dp" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/text_size_change_frame"
         android:layout_width="match_parent"
