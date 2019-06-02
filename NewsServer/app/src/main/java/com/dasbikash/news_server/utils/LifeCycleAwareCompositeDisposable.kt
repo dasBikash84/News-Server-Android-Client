@@ -24,9 +24,9 @@ class LifeCycleAwareCompositeDisposable private constructor():
         DefaultLifecycleObserver, Disposable, DisposableContainer {
     private val mDisposable = CompositeDisposable()
 
-    fun clear(){
-        mDisposable.clear()
-    }
+//    fun clear(){
+//        mDisposable.clear()
+//    }
 
     override fun onPause(owner: LifecycleOwner) {
         LoggerUtils.debugLog("Disposing",this::class.java)

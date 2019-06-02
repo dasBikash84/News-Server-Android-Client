@@ -15,11 +15,11 @@ package com.dasbikash.news_server.view_controllers
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ListAdapter
@@ -37,6 +37,7 @@ import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
@@ -108,11 +109,15 @@ class NewspaperPerviewFragment : Fragment() {
 class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
                                 val appSettingsRepository: AppSettingsRepository,
                                 val homeViewModel: HomeViewModel) :
-        ListAdapter<Page, PagePreviewHolder>(PageDiffCallback) {
+        ListAdapter<Page, PagePreviewHolder>(PageDiffCallback), DefaultLifecycleObserver {
+
+    init {
+        lifecycleOwner.lifecycle.addObserver(this)
+    }
 
     val childPageMap = mutableMapOf<Page, List<Page>>()
 
-    val disposable = LifeCycleAwareCompositeDisposable.getInstance(lifecycleOwner)
+    val disposable = CompositeDisposable()
 
     override fun onCurrentListChanged(previousList: MutableList<Page>, currentList: MutableList<Page>) {
         super.onCurrentListChanged(previousList, currentList)
@@ -187,6 +192,17 @@ class TopPagePreviewListAdapter(val lifecycleOwner: LifecycleOwner,
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
+        LoggerUtils.debugLog("Disposing",this::class.java)
+        disposable.clear()
+    }
+
+    override fun onPause(owner: LifecycleOwner) {
+        LoggerUtils.debugLog("Disposing",this::class.java)
+        disposable.clear()
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        LoggerUtils.debugLog("Disposing",this::class.java)
         disposable.clear()
     }
 
