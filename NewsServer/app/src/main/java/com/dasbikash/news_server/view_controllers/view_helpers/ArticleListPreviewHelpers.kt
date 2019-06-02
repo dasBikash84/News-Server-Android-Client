@@ -24,9 +24,9 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DisplayUtils
-import com.dasbikash.news_server.utils.ImageUtils
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
+import com.dasbikash.news_server_data.utills.ImageUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -86,7 +86,7 @@ class ArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                     articleTitle.text = mArticle.title
                     articlePublicationTime.text = it
 
-                    ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink)
+                    ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink,R.drawable.app_big_logo)
                 }
     }
 }

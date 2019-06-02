@@ -28,7 +28,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DisplayUtils
-import com.dasbikash.news_server.utils.ImageUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.view_controllers.PageViewActivity
 import com.dasbikash.news_server.view_models.HomeViewModel
@@ -39,6 +38,7 @@ import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.Observable
@@ -179,7 +179,7 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName:Int=0,pag
             LoggerUtils.debugLog("Page: ${page.name} dateString: ${dateString}",this::class.java)
         },10L)
 
-        ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink)
+        ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink,R.drawable.app_big_logo)
         articlePreviewImage.visibility = View.VISIBLE
 
         //Add click listner

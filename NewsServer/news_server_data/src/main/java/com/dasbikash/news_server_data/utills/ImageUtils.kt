@@ -15,7 +15,10 @@ package com.dasbikash.news_server_data.utills
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.widget.ImageView
+import androidx.annotation.DrawableRes
 import com.squareup.picasso.Picasso
+import com.squareup.picasso.RequestCreator
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
@@ -36,5 +39,21 @@ object ImageUtils {
             LoggerUtils.printStackTrace(e)
             return null
         }
+    }
+
+    fun customLoader(imageView: ImageView, url: String?=null, @DrawableRes defaultImageResourceId:Int) {
+        val picasso = Picasso.get()
+        val requestCreator: RequestCreator
+
+        if (url != null){
+            if (url.startsWith("/data")){
+                requestCreator = picasso.load(File(url))
+            }else {
+                requestCreator = picasso.load(url)
+            }
+        }else{
+            requestCreator = picasso.load(defaultImageResourceId)
+        }
+        requestCreator.error(defaultImageResourceId).into(imageView)
     }
 }

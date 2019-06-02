@@ -30,12 +30,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
-import com.dasbikash.news_server.utils.ImageUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.models.room_entity.SavedArticle
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.Observer
@@ -155,7 +155,7 @@ class SavedArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemVi
         savedArticle = currentSavedArticle
         pageTitle.text = StringBuilder(savedArticle.pageName).append(" | ").append(savedArticle.newspaperName).toString()
         articleTitle.text = savedArticle.title
-        ImageUtils.customLoader(articleImage, savedArticle.previewImageLink)
+        ImageUtils.customLoader(articleImage, savedArticle.previewImageLink,R.drawable.app_big_logo)
         Observable.just(savedArticle.publicationTime)
                 .observeOn(Schedulers.io())
                 .map {

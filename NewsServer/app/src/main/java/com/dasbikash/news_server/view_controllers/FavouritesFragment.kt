@@ -32,7 +32,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
-import com.dasbikash.news_server.utils.ImageUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.view_controllers.view_helpers.PageDiffCallback
@@ -42,6 +41,7 @@ import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import com.google.android.material.card.MaterialCardView
@@ -215,7 +215,7 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
                                     articleTitle.text = mArticle.title
                                     articlePublicationTime.text = data.second
 
-                                    ImageUtils.customLoader(articleImage, mArticle.previewImageLink)
+                                    ImageUtils.customLoader(articleImage, mArticle.previewImageLink,R.drawable.app_big_logo)
 
                                     mArticle.previewImageLink?.let {
                                         articleImage.setOnClickListener {

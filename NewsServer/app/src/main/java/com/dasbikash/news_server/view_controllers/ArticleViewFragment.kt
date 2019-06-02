@@ -27,12 +27,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
-import com.dasbikash.news_server.utils.ImageUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.ArticleImage
 import com.dasbikash.news_server_data.models.room_entity.Language
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -276,7 +276,7 @@ class ArticleImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         if (articleImage.link != null) {
             itemView.visibility = View.VISIBLE
 
-            ImageUtils.customLoader(mArticleImage, articleImage.link)
+            ImageUtils.customLoader(mArticleImage, articleImage.link,R.drawable.app_big_logo)
 
             if (articleImage.caption != null) {
                 mImageCaption.text = articleImage.caption
