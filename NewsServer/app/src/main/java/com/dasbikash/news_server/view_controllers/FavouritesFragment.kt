@@ -271,7 +271,7 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
 class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAdapter,
                                    val signInHandler: SignInHandler,
                                    val workInProcessWindowOperator: WorkInProcessWindowOperator) :
-        ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+        ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT or ItemTouchHelper.LEFT) {
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
         return false
     }

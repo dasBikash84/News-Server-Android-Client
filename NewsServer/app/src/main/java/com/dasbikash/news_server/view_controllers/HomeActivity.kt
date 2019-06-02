@@ -308,7 +308,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                 mLogInButton.visibility = View.GONE
                 mUserDetailsTextView.visibility = View.GONE
                 mUserSettingsRepository.getCurrentUserName()?.let {
-                    DisplayUtils.displayHtmlText(mUserDetailsTextView, StringBuilder("Logged in as <u>").append(it).append("</u>").toString())
+                    DisplayUtils.displayHtmlText(mUserDetailsTextView, StringBuilder("").append(it).toString())
                     mUserDetailsTextView.visibility = View.VISIBLE
                 }
             } else {

@@ -55,7 +55,8 @@ class FragmentArticlePreviewForPages : Fragment() {
         }
 
         mPagePreviewListAdapter =
-                PagePreviewListAdapter(this,mArticlePreviewResId!!,ViewModelProviders.of(activity!!).get(HomeViewModel::class.java),mShowNewsPaperName!!)
+                PagePreviewListAdapter(this,mArticlePreviewResId!!,ViewModelProviders.of(activity!!).get(HomeViewModel::class.java),
+                                            mShowNewsPaperName!!, PAGE_TITLE_LINE_COUNT)
 
         mPageListPreviewHolderRV.adapter = mPagePreviewListAdapter
     }
@@ -74,6 +75,7 @@ class FragmentArticlePreviewForPages : Fragment() {
         val ARG_PAGE_LIST = "com.dasbikash.news_server.views.FragmentArticlePreviewForPages.ARG_PAGE_LIST"
         val ARG_ARTICLE_PREVIEW_RES_ID = "com.dasbikash.news_server.views.FragmentArticlePreviewForPages.ARG_ARTICLE_PREVIEW_RES_ID"
         val ARG_SHOW_NP_NAME_FLAG = "com.dasbikash.news_server.views.FragmentArticlePreviewForPages.ARG_SHOW_NP_NAME_FLAG"
+        val PAGE_TITLE_LINE_COUNT = 2
 
         private fun getInstance(pages: List<Page>, @LayoutRes resId: Int,showNewsPaperName:Int): FragmentArticlePreviewForPages {
 

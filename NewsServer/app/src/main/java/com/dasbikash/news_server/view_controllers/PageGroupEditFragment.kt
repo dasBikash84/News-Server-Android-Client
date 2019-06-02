@@ -273,7 +273,7 @@ class PageGroupEditFragment : Fragment() {
     }
 
     private inner class CurrentPageSwipeToDeleteCallback() :
-            ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT or ItemTouchHelper.LEFT) {
         override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
                             target: RecyclerView.ViewHolder): Boolean {
             return false

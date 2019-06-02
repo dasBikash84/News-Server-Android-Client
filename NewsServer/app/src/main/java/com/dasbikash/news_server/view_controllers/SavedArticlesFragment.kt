@@ -179,7 +179,7 @@ class SavedArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemVi
 
 class SavedArticleSwipeToDeleteCallback(val deleteSavedArticle:(savedArticle:SavedArticle)->Unit,
                                         val listAdapter: SavedArticlePreviewListAdapter) :
-        ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+        ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT or ItemTouchHelper.LEFT) {
 
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
                         target: RecyclerView.ViewHolder): Boolean {

@@ -238,8 +238,8 @@ class PageViewActivity : AppCompatActivity(),
                         override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult, Throwable?>) {
                             when (processingResult.first) {
                                 UserSettingsRepository.SignInResult.SUCCESS -> {
-                                    DisplayUtils.showShortSnack(mPageViewContainer,
-                                            "Welcome ${mUserSettingsRepository.getCurrentUserName() ?: ""}")
+//                                    DisplayUtils.showShortSnack(mPageViewContainer,
+//                                            "Welcome ${mUserSettingsRepository.getCurrentUserName() ?: ""}")
                                     actionAfterSuccessfulLogIn?.let {it()}
                                 }
                                 UserSettingsRepository.SignInResult.USER_ABORT -> DisplayUtils.showShortSnack(mPageViewContainer,"Log in aborted")

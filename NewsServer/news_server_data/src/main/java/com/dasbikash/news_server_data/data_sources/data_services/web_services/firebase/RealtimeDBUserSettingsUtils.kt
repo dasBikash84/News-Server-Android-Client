@@ -35,7 +35,15 @@ internal object RealtimeDBUserSettingsUtils {
 
     fun getCurrentUserName(): String? {
         FirebaseAuth.getInstance().currentUser?.let {
-            return it.displayName ?: it.email ?: it.phoneNumber ?: "Anonymous"
+            val email = it.email
+            val diplayName = it.displayName
+            val phoneNumber = it.phoneNumber
+            diplayName?.let {
+                email?.let { return "${diplayName} <br>(${email})" }
+                return diplayName
+            }
+            email?.let { return it }
+            phoneNumber?.let { return it }
         }
         return null
     }

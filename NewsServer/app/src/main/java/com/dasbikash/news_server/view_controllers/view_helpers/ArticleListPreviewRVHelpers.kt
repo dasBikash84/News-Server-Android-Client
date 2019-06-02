@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server.view_controllers.view_helpers
 
+import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -49,14 +50,14 @@ import java.lang.StringBuilder
 import java.util.*
 
 class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holderResId: Int,
-                             val homeViewModel: HomeViewModel,val showNewsPaperName:Int=0) :
+                             val homeViewModel: HomeViewModel,val showNewsPaperName:Int=0,val pageTitleLineCount:Int=1) :
         ListAdapter<Page, LatestArticlePreviewHolder>(PageDiffCallback){
 
     val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(lifecycleOwner)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LatestArticlePreviewHolder {
         val view = LayoutInflater.from(parent.context).inflate(holderResId, parent, false)
-        return LatestArticlePreviewHolder(view, homeViewModel,showNewsPaperName)
+        return LatestArticlePreviewHolder(view,showNewsPaperName,pageTitleLineCount)
     }
 
     override fun onBindViewHolder(holder: LatestArticlePreviewHolder, position: Int) {
@@ -115,7 +116,7 @@ class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holde
 
 }
 
-class LatestArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewModel,val showNewsPaperName:Int=0) : RecyclerView.ViewHolder(itemView) {
+class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName:Int=0,pageTitleLineCount:Int=1) : RecyclerView.ViewHolder(itemView) {
 
     companion object {
         val TAG = "ArticlePreviewHolder"
@@ -133,11 +134,13 @@ class LatestArticlePreviewHolder(itemView: View, val homeViewModel: HomeViewMode
         articlePreviewImage = itemView.findViewById(R.id.article_preview_image)
         articleTitle = itemView.findViewById(R.id.article_title)
         articlePublicationTime = itemView.findViewById(R.id.article_time)
+        pageTitle.setLines(pageTitleLineCount)
         itemView.setOnClickListener{}
     }
 
     lateinit var mPage: Page
 
+    @SuppressLint("CheckResult")
     fun disableDisplay(page: Page) {
         mPage = page
 
