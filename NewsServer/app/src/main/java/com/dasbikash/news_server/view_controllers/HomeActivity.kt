@@ -15,7 +15,6 @@ package com.dasbikash.news_server.view_controllers
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -28,10 +27,12 @@ import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
+import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.utils.OptionsIntentBuilderUtility
 import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
+import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.dasbikash.news_server_data.utills.LoggerUtils
@@ -44,24 +45,25 @@ import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
-import java.lang.StringBuilder
 
 class HomeActivity : AppCompatActivity(),
-        NavigationHost, HomeNavigator, SignInHandler,WorkInProcessWindowOperator {
+        NavigationHost, HomeNavigator, SignInHandler, WorkInProcessWindowOperator {
 
     private lateinit var mToolbar: Toolbar
     private lateinit var mAppBar: AppBarLayout
     private lateinit var mCoordinatorLayout: CoordinatorLayout
 
-    private lateinit var mUserSettingsRepository:UserSettingsRepository
+    private lateinit var mUserSettingsRepository: UserSettingsRepository
 
-    private lateinit var mLogInMenuHolder:ConstraintLayout
+    private lateinit var mLogInMenuHolder: ConstraintLayout
 
-    private lateinit var mLogInButton:MaterialButton
+    private lateinit var mLogInButton: MaterialButton
     private lateinit var mUserDetailsTextView: AppCompatTextView
-    private lateinit var mSignOutButton:MaterialButton
-//    private lateinit var mUserSettingEditButton:MaterialButton
+    private lateinit var mSignOutButton: MaterialButton
+    //    private lateinit var mUserSettingEditButton:MaterialButton
+    private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
     private val LOG_IN_REQ_CODE = 7777
 
@@ -132,8 +134,8 @@ class HomeActivity : AppCompatActivity(),
     private fun setUpBottomNavigationView() {
 
         mBottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
-            var handled: Boolean
-            handled = when (menuItem.itemId) {
+//            var handled: Boolean
+            when (menuItem.itemId) {
                 R.id.bottom_menu_item_home -> {
                     if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is HomeFragment)) {
                         mAppBar.visibility = View.GONE
@@ -172,7 +174,7 @@ class HomeActivity : AppCompatActivity(),
 
                 else -> false
             }
-            handled
+//            handled
         }
     }
 
@@ -193,9 +195,9 @@ class HomeActivity : AppCompatActivity(),
     }
 
     override fun showAppBar(show: Boolean) {
-        if(show) {
+        if (show) {
             mAppBar.visibility = View.VISIBLE
-        }else{
+        } else {
             mAppBar.visibility = View.GONE
         }
     }
@@ -203,9 +205,10 @@ class HomeActivity : AppCompatActivity(),
     override fun disableBackPress(disable: Boolean) {
         disableBackPressFlag = disable
     }
+
     var disableBackPressFlag = false
     var mWaitWindowShown = false
-    var mWaitWindow :Fragment? = null
+    var mWaitWindow: Fragment? = null
     override fun loadWorkInProcessWindow() {
         mWaitWindow = FragmentWorkInProcess()
         showBottomNavigationView(false)
@@ -299,9 +302,9 @@ class HomeActivity : AppCompatActivity(),
         return false
     }
 
-    private fun launchSignOutDialog(){
+    private fun launchSignOutDialog() {
         DialogUtils.createAlertDialog(this, DialogUtils.AlertDialogDetails(
-                title = "Sign Out?",positiveButtonText = "Yes",negetiveButtonText = "Cancel",doOnPositivePress = { signOutAction() }
+                title = "Sign Out?", positiveButtonText = "Yes", negetiveButtonText = "Cancel", doOnPositivePress = { signOutAction() }
         )).show()
     }
 
@@ -311,30 +314,30 @@ class HomeActivity : AppCompatActivity(),
 
     private fun logInAppMenuItemAction() {
 
-        if (mLogInMenuHolder.visibility == View.GONE){
+        if (mLogInMenuHolder.visibility == View.GONE) {
             mLogInMenuHolder.visibility = View.VISIBLE
             mLogInMenuHolder.bringToFront()
-            if(mUserSettingsRepository.checkIfLoggedIn()){
+            if (mUserSettingsRepository.checkIfLoggedIn()) {
                 mSignOutButton.visibility = View.VISIBLE
                 mLogInButton.visibility = View.GONE
                 mUserDetailsTextView.visibility = View.GONE
                 mUserSettingsRepository.getCurrentUserName()?.let {
-                    DisplayUtils.displayHtmlText(mUserDetailsTextView,StringBuilder("Logged in as <u>").append(it).append("</u>").toString())
+                    DisplayUtils.displayHtmlText(mUserDetailsTextView, StringBuilder("Logged in as <u>").append(it).append("</u>").toString())
                     mUserDetailsTextView.visibility = View.VISIBLE
                 }
-            }else{
+            } else {
                 mSignOutButton.visibility = View.GONE
                 mLogInButton.visibility = View.VISIBLE
                 mUserDetailsTextView.visibility = View.GONE
             }
-        }else{
+        } else {
             mLogInMenuHolder.visibility = View.GONE
         }
     }
 
-    var actionAfterSuccessfulLogIn : (() -> Unit)? = null
+    var actionAfterSuccessfulLogIn: (() -> Unit)? = null
 
-    override fun launchSignInActivity(doOnSignIn:()->Unit) {
+    override fun launchSignInActivity(doOnSignIn: () -> Unit) {
         val intent = mUserSettingsRepository.getLogInIntent()
         intent?.let {
             startActivityForResult(intent, LOG_IN_REQ_CODE)
@@ -343,8 +346,41 @@ class HomeActivity : AppCompatActivity(),
     }
 
     private fun signOutAction() {
-        mUserSettingsRepository.signOutUser()
-        Snackbar.make(mCoordinatorLayout,"You have just signed out",Snackbar.LENGTH_SHORT).show()
+        var amDisposed = false
+        mDisposable.add(
+                Observable.just(true)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            mUserSettingsRepository.signOutUser(this)
+                        }
+                        .onErrorReturn {
+                            if (!amDisposed){
+                                throw it
+                            }
+                        }
+                        .doOnDispose {
+                            amDisposed = true
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<Unit>() {
+                            override fun onComplete() {}
+
+                            override fun onNext(t: Unit) {
+                                Snackbar.make(mCoordinatorLayout, "You are now signed out.", Snackbar.LENGTH_SHORT).show()
+                            }
+
+                            override fun onError(e: Throwable) {
+                                when (e) {
+                                    is NoInternertConnectionException -> {
+                                        NetConnectivityUtility.showNoInternetToast(this@HomeActivity)
+                                    }
+                                    else -> {
+                                        Snackbar.make(mCoordinatorLayout, "Signed out. Please retry.", Snackbar.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        })
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -361,35 +397,38 @@ class HomeActivity : AppCompatActivity(),
 
         if (requestCode == LOG_IN_REQ_CODE) {
 
-            Observable.just(Pair(resultCode,data))
+            Observable.just(Pair(resultCode, data))
                     .subscribeOn(Schedulers.io())
-                    .map { mUserSettingsRepository.processSignInRequestResult(it,this) }
+                    .map { mUserSettingsRepository.processSignInRequestResult(it, this) }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(object : Observer<Pair<UserSettingsRepository.SignInResult, Throwable?>> {
                         override fun onComplete() {
                             actionAfterSuccessfulLogIn = null
                         }
+
                         override fun onSubscribe(d: Disposable) {
                         }
-                        override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult,Throwable?>) {
-                            when(processingResult.first){
+
+                        override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult, Throwable?>) {
+                            when (processingResult.first) {
                                 UserSettingsRepository.SignInResult.SUCCESS -> {
-                                    LoggerUtils.debugLog("User settings data saved.",this::class.java)
+                                    LoggerUtils.debugLog("User settings data saved.", this::class.java)
                                     actionAfterSuccessfulLogIn?.let {
                                         it()
                                     }
                                 }
                                 UserSettingsRepository.SignInResult.USER_ABORT -> LoggerUtils.debugLog("Log in canceled by user",
-                                                                                                            this@HomeActivity::class.java)
+                                        this@HomeActivity::class.java)
                                 UserSettingsRepository.SignInResult.SERVER_ERROR -> LoggerUtils.debugLog("Log in error. Details:${processingResult.second}",
-                                                                                                            this@HomeActivity::class.java)
+                                        this@HomeActivity::class.java)
                                 UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> LoggerUtils.debugLog("Error while saving User settings data. Details:${processingResult.second}",
-                                                                                                            this@HomeActivity::class.java)
+                                        this@HomeActivity::class.java)
                             }
                         }
+
                         override fun onError(e: Throwable) {
                             actionAfterSuccessfulLogIn = null
-                            LoggerUtils.debugLog("Error while User settings data saving. Error: ${e}",this::class.java)
+                            LoggerUtils.debugLog("Error while User settings data saving. Error: ${e}", this::class.java)
                         }
                     })
         }
@@ -397,6 +436,6 @@ class HomeActivity : AppCompatActivity(),
 
 }
 
-interface SignInHandler{
-    fun launchSignInActivity(doOnSignIn:()->Unit = {})
+interface SignInHandler {
+    fun launchSignInActivity(doOnSignIn: () -> Unit = {})
 }

@@ -80,9 +80,9 @@ abstract class AppSettingsRepository {
         addNewsPapers(ArrayList(appSettings.newspapers?.values))
         addPages(ArrayList(appSettings.pages?.values))
 
-        if (getPageGroupCount() == 0) {
-            addPageGroups(ArrayList(appSettings.page_groups?.values ?: emptyList()))
-        }
+//        if (getPageGroupCount() == 0) {
+//            addPageGroups(ArrayList(appSettings.page_groups?.values ?: emptyList()))
+//        }
 
         val settingUpdateTimes = ArrayList(appSettings.update_time?.values)
         mAppSettingsDataService.saveLocalAppSettingsUpdateTime(context, settingUpdateTimes.max()!!)

@@ -88,12 +88,12 @@ class FavouritesFragment : Fragment() {
         mHomeViewModel.getUserPreferenceData()
                 .observe(activity!!, object : Observer<UserPreferenceData?> {
                     override fun onChanged(userPreferenceData: UserPreferenceData?) {
-                        userPreferenceData?.let {
-                            disposable.add(Observable.just(userPreferenceData.favouritePageIds)
+                        userPreferenceData.let {
+                            val favouritePageIdList = it?.favouritePageIds?.toList() ?: emptyList()
+                            disposable.add(Observable.just(favouritePageIdList)
                                     .subscribeOn(Schedulers.io())
                                     .map {
-                                        it.sortBy { it }
-                                        it.asSequence().map { appSettingsRepository.findPageById(it) }.toList()
+                                        it.asSequence().map { appSettingsRepository.findPageById(it) }.filter { it != null }.toList()
                                     }
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribeWith(object : DisposableObserver<List<Page?>>() {
@@ -138,12 +138,12 @@ class FavouritePagesListAdapter(val context: Context) :
 
     override fun onViewAttachedToWindow(holder: FavouritePagePreviewHolder) {
         super.onViewAttachedToWindow(holder)
-        LoggerUtils.debugLog( "onViewAttachedToWindow",this::class.java)
+        LoggerUtils.debugLog("onViewAttachedToWindow", this::class.java)
     }
 
     override fun onViewDetachedFromWindow(holder: FavouritePagePreviewHolder) {
         super.onViewDetachedFromWindow(holder)
-        LoggerUtils.debugLog( "onViewDetachedFromWindow",this::class.java)
+        LoggerUtils.debugLog("onViewDetachedFromWindow", this::class.java)
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -205,6 +205,7 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
                         .subscribeWith(object : DisposableObserver<Any>() {
                             override fun onComplete() {
                             }
+
                             override fun onNext(data: Any) {
                                 if (data is Pair<*, *>) {
                                     showChilds()
@@ -214,7 +215,7 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
                                     articleTitle.text = mArticle.title
                                     articlePublicationTime.text = data.second
 
-                                    ImageUtils.customLoader(articleImage,mArticle.previewImageLink)
+                                    ImageUtils.customLoader(articleImage, mArticle.previewImageLink)
 
                                     mArticle.previewImageLink?.let {
                                         articleImage.setOnClickListener {
@@ -226,17 +227,17 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
                             }
 
                             override fun onError(e: Throwable) {
-                                when(e){
-                                    is NoInternertConnectionException ->{
+                                when (e) {
+                                    is NoInternertConnectionException -> {
                                         NetConnectivityUtility.showNoInternetToast(itemView.context)
                                     }
-                                    is DataNotFoundException ->{
+                                    is DataNotFoundException -> {
 
                                     }
-                                    is DataServerException ->{
+                                    is DataServerException -> {
 
                                     }
-                                    else ->{
+                                    else -> {
 
                                     }
                                 }
@@ -296,6 +297,7 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
                         override fun onComplete() {
                             workInProcessWindowOperator.removeWorkInProcessWindow()
                         }
+
                         override fun onSubscribe(d: Disposable) {}
                         override fun onNext(result: Boolean) {
                             if (!result) {
@@ -306,9 +308,10 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
                         override fun onError(e: Throwable) {
                             if (e is NoInternertConnectionException) {
                                 NetConnectivityUtility.showNoInternetToast(viewHolder.itemView.context)
-                            }else {
-                                LoggerUtils.debugLog(e.message ?: e::class.java.simpleName+" Error",this@FavPageSwipeToDeleteCallback::class.java)
-                                DisplayUtils.showShortToast(viewHolder.itemView.context,"Error!! Please retry.")
+                            } else {
+                                LoggerUtils.debugLog(e.message ?: e::class.java.simpleName
+                                + " Error", this@FavPageSwipeToDeleteCallback::class.java)
+                                DisplayUtils.showShortToast(viewHolder.itemView.context, "Error!! Please retry.")
                             }
                             workInProcessWindowOperator.removeWorkInProcessWindow()
                             favouritePagesListAdapter.notifyDataSetChanged()
@@ -318,21 +321,21 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
 
         val removeFavItemDialog =
                 DialogUtils.createAlertDialog(
-                    viewHolder.itemView.context,
-                    DialogUtils.AlertDialogDetails(
-                            message = message,positiveButtonText = positiveText, negetiveButtonText = negetiveText,
-                            doOnPositivePress = positiveAction, doOnNegetivePress = negetiveAction,
-                            isCancelable = false
-                    )
+                        viewHolder.itemView.context,
+                        DialogUtils.AlertDialogDetails(
+                                message = message, positiveButtonText = positiveText, negetiveButtonText = negetiveText,
+                                doOnPositivePress = positiveAction, doOnNegetivePress = negetiveAction,
+                                isCancelable = false
+                        )
                 )
 
-        if (userSettingsRepository.checkIfLoggedIn()){
+        if (userSettingsRepository.checkIfLoggedIn()) {
             removeFavItemDialog.show()
-        }else{
+        } else {
             DialogUtils.createAlertDialog(
                     viewHolder.itemView.context,
                     DialogUtils.AlertDialogDetails(
-                            message = message,positiveButtonText = "Sign in and continue", negetiveButtonText = negetiveText,
+                            message = message, positiveButtonText = "Sign in and continue", negetiveButtonText = negetiveText,
                             doOnPositivePress = {
                                 signInHandler.launchSignInActivity({
                                     removeFavItemDialog.show()

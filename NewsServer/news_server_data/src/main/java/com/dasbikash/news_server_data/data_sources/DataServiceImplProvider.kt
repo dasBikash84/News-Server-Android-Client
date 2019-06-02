@@ -19,7 +19,7 @@ import com.dasbikash.news_server_data.data_sources.data_services.app_settings_da
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.CloudFireStoreNewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.RealTimeDbNewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.SpringMVCNewsDataService
-import com.dasbikash.news_server_data.data_sources.data_services.user_settings_data_services.FirebaseUserSettingsDataService
+import com.dasbikash.news_server_data.data_sources.data_services.user_settings_data_services.RealtimeDbUserSettingsDataService
 import com.dasbikash.news_server_data.utills.LoggerUtils
 
 
@@ -57,7 +57,7 @@ internal object DataServiceImplProvider {
     private fun initUserSettingsDataService() {
         userSettingsDataService =
             when (userSettingServiceOption) {
-                USER_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB -> FirebaseUserSettingsDataService
+                USER_SETTING_SERVICE_OPTIONS.FIREBASE_REAL_TIME_DB -> RealtimeDbUserSettingsDataService
             }
     }
 

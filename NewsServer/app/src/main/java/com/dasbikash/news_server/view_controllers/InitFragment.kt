@@ -41,6 +41,7 @@ import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
+import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
@@ -113,7 +114,7 @@ class InitFragment : Fragment() {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<DataLoadingStatus>() {
                             override fun onNext(loadingStatus: DataLoadingStatus) {
-                                LoggerUtils.debugLog( "onNext: $loadingStatus",this::class.java)
+                                LoggerUtils.debugLog("onNext: $loadingStatus", this::class.java)
                                 if (loadingStatus.isSetProgressbarDeterminate) {
                                     mProgressBar.isIndeterminate = false
                                     mProgressBar.progress = loadingStatus.progressBarValue
@@ -123,15 +124,15 @@ class InitFragment : Fragment() {
                             }
 
                             override fun onError(e: Throwable) {
-                                LoggerUtils.debugLog( "onError: " + e.javaClass.canonicalName!!,this::class.java)
+                                LoggerUtils.debugLog("onError: " + e.javaClass.canonicalName!!, this::class.java)
                                 Arrays.asList(e.stackTrace).asSequence().forEach {
                                     it.iterator().forEach {
-                                        LoggerUtils.debugLog( "onError: " + it.toString(),this::class.java)
+                                        LoggerUtils.debugLog("onError: " + it.toString(), this::class.java)
                                     }
                                 }
                                 LoggerUtils.printStackTrace(e)
-                                Toast.makeText(activity,"onError: " + e.javaClass.canonicalName!!,
-                                                Toast.LENGTH_SHORT).show()
+                                Toast.makeText(activity, "onError: " + e.javaClass.canonicalName!!,
+                                        Toast.LENGTH_SHORT).show()
                                 doOnError(e)
                             }
 
@@ -139,7 +140,7 @@ class InitFragment : Fragment() {
                                 mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
                                 mHomeViewModel
                                         .getNewsPapers()
-                                        .observe(activity!!, object : Observer<List<Newspaper>>{
+                                        .observe(activity!!, object : Observer<List<Newspaper>> {
                                             override fun onChanged(newspapers: List<Newspaper>?) {
                                                 (activity as HomeNavigator).loadHomeFragment()
                                             }
@@ -183,23 +184,64 @@ class InitFragment : Fragment() {
 
     private fun doOnError(throwable: Throwable) {
 
-        when(throwable){
+        when (throwable) {
             is NoInternertConnectionException -> {
                 mProgressBar.isIndeterminate = true
                 mNoInternetMessage.visibility = View.VISIBLE
                 registerBrodcastReceivers()
             }
-            is SettingsServerException  -> {
+            is SettingsServerException -> {
                 mRetryCountForError++
                 mRetryDelayForRemoteDBError += INCREMENTAL_RETRY_DELAY_MS * mRetryCountForError
                 initSettingsDataLoading(mRetryDelayForRemoteDBError)
             }
             is AuthServerException -> {
                 val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
-                userSettingsRepository.signOutUser()
-                (activity as SignInHandler).launchSignInActivity({
-                    initSettingsDataLoading(0L)
-                })
+                var amDisposed = false
+                mDisposable.add(
+                        Observable.just(true)
+                                .subscribeOn(Schedulers.io())
+                                .map {
+                                    userSettingsRepository.signOutUser(context!!)
+                                }
+                                .onErrorReturn {
+                                    if (!amDisposed){
+                                        throw it
+                                    }
+                                }
+                                .doOnDispose {
+                                    amDisposed = true
+                                }
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribeWith(object : DisposableObserver<Unit>() {
+                                    override fun onComplete() {}
+
+                                    override fun onNext(t: Unit) {
+                                        (activity as SignInHandler).launchSignInActivity({
+                                            initSettingsDataLoading(0L)
+                                        })
+                                    }
+
+                                    override fun onError(e: Throwable) {
+                                        when (e) {
+                                            is NoInternertConnectionException -> {
+                                                NetConnectivityUtility.showNoInternetToast(this@InitFragment.context!!)
+                                                mProgressBar.isIndeterminate = true
+                                                mNoInternetMessage.visibility = View.VISIBLE
+                                                registerBrodcastReceivers()
+                                            }
+                                            else -> {
+                                                mRetryCountForError++
+                                                mRetryDelayForRemoteDBError += INCREMENTAL_RETRY_DELAY_MS * mRetryCountForError
+                                                initSettingsDataLoading(mRetryDelayForRemoteDBError)
+//                                                Snackbar.make(mCoordinatorLayout, "Signed out. Please retry.", Snackbar.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    }
+                                })
+                )
+
+
             }
             is DataSourceNotFoundException -> {
                 mRetryCountForError++

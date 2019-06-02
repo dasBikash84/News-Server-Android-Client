@@ -30,7 +30,6 @@ internal class UserSettingsRepositoryRoomImpl internal constructor(context: Cont
     private val mDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
 
     override fun getUserPreferenceDataFromLocalDB(): UserPreferenceData {
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         var userPreferenceData:UserPreferenceData? = mDatabase.userPreferenceDataDao.findUserPreferenceStaticData()
         if(userPreferenceData == null) {
             userPreferenceData = UserPreferenceData(id=UUID.randomUUID().toString())
@@ -80,5 +79,17 @@ internal class UserSettingsRepositoryRoomImpl internal constructor(context: Cont
 
     override fun getPageGroupListLive(): LiveData<List<PageGroup>> {
         return mDatabase.pageGroupDao.findAllLive()
+    }
+
+    override fun resetUserSettings(defaultPageGroups: Map<String, PageGroup>) {
+        mDatabase.userPreferenceDataDao.nukeTable()
+        mDatabase.pageGroupDao.nukeTable()
+        if (defaultPageGroups.isNotEmpty()){
+            mDatabase.pageGroupDao.addPageGroups(defaultPageGroups.values.toList())
+        }
+    }
+
+    override fun getPageGroupListCount(): Int {
+        return mDatabase.pageGroupDao.count
     }
 }

@@ -15,17 +15,18 @@ package com.dasbikash.news_server_data.data_sources.data_services.user_settings_
 
 import android.content.Intent
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBAppSettingsUtils
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBUserSettingsUtils
+import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 
-internal object FirebaseUserSettingsDataService: UserSettingsDataService {
+internal object RealtimeDbUserSettingsDataService: UserSettingsDataService {
+
     override fun getCurrentUserName(): String? {
         return RealtimeDBUserSettingsUtils.getCurrentUserName()
     }
-
 
     private val mSignInProviders = arrayListOf(
             AuthUI.IdpConfig.GoogleBuilder().build(),
@@ -62,7 +63,11 @@ internal object FirebaseUserSettingsDataService: UserSettingsDataService {
         return null
     }
 
-//    override fun getCurrentUser(): FirebaseUser? {
+    override fun getDefaultPageGroupSettings(): Map<String, PageGroup> {
+        return RealtimeDBAppSettingsUtils.getServerAppSettingsData().page_groups?.toMap() ?: emptyMap()
+    }
+
+    //    override fun getCurrentUser(): FirebaseUser? {
 //        return FirebaseAuth.getInstance().currentUser
 //    }
 }

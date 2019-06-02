@@ -17,6 +17,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.LiveData
+import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.exceptions.AuthServerException
@@ -30,7 +31,6 @@ import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import com.firebase.ui.auth.IdpResponse
-import com.google.firebase.auth.FirebaseUser
 import java.util.*
 
 abstract class UserSettingsRepository {
@@ -39,6 +39,7 @@ abstract class UserSettingsRepository {
             "com.dasbikash.news_server_data.repositories.UserSettingsRepository.LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY"
 
     private val mUserSettingsDataService: UserSettingsDataService = DataServiceImplProvider.getUserSettingsDataServiceImpl()
+//    private val mAppSettingsDataService: AppSettingsDataService = DataServiceImplProvider.getAppSettingsDataServiceImpl()
 
     abstract protected fun nukeUserPreferenceDataTable()
     abstract protected fun nukePageGroupTable()
@@ -52,9 +53,12 @@ abstract class UserSettingsRepository {
     abstract fun findPageGroupByName(pageGroupName: String): PageGroup
     abstract fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?>
     abstract fun getPageGroupListLive(): LiveData<List<PageGroup>>
+    abstract fun getPageGroupListCount(): Int
 
     private fun doPostLogInProcessing(userLogInResponse: UserLogInResponse, context: Context) {
+
         val idpResponse = userLogInResponse.iDpResponse
+
         if (idpResponse == null || idpResponse.error != null) {
             throw AuthServerException()
         }
@@ -89,7 +93,7 @@ abstract class UserSettingsRepository {
 
         val userPreferenceData = mUserSettingsDataService.getUserPreferenceData()
         //Remove if any null entry found
-        userPreferenceData.favouritePageIds = userPreferenceData.favouritePageIds.filter { it != null }.toCollection(mutableListOf())
+        userPreferenceData.favouritePageIds = userPreferenceData.favouritePageIds.filter { it != null }.toMutableList()
 
         return userPreferenceData
     }
@@ -98,6 +102,10 @@ abstract class UserSettingsRepository {
     fun initUserSettings(context: Context) {
         if (checkIfLoggedIn()) {
             updateUserSettingsIfModified(context)
+        }else{
+            if (getPageGroupListCount()==0){
+                resetUserSettings(context)
+            }
         }
     }
 
@@ -137,7 +145,7 @@ abstract class UserSettingsRepository {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         LoggerUtils.debugLog( "addPageToFavList: ${page.name}",this::class.java)
         //Before update fetch current settings from server
-        updateUserSettingsIfModified(context)
+//        updateUserSettingsIfModified(context)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
         if (userPreferenceData.favouritePageIds.contains(page.id)){
@@ -155,7 +163,7 @@ abstract class UserSettingsRepository {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         LoggerUtils.debugLog( "removePageFromFavList: ${page.name}",this::class.java)
         //Before update fetch current settings from server
-        updateUserSettingsIfModified(context)
+//        updateUserSettingsIfModified(context)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
         if (! userPreferenceData.favouritePageIds.contains(page.id)){
@@ -172,7 +180,7 @@ abstract class UserSettingsRepository {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         LoggerUtils.debugLog( "addPageGroup: ${pageGroup.name}",this::class.java)
         //Before update fetch current settings from server
-        updateUserSettingsIfModified(context)
+//        updateUserSettingsIfModified(context)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
         userPreferenceData.pageGroups.put(pageGroup.name,pageGroup)
@@ -185,7 +193,7 @@ abstract class UserSettingsRepository {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         LoggerUtils.debugLog( "deletePageGroup: ${pageGroup.name}",this::class.java)
         //Before update fetch current settings from server
-        updateUserSettingsIfModified(context)
+//        updateUserSettingsIfModified(context)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
         if (!userPreferenceData.pageGroups.keys.contains(pageGroup.name)){
@@ -201,7 +209,7 @@ abstract class UserSettingsRepository {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         LoggerUtils.debugLog( "savePageGroup: ${pageGroup.name}",this::class.java)
         //Before update fetch current settings from server
-        updateUserSettingsIfModified(context)
+//        updateUserSettingsIfModified(context)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
         userPreferenceData.pageGroups.remove(oldId)
@@ -241,12 +249,25 @@ abstract class UserSettingsRepository {
         return mUserSettingsDataService.getLogInStatus()
     }
 
-    fun signOutUser(){
+    fun signOutUser(context: Context){
+        resetUserSettings(context)
         return mUserSettingsDataService.signOutUser()
     }
 
     fun getLogInIntent(): Intent?{
         return mUserSettingsDataService.getLogInIntent()
+    }
+
+    fun resetUserSettings(context: Context){
+        saveLastUserSettingsUpdateTime(0L,context)
+        resetUserSettings(getDefaultPageGroupSettings())
+    }
+
+    abstract protected fun resetUserSettings(defaultPageGroups:Map<String,PageGroup>)
+
+    private fun getDefaultPageGroupSettings():Map<String,PageGroup>{
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        return mUserSettingsDataService.getDefaultPageGroupSettings()
     }
 
     companion object {
