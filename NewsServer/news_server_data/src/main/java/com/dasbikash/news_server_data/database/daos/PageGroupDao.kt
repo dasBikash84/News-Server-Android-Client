@@ -30,7 +30,7 @@ internal interface PageGroupDao {
     fun findAllLive(): LiveData<List<PageGroup>>
 
     @Query("SELECT * FROM PageGroup where name=:id")
-    fun findById(id: String): PageGroup
+    fun findById(id: String): PageGroup?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addPageGroups(newsCategories: List<PageGroup>)

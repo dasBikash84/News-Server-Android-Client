@@ -93,48 +93,13 @@ internal object RealtimeDBUserSettingsUtils {
         }
 
         val userSettingsNodes = getUserSettingsNodes(user)
-//        val lock = Object()
-//
-//        var userSettingsUploadFailureException: UserSettingsUploadFailureException? = null
-//        val workDone = AtomicBoolean(false)
 
         userSettingsNodes.favPageIdListRef
                 .setValue(userPreferenceData.favouritePageIds)
-//                .addOnCompleteListener { task ->
-//                    if (task.isSuccessful) {
-//                        workDone.set(true)
-//                        synchronized(lock) { lock.notify() }
-//                    } else {
-//                        userSettingsUploadFailureException = UserSettingsUploadFailureException(task.exception!!)
-//                        synchronized(lock) { lock.notify() }
-//                    }
-//                }
-//
-//        workDone.set(false)
-//        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
-//        userSettingsUploadFailureException?.let { throw it }
-//        if (!workDone.get()) {
-//            throw SettingsServerUnavailable()
-//        }
 
         userSettingsNodes.pageGroupListRef
                 .setValue(userPreferenceData.pageGroups)
-//                .addOnCompleteListener { task ->
-//                    if (task.isSuccessful) {
-//                        workDone.set(true)
-//                        synchronized(lock) { lock.notify() }
-//                    } else {
-//                        userSettingsUploadFailureException = UserSettingsUploadFailureException(task.exception!!)
-//                        synchronized(lock) { lock.notify() }
-//                    }
-//                }
-//        workDone.set(false)
-//        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
-//        userSettingsUploadFailureException?.let { throw it }
-//        if (!workDone.get()) {
-//            throw SettingsServerUnavailable()
-//        }
-//
+
         var ipAddress: String
         try {
             ipAddress = UserIpDataService.getIpAddress()
@@ -145,21 +110,7 @@ internal object RealtimeDBUserSettingsUtils {
         userSettingsNodes.updateLogRef
                 .push()
                 .setValue(UserSettingsUpdateDetails(userIp = ipAddress))
-//                .addOnCompleteListener { task ->
-//                    if (task.isSuccessful) {
-//                        workDone.set(true)
-//                        synchronized(lock) { lock.notify() }
-//                    } else {
-//                        userSettingsUploadFailureException = UserSettingsUploadFailureException(task.exception!!)
-//                        synchronized(lock) { lock.notify() }
-//                    }
-//                }
-//        workDone.set(false)
-//        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
-//        userSettingsUploadFailureException?.let { throw it }
-//        if (!workDone.get()) {
-//            throw SettingsServerUnavailable()
-//        }
+
     }
 
     fun getLastUserSettingsUpdateTime(): Long {

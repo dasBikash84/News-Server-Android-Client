@@ -71,7 +71,7 @@ class PageGroupFragment : Fragment() {
 
         mPageGroupListAdapter =
                 PageGroupListAdapter(activity!!.supportFragmentManager, this,
-                        activity!! as SignInHandler, activity as NavigationHost,activity as WorkInProcessWindowOperator)
+                        activity!! as SignInHandler, activity as NavigationHost, activity as WorkInProcessWindowOperator)
         mPageGroupListHolder.adapter = mPageGroupListAdapter
 
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
@@ -141,12 +141,12 @@ class PageGroupFragment : Fragment() {
 
 
 class PageGroupListAdapter(val fragmentManager: FragmentManager, val lifecycleOwner: LifecycleOwner,
-                           val signInHandler: SignInHandler, val navigationHost: NavigationHost,val workInProcessWindowOperator: WorkInProcessWindowOperator)
+                           val signInHandler: SignInHandler, val navigationHost: NavigationHost, val workInProcessWindowOperator: WorkInProcessWindowOperator)
     : ListAdapter<PageGroup, PageGroupHolder>(PageGroupDiffCallback) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageGroupHolder {
         val pagePreviewHolder = PageGroupHolder(LayoutInflater.from(parent.context).inflate(
                 R.layout.view_page_group_item, parent, false), fragmentManager,
-                signInHandler, navigationHost,workInProcessWindowOperator)
+                signInHandler, navigationHost, workInProcessWindowOperator)
 
         lifecycleOwner.lifecycle.addObserver(pagePreviewHolder)
 
@@ -224,9 +224,12 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                                                         LoggerUtils.printStackTrace(e)
                                                         if (e is NoInternertConnectionException) {
                                                             NetConnectivityUtility.showNoInternetToast(itemView.context)
-                                                        }else {
-                                                            LoggerUtils.debugLog(e.message ?: e.cause.toString() ?: e::class.java.simpleName+" Error",this::class.java)
-                                                            DisplayUtils.showShortToast(itemView.context!!,"Error!! Please retry.")
+                                                        } else {
+                                                            LoggerUtils.debugLog(e.message
+                                                                    ?: e.cause.toString()
+                                                                    ?: e::class.java.simpleName
+                                                                    + " Error", this::class.java)
+                                                            DisplayUtils.showShortToast(itemView.context!!, "Error!! Please retry.")
                                                         }
                                                         workInProcessWindowOperator.removeWorkInProcessWindow()
                                                     }
@@ -237,7 +240,20 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                     ).show()
                 }
                 val pageGroupEditFragmentLaunchAction: () -> Unit = {
-                    navigationHost.addFragment(PageGroupEditFragment.getInstance(mPageGroup.name))
+                    Observable.just(mPageGroup)
+                            .subscribeOn(Schedulers.io())
+                            .map {
+                                userSettingsRepository.findPageGroupByName(it.name)
+                            }
+                            .subscribeWith(object :DisposableObserver<PageGroup?>(){
+                                override fun onComplete() {}
+                                override fun onNext(pageGroup: PageGroup) {
+                                    navigationHost.addFragment(PageGroupEditFragment.getInstance(pageGroup.name))
+                                }
+                                override fun onError(e: Throwable) {}
+                            })
+
+
                 }
 
                 val modifyActionDialog = DialogUtils.createAlertDialog(
@@ -249,8 +265,8 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                         )
                 )
 
-                val logInPromptNegetiveText: String = "Cancel"
-                val logInPromptPositiveText: String = "Sign in and continue"
+                val logInPromptNegetiveText = "Cancel"
+                val logInPromptPositiveText = "Sign in and continue"
                 val logInPromptPositiveAction: () -> Unit = {
                     signInHandler.launchSignInActivity({
                         modifyActionDialog.show()
@@ -309,11 +325,11 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                     val fragment = when {
                         this.pageEntityList.size == 1 -> {
                             FragmentArticlePreviewForPages
-                                    .getInstanceForScreenFillPreview(this.pageEntityList.first(),this.pageEntityList.size)
+                                    .getInstanceForScreenFillPreview(this.pageEntityList.first(), this.pageEntityList.size)
                         }
                         this.pageEntityList.size > 1 -> {
                             FragmentArticlePreviewForPages
-                                    .getInstanceForCustomWidthPreview(this.pageEntityList.filter { it != null }.toList(),this.pageEntityList.size)
+                                    .getInstanceForCustomWidthPreview(this.pageEntityList.filter { it != null }.toList(), this.pageEntityList.size)
                         }
                         else -> {
                             null

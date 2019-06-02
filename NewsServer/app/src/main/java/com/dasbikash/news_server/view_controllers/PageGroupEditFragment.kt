@@ -16,7 +16,6 @@ package com.dasbikash.news_server.view_controllers
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,6 +63,7 @@ class PageGroupEditFragment : Fragment() {
 
     private lateinit var mPageGroupName: String
     private lateinit var mMode: OPERATING_MODE
+    private lateinit var mBackPressTaskTag:String
 
     private val mCurrentPageList = mutableListOf<Page>()
     private val mSearchResultPageList = mutableListOf<Page>()
@@ -79,14 +79,24 @@ class PageGroupEditFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        (activity as NavigationHost).showAppBar(false) //To disable sign out
-        (activity as NavigationHost).disableBackPress(true) //To disable sign out
+        doOnCreate()
+        mBackPressTaskTag = (activity as BackPressQueueManager).addTaskToQueue { doOnExit() }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    private fun doOnCreate() {
+        (activity as NavigationHost).showAppBar(false) //To disable sign out
+        (activity as NavigationHost).showBottomNavigationView(false) //To disable navigation
+    }
+
+    private fun exit() {
+        (activity as BackPressQueueManager).removeTaskFromQueue(mBackPressTaskTag)
+        doOnExit()
+    }
+
+    private fun doOnExit() {
+        (activity as HomeNavigator).loadPageGroupFragment()
         (activity as NavigationHost).showAppBar(true)
-        (activity as NavigationHost).disableBackPress(false) //To disable sign out
+        (activity as NavigationHost).showBottomNavigationView(true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -178,7 +188,7 @@ class PageGroupEditFragment : Fragment() {
                             if (it == OPERATING_MODE.EDIT && mPageGroupName.isNotBlank()) {
                                 val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
                                 val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
-                                mPageGroup = userSettingsRepository.findPageGroupByName(mPageGroupName)
+                                mPageGroup = userSettingsRepository.findPageGroupByName(mPageGroupName)!!
                                 mPageGroup.pageList?.asSequence()
                                         ?.map { appSettingsRepository.findPageById(it) }
                                         ?.forEach {
@@ -303,12 +313,6 @@ class PageGroupEditFragment : Fragment() {
         }
     }
 
-    private fun exit() {
-        (activity as HomeNavigator).loadPageGroupFragment()
-        (activity as NavigationHost).showAppBar(true)
-        (activity as NavigationHost).disableBackPress(false) //To disable sign out
-    }
-
     private fun doneButtonClickAction() {
 
         if (!checkIfModified()) {
@@ -355,7 +359,7 @@ class PageGroupEditFragment : Fragment() {
 
                                 (activity as WorkInProcessWindowOperator).removeWorkInProcessWindow()
                                 if (t) {
-                                    Toast.makeText(context, "Data Saved!!", Toast.LENGTH_SHORT).show()
+//                                    Toast.makeText(context, "Data Saved!!", Toast.LENGTH_SHORT).show()
                                     exit()
                                 } else {
                                     Toast.makeText(context, "Error!! Please retry!!", Toast.LENGTH_SHORT).show()

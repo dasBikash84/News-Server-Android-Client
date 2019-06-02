@@ -15,6 +15,7 @@ package com.dasbikash.news_server_data.utills
 
 import android.os.Looper
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
+import com.dasbikash.news_server_data.exceptions.NotOnMainThreadException
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException
 
 object ExceptionUtils {
@@ -22,6 +23,12 @@ object ExceptionUtils {
     private fun thowExceptionIfOnMainThred(){
         if (Thread.currentThread() == Looper.getMainLooper().thread) {
             throw OnMainThreadException()
+        }
+    }
+
+    fun thowExceptionIfNotOnMainThred(){
+        if (Thread.currentThread() != Looper.getMainLooper().thread) {
+            throw NotOnMainThreadException()
         }
     }
     private fun thowExceptionIfNoInternetConnection(){

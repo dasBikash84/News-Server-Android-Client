@@ -39,7 +39,6 @@ abstract class UserSettingsRepository {
             "com.dasbikash.news_server_data.repositories.UserSettingsRepository.LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY"
 
     private val mUserSettingsDataService: UserSettingsDataService = DataServiceImplProvider.getUserSettingsDataServiceImpl()
-//    private val mAppSettingsDataService: AppSettingsDataService = DataServiceImplProvider.getAppSettingsDataServiceImpl()
 
     abstract protected fun nukeUserPreferenceDataTable()
     abstract protected fun nukePageGroupTable()
@@ -50,7 +49,7 @@ abstract class UserSettingsRepository {
     abstract protected fun addPageGroupsToLocalDb(pageGroups: List<PageGroup>)
     abstract protected fun deletePageGroupFromLocalDb(pageGroupName: String)
     abstract protected fun getLocalPreferenceData(): List<UserPreferenceData>
-    abstract fun findPageGroupByName(pageGroupName: String): PageGroup
+    abstract fun findPageGroupByName(pageGroupName: String): PageGroup?
     abstract fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?>
     abstract fun getPageGroupListLive(): LiveData<List<PageGroup>>
     abstract fun getPageGroupListCount(): Int
@@ -144,8 +143,6 @@ abstract class UserSettingsRepository {
     fun addPageToFavList(page: Page, context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         LoggerUtils.debugLog( "addPageToFavList: ${page.name}",this::class.java)
-        //Before update fetch current settings from server
-//        updateUserSettingsIfModified(context)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
         if (userPreferenceData.favouritePageIds.contains(page.id)){
@@ -162,8 +159,6 @@ abstract class UserSettingsRepository {
     fun removePageFromFavList(page: Page, context: Context): Boolean{
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         LoggerUtils.debugLog( "removePageFromFavList: ${page.name}",this::class.java)
-        //Before update fetch current settings from server
-//        updateUserSettingsIfModified(context)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
         if (! userPreferenceData.favouritePageIds.contains(page.id)){
@@ -179,8 +174,6 @@ abstract class UserSettingsRepository {
     fun addPageGroup(pageGroup: PageGroup, context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         LoggerUtils.debugLog( "addPageGroup: ${pageGroup.name}",this::class.java)
-        //Before update fetch current settings from server
-//        updateUserSettingsIfModified(context)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
         userPreferenceData.pageGroups.put(pageGroup.name,pageGroup)
@@ -192,8 +185,6 @@ abstract class UserSettingsRepository {
     fun deletePageGroup(pageGroup: PageGroup, context: Context): Boolean{
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         LoggerUtils.debugLog( "deletePageGroup: ${pageGroup.name}",this::class.java)
-        //Before update fetch current settings from server
-//        updateUserSettingsIfModified(context)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
         if (!userPreferenceData.pageGroups.keys.contains(pageGroup.name)){
@@ -208,8 +199,6 @@ abstract class UserSettingsRepository {
     fun savePageGroup(oldId: String, pageGroup: PageGroup, context: Context): Boolean{
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         LoggerUtils.debugLog( "savePageGroup: ${pageGroup.name}",this::class.java)
-        //Before update fetch current settings from server
-//        updateUserSettingsIfModified(context)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
         userPreferenceData.pageGroups.remove(oldId)

@@ -69,7 +69,7 @@ internal class UserSettingsRepositoryRoomImpl internal constructor(context: Cont
     override fun nukePageGroupTable() {
         mDatabase.pageGroupDao.nukeTable()
     }
-    override fun findPageGroupByName(pageGroupName: String): PageGroup {
+    override fun findPageGroupByName(pageGroupName: String): PageGroup? {
         return mDatabase.pageGroupDao.findById(pageGroupName)
     }
 

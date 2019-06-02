@@ -82,7 +82,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/vertical_list_element_spacing"
-        android:background="@color/colorPrimaryLight2"
+        android:background="@color/colorPrimaryLight"
         android:foregroundGravity="center"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"

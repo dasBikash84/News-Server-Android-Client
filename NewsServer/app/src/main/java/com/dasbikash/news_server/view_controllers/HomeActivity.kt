@@ -48,7 +48,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class HomeActivity : AppCompatActivity(),
+class HomeActivity : ActivityWithBackPressQueueManager(),
         NavigationHost, HomeNavigator, SignInHandler, WorkInProcessWindowOperator {
 
     private lateinit var mToolbar: Toolbar
@@ -134,7 +134,6 @@ class HomeActivity : AppCompatActivity(),
     private fun setUpBottomNavigationView() {
 
         mBottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
-//            var handled: Boolean
             when (menuItem.itemId) {
                 R.id.bottom_menu_item_home -> {
                     if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is HomeFragment)) {
@@ -174,7 +173,6 @@ class HomeActivity : AppCompatActivity(),
 
                 else -> false
             }
-//            handled
         }
     }
 
@@ -202,38 +200,21 @@ class HomeActivity : AppCompatActivity(),
         }
     }
 
-    override fun disableBackPress(disable: Boolean) {
-        disableBackPressFlag = disable
-    }
-
-    var disableBackPressFlag = false
-    var mWaitWindowShown = false
     var mWaitWindow: Fragment? = null
+    private fun isWaitWindowShown() = mWaitWindow!=null
+
     override fun loadWorkInProcessWindow() {
         mWaitWindow = FragmentWorkInProcess()
         showBottomNavigationView(false)
         addFragment(mWaitWindow!!)
-        mWaitWindowShown = true
-        disableBackPress(true)
     }
 
     override fun removeWorkInProcessWindow() {
-        mWaitWindowShown = false
-        removeFragment(mWaitWindow!!)
+        mWaitWindow?.let {
+            removeFragment(it)
+        }
         mWaitWindow = null
         showBottomNavigationView(true)
-        disableBackPress(false)
-    }
-
-    override fun onBackPressed() {
-        if (!disableBackPressFlag) {
-            super.onBackPressed()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        disableBackPressFlag = false
     }
 
     /**
@@ -244,7 +225,7 @@ class HomeActivity : AppCompatActivity(),
      * @param addToBackstack
      */
     override fun navigateTo(fragment: Fragment, addToBackstack: Boolean) {
-        if (!mWaitWindowShown) {
+        if (!isWaitWindowShown()) {
             val transaction = supportFragmentManager
                     .beginTransaction()
                     .replace(R.id.main_frame, fragment)
@@ -283,7 +264,7 @@ class HomeActivity : AppCompatActivity(),
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (!mWaitWindowShown) {
+        if (!isWaitWindowShown()) {
             when (item.itemId) {
                 R.id.share_app_menu_item -> {
                     shareAppMenuItemAction()
@@ -346,6 +327,7 @@ class HomeActivity : AppCompatActivity(),
     }
 
     private fun signOutAction() {
+        loadWorkInProcessWindow()
         var amDisposed = false
         mDisposable.add(
                 Observable.just(true)
@@ -367,6 +349,7 @@ class HomeActivity : AppCompatActivity(),
 
                             override fun onNext(t: Unit) {
                                 Snackbar.make(mCoordinatorLayout, "You are now signed out.", Snackbar.LENGTH_SHORT).show()
+                                removeWorkInProcessWindow()
                             }
 
                             override fun onError(e: Throwable) {
@@ -378,6 +361,7 @@ class HomeActivity : AppCompatActivity(),
                                         Snackbar.make(mCoordinatorLayout, "Signed out. Please retry.", Snackbar.LENGTH_SHORT).show()
                                     }
                                 }
+                                removeWorkInProcessWindow()
                             }
                         })
         )
@@ -396,7 +380,7 @@ class HomeActivity : AppCompatActivity(),
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == LOG_IN_REQ_CODE) {
-
+            loadWorkInProcessWindow()
             Observable.just(Pair(resultCode, data))
                     .subscribeOn(Schedulers.io())
                     .map { mUserSettingsRepository.processSignInRequestResult(it, this) }
@@ -424,11 +408,13 @@ class HomeActivity : AppCompatActivity(),
                                 UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> LoggerUtils.debugLog("Error while saving User settings data. Details:${processingResult.second}",
                                         this@HomeActivity::class.java)
                             }
+                            removeWorkInProcessWindow()
                         }
 
                         override fun onError(e: Throwable) {
                             actionAfterSuccessfulLogIn = null
                             LoggerUtils.debugLog("Error while User settings data saving. Error: ${e}", this::class.java)
+                            removeWorkInProcessWindow()
                         }
                     })
         }
