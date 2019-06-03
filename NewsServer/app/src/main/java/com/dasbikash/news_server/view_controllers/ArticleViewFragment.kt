@@ -21,6 +21,8 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -32,10 +34,13 @@ import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.ArticleImage
 import com.dasbikash.news_server_data.models.room_entity.Language
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.ImageLoadingDisposer
 import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
@@ -135,7 +140,7 @@ class ArticleViewFragment : Fragment() {
         DisplayUtils.displayHtmlText(mArticleText, mArticle.articleText!!)
 
         if (mArticle.imageLinkList != null && mArticle.imageLinkList!!.size > 0) {
-            mArticleImageListAdapter = ArticleImageListAdapter()
+            mArticleImageListAdapter = ArticleImageListAdapter(this)
             mArticleImageHolder.adapter = mArticleImageListAdapter
             mArticleImageListAdapter.submitList(mArticle.imageLinkList)
             mArticleImageHolder.visibility = View.VISIBLE
@@ -248,35 +253,76 @@ object ArticleImageDiffCallback : DiffUtil.ItemCallback<ArticleImage>() {
     }
 }
 
-class ArticleImageListAdapter() :
-        ListAdapter<ArticleImage, ArticleImageHolder>(ArticleImageDiffCallback) {
+class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner) :
+        ListAdapter<ArticleImage, ArticleImageHolder>(ArticleImageDiffCallback), DefaultLifecycleObserver {
+
+    init {
+        lifecycleOwner.lifecycle.addObserver(this)
+    }
+
+    val mDisposable = CompositeDisposable()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleImageHolder {
         return ArticleImageHolder(
                 LayoutInflater.from(parent.context)
-                        .inflate(R.layout.view_article_image, parent, false)
+                        .inflate(R.layout.view_article_image, parent, false),
+                mDisposable
         )
     }
 
     override fun onBindViewHolder(holder: ArticleImageHolder, position: Int) {
         holder.bind(getItem(position))
     }
+
+    override fun onViewRecycled(holder: ArticleImageHolder) {
+        super.onViewRecycled(holder)
+        holder.disposeImageLoader()
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        LoggerUtils.debugLog("Disposing",this::class.java)
+        mDisposable.clear()
+    }
+
+    override fun onPause(owner: LifecycleOwner) {
+        LoggerUtils.debugLog("Disposing",this::class.java)
+        mDisposable.clear()
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        LoggerUtils.debugLog("Disposing",this::class.java)
+        mDisposable.clear()
+    }
 }
 
-class ArticleImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class ArticleImageHolder(itemView: View,val compositeDisposable: CompositeDisposable) : RecyclerView.ViewHolder(itemView) {
 
     val mArticleImage: AppCompatImageView
     val mImageCaption: AppCompatTextView
+    var imageLoadingDisposer: Disposable?=null
 
     init {
         mArticleImage = itemView.findViewById(R.id.article_image)
         mImageCaption = itemView.findViewById(R.id.article_image_caption)
     }
 
+    fun disposeImageLoader(){
+        imageLoadingDisposer?.dispose()
+    }
+
     fun bind(articleImage: ArticleImage) {
         if (articleImage.link != null) {
             itemView.visibility = View.VISIBLE
 
-            ImageUtils.customLoader(mArticleImage, articleImage.link,R.drawable.app_big_logo)
+            imageLoadingDisposer = ImageLoadingDisposer(mArticleImage)
+            compositeDisposable.add(imageLoadingDisposer!!)
+
+            ImageUtils.customLoader(mArticleImage, articleImage.link,R.drawable.app_big_logo,
+                                        {
+                                            compositeDisposable.delete(imageLoadingDisposer!!)
+                                            imageLoadingDisposer=null
+                                        })
 
             if (articleImage.caption != null) {
                 mImageCaption.text = articleImage.caption

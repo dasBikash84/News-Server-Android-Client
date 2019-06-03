@@ -17,8 +17,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
+import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.RequestCreator
+import io.reactivex.disposables.Disposable
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
@@ -41,7 +43,8 @@ object ImageUtils {
         }
     }
 
-    fun customLoader(imageView: ImageView, url: String?=null, @DrawableRes defaultImageResourceId:Int) {
+    fun customLoader(imageView: ImageView, url: String?=null,
+                     @DrawableRes defaultImageResourceId:Int,callBack:(()->Unit)?=null){
         val picasso = Picasso.get()
         val requestCreator: RequestCreator
 
@@ -54,6 +57,30 @@ object ImageUtils {
         }else{
             requestCreator = picasso.load(defaultImageResourceId)
         }
-        requestCreator.error(defaultImageResourceId).into(imageView)
+        requestCreator.error(defaultImageResourceId).into(imageView,object :Callback{
+            override fun onSuccess() {
+                callBack?.let { callBack() }
+            }
+            override fun onError(e: java.lang.Exception?) {}
+        })
+    }
+
+    fun cancelRequestForImageView(imageView: ImageView){
+        Picasso.get().cancelRequest(imageView)
+        LoggerUtils.debugLog("cancelRequestForImageView",this::class.java)
+    }
+}
+
+
+class ImageLoadingDisposer(val imageView: ImageView): Disposable {
+    private var disposed = false
+
+    override fun isDisposed() = disposed
+
+    override fun dispose() {
+        if (!disposed) {
+            ImageUtils.cancelRequestForImageView(imageView)
+            disposed = true
+        }
     }
 }

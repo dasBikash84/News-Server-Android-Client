@@ -15,7 +15,6 @@ package com.dasbikash.news_server.view_controllers
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,6 +40,7 @@ import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.ImageLoadingDisposer
 import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
@@ -112,13 +112,13 @@ class FavouritesFragment : Fragment() {
 }
 
 class FavouritePagesListAdapter(val context: Context) :
-        ListAdapter<Page, FavouritePagePreviewHolder>(PageDiffCallback) {
+        ListAdapter<Page, FavouritePagePreviewHolder>(PageDiffCallback){
 
     val disposable = CompositeDisposable()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavouritePagePreviewHolder {
         return FavouritePagePreviewHolder(LayoutInflater.from(context).inflate(
-                R.layout.view_article_perview_parent_width, parent, false))
+                R.layout.view_article_perview_parent_width, parent, false),disposable)
     }
 
     override fun onBindViewHolder(holder: FavouritePagePreviewHolder, position: Int) {
@@ -136,23 +136,13 @@ class FavouritePagesListAdapter(val context: Context) :
         )
     }
 
-    override fun onViewAttachedToWindow(holder: FavouritePagePreviewHolder) {
-        super.onViewAttachedToWindow(holder)
-        LoggerUtils.debugLog("onViewAttachedToWindow", this::class.java)
-    }
-
-    override fun onViewDetachedFromWindow(holder: FavouritePagePreviewHolder) {
-        super.onViewDetachedFromWindow(holder)
-        LoggerUtils.debugLog("onViewDetachedFromWindow", this::class.java)
-    }
-
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         disposable.clear()
     }
 }
 
-class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemview) {
+class FavouritePagePreviewHolder(itemview: View,val compositeDisposable: CompositeDisposable) : RecyclerView.ViewHolder(itemview) {
 
     private val pageTitle: AppCompatTextView
     private val pageTitleHolder: MaterialCardView
@@ -215,7 +205,11 @@ class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemv
                                     articleTitle.text = mArticle.title
                                     articlePublicationTime.text = data.second
 
-                                    ImageUtils.customLoader(articleImage, mArticle.previewImageLink,R.drawable.app_big_logo)
+                                    val imageLoadingDisposer:Disposable = ImageLoadingDisposer(articleImage)
+                                    compositeDisposable.add(imageLoadingDisposer)
+
+                                    ImageUtils.customLoader(articleImage, mArticle.previewImageLink,R.drawable.app_big_logo,
+                                                            {compositeDisposable.delete(imageLoadingDisposer)})
 
                                     mArticle.previewImageLink?.let {
                                         articleImage.setOnClickListener {

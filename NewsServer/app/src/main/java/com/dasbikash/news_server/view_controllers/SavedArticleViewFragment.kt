@@ -38,7 +38,7 @@ class SavedArticleViewFragment : Fragment() {
     private lateinit var mArticlePublicationText: AppCompatTextView
     private lateinit var mArticleText: AppCompatTextView
     private lateinit var mArticleImageHolder: RecyclerView
-    private val mArticleImageListAdapter = ArticleImageListAdapter()
+    private val mArticleImageListAdapter = ArticleImageListAdapter(this)
 
     private lateinit var mArticleDateString: String
     private lateinit var mSavedArticle: SavedArticle

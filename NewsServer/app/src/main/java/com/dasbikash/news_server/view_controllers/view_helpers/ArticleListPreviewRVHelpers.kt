@@ -36,12 +36,14 @@ import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.ImageLoadingDisposer
 import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.exceptions.CompositeException
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
@@ -59,15 +61,17 @@ class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holde
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LatestArticlePreviewHolder {
         val view = LayoutInflater.from(parent.context).inflate(holderResId, parent, false)
-        return LatestArticlePreviewHolder(view,showNewsPaperName,pageTitleLineCount)
+        return LatestArticlePreviewHolder(view,showNewsPaperName,pageTitleLineCount,mDisposable)
     }
 
     override fun onBindViewHolder(holder: LatestArticlePreviewHolder, position: Int) {
+
         val page = getItem(position)
+        holder.disableDisplay(page)
 
         val uuid = UUID.randomUUID()
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(holder.itemView.context)
-        holder.disableDisplay(page)
+
         mDisposable.add(
                 homeViewModel.getLatestArticleProvider(Pair(uuid, page))
                         .filter { it.first == uuid }
@@ -127,18 +131,22 @@ class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holde
         mDisposable.clear()
     }
 
+    override fun onViewRecycled(holder: LatestArticlePreviewHolder) {
+        super.onViewRecycled(holder)
+        holder.disposeImageLoader()
+    }
+
 }
 
-class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName:Int=0,pageTitleLineCount:Int=1) : RecyclerView.ViewHolder(itemView) {
-
-    companion object {
-        val TAG = "ArticlePreviewHolder"
-    }
+class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName:Int=0
+                                 ,pageTitleLineCount:Int=1,val compositeDisposable: CompositeDisposable)
+    : RecyclerView.ViewHolder(itemView) {
 
     val pageTitle: TextView
     val articlePreviewImage: ImageView
     val articleTitle: TextView
     val articlePublicationTime: TextView
+    var imageLoadingDisposer:Disposable?=null
 
     lateinit var mArticle: Article
 
@@ -153,8 +161,17 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName:Int=0,pag
 
     lateinit var mPage: Page
 
+    fun disposeImageLoader(){
+        imageLoadingDisposer?.dispose()
+    }
+
     @SuppressLint("CheckResult")
     fun disableDisplay(page: Page) {
+
+        articlePreviewImage.visibility = View.INVISIBLE
+        articleTitle.visibility = View.INVISIBLE
+        articlePublicationTime.visibility = View.INVISIBLE
+
         mPage = page
 
         if (showNewsPaperName>0){
@@ -173,10 +190,6 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName:Int=0,pag
             pageTitle.text = page.name
             pageTitle.visibility = View.VISIBLE
         }
-
-        articlePreviewImage.visibility = View.INVISIBLE
-        articleTitle.visibility = View.INVISIBLE
-        articlePublicationTime.visibility = View.INVISIBLE
     }
 
     fun bind(page: Page, dateString: String?, article: Article) {
@@ -192,7 +205,14 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName:Int=0,pag
             LoggerUtils.debugLog("Page: ${page.name} dateString: ${dateString}",this::class.java)
         },10L)
 
-        ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink,R.drawable.app_big_logo)
+        imageLoadingDisposer = ImageLoadingDisposer(articlePreviewImage)
+        compositeDisposable.add(imageLoadingDisposer!!)
+        ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink,R.drawable.app_big_logo,
+                                    {
+                                        compositeDisposable.delete(imageLoadingDisposer!!)
+                                        imageLoadingDisposer=null
+                                    })
+
         articlePreviewImage.visibility = View.VISIBLE
 
         //Add click listner

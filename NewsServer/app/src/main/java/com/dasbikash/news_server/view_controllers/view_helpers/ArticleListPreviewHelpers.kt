@@ -19,6 +19,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -26,9 +28,13 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
+import com.dasbikash.news_server_data.utills.ImageLoadingDisposer
 import com.dasbikash.news_server_data.utills.ImageUtils
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
 object ArticleDiffCallback: DiffUtil.ItemCallback<Article>(){
@@ -40,8 +46,15 @@ object ArticleDiffCallback: DiffUtil.ItemCallback<Article>(){
     }
 }
 
-class ArticlePreviewListAdapter(val mLanguage: Language,val clickAction:(position:Int)->Unit) :
-        ListAdapter<Article, ArticlePreviewHolder>(ArticleDiffCallback) {
+class ArticlePreviewListAdapter(lifecycleOwner: LifecycleOwner, val mLanguage: Language,
+                                val clickAction:(position:Int)->Unit) :
+        ListAdapter<Article, ArticlePreviewHolder>(ArticleDiffCallback), DefaultLifecycleObserver {
+
+    init {
+        lifecycleOwner.lifecycle.addObserver(this)
+    }
+
+    val mDisposable = CompositeDisposable()
 
     override fun onBindViewHolder(holder: ArticlePreviewHolder, position: Int) {
         holder.bind(getItem(position),mLanguage)
@@ -53,22 +66,48 @@ class ArticlePreviewListAdapter(val mLanguage: Language,val clickAction:(positio
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticlePreviewHolder {
         return ArticlePreviewHolder(
                 LayoutInflater.from(parent.context)
-                        .inflate(R.layout.view_article_preview_holder_without_page_title,parent,false))
+                        .inflate(R.layout.view_article_preview_holder_without_page_title,parent,false),mDisposable)
+    }
+
+    override fun onViewRecycled(holder: ArticlePreviewHolder) {
+        super.onViewRecycled(holder)
+        holder.disposeImageLoader()
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        LoggerUtils.debugLog("Disposing",this::class.java)
+        mDisposable.clear()
+    }
+
+    override fun onPause(owner: LifecycleOwner) {
+        LoggerUtils.debugLog("Disposing",this::class.java)
+        mDisposable.clear()
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        LoggerUtils.debugLog("Disposing",this::class.java)
+        mDisposable.clear()
     }
 }
 
-class ArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class ArticlePreviewHolder(itemView: View,val compositeDisposable: CompositeDisposable) : RecyclerView.ViewHolder(itemView) {
 
     val articlePreviewImage: ImageView
     val articleTitle: TextView
     val articlePublicationTime: TextView
     lateinit var mLanguage: Language
     lateinit var mArticle: Article
+    var imageLoadingDisposer: Disposable?=null
 
     init {
         articlePreviewImage = itemView.findViewById(R.id.article_preview_image)
         articleTitle = itemView.findViewById(R.id.article_title)
         articlePublicationTime = itemView.findViewById(R.id.article_time)
+    }
+
+    fun disposeImageLoader(){
+        imageLoadingDisposer?.dispose()
     }
 
     @SuppressLint("CheckResult")
@@ -86,7 +125,14 @@ class ArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                     articleTitle.text = mArticle.title
                     articlePublicationTime.text = it
 
-                    ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink,R.drawable.app_big_logo)
+                    imageLoadingDisposer = ImageLoadingDisposer(articlePreviewImage)
+                    compositeDisposable.add(imageLoadingDisposer!!)
+
+                    ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink,R.drawable.app_big_logo,
+                                                    {
+                                                        compositeDisposable.delete(imageLoadingDisposer!!)
+                                                        imageLoadingDisposer=null
+                                                    })
                 }
     }
 }

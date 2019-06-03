@@ -459,7 +459,7 @@ class PageViewActivity : AppCompatActivity(),
         mArticleList.clear()
         mArticleList.addAll(articleList)
         if (!::mArticlePreviewListAdapter.isInitialized) {
-            mArticlePreviewListAdapter = ArticlePreviewListAdapter(mLanguage, {
+            mArticlePreviewListAdapter = ArticlePreviewListAdapter(this,mLanguage, {
                 mArticleViewContainer.currentItem = it
             })
             mArticlePreviewListHolder.adapter = mArticlePreviewListAdapter
