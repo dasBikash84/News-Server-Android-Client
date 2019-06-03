@@ -112,13 +112,13 @@ class FavouritesFragment : Fragment() {
 }
 
 class FavouritePagesListAdapter(val context: Context) :
-        ListAdapter<Page, FavouritePagePreviewHolder>(PageDiffCallback){
+        ListAdapter<Page, FavouritePagePreviewHolder>(PageDiffCallback) {
 
     val disposable = CompositeDisposable()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavouritePagePreviewHolder {
         return FavouritePagePreviewHolder(LayoutInflater.from(context).inflate(
-                R.layout.view_article_perview_parent_width, parent, false),disposable)
+                R.layout.view_article_perview_parent_width, parent, false), disposable)
     }
 
     override fun onBindViewHolder(holder: FavouritePagePreviewHolder, position: Int) {
@@ -142,7 +142,7 @@ class FavouritePagesListAdapter(val context: Context) :
     }
 }
 
-class FavouritePagePreviewHolder(itemview: View,val compositeDisposable: CompositeDisposable) : RecyclerView.ViewHolder(itemview) {
+class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: CompositeDisposable) : RecyclerView.ViewHolder(itemview) {
 
     private val pageTitle: AppCompatTextView
     private val pageTitleHolder: MaterialCardView
@@ -205,11 +205,12 @@ class FavouritePagePreviewHolder(itemview: View,val compositeDisposable: Composi
                                     articleTitle.text = mArticle.title
                                     articlePublicationTime.text = data.second
 
-                                    val imageLoadingDisposer:Disposable = ImageLoadingDisposer(articleImage)
+                                    val imageLoadingDisposer: Disposable = ImageLoadingDisposer(articleImage)
                                     compositeDisposable.add(imageLoadingDisposer)
 
-                                    ImageUtils.customLoader(articleImage, mArticle.previewImageLink,R.drawable.app_big_logo,
-                                                            {compositeDisposable.delete(imageLoadingDisposer)})
+                                    ImageUtils.customLoader(articleImage, mArticle.previewImageLink,
+                                            R.drawable.pc_bg, R.drawable.app_big_logo,
+                                            { compositeDisposable.delete(imageLoadingDisposer) })
 
                                     mArticle.previewImageLink?.let {
                                         articleImage.setOnClickListener {

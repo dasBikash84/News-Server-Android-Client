@@ -66,14 +66,14 @@ class SavedArticlesFragment : Fragment() {
 
         mListAdapter = SavedArticlePreviewListAdapter { item -> doOnArticleClick(item) }
         mSavedArticlePreviewHolder.adapter = mListAdapter
-        ItemTouchHelper(SavedArticleSwipeToDeleteCallback({item->savedArticleDeleteAction(item)},mListAdapter))
-                                            .attachToRecyclerView(mSavedArticlePreviewHolder)
+        ItemTouchHelper(SavedArticleSwipeToDeleteCallback({ item -> savedArticleDeleteAction(item) }, mListAdapter))
+                .attachToRecyclerView(mSavedArticlePreviewHolder)
 
         ViewModelProviders.of(activity!!).get(HomeViewModel::class.java).getSavedArticlesLiveData()
-                .observe(this,object : androidx.lifecycle.Observer<List<SavedArticle>>{
+                .observe(this, object : androidx.lifecycle.Observer<List<SavedArticle>> {
                     override fun onChanged(t: List<SavedArticle>?) {
                         t?.let {
-                            mListAdapter.submitList(it.sortedBy { it.newspaperName+it.pageName }.toList())
+                            mListAdapter.submitList(it.sortedBy { it.newspaperName + it.pageName }.toList())
                         }
 
                     }
@@ -83,25 +83,26 @@ class SavedArticlesFragment : Fragment() {
 
     fun doOnArticleClick(savedArticle: SavedArticle) {
         LoggerUtils.debugLog("${savedArticle.title} clicked", this::class.java)
-        activity!!.startActivity(SavedArticleViewActivity.getIntent(savedArticle,context!!))
+        activity!!.startActivity(SavedArticleViewActivity.getIntent(savedArticle, context!!))
     }
 
-    fun savedArticleDeleteAction(savedArticle: SavedArticle){
+    fun savedArticleDeleteAction(savedArticle: SavedArticle) {
         mDisposable.add(
-        Observable.just(savedArticle)
-                .subscribeOn(Schedulers.io())
-                .map {
-                    mNewsDataRepository.deleteSavedArticle(it)
-                }
-                .subscribeWith(object : DisposableObserver<Unit>(){
-                    override fun onComplete() {}
-                    override fun onNext(t: Unit) {
-                        DisplayUtils.showShortSnack(getView() as CoordinatorLayout,"Article deleted.")
-                    }
-                    override fun onError(e: Throwable) {
-                        mListAdapter.notifyDataSetChanged()
-                    }
-                }))
+                Observable.just(savedArticle)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            mNewsDataRepository.deleteSavedArticle(it)
+                        }
+                        .subscribeWith(object : DisposableObserver<Unit>() {
+                            override fun onComplete() {}
+                            override fun onNext(t: Unit) {
+                                DisplayUtils.showShortSnack(getView() as CoordinatorLayout, "Article deleted.")
+                            }
+
+                            override fun onError(e: Throwable) {
+                                mListAdapter.notifyDataSetChanged()
+                            }
+                        }))
     }
 }
 
@@ -155,7 +156,8 @@ class SavedArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemVi
         savedArticle = currentSavedArticle
         pageTitle.text = StringBuilder(savedArticle.pageName).append(" | ").append(savedArticle.newspaperName).toString()
         articleTitle.text = savedArticle.title
-        ImageUtils.customLoader(articleImage, savedArticle.previewImageLink,R.drawable.app_big_logo)
+        ImageUtils.customLoader(articleImage, savedArticle.previewImageLink,
+                                    R.drawable.pc_bg, R.drawable.app_big_logo)
         Observable.just(savedArticle.publicationTime)
                 .observeOn(Schedulers.io())
                 .map {
@@ -177,7 +179,7 @@ class SavedArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemVi
 
 }
 
-class SavedArticleSwipeToDeleteCallback(val deleteSavedArticle:(savedArticle:SavedArticle)->Unit,
+class SavedArticleSwipeToDeleteCallback(val deleteSavedArticle: (savedArticle: SavedArticle) -> Unit,
                                         val listAdapter: SavedArticlePreviewListAdapter) :
         ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT or ItemTouchHelper.LEFT) {
 
@@ -185,13 +187,14 @@ class SavedArticleSwipeToDeleteCallback(val deleteSavedArticle:(savedArticle:Sav
                         target: RecyclerView.ViewHolder): Boolean {
         return false
     }
+
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         val savedArticle = (viewHolder as SavedArticlePreviewHolder).savedArticle
 
         DialogUtils.createAlertDialog(viewHolder.itemView.context, DialogUtils.AlertDialogDetails(
                 title = "Delete saved article?",
-                doOnPositivePress = {deleteSavedArticle(savedArticle)},
-                doOnNegetivePress = {listAdapter.notifyDataSetChanged()}
+                doOnPositivePress = { deleteSavedArticle(savedArticle) },
+                doOnNegetivePress = { listAdapter.notifyDataSetChanged() }
         )).show()
     }
 }

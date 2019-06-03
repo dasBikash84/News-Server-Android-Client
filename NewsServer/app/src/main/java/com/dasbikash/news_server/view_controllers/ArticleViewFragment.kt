@@ -58,24 +58,24 @@ class ArticleViewFragment : Fragment() {
     private lateinit var mArticleText: AppCompatTextView
     private lateinit var mArticleImageHolder: RecyclerView
     private lateinit var mArticleImageListAdapter: ArticleImageListAdapter
-    private lateinit var mWaitScreen:LinearLayoutCompat
+    private lateinit var mWaitScreen: LinearLayoutCompat
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        LoggerUtils.debugLog("onCreate",this::class.java)
+        LoggerUtils.debugLog("onCreate", this::class.java)
         setHasOptionsMenu(true)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        LoggerUtils.debugLog("onCreateView",this::class.java)
+        LoggerUtils.debugLog("onCreateView", this::class.java)
         return inflater.inflate(R.layout.fragment_article_view, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        LoggerUtils.debugLog("onViewCreated",this::class.java)
+        LoggerUtils.debugLog("onViewCreated", this::class.java)
         mArticleId = arguments!!.getString(ARG_ARTICLE_ID)!!
         mLanguage = arguments!!.getSerializable(ARG_LANGUAGE) as Language
         mTransientTextSize = arguments!!.getInt(ARG_TRANSIENT_TEXT_SIZE)
@@ -93,16 +93,16 @@ class ArticleViewFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        LoggerUtils.debugLog("onStart",this::class.java)
+        LoggerUtils.debugLog("onStart", this::class.java)
 
         mWaitScreen.bringToFront()
 
-        if (!::mDateString.isInitialized){
+        if (!::mDateString.isInitialized) {
             initArticleData()
         }
     }
 
-    private fun initArticleData(doAfterInit:(()->Unit)?=null) {
+    private fun initArticleData(doAfterInit: (() -> Unit)? = null) {
         mDisposable.add(
                 Observable.just(mArticleId)
                         .subscribeOn(Schedulers.io())
@@ -120,7 +120,8 @@ class ArticleViewFragment : Fragment() {
                             } else {
                                 mArticleTextSize = DisplayUtils.getArticleTextSize(context!!)
                             }
-                            mDateString = DisplayUtils.getArticlePublicationDateString(mArticle, mLanguage, context!!) ?: ""
+                            mDateString = DisplayUtils.getArticlePublicationDateString(mArticle, mLanguage, context!!)
+                                    ?: ""
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<Unit>() {
@@ -128,11 +129,12 @@ class ArticleViewFragment : Fragment() {
                             override fun onNext(t: Unit) {
                                 doAfterInit?.let { doAfterInit() }
                             }
+
                             override fun onError(e: Throwable) {}
                         }))
     }
 
-    fun displayArticle(){
+    fun displayArticle() {
         mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, mArticleTextSize!!.toFloat())
 
         mArticleTitle.text = mArticle.title
@@ -153,11 +155,11 @@ class ArticleViewFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        LoggerUtils.debugLog("onResume",this::class.java)
+        LoggerUtils.debugLog("onResume", this::class.java)
 
-        if (::mDateString.isInitialized){
+        if (::mDateString.isInitialized) {
             displayArticle()
-        }else {
+        } else {
             initArticleData { displayArticle() }
         }
     }
@@ -179,6 +181,7 @@ class ArticleViewFragment : Fragment() {
                                 override fun onNext(alreadySaved: Boolean) {
                                     menu.findItem(R.id.save_article_locally_menu_item).setVisible(!alreadySaved)
                                 }
+
                                 override fun onError(e: Throwable) {}
                             })
             )
@@ -191,7 +194,7 @@ class ArticleViewFragment : Fragment() {
         // as you specify a parent activity in AndroidManifest.xml.
         if (item.itemId == R.id.save_article_locally_menu_item) {
             DialogUtils.createAlertDialog(context!!,
-                    DialogUtils.AlertDialogDetails(message = "Save Article?",doOnPositivePress = {saveArticleLocallyAction()}))
+                    DialogUtils.AlertDialogDetails(message = "Save Article?", doOnPositivePress = { saveArticleLocallyAction() }))
                     .show()
             return true
         }
@@ -214,12 +217,13 @@ class ArticleViewFragment : Fragment() {
                             false
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object :DisposableObserver<Boolean>(){
+                        .subscribeWith(object : DisposableObserver<Boolean>() {
                             override fun onComplete() {}
                             override fun onNext(t: Boolean) {
-                                DisplayUtils.showShortSnack(view as CoordinatorLayout,"Article Saved.")
+                                DisplayUtils.showShortSnack(view as CoordinatorLayout, "Article Saved.")
                                 activity!!.invalidateOptionsMenu()
                             }
+
                             override fun onError(e: Throwable) {}
                         })
         )
@@ -281,33 +285,33 @@ class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner) :
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        LoggerUtils.debugLog("Disposing",this::class.java)
+        LoggerUtils.debugLog("Disposing", this::class.java)
         mDisposable.clear()
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        LoggerUtils.debugLog("Disposing",this::class.java)
+        LoggerUtils.debugLog("Disposing", this::class.java)
         mDisposable.clear()
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
-        LoggerUtils.debugLog("Disposing",this::class.java)
+        LoggerUtils.debugLog("Disposing", this::class.java)
         mDisposable.clear()
     }
 }
 
-class ArticleImageHolder(itemView: View,val compositeDisposable: CompositeDisposable) : RecyclerView.ViewHolder(itemView) {
+class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDisposable) : RecyclerView.ViewHolder(itemView) {
 
     val mArticleImage: AppCompatImageView
     val mImageCaption: AppCompatTextView
-    var imageLoadingDisposer: Disposable?=null
+    var imageLoadingDisposer: Disposable? = null
 
     init {
         mArticleImage = itemView.findViewById(R.id.article_image)
         mImageCaption = itemView.findViewById(R.id.article_image_caption)
     }
 
-    fun disposeImageLoader(){
+    fun disposeImageLoader() {
         imageLoadingDisposer?.dispose()
     }
 
@@ -318,11 +322,12 @@ class ArticleImageHolder(itemView: View,val compositeDisposable: CompositeDispos
             imageLoadingDisposer = ImageLoadingDisposer(mArticleImage)
             compositeDisposable.add(imageLoadingDisposer!!)
 
-            ImageUtils.customLoader(mArticleImage, articleImage.link,R.drawable.app_big_logo,
-                                        {
-                                            compositeDisposable.delete(imageLoadingDisposer!!)
-                                            imageLoadingDisposer=null
-                                        })
+            ImageUtils.customLoader(mArticleImage, articleImage.link,
+                    R.drawable.pc_bg, R.drawable.app_big_logo,
+                    {
+                        compositeDisposable.delete(imageLoadingDisposer!!)
+                        imageLoadingDisposer = null
+                    })
 
             if (articleImage.caption != null) {
                 mImageCaption.text = articleImage.caption

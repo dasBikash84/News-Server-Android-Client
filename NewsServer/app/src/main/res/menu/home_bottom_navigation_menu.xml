@@ -18,22 +18,22 @@
         android:id="@+id/bottom_menu_item_home"
         android:icon="@drawable/ic_home_pink_24dp"
         android:title="@string/bmi_home_title"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/bottom_menu_item_page_group"
         android:icon="@drawable/ic_page_group_pink_24dp"
         android:title="@string/bmi_page_groups_title"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/bottom_menu_item_favourites"
-        android:icon="@drawable/ic_favorite_pink_24dp"
+        android:icon="@drawable/ic_fav"
         android:title="@string/bmi_favourites_title"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/bottom_menu_item_saved_articles"
         android:icon="@drawable/ic_save"
         android:title="@string/bmi_saved_artiles_title"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <!--<item
         android:id="@+id/bottom_menu_item_more"
         android:icon="@drawable/ic_more_vert_pink_24dp"

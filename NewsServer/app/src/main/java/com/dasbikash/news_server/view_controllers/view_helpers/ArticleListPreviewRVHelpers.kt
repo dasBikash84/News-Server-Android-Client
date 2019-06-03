@@ -207,7 +207,8 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName:Int=0
 
         imageLoadingDisposer = ImageLoadingDisposer(articlePreviewImage)
         compositeDisposable.add(imageLoadingDisposer!!)
-        ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink,R.drawable.app_big_logo,
+        ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink,
+                                    R.drawable.pc_bg,R.drawable.app_big_logo,
                                     {
                                         compositeDisposable.delete(imageLoadingDisposer!!)
                                         imageLoadingDisposer=null

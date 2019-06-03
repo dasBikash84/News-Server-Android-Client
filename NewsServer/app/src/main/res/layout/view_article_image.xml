@@ -32,6 +32,7 @@
             android:layout_height="240dp"
             android:paddingTop="2dp"
             android:paddingBottom="2dp"
+            android:src="@drawable/pc_bg"
             android:layout_gravity="center|center_horizontal"
             android:adjustViewBounds="true"/>
 

@@ -27,52 +27,57 @@ import java.net.URL
 
 object ImageUtils {
 
-    fun urlToFile(link:String, fileName: String, context: Context): String? {
+    fun urlToFile(link: String, fileName: String, context: Context): String? {
         try {
             val url = URL(link)
             val bitmap = Picasso.get().load(link).get()
-            val imageFile = File(context.filesDir.absolutePath+fileName+".jpg")
+            val imageFile = File(context.filesDir.absolutePath + fileName + ".jpg")
             val os = FileOutputStream(imageFile);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os)
             os.flush()
             os.close()
             return imageFile.absolutePath
-        } catch (e:Exception) {
+        } catch (e: Exception) {
             LoggerUtils.printStackTrace(e)
             return null
         }
     }
 
-    fun customLoader(imageView: ImageView, url: String?=null,
-                     @DrawableRes defaultImageResourceId:Int,callBack:(()->Unit)?=null){
+    fun customLoader(imageView: ImageView, url: String? = null,
+                     @DrawableRes placeHolderImageResourceId: Int,
+                     @DrawableRes defaultImageResourceId: Int, callBack: (() -> Unit)? = null) {
         val picasso = Picasso.get()
         val requestCreator: RequestCreator
 
-        if (url != null){
-            if (url.startsWith("/data")){
+        if (url != null) {
+            if (url.startsWith("/data")) {
                 requestCreator = picasso.load(File(url))
-            }else {
+            } else {
                 requestCreator = picasso.load(url)
             }
-        }else{
+        } else {
             requestCreator = picasso.load(defaultImageResourceId)
         }
-        requestCreator.error(defaultImageResourceId).into(imageView,object :Callback{
-            override fun onSuccess() {
-                callBack?.let { callBack() }
-            }
-            override fun onError(e: java.lang.Exception?) {}
-        })
+        requestCreator
+                .error(defaultImageResourceId)
+                .placeholder(placeHolderImageResourceId)
+                .into(imageView, object : Callback {
+                    override fun onSuccess() {
+                        callBack?.let { callBack() }
+                    }
+
+                    override fun onError(e: java.lang.Exception?) {}
+                })
     }
 
-    fun cancelRequestForImageView(imageView: ImageView){
+    fun cancelRequestForImageView(imageView: ImageView) {
         Picasso.get().cancelRequest(imageView)
-        LoggerUtils.debugLog("cancelRequestForImageView",this::class.java)
+        LoggerUtils.debugLog("cancelRequestForImageView", this::class.java)
     }
 }
 
 
-class ImageLoadingDisposer(val imageView: ImageView): Disposable {
+class ImageLoadingDisposer(val imageView: ImageView) : Disposable {
     private var disposed = false
 
     override fun isDisposed() = disposed

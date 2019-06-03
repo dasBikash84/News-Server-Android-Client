@@ -34,6 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="120dp"
             android:background="@android:color/white"
+            android:src="@drawable/pc_bg"
             android:gravity="center"
             android:padding="2dp"
             app:layout_constraintEnd_toEndOf="parent"
