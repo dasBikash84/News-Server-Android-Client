@@ -20,6 +20,7 @@
     android:overScrollMode="never"
     android:paddingTop="?attr/actionBarSize"
     android:paddingBottom="?attr/actionBarSize"
+    android:background="@color/colorPageBackground"
     android:scrollbars="vertical">
 
     <androidx.constraintlayout.widget.ConstraintLayout

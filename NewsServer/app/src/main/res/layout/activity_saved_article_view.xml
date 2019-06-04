@@ -15,7 +15,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/colorPageBackground">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
@@ -27,7 +28,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
-            app:title="@string/app_name" />
+            app:title="@string/app_name"
+            app:titleTextColor="@android:color/white"/>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.viewpager.widget.ViewPager

@@ -15,18 +15,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    android:layout_marginTop="8dp"
-    android:background="@android:color/white">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginBottom="4dp"
+    android:background="@android:color/transparent">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/page_title_holder"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="@color/colorPrimary">
+        android:background="@color/snow_white2">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -47,9 +47,9 @@
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/page_title"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/white"
+                android:layout_height="match_parent"
                 android:gravity="start|center_vertical"
+                tools:text="Page Title"
                 android:paddingTop="2dp"
                 android:textColor="@android:color/black"
                 android:textSize="20sp"/>

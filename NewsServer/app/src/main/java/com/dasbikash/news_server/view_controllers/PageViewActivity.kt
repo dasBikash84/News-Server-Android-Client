@@ -391,7 +391,10 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe {
                                 mTextSizeChangeFrame.visibility = View.GONE
-                                changeTextFontBackPressActionTag?.let { removeTaskFromQueue(it) }
+                                changeTextFontBackPressActionTag?.let {
+                                    removeTaskFromQueue(it)
+                                    changeTextFontBackPressActionTag = null
+                                }
                             }
             )
         }
