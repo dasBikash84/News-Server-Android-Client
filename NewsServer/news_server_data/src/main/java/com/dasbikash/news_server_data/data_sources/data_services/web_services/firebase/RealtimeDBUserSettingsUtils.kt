@@ -20,52 +20,56 @@ import com.dasbikash.news_server_data.exceptions.UserSettingsNotFoundException
 import com.dasbikash.news_server_data.exceptions.WrongCredentialException
 import com.dasbikash.news_server_data.models.UserSettingsUpdateDetails
 import com.dasbikash.news_server_data.models.UserSettingsUpdateTime
+import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 
 internal object RealtimeDBUserSettingsUtils {
 
     private const val MAX_WAITING_MS_FOR_NET_RESPONSE = 30000L
-    private const val FAV_PAGE_ID_LIST_NODE = "favouritePageIds"
+    private const val FAV_PAGE_ID_MAP_NODE = "favPageIdMap"
     private const val PAGE_GROUP_LIST_NODE = "pageGroups"
     private const val UPDATE_LOG_NODE = "updateLog"
 
     fun getCurrentUserName(): String? {
         FirebaseAuth.getInstance().currentUser?.let {
-            LoggerUtils.debugLog("providerId: ${it.providerId}",this::class.java)
+            LoggerUtils.debugLog("providerId: ${it.providerId}", this::class.java)
             val email = it.email
             val diplayName = it.displayName
             val phoneNumber = it.phoneNumber
-            if (!email.isNullOrEmpty()){
+            if (!email.isNullOrEmpty()) {
                 if (!diplayName.isNullOrEmpty()) {
-                    LoggerUtils.debugLog("returning diplayName with email",this::class.java)
+                    LoggerUtils.debugLog("returning diplayName with email", this::class.java)
                     return "${diplayName} <br>(${email})"
                 }
-                LoggerUtils.debugLog("returning email only",this::class.java)
+                LoggerUtils.debugLog("returning email only", this::class.java)
                 return email
             }
-            if (!phoneNumber.isNullOrEmpty()){
+            if (!phoneNumber.isNullOrEmpty()) {
                 if (!diplayName.isNullOrEmpty()) {
-                    LoggerUtils.debugLog("returning phoneNumber with email",this::class.java)
+                    LoggerUtils.debugLog("returning phoneNumber with email", this::class.java)
                     return "${diplayName} <br>(${phoneNumber})"
                 }
-                LoggerUtils.debugLog("returning phoneNumber only",this::class.java)
+                LoggerUtils.debugLog("returning phoneNumber only", this::class.java)
                 return phoneNumber
             }
         }
         return null
     }
 
-    fun signOutUser(){
+    fun signOutUser() {
         FirebaseAuth.getInstance().signOut()
     }
 
     fun getUserPreferenceData(): UserPreferenceData {
+        LoggerUtils.debugLog("getUserPreferenceData()",this@RealtimeDBUserSettingsUtils::class.java)
         val user = FirebaseAuth.getInstance().currentUser
         if (user == null || user.isAnonymous) {
             throw WrongCredentialException()
@@ -80,14 +84,23 @@ internal object RealtimeDBUserSettingsUtils {
                 .rootUserSettingsNode
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onCancelled(error: DatabaseError) {
+                        LoggerUtils.debugLog("onCancelled",this@RealtimeDBUserSettingsUtils::class.java)
                         userSettingsException = SettingsServerException(error.message)
                         synchronized(lock) { lock.notify() }
                     }
 
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        LoggerUtils.debugLog("onDataChange",this@RealtimeDBUserSettingsUtils::class.java)
                         if (dataSnapshot.exists()) {
                             try {
                                 data = dataSnapshot.getValue(UserPreferenceData::class.java)!!
+                                LoggerUtils.debugLog(data!!.toString(),this@RealtimeDBUserSettingsUtils::class.java)
+                                data!!.favouritePageIds.clear()
+                                data!!.favPageIdMap.filter {
+                                    it.value
+                                }.keys.asSequence().forEach { data!!.favouritePageIds.add(it) }
+                                LoggerUtils.debugLog(data!!.toString(),this@RealtimeDBUserSettingsUtils::class.java)
+//                                data!!.favouritePageIds.addAll(data!!.favPageIdMap.keys)
                                 synchronized(lock) { lock.notify() }
                             } catch (ex: Exception) {
                                 userSettingsException = UserSettingsNotFoundException(ex)
@@ -95,7 +108,9 @@ internal object RealtimeDBUserSettingsUtils {
                         }
                     }
                 })
+        LoggerUtils.debugLog("before synchronized(lock)",this@RealtimeDBUserSettingsUtils::class.java)
         synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+        LoggerUtils.debugLog("after synchronized(lock)",this@RealtimeDBUserSettingsUtils::class.java)
         userSettingsException?.let { throw userSettingsException as SettingsServerException }
         if (data == null) {
             throw SettingsServerUnavailable()
@@ -105,39 +120,92 @@ internal object RealtimeDBUserSettingsUtils {
 
     private fun getUserSettingsNodes(user: FirebaseUser) = object {
         val rootUserSettingsNode = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid)
-        val favPageIdListRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(FAV_PAGE_ID_LIST_NODE)
+        val favPageIdMapRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(FAV_PAGE_ID_MAP_NODE)
         val pageGroupListRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(PAGE_GROUP_LIST_NODE)
         val updateLogRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(UPDATE_LOG_NODE)
     }
 
     fun uploadUserPreferenceData(userPreferenceData: UserPreferenceData) {
 
-        val user = FirebaseAuth.getInstance().currentUser
-
-        if (user == null || user.isAnonymous) {
-            throw WrongCredentialException()
-        }
-
+        val user = getLoggedInFirebaseUser()
         val userSettingsNodes = getUserSettingsNodes(user)
 
-        userSettingsNodes.favPageIdListRef
-                .setValue(userPreferenceData.favouritePageIds)
+        userSettingsNodes.favPageIdMapRef
+                .setValue(getFavPageIdMapForRemoteDb(userPreferenceData.favouritePageIds))
 
         userSettingsNodes.pageGroupListRef
                 .setValue(userPreferenceData.pageGroups)
 
+        addSettingsUpdateTime()
+    }
+
+    private fun getIpAddress(): String {
         var ipAddress: String
         try {
             ipAddress = UserIpDataService.getIpAddress()
         } catch (ex: Throwable) {
             ipAddress = UserSettingsUpdateDetails.NULL_IP
         }
+        return ipAddress
+    }
 
+    private fun getLoggedInFirebaseUser(): FirebaseUser {
+        val user = FirebaseAuth.getInstance().currentUser
+
+        if (user == null || user.isAnonymous) {
+            throw WrongCredentialException()
+        }
+        return user
+    }
+
+    private fun getFavPageRef(page: Page) =
+        RealtimeDBUtils.mUserSettingsRootReference.child( getLoggedInFirebaseUser().uid).child(FAV_PAGE_ID_MAP_NODE).child(page.id)
+
+    private fun changePageStateOnFavList(page: Page,status:Boolean) {
+        val favPageRef = getFavPageRef(page)
+        favPageRef.setValue(status)
+        addSettingsUpdateTime()
+    }
+
+    private fun uploadPageGroupData(pageGroupEntryId: String, pageGroup: PageGroup?){
+        val pageGroupEntryRef = getPageGroupEntryRef(pageGroupEntryId)
+        pageGroupEntryRef.setValue(pageGroup)
+        addSettingsUpdateTime()
+    }
+
+    private fun getPageGroupEntryRef(pageGroupEntryId: String) =
+            RealtimeDBUtils.mUserSettingsRootReference.child( getLoggedInFirebaseUser().uid)
+                    .child(PAGE_GROUP_LIST_NODE).child(pageGroupEntryId)
+
+    private fun addSettingsUpdateTime(){
+        val user = getLoggedInFirebaseUser()
+        val userSettingsNodes = getUserSettingsNodes(user)
+
+        val ipAddress: String = getIpAddress()
         userSettingsNodes.updateLogRef
                 .push()
                 .setValue(UserSettingsUpdateDetails(userIp = ipAddress))
-
     }
+
+    private fun getFavPageIdMapForRemoteDb(favouritePageIds: List<String>): Map<String, Boolean> {
+        val favPageIdMapForRemoteDb = mutableMapOf<String, Boolean>()
+        favouritePageIds.asSequence().forEach { favPageIdMapForRemoteDb.put(it, true) }
+        return favPageIdMapForRemoteDb.toMap()
+    }
+
+    fun addPageGroup(pageGroup: PageGroup) = uploadPageGroupData(pageGroup.name,pageGroup)
+    fun deletePageGroup(pageGroup: PageGroup) = uploadPageGroupData(pageGroup.name,null)
+    private fun deletePageGroup(pageGroupId: String) = uploadPageGroupData(pageGroupId,null)
+    fun savePageGroup(oldId: String, pageGroup: PageGroup){
+        if (!oldId.equals(pageGroup.name)){
+            deletePageGroup(oldId)
+        }
+        addPageGroup(pageGroup)
+    }
+
+    fun addPageToFavList(page: Page) = changePageStateOnFavList(page,true)
+    fun removePageFromFavList(page: Page) = changePageStateOnFavList(page,false)
+
 
     fun getLastUserSettingsUpdateTime(): Long {
 
@@ -178,7 +246,7 @@ internal object RealtimeDBUserSettingsUtils {
         return lastUpdateTime
     }
 
-    fun checkIfLoogedAsAdmin():Boolean{
+    fun checkIfLoogedAsAdmin(): Boolean {
         val user = FirebaseAuth.getInstance().currentUser
         if (user == null || user.isAnonymous) {
             return false

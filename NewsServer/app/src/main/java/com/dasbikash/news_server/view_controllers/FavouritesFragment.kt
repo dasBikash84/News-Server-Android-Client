@@ -278,7 +278,6 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
 
         val message = "Remove \"${page.name}\" from favourites?"
         val positiveText = "Yes"
-        val negetiveText = "Cancel"
         val negetiveAction: () -> Unit = {
             favouritePagesListAdapter.notifyDataSetChanged()
         }
@@ -318,7 +317,7 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
                 DialogUtils.createAlertDialog(
                         viewHolder.itemView.context,
                         DialogUtils.AlertDialogDetails(
-                                message = message, positiveButtonText = positiveText, negetiveButtonText = negetiveText,
+                                message = message, positiveButtonText = positiveText,
                                 doOnPositivePress = positiveAction, doOnNegetivePress = negetiveAction,
                                 isCancelable = false
                         )
@@ -330,7 +329,7 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
             DialogUtils.createAlertDialog(
                     viewHolder.itemView.context,
                     DialogUtils.AlertDialogDetails(
-                            message = message, positiveButtonText = "Sign in and continue", negetiveButtonText = negetiveText,
+                            message = message, positiveButtonText = "Sign in and continue",
                             doOnPositivePress = {
                                 signInHandler.launchSignInActivity({
                                     removeFavItemDialog.show()

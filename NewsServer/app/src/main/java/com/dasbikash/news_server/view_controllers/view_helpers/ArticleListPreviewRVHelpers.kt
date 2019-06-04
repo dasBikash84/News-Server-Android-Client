@@ -202,7 +202,7 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName:Int=0
 
             articlePublicationTime.text = dateString
             articlePublicationTime.visibility = View.VISIBLE
-            LoggerUtils.debugLog("Page: ${page.name} dateString: ${dateString}",this::class.java)
+            LoggerUtils.debugLog("Page: ${page.name!!} dateString: ${dateString}",this::class.java)
         },10L)
 
         imageLoadingDisposer = ImageLoadingDisposer(articlePreviewImage)

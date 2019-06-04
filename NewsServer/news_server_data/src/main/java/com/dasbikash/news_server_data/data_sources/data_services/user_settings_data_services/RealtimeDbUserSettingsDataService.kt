@@ -17,6 +17,7 @@ import android.content.Intent
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBAppSettingsUtils
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBUserSettingsUtils
+import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.firebase.ui.auth.AuthUI
@@ -71,6 +72,25 @@ internal object RealtimeDbUserSettingsDataService: UserSettingsDataService {
         return RealtimeDBUserSettingsUtils.checkIfLoogedAsAdmin()
     }
 
+    override fun addPageToFavList(page: Page) {
+        return RealtimeDBUserSettingsUtils.addPageToFavList(page)
+    }
+
+    override fun removePageFromFavList(page: Page) {
+        return RealtimeDBUserSettingsUtils.removePageFromFavList(page)
+    }
+
+    override fun addPageGroup(pageGroup: PageGroup) {
+        return RealtimeDBUserSettingsUtils.addPageGroup(pageGroup)
+    }
+
+    override fun deletePageGroup(pageGroup: PageGroup) {
+        return RealtimeDBUserSettingsUtils.deletePageGroup(pageGroup)
+    }
+
+    override fun savePageGroup(oldId: String, pageGroup: PageGroup) {
+        return RealtimeDBUserSettingsUtils.savePageGroup(oldId,pageGroup)
+    }
     //    override fun getCurrentUser(): FirebaseUser? {
 //        return FirebaseAuth.getInstance().currentUser
 //    }

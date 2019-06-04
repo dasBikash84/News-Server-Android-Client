@@ -148,8 +148,8 @@ abstract class UserSettingsRepository {
             return true
         }
         userPreferenceData.favouritePageIds.add(page.id)
-        uploadUserPreferenceData(context,userPreferenceData)
-
+//        uploadUserPreferenceData(context,userPreferenceData)
+        mUserSettingsDataService.addPageToFavList(page)
         saveUserPreferenceDataToLocalDb(userPreferenceData)
 
         return true
@@ -164,7 +164,8 @@ abstract class UserSettingsRepository {
             return true
         }
         userPreferenceData.favouritePageIds.remove(page.id)
-        uploadUserPreferenceData(context,userPreferenceData)
+//        uploadUserPreferenceData(context,userPreferenceData)
+        mUserSettingsDataService.removePageFromFavList(page)
         saveUserPreferenceDataToLocalDb(userPreferenceData)
 
         return true
@@ -176,7 +177,8 @@ abstract class UserSettingsRepository {
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
         userPreferenceData.pageGroups.put(pageGroup.name,pageGroup)
-        uploadUserPreferenceData(context,userPreferenceData)
+//        uploadUserPreferenceData(context,userPreferenceData)
+        mUserSettingsDataService.addPageGroup(pageGroup)
         addPageGroupsToLocalDb(listOf<PageGroup>(pageGroup))
         return true
     }
@@ -190,7 +192,8 @@ abstract class UserSettingsRepository {
             return true
         }
         userPreferenceData.pageGroups.remove(pageGroup.name)
-        uploadUserPreferenceData(context,userPreferenceData)
+//        uploadUserPreferenceData(context,userPreferenceData)
+        mUserSettingsDataService.deletePageGroup(pageGroup)
         deletePageGroupFromLocalDb(pageGroup.name)
         return true
     }
@@ -203,7 +206,8 @@ abstract class UserSettingsRepository {
         userPreferenceData.pageGroups.remove(oldId)
         pageGroup.pageEntityList.clear()
         userPreferenceData.pageGroups.put(pageGroup.name,pageGroup)
-        uploadUserPreferenceData(context,userPreferenceData)
+//        uploadUserPreferenceData(context,userPreferenceData)
+        mUserSettingsDataService.savePageGroup(oldId, pageGroup)
         deletePageGroupFromLocalDb(oldId)
         addPageGroupsToLocalDb(listOf(pageGroup))
         return true

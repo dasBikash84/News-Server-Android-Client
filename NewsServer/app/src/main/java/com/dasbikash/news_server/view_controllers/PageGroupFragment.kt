@@ -117,7 +117,7 @@ class PageGroupFragment : Fragment() {
                     val notLoggedInDialog = DialogUtils.createAlertDialog(
                             context!!,
                             DialogUtils.AlertDialogDetails(
-                                    message = "Add new page group?", negetiveButtonText = "Cancel",
+                                    message = "Add new page group?",
                                     positiveButtonText = "Sign in and continue",
                                     doOnPositivePress = {
                                         (activity as SignInHandler).launchSignInActivity({
@@ -195,14 +195,13 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                 val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(itemView.context)
 
                 val positiveText: String = "Delete group"
-                val negetiveText: String = "Cancel"
                 val neutralText: String = "Add/remove page(s)"
                 val pageGroupDeletionAction: () -> Unit = {
                     DialogUtils.createAlertDialog(
                             itemView.context,
                             DialogUtils.AlertDialogDetails(
                                     message = "Proceed with deletion of \"${mPageGroup.name}\" page group?",
-                                    positiveButtonText = "Yes", negetiveButtonText = "Cancel",
+                                    positiveButtonText = "Yes",
                                     doOnPositivePress = {
                                         workInProcessWindowOperator.loadWorkInProcessWindow()
                                         Observable.just(mPageGroup)
@@ -260,12 +259,11 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                         itemView.context,
                         DialogUtils.AlertDialogDetails(
                                 message = "Edit \"${mPageGroup.name}\" group?",
-                                positiveButtonText = positiveText, negetiveButtonText = negetiveText, neutralButtonText = neutralText,
+                                positiveButtonText = positiveText, neutralButtonText = neutralText,
                                 doOnPositivePress = pageGroupDeletionAction, doOnNeutralPress = pageGroupEditFragmentLaunchAction
                         )
                 )
 
-                val logInPromptNegetiveText = "Cancel"
                 val logInPromptPositiveText = "Sign in and continue"
                 val logInPromptPositiveAction: () -> Unit = {
                     signInHandler.launchSignInActivity({
@@ -277,7 +275,7 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                         itemView.context,
                         DialogUtils.AlertDialogDetails(
                                 message = "Edit \"${mPageGroup.name}\" group?",
-                                positiveButtonText = logInPromptPositiveText, negetiveButtonText = logInPromptNegetiveText,
+                                positiveButtonText = logInPromptPositiveText,
                                 doOnPositivePress = logInPromptPositiveAction
                         )
                 )

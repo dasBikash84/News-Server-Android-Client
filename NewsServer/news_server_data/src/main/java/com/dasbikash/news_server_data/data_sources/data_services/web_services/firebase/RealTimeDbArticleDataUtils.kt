@@ -13,7 +13,6 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
-import android.util.Log
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
@@ -26,6 +25,8 @@ import com.google.firebase.database.ValueEventListener
 
 internal object RealTimeDbArticleDataUtils {
 
+    private const val DB_PUBLICATION_TIME_FIELD_NAME = "publicationTimeRTDB"
+
     fun getLatestArticlesByPage(page: Page, articleRequestSize: Int=1): List<Article> {
 
         val lock = Object()
@@ -34,7 +35,7 @@ internal object RealTimeDbArticleDataUtils {
 
         RealtimeDBUtils.mArticleDataRootReference
                 .child(page.id)
-                .orderByChild("publicationTimeRTDB")
+                .orderByChild(DB_PUBLICATION_TIME_FIELD_NAME)
                 .limitToLast(articleRequestSize)
                 .addListenerForSingleValueEvent(object : ValueEventListener{
                     override fun onCancelled(error: DatabaseError) {
@@ -80,8 +81,8 @@ internal object RealTimeDbArticleDataUtils {
 
         RealtimeDBUtils.mArticleDataRootReference
                 .child(page.id)
-                .orderByChild("publicationTimeRTDB")
-                .endAt(lastArticle.publicationTimeRTDB!!.toDouble(),"publicationTimeRTDB")
+                .orderByChild(DB_PUBLICATION_TIME_FIELD_NAME)
+                .endAt(lastArticle.publicationTimeRTDB!!.toDouble(), DB_PUBLICATION_TIME_FIELD_NAME)
                 .limitToLast(articleRequestSize+1)
                 .addListenerForSingleValueEvent(object : ValueEventListener{
                     override fun onCancelled(error: DatabaseError) {

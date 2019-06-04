@@ -51,6 +51,10 @@ import io.reactivex.schedulers.Schedulers
 class HomeActivity : ActivityWithBackPressQueueManager(),
         NavigationHost, HomeNavigator, SignInHandler, WorkInProcessWindowOperator {
 
+    private val SIGN_OUT_PROMPT = "Sign Out?"
+    private val SIGNED_OUT_MESSAGE = "Signed out."
+    private val SIGN_OUT_ERROR_MSG = "Sign out Error!! Please retry."
+
     private lateinit var mToolbar: Toolbar
     private lateinit var mAppBar: AppBarLayout
     private lateinit var mCoordinatorLayout: CoordinatorLayout
@@ -286,7 +290,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
 
     private fun launchSignOutDialog() {
         DialogUtils.createAlertDialog(this, DialogUtils.AlertDialogDetails(
-                title = "Sign Out?", positiveButtonText = "Yes", negetiveButtonText = "Cancel", doOnPositivePress = { signOutAction() }
+                title = SIGN_OUT_PROMPT, doOnPositivePress = { signOutAction() }
         )).show()
     }
 
@@ -341,6 +345,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
         actionAfterSuccessfulLogIn = doOnSignIn
     }
 
+
     private fun signOutAction() {
         loadWorkInProcessWindow()
         var amDisposed = false
@@ -363,7 +368,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                             override fun onComplete() {}
 
                             override fun onNext(t: Unit) {
-                                Snackbar.make(mCoordinatorLayout, "Signed out.", Snackbar.LENGTH_SHORT).show()
+                                Snackbar.make(mCoordinatorLayout, SIGNED_OUT_MESSAGE, Snackbar.LENGTH_SHORT).show()
                                 removeWorkInProcessWindow()
                             }
 
@@ -378,7 +383,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                                         NetConnectivityUtility.showNoInternetToast(this@HomeActivity)
                                     }
                                     else {
-                                        Snackbar.make(mCoordinatorLayout, "Sign out Error!! Please retry.", Snackbar.LENGTH_SHORT).show()
+                                        Snackbar.make(mCoordinatorLayout, SIGN_OUT_ERROR_MSG, Snackbar.LENGTH_SHORT).show()
                                     }
                                 }
                                 removeWorkInProcessWindow()

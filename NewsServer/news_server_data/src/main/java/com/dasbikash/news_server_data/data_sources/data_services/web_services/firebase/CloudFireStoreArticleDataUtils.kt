@@ -24,6 +24,9 @@ import com.google.firebase.firestore.Query
 
 internal object CloudFireStoreArticleDataUtils {
 
+    private const val DB_PUBLICATION_TIME_FIELD_NAME = "publicationTime"
+    private const val DB_PAGE_ID_FIELD_NAME = "pageId"
+
     internal fun getLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
 
         val lock = Object()
@@ -31,8 +34,8 @@ internal object CloudFireStoreArticleDataUtils {
         var dataServerException: DataServerException? = null
 
         CloudFireStoreConUtils.getArticleCollectionRef()
-                .whereEqualTo("pageId",page.id)
-                .orderBy("publicationTime", Query.Direction.DESCENDING)
+                .whereEqualTo(DB_PAGE_ID_FIELD_NAME,page.id)
+                .orderBy(DB_PUBLICATION_TIME_FIELD_NAME, Query.Direction.DESCENDING)
                 .limit(articleRequestSize.toLong())
                 .get()
                 .addOnSuccessListener { documents ->
@@ -72,9 +75,9 @@ internal object CloudFireStoreArticleDataUtils {
         var dataServerException: DataServerException? = null
 
         CloudFireStoreConUtils.getArticleCollectionRef()
-                .whereEqualTo("pageId",page.id)
-                .whereLessThan("publicationTime",lastArticle.publicationTime!!)
-                .orderBy("publicationTime", Query.Direction.DESCENDING)
+                .whereEqualTo(DB_PAGE_ID_FIELD_NAME,page.id)
+                .whereLessThan(DB_PUBLICATION_TIME_FIELD_NAME,lastArticle.publicationTime!!)
+                .orderBy(DB_PUBLICATION_TIME_FIELD_NAME, Query.Direction.DESCENDING)
                 .limit(articleRequestSize.toLong())
                 .get()
                 .addOnSuccessListener { documents ->

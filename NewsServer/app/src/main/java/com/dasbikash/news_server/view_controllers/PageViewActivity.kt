@@ -507,7 +507,6 @@ class PageViewActivity : AppCompatActivity(),
         }
 
         val positiveActionText = "Yes"
-        val negetiveActionText = "Cancel"
 
         val positiveAction: () -> Unit = {
 //            loadWorkInProcessWindow()
@@ -563,7 +562,6 @@ class PageViewActivity : AppCompatActivity(),
                         DialogUtils.AlertDialogDetails(
                                 message = dialogMessage,
                                 positiveButtonText = positiveActionText,
-                                negetiveButtonText = negetiveActionText,
                                 doOnPositivePress = positiveAction
                         )
                 )
@@ -576,7 +574,6 @@ class PageViewActivity : AppCompatActivity(),
                     DialogUtils.AlertDialogDetails(
                             message = dialogMessage,
                             positiveButtonText = "Sign in and continue",
-                            negetiveButtonText = "Cancel",
                             doOnPositivePress = {
                                 launchSignInActivity({
                                     refreshFavStatus({ changeFavStatusDialog.show() })
