@@ -64,7 +64,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class PageViewActivity : AppCompatActivity(),
+class PageViewActivity : ActivityWithBackPressQueueManager(),
         SignInHandler, WorkInProcessWindowOperator {
 
     companion object {
@@ -361,6 +361,8 @@ class PageViewActivity : AppCompatActivity(),
         mFragmentStatePagerAdapter.notifyDataSetChanged()
     }
 
+    private var changeTextFontBackPressActionTag:String?=null
+
     private fun changeTextFontAction() {
         if (mTextSizeChangeFrame.visibility == View.GONE) {
             mDisposable.add(
@@ -374,6 +376,7 @@ class PageViewActivity : AppCompatActivity(),
                                 transTextSize = it
                                 mTextSizeChangeFrame.visibility = View.VISIBLE
                                 mTextSizeChangeFrame.bringToFront()
+                                changeTextFontBackPressActionTag = addTaskToQueue { changeTextFontAction() }
                             }
             )
         } else {
@@ -386,7 +389,10 @@ class PageViewActivity : AppCompatActivity(),
                                 SystemClock.sleep(100)
                             }
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe { mTextSizeChangeFrame.visibility = View.GONE }
+                            .subscribe {
+                                mTextSizeChangeFrame.visibility = View.GONE
+                                changeTextFontBackPressActionTag?.let { removeTaskFromQueue(it) }
+                            }
             )
         }
     }
