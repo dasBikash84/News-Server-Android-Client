@@ -545,7 +545,7 @@ class PageViewActivity : AppCompatActivity(),
 
                                 override fun onError(e: Throwable) {
                                     if (e is NoInternertConnectionException) {
-                                        NetConnectivityUtility.showNoInternetToast(this@PageViewActivity)
+                                        NetConnectivityUtility.showNoInternetToastAnyWay(this@PageViewActivity)
                                     }else {
                                         DisplayUtils.showShortSnack(mPageViewContainer, "Error!! Please retry.")
                                     }

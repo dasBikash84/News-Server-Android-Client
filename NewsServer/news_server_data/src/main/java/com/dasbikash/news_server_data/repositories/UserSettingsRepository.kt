@@ -140,7 +140,7 @@ abstract class UserSettingsRepository {
 //    }
 
     fun addPageToFavList(page: Page, context: Context): Boolean {
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         LoggerUtils.debugLog( "addPageToFavList: ${page.name}",this::class.java)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
@@ -148,7 +148,6 @@ abstract class UserSettingsRepository {
             return true
         }
         userPreferenceData.favouritePageIds.add(page.id)
-//        uploadUserPreferenceData(context,userPreferenceData)
         mUserSettingsDataService.addPageToFavList(page)
         saveUserPreferenceDataToLocalDb(userPreferenceData)
 
@@ -156,7 +155,7 @@ abstract class UserSettingsRepository {
     }
 
     fun removePageFromFavList(page: Page, context: Context): Boolean{
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         LoggerUtils.debugLog( "removePageFromFavList: ${page.name}",this::class.java)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
@@ -164,7 +163,6 @@ abstract class UserSettingsRepository {
             return true
         }
         userPreferenceData.favouritePageIds.remove(page.id)
-//        uploadUserPreferenceData(context,userPreferenceData)
         mUserSettingsDataService.removePageFromFavList(page)
         saveUserPreferenceDataToLocalDb(userPreferenceData)
 
@@ -172,19 +170,18 @@ abstract class UserSettingsRepository {
     }
 
     fun addPageGroup(pageGroup: PageGroup, context: Context): Boolean {
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         LoggerUtils.debugLog( "addPageGroup: ${pageGroup.name}",this::class.java)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
         userPreferenceData.pageGroups.put(pageGroup.name,pageGroup)
-//        uploadUserPreferenceData(context,userPreferenceData)
         mUserSettingsDataService.addPageGroup(pageGroup)
         addPageGroupsToLocalDb(listOf<PageGroup>(pageGroup))
         return true
     }
 
     fun deletePageGroup(pageGroup: PageGroup, context: Context): Boolean{
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         LoggerUtils.debugLog( "deletePageGroup: ${pageGroup.name}",this::class.java)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
@@ -192,21 +189,19 @@ abstract class UserSettingsRepository {
             return true
         }
         userPreferenceData.pageGroups.remove(pageGroup.name)
-//        uploadUserPreferenceData(context,userPreferenceData)
         mUserSettingsDataService.deletePageGroup(pageGroup)
         deletePageGroupFromLocalDb(pageGroup.name)
         return true
     }
 
     fun savePageGroup(oldId: String, pageGroup: PageGroup, context: Context): Boolean{
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         LoggerUtils.debugLog( "savePageGroup: ${pageGroup.name}",this::class.java)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
         userPreferenceData.pageGroups.remove(oldId)
         pageGroup.pageEntityList.clear()
         userPreferenceData.pageGroups.put(pageGroup.name,pageGroup)
-//        uploadUserPreferenceData(context,userPreferenceData)
         mUserSettingsDataService.savePageGroup(oldId, pageGroup)
         deletePageGroupFromLocalDb(oldId)
         addPageGroupsToLocalDb(listOf(pageGroup))
@@ -242,8 +237,8 @@ abstract class UserSettingsRepository {
     }
 
     fun signOutUser(context: Context){
-        mUserSettingsDataService.signOutUser()
         resetUserSettings(context)
+        mUserSettingsDataService.signOutUser()
     }
 
     fun getLogInIntent(): Intent?{

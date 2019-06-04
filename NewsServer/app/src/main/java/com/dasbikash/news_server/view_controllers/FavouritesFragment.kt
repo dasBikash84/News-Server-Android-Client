@@ -224,7 +224,7 @@ class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: Compos
                             override fun onError(e: Throwable) {
                                 when (e) {
                                     is NoInternertConnectionException -> {
-                                        NetConnectivityUtility.showNoInternetToast(itemView.context)
+                                        NetConnectivityUtility.showNoInternetToastAnyWay(itemView.context)
                                     }
                                     is DataNotFoundException -> {
 
@@ -301,7 +301,7 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
 
                         override fun onError(e: Throwable) {
                             if (e is NoInternertConnectionException) {
-                                NetConnectivityUtility.showNoInternetToast(viewHolder.itemView.context)
+                                NetConnectivityUtility.showNoInternetToastAnyWay(viewHolder.itemView.context)
                             } else {
                                 LoggerUtils.debugLog(e.message ?: e::class.java.simpleName
                                 + " Error", this@FavPageSwipeToDeleteCallback::class.java)

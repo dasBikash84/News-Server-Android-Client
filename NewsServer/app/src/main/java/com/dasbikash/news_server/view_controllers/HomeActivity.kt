@@ -380,7 +380,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                                         LoggerUtils.debugLog("Trace: ${it.stackTrace.asList()}",this@HomeActivity::class.java)
                                     }
                                     if(e.exceptions.filter { it is NoInternertConnectionException }.count() > 0){
-                                        NetConnectivityUtility.showNoInternetToast(this@HomeActivity)
+                                        NetConnectivityUtility.showNoInternetToastAnyWay(this@HomeActivity)
                                     }
                                     else {
                                         Snackbar.make(mCoordinatorLayout, SIGN_OUT_ERROR_MSG, Snackbar.LENGTH_SHORT).show()

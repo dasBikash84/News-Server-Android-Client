@@ -115,9 +115,16 @@ object NetConnectivityUtility : BroadcastReceiver() {
     }
 
     fun showNoInternetToast(context: Context){
-        if (!mNoInternertToastShown){
+        if (!isConnected && !mNoInternertToastShown){
             mNoInternertToastShown = true
             Toast.makeText(context, NO_INTERNET_TOAST_MESSAGE,Toast.LENGTH_LONG).show()
+        }
+    }
+
+    fun showNoInternetToastAnyWay(context: Context){
+        if (!isConnected){
+            mNoInternertToastShown = true
+            Toast.makeText(context, NO_INTERNET_TOAST_MESSAGE,Toast.LENGTH_SHORT).show()
         }
     }
 }

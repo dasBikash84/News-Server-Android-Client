@@ -368,7 +368,7 @@ class PageGroupEditFragment : Fragment() {
 
                             override fun onError(e: Throwable) {
                                 if (e is NoInternertConnectionException) {
-                                    NetConnectivityUtility.showNoInternetToast(this@PageGroupEditFragment.context!!)
+                                    NetConnectivityUtility.showNoInternetToastAnyWay(this@PageGroupEditFragment.context!!)
                                 }else {
                                     LoggerUtils.debugLog(e.message ?: e::class.java.simpleName+" Error",this::class.java)
                                     DisplayUtils.showShortToast(this@PageGroupEditFragment.context!!,"Error!! Please retry.")
