@@ -17,7 +17,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.LiveData
-import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.exceptions.AuthServerException
@@ -239,8 +238,8 @@ abstract class UserSettingsRepository {
     }
 
     fun signOutUser(context: Context){
+        mUserSettingsDataService.signOutUser()
         resetUserSettings(context)
-        return mUserSettingsDataService.signOutUser()
     }
 
     fun getLogInIntent(): Intent?{

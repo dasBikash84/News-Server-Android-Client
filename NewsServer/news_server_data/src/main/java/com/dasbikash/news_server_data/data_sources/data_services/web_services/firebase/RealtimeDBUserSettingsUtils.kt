@@ -14,7 +14,10 @@
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
 import com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service.UserIpDataService
-import com.dasbikash.news_server_data.exceptions.*
+import com.dasbikash.news_server_data.exceptions.SettingsServerException
+import com.dasbikash.news_server_data.exceptions.SettingsServerUnavailable
+import com.dasbikash.news_server_data.exceptions.UserSettingsNotFoundException
+import com.dasbikash.news_server_data.exceptions.WrongCredentialException
 import com.dasbikash.news_server_data.models.UserSettingsUpdateDetails
 import com.dasbikash.news_server_data.models.UserSettingsUpdateTime
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
@@ -24,7 +27,6 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import java.util.concurrent.atomic.AtomicBoolean
 
 internal object RealtimeDBUserSettingsUtils {
 
@@ -35,17 +37,32 @@ internal object RealtimeDBUserSettingsUtils {
 
     fun getCurrentUserName(): String? {
         FirebaseAuth.getInstance().currentUser?.let {
+            LoggerUtils.debugLog("providerId: ${it.providerId}",this::class.java)
             val email = it.email
             val diplayName = it.displayName
             val phoneNumber = it.phoneNumber
-            diplayName?.let {
-                email?.let { return "${diplayName} <br>(${email})" }
-                return diplayName
+            if (!email.isNullOrEmpty()){
+                if (!diplayName.isNullOrEmpty()) {
+                    LoggerUtils.debugLog("returning diplayName with email",this::class.java)
+                    return "${diplayName} <br>(${email})"
+                }
+                LoggerUtils.debugLog("returning email only",this::class.java)
+                return email
             }
-            email?.let { return it }
-            phoneNumber?.let { return it }
+            if (!phoneNumber.isNullOrEmpty()){
+                if (!diplayName.isNullOrEmpty()) {
+                    LoggerUtils.debugLog("returning phoneNumber with email",this::class.java)
+                    return "${diplayName} <br>(${phoneNumber})"
+                }
+                LoggerUtils.debugLog("returning phoneNumber only",this::class.java)
+                return phoneNumber
+            }
         }
         return null
+    }
+
+    fun signOutUser(){
+        FirebaseAuth.getInstance().signOut()
     }
 
     fun getUserPreferenceData(): UserPreferenceData {

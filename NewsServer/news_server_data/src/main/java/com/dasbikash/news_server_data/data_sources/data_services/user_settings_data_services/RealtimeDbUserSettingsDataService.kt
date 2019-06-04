@@ -38,7 +38,7 @@ internal object RealtimeDbUserSettingsDataService: UserSettingsDataService {
             FirebaseAuth.getInstance().currentUser != null
 
     override fun signOutUser(){
-        FirebaseAuth.getInstance().signOut()
+        RealtimeDBUserSettingsUtils.signOutUser()
     }
 
     override fun getLastUserSettingsUpdateTime(): Long {

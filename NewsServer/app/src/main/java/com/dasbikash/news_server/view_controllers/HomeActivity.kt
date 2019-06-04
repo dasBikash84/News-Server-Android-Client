@@ -31,8 +31,6 @@ import com.dasbikash.news_server.utils.OptionsIntentBuilderUtility
 import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
-import com.dasbikash.news_server_data.exceptions.DataNotFoundException
-import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
@@ -371,6 +369,11 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
 
                             override fun onError(e: Throwable) {
                                 if (e is CompositeException){
+                                    e.exceptions.asSequence().forEach {
+                                        it.printStackTrace()
+                                        LoggerUtils.debugLog("Error class: ${it::class.java.canonicalName}",this@HomeActivity::class.java)
+                                        LoggerUtils.debugLog("Trace: ${it.stackTrace.asList()}",this@HomeActivity::class.java)
+                                    }
                                     if(e.exceptions.filter { it is NoInternertConnectionException }.count() > 0){
                                         NetConnectivityUtility.showNoInternetToast(this@HomeActivity)
                                     }
