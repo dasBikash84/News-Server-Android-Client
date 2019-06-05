@@ -47,11 +47,13 @@ internal class UserSettingsRepositoryRoomImpl internal constructor(context: Cont
     }
 
     override fun addPageGroupsToLocalDb(pageGroups: List<PageGroup>) {
+        LoggerUtils.debugLog("addPageGroupsToLocalDb: ${pageGroups.map { it.id }.toList()}",this::class.java)
         mDatabase.pageGroupDao.addPageGroups(pageGroups)
     }
 
-    override fun deletePageGroupFromLocalDb(pageGroupName: String) {
-        mDatabase.pageGroupDao.delete(pageGroupName)
+    override fun deletePageGroupFromLocalDb(pageGroup:PageGroup) {
+        LoggerUtils.debugLog("deletePageGroupFromLocalDb: ${pageGroup.id}",this::class.java)
+        mDatabase.pageGroupDao.delete(pageGroup)
     }
 
     override fun getLocalPreferenceData(): List<UserPreferenceData> {

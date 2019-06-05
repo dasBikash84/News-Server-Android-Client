@@ -324,16 +324,9 @@ class PageGroupEditFragment : Fragment() {
 
         val newPageGroupName = mPageGroupNameEditText.text.toString()
 
-        val pageGroupForEdit:PageGroup
-        var oldName = ""
-        if (mMode == OPERATING_MODE.CREATE) {
-            pageGroupForEdit = PageGroup()
-        } else {
-            oldName = mPageGroup.name
-            pageGroupForEdit = mPageGroup.copy()
-        }
-        pageGroupForEdit.name = newPageGroupName.trim()
-        pageGroupForEdit.pageList = mCurrentPageList.map { it.id }.toList()
+        val newPageGroup = PageGroup()
+        newPageGroup.name = newPageGroupName.trim()
+        newPageGroup.pageList = mCurrentPageList.map { it.id }.toList()
 
         val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
 
@@ -345,10 +338,10 @@ class PageGroupEditFragment : Fragment() {
                         .map {
                             when (mMode) {
                                 OPERATING_MODE.CREATE -> {
-                                    return@map userSettingsRepository.addPageGroup(pageGroupForEdit, context!!)
+                                    return@map userSettingsRepository.addPageGroup(newPageGroup, context!!)
                                 }
                                 OPERATING_MODE.EDIT -> {
-                                    return@map userSettingsRepository.savePageGroup(oldName, pageGroupForEdit, context!!)
+                                    return@map userSettingsRepository.savePageGroup(mPageGroup.copy(), newPageGroup, context!!)
                                 }
                             }
                         }

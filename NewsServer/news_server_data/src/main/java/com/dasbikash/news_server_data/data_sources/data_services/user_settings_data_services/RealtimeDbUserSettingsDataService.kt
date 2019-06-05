@@ -81,16 +81,16 @@ internal object RealtimeDbUserSettingsDataService: UserSettingsDataService {
         return RealtimeDBUserSettingsUtils.removePageFromFavList(page,context)
     }
 
-    override fun addPageGroup(pageGroup: PageGroup) {
-        return RealtimeDBUserSettingsUtils.addPageGroup(pageGroup)
+    override fun addPageGroup(pageGroup: PageGroup,context: Context) {
+        return RealtimeDBUserSettingsUtils.addPageGroup(pageGroup,context)
     }
 
-    override fun deletePageGroup(pageGroup: PageGroup) {
-        return RealtimeDBUserSettingsUtils.deletePageGroup(pageGroup)
+    override fun deletePageGroup(pageGroup: PageGroup,context: Context) {
+        return RealtimeDBUserSettingsUtils.deletePageGroup(pageGroup,context)
     }
 
-    override fun savePageGroup(oldId: String, pageGroup: PageGroup) {
-        return RealtimeDBUserSettingsUtils.savePageGroup(oldId,pageGroup)
+    override fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup,context: Context) {
+        return RealtimeDBUserSettingsUtils.savePageGroup(oldPageGroup,pageGroup,context)
     }
     //    override fun getCurrentUser(): FirebaseUser? {
 //        return FirebaseAuth.getInstance().currentUser

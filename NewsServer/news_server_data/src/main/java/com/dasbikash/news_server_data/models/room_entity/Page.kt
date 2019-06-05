@@ -61,6 +61,7 @@ data class Page(
         @JvmField
         @Ignore
         @Exclude
+        @com.google.firebase.firestore.Exclude
         @Expose(serialize = false,deserialize = false)
         val CREATOR: Parcelable.Creator<Page> = object : Parcelable.Creator<Page> {
             override fun createFromParcel(source: Parcel): Page {

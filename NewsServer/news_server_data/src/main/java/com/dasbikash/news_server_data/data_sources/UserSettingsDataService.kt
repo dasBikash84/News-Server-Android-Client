@@ -32,8 +32,8 @@ internal interface UserSettingsDataService{
     fun checkIfLoogedAsAdmin():Boolean
     fun addPageToFavList(page: Page,context: Context)
     fun removePageFromFavList(page: Page,context:Context)
-    fun addPageGroup(pageGroup: PageGroup)
-    fun deletePageGroup(pageGroup: PageGroup)
-    fun savePageGroup(oldId: String, pageGroup: PageGroup)
+    fun addPageGroup(pageGroup: PageGroup,context: Context)
+    fun deletePageGroup(pageGroup: PageGroup,context: Context)
+    fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup,context: Context)
 //    fun getCurrentUser():FirebaseUser?
 }

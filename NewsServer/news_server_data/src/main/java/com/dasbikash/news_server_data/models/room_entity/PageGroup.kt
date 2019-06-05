@@ -18,10 +18,14 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.google.firebase.database.Exclude
 import java.io.Serializable
+import java.util.*
 
 @Entity
 data class PageGroup  (
         @PrimaryKey
+        @Exclude
+        @com.google.firebase.firestore.Exclude
+        var id:String = UUID.randomUUID().toString(),
         var name: String="",
         @Ignore
         @Exclude

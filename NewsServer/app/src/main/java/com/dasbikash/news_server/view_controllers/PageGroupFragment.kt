@@ -195,7 +195,7 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                 val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(itemView.context)
 
                 val positiveText: String = "Delete group"
-                val neutralText: String = "Add/remove page(s)"
+                val neutralText: String = "Edit group"
                 val pageGroupDeletionAction: () -> Unit = {
                     DialogUtils.createAlertDialog(
                             itemView.context,

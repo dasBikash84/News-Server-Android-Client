@@ -30,7 +30,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 
 internal object RealtimeDBUserSettingsUtils {
@@ -71,7 +70,7 @@ internal object RealtimeDBUserSettingsUtils {
     }
 
     fun getUserPreferenceData(): UserPreferenceData {
-        LoggerUtils.debugLog("getUserPreferenceData()",this@RealtimeDBUserSettingsUtils::class.java)
+        LoggerUtils.debugLog("getUserPreferenceData()", this@RealtimeDBUserSettingsUtils::class.java)
         val user = FirebaseAuth.getInstance().currentUser
         if (user == null || user.isAnonymous) {
             throw WrongCredentialException()
@@ -86,22 +85,22 @@ internal object RealtimeDBUserSettingsUtils {
                 .rootUserSettingsNode
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onCancelled(error: DatabaseError) {
-                        LoggerUtils.debugLog("onCancelled",this@RealtimeDBUserSettingsUtils::class.java)
+                        LoggerUtils.debugLog("onCancelled", this@RealtimeDBUserSettingsUtils::class.java)
                         userSettingsException = SettingsServerException(error.message)
                         synchronized(lock) { lock.notify() }
                     }
 
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        LoggerUtils.debugLog("onDataChange",this@RealtimeDBUserSettingsUtils::class.java)
+                        LoggerUtils.debugLog("onDataChange", this@RealtimeDBUserSettingsUtils::class.java)
                         if (dataSnapshot.exists()) {
                             try {
                                 data = dataSnapshot.getValue(UserPreferenceData::class.java)!!
-                                LoggerUtils.debugLog(data!!.toString(),this@RealtimeDBUserSettingsUtils::class.java)
+                                LoggerUtils.debugLog(data!!.toString(), this@RealtimeDBUserSettingsUtils::class.java)
                                 data!!.favouritePageIds.clear()
                                 data!!.favPageIdMap.filter {
                                     it.value
                                 }.keys.asSequence().forEach { data!!.favouritePageIds.add(it) }
-                                LoggerUtils.debugLog(data!!.toString(),this@RealtimeDBUserSettingsUtils::class.java)
+                                LoggerUtils.debugLog(data!!.toString(), this@RealtimeDBUserSettingsUtils::class.java)
 //                                data!!.favouritePageIds.addAll(data!!.favPageIdMap.keys)
                                 synchronized(lock) { lock.notify() }
                             } catch (ex: Exception) {
@@ -110,9 +109,9 @@ internal object RealtimeDBUserSettingsUtils {
                         }
                     }
                 })
-        LoggerUtils.debugLog("before synchronized(lock)",this@RealtimeDBUserSettingsUtils::class.java)
+        LoggerUtils.debugLog("before synchronized(lock)", this@RealtimeDBUserSettingsUtils::class.java)
         synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
-        LoggerUtils.debugLog("after synchronized(lock)",this@RealtimeDBUserSettingsUtils::class.java)
+        LoggerUtils.debugLog("after synchronized(lock)", this@RealtimeDBUserSettingsUtils::class.java)
         userSettingsException?.let { throw userSettingsException as SettingsServerException }
         if (data == null) {
             throw SettingsServerUnavailable()
@@ -161,16 +160,21 @@ internal object RealtimeDBUserSettingsUtils {
     }
 
     private fun getFavPageRef(page: Page) =
-        RealtimeDBUtils.mUserSettingsRootReference.child( getLoggedInFirebaseUser().uid).child(FAV_PAGE_ID_MAP_NODE).child(page.id)
+            RealtimeDBUtils.mUserSettingsRootReference.child(getLoggedInFirebaseUser().uid).child(FAV_PAGE_ID_MAP_NODE).child(page.id)
 
-    private fun changePageStateOnFavList(page: Page,context: Context,status:Boolean) {
+    private fun changePageStateOnFavList(page: Page, context: Context, status: Boolean) {
         val favPageRef = getFavPageRef(page)
         favPageRef.setValue(status)
                 .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {} else {
-                        when(status){
-                            true -> {UserSettingsRepository.revertAddPageToFavList(page,context)}
-                            false ->{UserSettingsRepository.revertRemovePageFromFavList(page,context)}
+                    if (task.isSuccessful) {
+                    } else {
+                        when (status) {
+                            true -> {
+                                UserSettingsRepository.undoAddPageToFavList(page, context)
+                            }
+                            false -> {
+                                UserSettingsRepository.undoRemovePageFromFavList(page, context)
+                            }
                         }
                     }
                 }
@@ -178,17 +182,36 @@ internal object RealtimeDBUserSettingsUtils {
         addSettingsUpdateTime()
     }
 
-    private fun uploadPageGroupData(pageGroupEntryId: String, pageGroup: PageGroup?){
-        val pageGroupEntryRef = getPageGroupEntryRef(pageGroupEntryId)
-        pageGroupEntryRef.setValue(pageGroup)
+    enum class PageGroupEditAction { ADD, DELETE }
+
+    private fun uploadPageGroupData(pageGroup: PageGroup, context: Context, pageGroupEditAction: PageGroupEditAction) {
+        LoggerUtils.debugLog("uploadPageGroupData. Action: ${pageGroupEditAction.name} for ${pageGroup.name}", this::class.java)
+        val pageGroupEntryRef = getPageGroupEntryRef(pageGroup.name)
+        pageGroupEntryRef.setValue(when (pageGroupEditAction) {
+            RealtimeDBUserSettingsUtils.PageGroupEditAction.ADD -> pageGroup
+            RealtimeDBUserSettingsUtils.PageGroupEditAction.DELETE -> null
+        })
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                    } else {
+                        when (pageGroupEditAction) {
+                            RealtimeDBUserSettingsUtils.PageGroupEditAction.ADD -> {
+                                UserSettingsRepository.undoAddPageGroup(pageGroup, context)
+                            }
+                            RealtimeDBUserSettingsUtils.PageGroupEditAction.DELETE -> {
+                                UserSettingsRepository.undoDeletePageGroup(pageGroup, context)
+                            }
+                        }
+                    }
+                }
         addSettingsUpdateTime()
     }
 
     private fun getPageGroupEntryRef(pageGroupEntryId: String) =
-            RealtimeDBUtils.mUserSettingsRootReference.child( getLoggedInFirebaseUser().uid)
+            RealtimeDBUtils.mUserSettingsRootReference.child(getLoggedInFirebaseUser().uid)
                     .child(PAGE_GROUP_LIST_NODE).child(pageGroupEntryId)
 
-    private fun addSettingsUpdateTime(){
+    private fun addSettingsUpdateTime() {
         val user = getLoggedInFirebaseUser()
         val userSettingsNodes = getUserSettingsNodes(user)
 
@@ -204,18 +227,16 @@ internal object RealtimeDBUserSettingsUtils {
         return favPageIdMapForRemoteDb.toMap()
     }
 
-    fun addPageGroup(pageGroup: PageGroup) = uploadPageGroupData(pageGroup.name,pageGroup)
-    fun deletePageGroup(pageGroup: PageGroup) = uploadPageGroupData(pageGroup.name,null)
-    private fun deletePageGroup(pageGroupId: String) = uploadPageGroupData(pageGroupId,null)
-    fun savePageGroup(oldId: String, pageGroup: PageGroup){
-        if (!oldId.equals(pageGroup.name)){
-            deletePageGroup(oldId)
-        }
-        addPageGroup(pageGroup)
+    fun addPageGroup(pageGroup: PageGroup, context: Context) = uploadPageGroupData(pageGroup, context, RealtimeDBUserSettingsUtils.PageGroupEditAction.ADD)
+    fun deletePageGroup(pageGroup: PageGroup, context: Context) = uploadPageGroupData(pageGroup, context, RealtimeDBUserSettingsUtils.PageGroupEditAction.DELETE)
+
+    fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup, context: Context) {
+        deletePageGroup(oldPageGroup, context)
+        addPageGroup(pageGroup, context)
     }
 
-    fun addPageToFavList(page: Page,context: Context) = changePageStateOnFavList(page,context,true)
-    fun removePageFromFavList(page: Page,context: Context) = changePageStateOnFavList(page,context,false)
+    fun addPageToFavList(page: Page, context: Context) = changePageStateOnFavList(page, context, true)
+    fun removePageFromFavList(page: Page, context: Context) = changePageStateOnFavList(page, context, false)
 
 
     fun getLastUserSettingsUpdateTime(): Long {
