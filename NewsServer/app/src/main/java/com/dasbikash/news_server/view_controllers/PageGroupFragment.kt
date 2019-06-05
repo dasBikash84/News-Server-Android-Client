@@ -267,7 +267,7 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                 val logInPromptPositiveText = "Sign in and continue"
                 val logInPromptPositiveAction: () -> Unit = {
                     signInHandler.launchSignInActivity({
-                        modifyActionDialog.show()
+//                        modifyActionDialog.show()
                     })
                 }
 

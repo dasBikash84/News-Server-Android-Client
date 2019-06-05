@@ -332,7 +332,7 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
                             message = message, positiveButtonText = "Sign in and continue",
                             doOnPositivePress = {
                                 signInHandler.launchSignInActivity({
-                                    removeFavItemDialog.show()
+//                                    removeFavItemDialog.show()
                                 })
                             }, doOnNegetivePress = negetiveAction,
                             isCancelable = false

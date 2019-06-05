@@ -69,7 +69,7 @@ class InitFragment : Fragment() {
     internal enum class DataLoadingStatus private constructor(val isSetProgressbarDeterminate: Boolean, val progressBarValue: Int) {
 
         WAITING_FOR_NETWORK_INIT(false, 0),
-        STARTING_INITIALIZATION(true, 0),
+        STARTING_INITIALIZATION(true, 10),
         APP_SETTINGS_DATA_LOADED(true, 40),
         USER_SETTINGS_DATA_LOADED(true, 70),
         NEWS_DATA_REPO_INITIATED(true, 100),
