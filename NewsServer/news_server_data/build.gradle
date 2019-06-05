@@ -6,6 +6,14 @@ apply plugin: 'kotlin-kapt'
 
 android {
 
+    signingConfigs {
+        release {
+            storeFile file('/media/bikash/Work/project_works/News Server/data/keyStore/new/news_server_key.jks')
+            storePassword 'sadsakib201215'
+            keyAlias = 'key0'
+            keyPassword 'sadsakib201215'
+        }
+    }
     compileSdkVersion 28
 
     defaultConfig {
@@ -26,6 +34,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 

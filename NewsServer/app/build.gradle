@@ -4,6 +4,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('/media/bikash/Work/project_works/News Server/data/keyStore/new/news_server_key.jks')
+            storePassword 'sadsakib201215'
+            keyAlias = 'key0'
+            keyPassword 'sadsakib201215'
+        }
+    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.dasbikash.news_server"
@@ -20,6 +28,7 @@ android {
             shrinkResources true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
