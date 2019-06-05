@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.dasbikash.news_server">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
@@ -13,47 +16,38 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
+        android:allowBackup="false"
         tools:targetApi="m">
-        <activity
-            android:name=".view_controllers.PageViewActivity"
-            android:label="@string/app_name"
-            android:parentActivityName=".view_controllers.HomeActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.dasbikash.news_server.view_controllers.HomeActivity" />
-        </activity>
-
-        <uses-library
-            android:name="android.test.runner"
-            android:required="false" />
 
         <activity
             android:name=".view_controllers.HomeActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data
                     android:host="www.dasbikash.com"
                     android:pathPrefix="/news_server"
                     android:scheme="http" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".view_controllers.PageViewActivity"
+            android:screenOrientation="portrait">
+        </activity>
         <activity android:name=".view_controllers.SavedArticleViewActivity"
-            android:screenOrientation="portrait"/>
+            android:parentActivityName=".view_controllers.HomeActivity"
+            android:screenOrientation="portrait">
+        </activity>
 
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="@string/admob_app_id" />
+        <uses-library
+            android:name="android.test.runner"
+            android:required="false" />
     </application>
 
 </manifest>

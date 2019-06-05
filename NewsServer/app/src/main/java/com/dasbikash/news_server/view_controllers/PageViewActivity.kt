@@ -140,7 +140,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
         ViewModelProviders.of(this).get(PageViewViewModel::class.java)
                 .getArticleLiveDataForPage(mPage)
-                .observe(this,object : androidx.lifecycle.Observer<List<Article>>{
+                .observe(this, object : androidx.lifecycle.Observer<List<Article>> {
                     override fun onChanged(articleList: List<Article>?) {
                         articleList?.let {
                             postArticlesForDisplay(articleList)
@@ -150,11 +150,11 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
         ViewModelProviders.of(this).get(PageViewViewModel::class.java)
                 .getUserPreferenceLiveData()
-                .observe(this,object :androidx.lifecycle.Observer<UserPreferenceData?>{
+                .observe(this, object : androidx.lifecycle.Observer<UserPreferenceData?> {
                     override fun onChanged(userPreferenceData: UserPreferenceData?) {
                         userPreferenceData?.let {
                             it.favouritePageIds.asSequence().forEach {
-                                if (it.equals(mPage.id)){
+                                if (it.equals(mPage.id)) {
                                     mIsPageOnFavList = true
                                     return@let
                                 }
@@ -168,16 +168,16 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
     }
 
-    private fun showWaitScreen(){
+    private fun showWaitScreen() {
         mWaitScreen.visibility = View.VISIBLE
         mWaitScreen.bringToFront()
     }
 
-    private fun hideWaitScreen(){
+    private fun hideWaitScreen() {
         mWaitScreen.visibility = View.GONE
     }
 
-    private fun init(){
+    private fun init() {
         Observable.just(mPage)
                 .subscribeOn(Schedulers.io())
                 .map {
@@ -256,18 +256,18 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                         override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult, Throwable?>) {
                             when (processingResult.first) {
                                 UserSettingsRepository.SignInResult.SUCCESS -> {
-                                    DisplayUtils.showLogInWelcomeSnack(mPageViewContainer,this@PageViewActivity)
-                                    actionAfterSuccessfulLogIn?.let {it()}
+                                    DisplayUtils.showLogInWelcomeSnack(mPageViewContainer, this@PageViewActivity)
+                                    actionAfterSuccessfulLogIn?.let { it() }
                                 }
-                                UserSettingsRepository.SignInResult.USER_ABORT -> DisplayUtils.showShortSnack(mPageViewContainer,"Log in aborted")
-                                UserSettingsRepository.SignInResult.SERVER_ERROR -> DisplayUtils.showShortSnack(mPageViewContainer,"Log in error.")//* Details:${processingResult.second}*/")
-                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> DisplayUtils.showShortSnack(mPageViewContainer,"Log in error.")//"Error while User settings data saving. Details:${processingResult.second}")
+                                UserSettingsRepository.SignInResult.USER_ABORT -> DisplayUtils.showShortSnack(mPageViewContainer, "Log in aborted")
+                                UserSettingsRepository.SignInResult.SERVER_ERROR -> DisplayUtils.showShortSnack(mPageViewContainer, "Log in error.")//* Details:${processingResult.second}*/")
+                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> DisplayUtils.showShortSnack(mPageViewContainer, "Log in error.")//"Error while User settings data saving. Details:${processingResult.second}")
                             }
                         }
 
                         override fun onError(e: Throwable) {
                             actionAfterSuccessfulLogIn = null
-                            DisplayUtils.showShortSnack(mPageViewContainer,"Log in error.")//"Error while User settings data saving. Error: ${e}")
+                            DisplayUtils.showShortSnack(mPageViewContainer, "Log in error.")//"Error while User settings data saving. Error: ${e}")
                             removeWorkInProcessWindow()
                         }
                     })
@@ -317,11 +317,13 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                 return mArticleList.size
             }
         }
-        mArticleViewContainer.addOnPageChangeListener(object : ViewPager.OnPageChangeListener{
+        mArticleViewContainer.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {
             }
+
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
             }
+
             override fun onPageSelected(position: Int) {
                 invalidateOptionsMenu()
             }
@@ -333,6 +335,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
     private fun initDrawerComponents() {
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
+
         mDrawerLayout = findViewById(R.id.drawer_layout)
         val toggle = ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close)
@@ -378,7 +381,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
         mFragmentStatePagerAdapter.notifyDataSetChanged()
     }
 
-    private var changeTextFontBackPressActionTag:String?=null
+    private var changeTextFontBackPressActionTag: String? = null
 
     private fun changeTextFontAction() {
         if (mTextSizeChangeFrame.visibility == View.GONE) {
@@ -429,10 +432,10 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                     Observable.just(mPage)
                             .subscribeOn(Schedulers.io())
                             .map {
-                                if(!::mLanguage.isInitialized) {
+                                if (!::mLanguage.isInitialized) {
                                     mLanguage = mAppSettingsRepository.getLanguageByPage(mPage)
                                 }
-                                if (mArticleList.isEmpty()){
+                                if (mArticleList.isEmpty()) {
                                     mNewsDataRepository.getLatestArticleByPage(mPage)
                                 }
                                 mNewsDataRepository.downloadMoreArticlesByPage(mPage)
@@ -443,17 +446,18 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                                     mArticleLoadRunning = false
                                     removeWorkInProcessWindow()//hideProgressBars()
                                 }
+
                                 override fun onNext(articleList: List<Article>) {}
                                 override fun onError(throwable: Throwable) {
                                     mArticleLoadRunning = false
                                     removeWorkInProcessWindow()//hideProgressBars()
-                                    when(throwable) {
-                                         is DataNotFoundException -> {
+                                    when (throwable) {
+                                        is DataNotFoundException -> {
                                             mInvHaveMoreArticle.set()
                                             mLoadMoreArticleButton.visibility = View.GONE
                                         }
                                         is DataServerNotAvailableExcepption -> {
-                                            DisplayUtils.showShortSnack(mPageViewContainer,"Remote server error! Please try again later.")
+                                            DisplayUtils.showShortSnack(mPageViewContainer, "Remote server error! Please try again later.")
                                         }
                                         is NoInternertConnectionException -> {
                                             NetConnectivityUtility.showNoInternetToast(this@PageViewActivity)
@@ -485,7 +489,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
         mArticleList.clear()
         mArticleList.addAll(articleList)
         if (!::mArticlePreviewListAdapter.isInitialized) {
-            mArticlePreviewListAdapter = ArticlePreviewListAdapter(this,mLanguage, {
+            mArticlePreviewListAdapter = ArticlePreviewListAdapter(this, mLanguage, {
                 mArticleViewContainer.currentItem = it
             })
             mArticlePreviewListHolder.adapter = mArticlePreviewListAdapter
@@ -514,7 +518,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
         }
 
         val positiveAction: () -> Unit = {
-//            loadWorkInProcessWindow()
+            //            loadWorkInProcessWindow()
             showWaitScreen()
             mDisposable.add(
                     Observable.just(mPage)
@@ -535,10 +539,10 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                                     if (result) {
                                         when (action) {
                                             PAGE_FAV_STATUS_CHANGE_ACTION.ADD -> {
-                                                DisplayUtils.showShortSnack(mPageViewContainer,"${mPage.name} added to favourites")
+                                                DisplayUtils.showShortSnack(mPageViewContainer, "${mPage.name} added to favourites")
                                             }
                                             PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE -> {
-                                                DisplayUtils.showShortSnack(mPageViewContainer,"${mPage.name} removed from favourites")
+                                                DisplayUtils.showShortSnack(mPageViewContainer, "${mPage.name} removed from favourites")
                                             }
                                         }
                                     }
@@ -547,7 +551,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                                 override fun onError(e: Throwable) {
                                     if (e is NoInternertConnectionException) {
                                         NetConnectivityUtility.showNoInternetToastAnyWay(this@PageViewActivity)
-                                    }else {
+                                    } else {
                                         DisplayUtils.showShortSnack(mPageViewContainer, "Error!! Please retry.")
                                     }
                                     hideWaitScreen()
@@ -597,6 +601,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
         }
         actionAfterSuccessfulLogIn = doOnSignIn
     }
+
     override fun loadWorkInProcessWindow() {
         if (!mWaitWindowShown) {
             showProgressBars()
@@ -605,7 +610,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
     }
 
     override fun removeWorkInProcessWindow() {
-        if(mWaitWindowShown) {
+        if (mWaitWindowShown) {
             mWaitWindowShown = false
             hideProgressBars()
         }

@@ -62,6 +62,9 @@ class SavedArticleViewActivity : AppCompatActivity() {
 
         setSupportActionBar(mToolbar)
 
+        getSupportActionBar()!!.setDisplayHomeAsUpEnabled(true)
+        getSupportActionBar()!!.setDisplayShowHomeEnabled(true)
+
         mFragmentStatePagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager,
                 FragmentStatePagerAdapter.BEHAVIOR_SET_USER_VISIBLE_HINT) {
 
@@ -105,6 +108,12 @@ class SavedArticleViewActivity : AppCompatActivity() {
                         }
                     }
                 })
+    }
+
+    @Override
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 
     fun deleteArticle(savedArticle: SavedArticle) {
