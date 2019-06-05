@@ -39,7 +39,6 @@ import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -66,6 +65,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
     private lateinit var mLogInButton: MaterialButton
     private lateinit var mUserDetailsTextView: AppCompatTextView
     private lateinit var mSignOutButton: MaterialButton
+    private lateinit var mLogInBottomBar: View
     //    private lateinit var mUserSettingEditButton:MaterialButton
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
@@ -129,6 +129,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
         mLogInButton = findViewById(R.id.log_in_sign_up_button)
         mUserDetailsTextView = findViewById(R.id.user_name_text)
         mSignOutButton = findViewById(R.id.sign_out_button)
+        mLogInBottomBar = findViewById(R.id.bottom_bar)
 //        mUserSettingEditButton = findViewById(R.id.customize_button)
     }
 
@@ -307,6 +308,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
             mLogInMenuHolder.bringToFront()
             if (mUserSettingsRepository.checkIfLoggedIn()) {
                 mSignOutButton.visibility = View.VISIBLE
+                mLogInBottomBar.visibility = View.VISIBLE
                 mLogInButton.visibility = View.GONE
                 mUserDetailsTextView.visibility = View.GONE
                 mUserSettingsRepository.getCurrentUserName()?.let {
@@ -315,6 +317,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                 }
             } else {
                 mSignOutButton.visibility = View.GONE
+                mLogInBottomBar.visibility = View.GONE
                 mLogInButton.visibility = View.VISIBLE
                 mUserDetailsTextView.visibility = View.GONE
             }
@@ -368,7 +371,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                             override fun onComplete() {}
 
                             override fun onNext(t: Unit) {
-                                Snackbar.make(mCoordinatorLayout, SIGNED_OUT_MESSAGE, Snackbar.LENGTH_SHORT).show()
+                                DisplayUtils.showShortSnack(mCoordinatorLayout, SIGNED_OUT_MESSAGE)
                                 removeWorkInProcessWindow()
                             }
 
@@ -383,7 +386,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                                         NetConnectivityUtility.showNoInternetToastAnyWay(this@HomeActivity)
                                     }
                                     else {
-                                        Snackbar.make(mCoordinatorLayout, SIGN_OUT_ERROR_MSG, Snackbar.LENGTH_SHORT).show()
+                                        DisplayUtils.showShortSnack(mCoordinatorLayout, SIGN_OUT_ERROR_MSG)
                                     }
                                 }
                                 removeWorkInProcessWindow()
@@ -422,6 +425,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                             when (processingResult.first) {
                                 UserSettingsRepository.SignInResult.SUCCESS -> {
                                     LoggerUtils.debugLog("User settings data saved.", this::class.java)
+                                    DisplayUtils.showLogInWelcomeSnack(mCoordinatorLayout,this@HomeActivity)
                                     actionAfterSuccessfulLogIn?.let {
                                         it()
                                     }

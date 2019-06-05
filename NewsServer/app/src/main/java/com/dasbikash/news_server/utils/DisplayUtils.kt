@@ -22,6 +22,7 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
 import com.dasbikash.news_server_data.models.room_entity.SavedArticle
+import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
@@ -276,6 +277,12 @@ object DisplayUtils {
             }
         }
         SharedPreferenceUtils.saveData(context,effectiveTextSize, ARTCILE_TEXT_SIZE_SP_KEY)
+    }
+
+    fun showLogInWelcomeSnack(coordinatorLayout: CoordinatorLayout,context: Context){
+        val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context)
+        showShortSnack(coordinatorLayout,
+                "Welcome ${userSettingsRepository.getCurrentUserName()?.replace("<br>","") ?: ""}")
     }
 
     fun showShortSnack(coordinatorLayout: CoordinatorLayout,message: String) {

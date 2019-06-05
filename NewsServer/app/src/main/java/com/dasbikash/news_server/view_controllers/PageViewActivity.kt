@@ -256,8 +256,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                         override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult, Throwable?>) {
                             when (processingResult.first) {
                                 UserSettingsRepository.SignInResult.SUCCESS -> {
-//                                    DisplayUtils.showShortSnack(mPageViewContainer,
-//                                            "Welcome ${mUserSettingsRepository.getCurrentUserName() ?: ""}")
+                                    DisplayUtils.showLogInWelcomeSnack(mPageViewContainer,this@PageViewActivity)
                                     actionAfterSuccessfulLogIn?.let {it()}
                                 }
                                 UserSettingsRepository.SignInResult.USER_ABORT -> DisplayUtils.showShortSnack(mPageViewContainer,"Log in aborted")
