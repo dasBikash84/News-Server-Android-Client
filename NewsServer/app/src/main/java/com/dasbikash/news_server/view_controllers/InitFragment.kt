@@ -18,13 +18,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -41,7 +39,6 @@ import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
-import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
@@ -139,7 +136,7 @@ class InitFragment : Fragment() {
                             override fun onComplete() {
                                 mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
                                 mHomeViewModel
-                                        .getNewsPapers()
+                                        .getNewsPapersLiveData()
                                         .observe(activity!!, object : Observer<List<Newspaper>> {
                                             override fun onChanged(newspapers: List<Newspaper>?) {
                                                 (activity as HomeNavigator).loadHomeFragment()

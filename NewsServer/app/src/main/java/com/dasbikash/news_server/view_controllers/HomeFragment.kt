@@ -111,7 +111,7 @@ class HomeFragment : Fragment() {
         })
 
         mHomeViewModel
-            .getNewsPapers()
+            .getNewsPapersLiveData()
             .observe(this,object : Observer<List<Newspaper>>{
                 override fun onChanged(newspapers: List<Newspaper>?) {
                     mDisposable.add(

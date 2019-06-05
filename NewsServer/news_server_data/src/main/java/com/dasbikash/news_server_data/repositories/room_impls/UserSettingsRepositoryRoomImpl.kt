@@ -14,13 +14,11 @@
 package com.dasbikash.news_server_data.repositories.room_impls
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
-import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import java.util.*
 
@@ -76,7 +74,7 @@ internal class UserSettingsRepositoryRoomImpl internal constructor(context: Cont
     }
 
     override fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?> {
-        return mDatabase.userPreferenceDataDao.findUserPreferenceData()
+        return mDatabase.userPreferenceDataDao.findUserPreferenceDataLiveData()
     }
 
     override fun getPageGroupListLive(): LiveData<List<PageGroup>> {
@@ -92,6 +90,6 @@ internal class UserSettingsRepositoryRoomImpl internal constructor(context: Cont
     }
 
     override fun getPageGroupListCount(): Int {
-        return mDatabase.pageGroupDao.count
+        return mDatabase.pageGroupDao.findAllStatic().size
     }
 }

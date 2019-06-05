@@ -32,7 +32,7 @@ internal interface UserPreferenceDataDao {
     fun findUserPreferenceStaticData(): UserPreferenceData?
 
     @Query("SELECT * from UserPreferenceData LIMIT 1")
-    fun findUserPreferenceData(): LiveData<UserPreferenceData?>
+    fun findUserPreferenceDataLiveData(): LiveData<UserPreferenceData?>
 
     @Query("DELETE FROM UserPreferenceData")
     fun nukeTable()

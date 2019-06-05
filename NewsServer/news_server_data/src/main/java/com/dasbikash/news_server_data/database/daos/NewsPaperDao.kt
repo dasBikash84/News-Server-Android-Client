@@ -23,11 +23,11 @@ import com.dasbikash.news_server_data.models.room_entity.Newspaper
 @Dao
 internal interface NewsPaperDao {
 
-    @get:Query("SELECT COUNT(*) FROM Newspaper")
-    val count: Int
+    @Query("SELECT * FROM Newspaper")
+    fun findAll(): List<Newspaper>
 
     @Query("SELECT * FROM Newspaper")
-    fun findAll(): LiveData<List<Newspaper>>
+    fun findAllLiveData(): LiveData<List<Newspaper>>
 
     @Query("SELECT * FROM Newspaper WHERE id=:id")
     fun findById(id: String): Newspaper

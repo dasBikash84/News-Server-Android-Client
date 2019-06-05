@@ -54,15 +54,15 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
         disposable.clear()
     }
 
-    fun getNewsPapers(): LiveData<List<Newspaper>> {
-        return mAppSettingsRepository.getNewsPapers()
+    fun getNewsPapersLiveData(): LiveData<List<Newspaper>> {
+        return mAppSettingsRepository.getNewsPapersLiveData()
     }
 
     fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?> {
         return mUserSettingsRepository.getUserPreferenceLiveData()
     }
 
-    fun getPageGroups(): LiveData<List<PageGroup>> {
+    fun getPageGroupsLiveData(): LiveData<List<PageGroup>> {
         return mUserSettingsRepository.getPageGroupListLive()
     }
 

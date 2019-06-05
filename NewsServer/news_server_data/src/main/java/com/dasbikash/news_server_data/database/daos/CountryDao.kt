@@ -22,9 +22,6 @@ import com.dasbikash.news_server_data.models.room_entity.Country
 @Dao
 internal interface CountryDao {
 
-    @get:Query("SELECT COUNT(*) FROM Country")
-    val count: Int
-
     @Query("SELECT * FROM Country")
     fun findAll(): List<Country>
 

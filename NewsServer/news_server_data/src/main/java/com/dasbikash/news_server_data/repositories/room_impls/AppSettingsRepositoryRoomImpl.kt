@@ -24,19 +24,16 @@ internal class AppSettingsRepositoryRoomImpl internal constructor(context: Conte
     private val mDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
 
     override fun getCountryCount(): Int {
-        return mDatabase.countryDao.count
+        return mDatabase.countryDao.findAll().size
     }
     override fun getLanguageCount(): Int {
-        return mDatabase.languageDao.count
+        return mDatabase.languageDao.findAll().size
     }
     override fun getNewsPaperCount(): Int {
-        return mDatabase.newsPaperDao.count
+        return mDatabase.newsPaperDao.findAll().size
     }
     override fun getPageCount(): Int {
-        return mDatabase.pageDao.count
-    }
-    override fun getPageGroupCount(): Int {
-        return mDatabase.pageGroupDao.count
+        return mDatabase.pageDao.findAll().size
     }
 
     override fun nukeAppSettings() {
@@ -63,8 +60,8 @@ internal class AppSettingsRepositoryRoomImpl internal constructor(context: Conte
         mDatabase.pageGroupDao.addPageGroups(pageGroups)
     }
 
-    override fun getNewsPapers():LiveData<List<Newspaper>>{
-        return mDatabase.newsPaperDao.findAll()
+    override fun getNewsPapersLiveData():LiveData<List<Newspaper>>{
+        return mDatabase.newsPaperDao.findAllLiveData()
     }
 
     override fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page> {

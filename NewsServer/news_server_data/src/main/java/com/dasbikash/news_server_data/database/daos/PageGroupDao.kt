@@ -20,9 +20,6 @@ import com.dasbikash.news_server_data.models.room_entity.PageGroup
 @Dao
 internal interface PageGroupDao {
 
-    @get:Query("SELECT COUNT(*) FROM PageGroup")
-    val count: Int
-
     @Query("SELECT * FROM PageGroup")
     fun findAllStatic(): List<PageGroup>
 

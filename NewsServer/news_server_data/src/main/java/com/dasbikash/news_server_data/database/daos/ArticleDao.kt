@@ -29,9 +29,6 @@ internal interface ArticleDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun addArticles(articles: List<Article>)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun addArticles(vararg articles: Article)
-
     @Query("DELETE FROM Article")
     fun nukeTable()
 

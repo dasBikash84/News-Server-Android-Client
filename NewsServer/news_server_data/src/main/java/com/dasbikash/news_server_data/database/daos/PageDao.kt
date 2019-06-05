@@ -20,9 +20,8 @@ import com.dasbikash.news_server_data.models.room_entity.PageArticleFetchStatus
 @Dao
 internal interface PageDao {
 
-
-    @get:Query("SELECT COUNT(*) FROM Page")
-    val count: Int
+    @Query("SELECT * FROM Page")
+    fun findAll(): List<Page>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addPages(pages: List<Page>)

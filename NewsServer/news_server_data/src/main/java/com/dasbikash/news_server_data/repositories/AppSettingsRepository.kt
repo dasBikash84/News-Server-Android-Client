@@ -39,9 +39,8 @@ abstract class AppSettingsRepository {
     abstract protected fun getLanguageCount(): Int
     abstract protected fun getNewsPaperCount(): Int
     abstract protected fun getPageCount(): Int
-    abstract protected fun getPageGroupCount(): Int
 
-    abstract fun getNewsPapers(): LiveData<List<Newspaper>>
+    abstract fun getNewsPapersLiveData(): LiveData<List<Newspaper>>
     abstract fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page>
     abstract fun getChildPagesForTopLevelPage(topLevelPage: Page): List<Page>
     abstract fun findMatchingPages(it: String): List<Page>

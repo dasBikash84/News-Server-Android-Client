@@ -77,7 +77,7 @@ class PageGroupFragment : Fragment() {
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
 
         ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
-                .getPageGroups().observe(this, object : Observer<List<PageGroup>> {
+                .getPageGroupsLiveData().observe(this, object : Observer<List<PageGroup>> {
                     override fun onChanged(pageGroups: List<PageGroup>?) {
                         pageGroups?.let {
                             mDisposable.add(
