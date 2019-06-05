@@ -18,6 +18,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
@@ -41,6 +42,10 @@ class PageViewViewModel(private val mApplication: Application) : AndroidViewMode
 
     fun getArticleLiveDataForPage(page: Page):LiveData<List<Article>>{
         return mNewsDataRepository.getArticleLiveDataForPage(page)
+    }
+
+    fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?> {
+        return mUserSettingsRepository.getUserPreferenceLiveData()
     }
 
     override fun onCleared() {

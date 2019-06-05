@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
+import android.content.Context
 import com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service.UserIpDataService
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
 import com.dasbikash.news_server_data.exceptions.SettingsServerUnavailable
@@ -23,6 +24,7 @@ import com.dasbikash.news_server_data.models.UserSettingsUpdateTime
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
+import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -161,9 +163,18 @@ internal object RealtimeDBUserSettingsUtils {
     private fun getFavPageRef(page: Page) =
         RealtimeDBUtils.mUserSettingsRootReference.child( getLoggedInFirebaseUser().uid).child(FAV_PAGE_ID_MAP_NODE).child(page.id)
 
-    private fun changePageStateOnFavList(page: Page,status:Boolean) {
+    private fun changePageStateOnFavList(page: Page,context: Context,status:Boolean) {
         val favPageRef = getFavPageRef(page)
         favPageRef.setValue(status)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {} else {
+                        when(status){
+                            true -> {UserSettingsRepository.revertAddPageToFavList(page,context)}
+                            false ->{UserSettingsRepository.revertRemovePageFromFavList(page,context)}
+                        }
+                    }
+                }
+
         addSettingsUpdateTime()
     }
 
@@ -203,8 +214,8 @@ internal object RealtimeDBUserSettingsUtils {
         addPageGroup(pageGroup)
     }
 
-    fun addPageToFavList(page: Page) = changePageStateOnFavList(page,true)
-    fun removePageFromFavList(page: Page) = changePageStateOnFavList(page,false)
+    fun addPageToFavList(page: Page,context: Context) = changePageStateOnFavList(page,context,true)
+    fun removePageFromFavList(page: Page,context: Context) = changePageStateOnFavList(page,context,false)
 
 
     fun getLastUserSettingsUpdateTime(): Long {

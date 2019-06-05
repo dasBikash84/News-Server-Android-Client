@@ -50,6 +50,7 @@ import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Language
 import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
@@ -146,6 +147,23 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                         }
                     }
                 })
+
+        ViewModelProviders.of(this).get(PageViewViewModel::class.java)
+                .getUserPreferenceLiveData()
+                .observe(this,object :androidx.lifecycle.Observer<UserPreferenceData?>{
+                    override fun onChanged(userPreferenceData: UserPreferenceData?) {
+                        userPreferenceData?.let {
+                            it.favouritePageIds.asSequence().forEach {
+                                if (it.equals(mPage.id)){
+                                    mIsPageOnFavList = true
+                                    return@let
+                                }
+                            }
+                            mIsPageOnFavList = false
+                        }
+                        invalidateOptionsMenu()
+                    }
+                })
         init()
 
     }
@@ -172,7 +190,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
     override fun onResume() {
         super.onResume()
-        refreshFavStatus()
+//        refreshFavStatus()
         loadMoreArticles()
     }
 
@@ -485,26 +503,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
         mDrawerLayout.closeDrawer(GravityCompat.START)
     }
 
-    private fun refreshFavStatus(doOnNext: () -> Unit = {}) {
-        mDisposable.add(
-                Observable.just(true)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            mIsPageOnFavList = mUserSettingsRepository.checkIfOnFavList(mPage)
-                            mIsPageOnFavList
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Boolean>() {
-                            override fun onComplete() {}
-                            override fun onNext(isFav: Boolean) {
-                                invalidateOptionsMenu()
-                                doOnNext()
-                            }
-
-                            override fun onError(e: Throwable) {}
-                        })
-        )
-    }
+    private val SIGN_IN_PROMPT = "Sign in and continue."
 
     private fun changePageFavStatus(action: PAGE_FAV_STATUS_CHANGE_ACTION) {
 
@@ -514,8 +513,6 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
             PAGE_FAV_STATUS_CHANGE_ACTION.ADD -> dialogMessage = "Add \"${mPage.name}\" to favourites?"
             PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE -> dialogMessage = "Remove \"${mPage.name}\" from favourites?"
         }
-
-        val positiveActionText = "Yes"
 
         val positiveAction: () -> Unit = {
 //            loadWorkInProcessWindow()
@@ -532,7 +529,6 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribeWith(object : DisposableObserver<Boolean>() {
                                 override fun onComplete() {
-//                                    removeWorkInProcessWindow()
                                     hideWaitScreen()
                                 }
 
@@ -540,15 +536,12 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                                     if (result) {
                                         when (action) {
                                             PAGE_FAV_STATUS_CHANGE_ACTION.ADD -> {
-                                                mIsPageOnFavList = true
                                                 DisplayUtils.showShortSnack(mPageViewContainer,"${mPage.name} added to favourites")
                                             }
                                             PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE -> {
-                                                mIsPageOnFavList = false
                                                 DisplayUtils.showShortSnack(mPageViewContainer,"${mPage.name} removed from favourites")
                                             }
                                         }
-                                        invalidateOptionsMenu()
                                     }
                                 }
 
@@ -558,7 +551,6 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                                     }else {
                                         DisplayUtils.showShortSnack(mPageViewContainer, "Error!! Please retry.")
                                     }
-//                                    removeWorkInProcessWindow()
                                     hideWaitScreen()
                                 }
                             })
@@ -570,7 +562,6 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                         this,
                         DialogUtils.AlertDialogDetails(
                                 message = dialogMessage,
-                                positiveButtonText = positiveActionText,
                                 doOnPositivePress = positiveAction
                         )
                 )
@@ -582,11 +573,9 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                     this,
                     DialogUtils.AlertDialogDetails(
                             message = dialogMessage,
-                            positiveButtonText = "Sign in and continue",
+                            positiveButtonText = SIGN_IN_PROMPT,
                             doOnPositivePress = {
-                                launchSignInActivity({
-                                    refreshFavStatus({ changeFavStatusDialog.show() })
-                                })
+                                launchSignInActivity()
                             }
                     )
             ).show()

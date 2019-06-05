@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.user_settings_data_services
 
+import android.content.Context
 import android.content.Intent
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBAppSettingsUtils
@@ -72,12 +73,12 @@ internal object RealtimeDbUserSettingsDataService: UserSettingsDataService {
         return RealtimeDBUserSettingsUtils.checkIfLoogedAsAdmin()
     }
 
-    override fun addPageToFavList(page: Page) {
-        return RealtimeDBUserSettingsUtils.addPageToFavList(page)
+    override fun addPageToFavList(page: Page,context:Context) {
+        return RealtimeDBUserSettingsUtils.addPageToFavList(page,context)
     }
 
-    override fun removePageFromFavList(page: Page) {
-        return RealtimeDBUserSettingsUtils.removePageFromFavList(page)
+    override fun removePageFromFavList(page: Page,context:Context) {
+        return RealtimeDBUserSettingsUtils.removePageFromFavList(page,context)
     }
 
     override fun addPageGroup(pageGroup: PageGroup) {

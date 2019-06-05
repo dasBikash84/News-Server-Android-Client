@@ -13,9 +13,11 @@
 
 package com.dasbikash.news_server_data.repositories
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
@@ -30,6 +32,9 @@ import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import com.firebase.ui.auth.IdpResponse
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import java.util.*
 
 abstract class UserSettingsRepository {
@@ -41,7 +46,7 @@ abstract class UserSettingsRepository {
 
     abstract protected fun nukeUserPreferenceDataTable()
     abstract protected fun nukePageGroupTable()
-    abstract protected fun addUserPreferenceDataToLocalDB(userPreferenceData:UserPreferenceData)
+    abstract protected fun addUserPreferenceDataToLocalDB(userPreferenceData: UserPreferenceData)
 
     abstract protected fun getUserPreferenceDataFromLocalDB(): UserPreferenceData
     abstract protected fun saveUserPreferenceDataToLocalDb(userPreferenceData: UserPreferenceData)
@@ -62,7 +67,7 @@ abstract class UserSettingsRepository {
         }
 
         if (idpResponse.isNewUser) {
-            LoggerUtils.debugLog( "New user",this::class.java)
+            LoggerUtils.debugLog("New user", this::class.java)
             return uploadUserPreferenceData(context, getUserPreferenceDataFromLocalDB())
         } else {
             return updateUserSettingsIfModified(context)
@@ -71,21 +76,23 @@ abstract class UserSettingsRepository {
 
     private fun uploadUserPreferenceData(context: Context, userPreferenceData: UserPreferenceData) {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        LoggerUtils.debugLog( "uploadUserPreferenceData",this::class.java)
+        LoggerUtils.debugLog("uploadUserPreferenceData", this::class.java)
         mUserSettingsDataService.uploadUserPreferenceData(userPreferenceData)
         saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
     }
 
     private fun saveLastUserSettingsUpdateTime(updateTs: Long, context: Context) {
         ExceptionUtils.checkRequestValidityBeforeLocalDiskAccess()
-        LoggerUtils.debugLog( "saveLastUserSettingsUpdateTime: ${updateTs}",this::class.java)
+        LoggerUtils.debugLog("saveLastUserSettingsUpdateTime: ${updateTs}", this::class.java)
         SharedPreferenceUtils.saveData(context, updateTs, LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY)
     }
+
     private fun getLastUserSettingsUpdateTime(context: Context): Long {
         ExceptionUtils.checkRequestValidityBeforeLocalDiskAccess()
         return SharedPreferenceUtils
                 .getData(context, SharedPreferenceUtils.DefaultValues.DEFAULT_LONG, LAST_USER_SETTINGS_UPDATE_TIMESTAMP_SP_KEY) as Long
     }
+
     @Suppress("SENSELESS_COMPARISON")
     private fun getServerUserPreferenceData(): UserPreferenceData {
 
@@ -100,8 +107,8 @@ abstract class UserSettingsRepository {
     fun initUserSettings(context: Context) {
         if (checkIfLoggedIn()) {
             updateUserSettingsIfModified(context)
-        }else{
-            if (getPageGroupListCount()==0){
+        } else {
+            if (getPageGroupListCount() == 0) {
                 resetUserSettings(context)
             }
         }
@@ -141,29 +148,29 @@ abstract class UserSettingsRepository {
 
     fun addPageToFavList(page: Page, context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        LoggerUtils.debugLog( "addPageToFavList: ${page.name}",this::class.java)
+        LoggerUtils.debugLog("addPageToFavList: ${page.name}", this::class.java)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
-        if (userPreferenceData.favouritePageIds.contains(page.id)){
+        if (userPreferenceData.favouritePageIds.contains(page.id)) {
             return true
         }
         userPreferenceData.favouritePageIds.add(page.id)
-        mUserSettingsDataService.addPageToFavList(page)
+        mUserSettingsDataService.addPageToFavList(page,context)
         saveUserPreferenceDataToLocalDb(userPreferenceData)
 
         return true
     }
 
-    fun removePageFromFavList(page: Page, context: Context): Boolean{
+    fun removePageFromFavList(page: Page, context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        LoggerUtils.debugLog( "removePageFromFavList: ${page.name}",this::class.java)
+        LoggerUtils.debugLog("removePageFromFavList: ${page.name}", this::class.java)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
-        if (! userPreferenceData.favouritePageIds.contains(page.id)){
+        if (!userPreferenceData.favouritePageIds.contains(page.id)) {
             return true
         }
         userPreferenceData.favouritePageIds.remove(page.id)
-        mUserSettingsDataService.removePageFromFavList(page)
+        mUserSettingsDataService.removePageFromFavList(page,context)
         saveUserPreferenceDataToLocalDb(userPreferenceData)
 
         return true
@@ -171,21 +178,21 @@ abstract class UserSettingsRepository {
 
     fun addPageGroup(pageGroup: PageGroup, context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        LoggerUtils.debugLog( "addPageGroup: ${pageGroup.name}",this::class.java)
+        LoggerUtils.debugLog("addPageGroup: ${pageGroup.name}", this::class.java)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
-        userPreferenceData.pageGroups.put(pageGroup.name,pageGroup)
+        userPreferenceData.pageGroups.put(pageGroup.name, pageGroup)
         mUserSettingsDataService.addPageGroup(pageGroup)
         addPageGroupsToLocalDb(listOf<PageGroup>(pageGroup))
         return true
     }
 
-    fun deletePageGroup(pageGroup: PageGroup, context: Context): Boolean{
+    fun deletePageGroup(pageGroup: PageGroup, context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        LoggerUtils.debugLog( "deletePageGroup: ${pageGroup.name}",this::class.java)
+        LoggerUtils.debugLog("deletePageGroup: ${pageGroup.name}", this::class.java)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
-        if (!userPreferenceData.pageGroups.keys.contains(pageGroup.name)){
+        if (!userPreferenceData.pageGroups.keys.contains(pageGroup.name)) {
             return true
         }
         userPreferenceData.pageGroups.remove(pageGroup.name)
@@ -194,33 +201,23 @@ abstract class UserSettingsRepository {
         return true
     }
 
-    fun savePageGroup(oldId: String, pageGroup: PageGroup, context: Context): Boolean{
+    fun savePageGroup(oldId: String, pageGroup: PageGroup, context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        LoggerUtils.debugLog( "savePageGroup: ${pageGroup.name}",this::class.java)
+        LoggerUtils.debugLog("savePageGroup: ${pageGroup.name}", this::class.java)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
         userPreferenceData.pageGroups.remove(oldId)
         pageGroup.pageEntityList.clear()
-        userPreferenceData.pageGroups.put(pageGroup.name,pageGroup)
+        userPreferenceData.pageGroups.put(pageGroup.name, pageGroup)
         mUserSettingsDataService.savePageGroup(oldId, pageGroup)
         deletePageGroupFromLocalDb(oldId)
         addPageGroupsToLocalDb(listOf(pageGroup))
         return true
     }
 
-    fun checkIfOnFavList(mPage: Page): Boolean{
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        LoggerUtils.debugLog( "checkIfOnFavList: ${mPage.name}",this::class.java)
-        val userPreferenceDataList = getLocalPreferenceData()
-        if (userPreferenceDataList.size > 0) {
-            return userPreferenceDataList.get(0).favouritePageIds.contains(mPage.id)
-        }
-        return false
-    }
-
     private fun updateUserSettingsIfModified(context: Context) {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        LoggerUtils.debugLog("updateUserSettingsIfModified",this::class.java)
+        LoggerUtils.debugLog("updateUserSettingsIfModified", this::class.java)
 
         if (mUserSettingsDataService.getLastUserSettingsUpdateTime() > getLastUserSettingsUpdateTime(context)) {
             val userPreferenceData = getServerUserPreferenceData()
@@ -236,23 +233,23 @@ abstract class UserSettingsRepository {
         return mUserSettingsDataService.getLogInStatus()
     }
 
-    fun signOutUser(context: Context){
+    fun signOutUser(context: Context) {
         resetUserSettings(context)
         mUserSettingsDataService.signOutUser()
     }
 
-    fun getLogInIntent(): Intent?{
+    fun getLogInIntent(): Intent? {
         return mUserSettingsDataService.getLogInIntent()
     }
 
-    fun resetUserSettings(context: Context){
-        saveLastUserSettingsUpdateTime(0L,context)
+    fun resetUserSettings(context: Context) {
+        saveLastUserSettingsUpdateTime(0L, context)
         resetUserSettings(getDefaultPageGroupSettings())
     }
 
-    abstract protected fun resetUserSettings(defaultPageGroups:Map<String,PageGroup>)
+    abstract protected fun resetUserSettings(defaultPageGroups: Map<String, PageGroup>)
 
-    private fun getDefaultPageGroupSettings():Map<String,PageGroup>{
+    private fun getDefaultPageGroupSettings(): Map<String, PageGroup> {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         return mUserSettingsDataService.getDefaultPageGroupSettings()
     }
@@ -260,6 +257,7 @@ abstract class UserSettingsRepository {
     companion object {
         @Volatile
         private lateinit var INSTANCE: UserSettingsRepository
+        private const val SETTINGS_CHANGE_REVERT_MESSAGE = "Settings chnage reverted due to server error."
 
         internal fun getImpl(context: Context, dbImplementation: DbImplementation): UserSettingsRepository {
             if (!::INSTANCE.isInitialized) {
@@ -272,6 +270,59 @@ abstract class UserSettingsRepository {
                 }
             }
             return INSTANCE
+        }
+
+
+        @SuppressLint("CheckResult")
+        internal fun revertAddPageToFavList(page: Page, context: Context) {
+            if (::INSTANCE.isInitialized) {
+                LoggerUtils.debugLog("revertAddPageToFavList: ${page.name}", this::class.java)
+                Observable.just(page)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            val userPreferenceData = INSTANCE.getUserPreferenceDataFromLocalDB()
+                            if (!userPreferenceData.favouritePageIds.contains(it.id)) {
+                                return@map false
+                            }
+                            userPreferenceData.favouritePageIds.remove(it.id)
+                            INSTANCE.saveUserPreferenceDataToLocalDb(userPreferenceData)
+                            return@map true
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            if (it){
+                                Toast.makeText(context, SETTINGS_CHANGE_REVERT_MESSAGE,Toast.LENGTH_SHORT).show()
+                            }
+                        }
+            } else {
+                LoggerUtils.debugLog("No INSTANCE found.", this::class.java)
+            }
+        }
+
+        @SuppressLint("CheckResult")
+        fun revertRemovePageFromFavList(page: Page, context: Context) {
+            if (::INSTANCE.isInitialized) {
+                LoggerUtils.debugLog("revertRemovePageFromFavList: ${page.name}", this::class.java)
+                Observable.just(page)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            val userPreferenceData = INSTANCE.getUserPreferenceDataFromLocalDB()
+                            if (userPreferenceData.favouritePageIds.contains(it.id)) {
+                                return@map false
+                            }
+                            userPreferenceData.favouritePageIds.add(it.id)
+                            INSTANCE.saveUserPreferenceDataToLocalDb(userPreferenceData)
+                            return@map true
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            if (it){
+                                Toast.makeText(context,SETTINGS_CHANGE_REVERT_MESSAGE,Toast.LENGTH_SHORT).show()
+                            }
+                        }
+            } else {
+                LoggerUtils.debugLog("No INSTANCE found.", this::class.java)
+            }
         }
     }
 

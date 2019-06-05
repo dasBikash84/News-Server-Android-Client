@@ -85,7 +85,7 @@ class FavouritesFragment : Fragment() {
         ItemTouchHelper(FavPageSwipeToDeleteCallback(mFavouritePagesListAdapter, activity!! as SignInHandler, activity!! as WorkInProcessWindowOperator))
                 .attachToRecyclerView(mFavItemsHolder)
 
-        mHomeViewModel.getUserPreferenceData()
+        mHomeViewModel.getUserPreferenceLiveData()
                 .observe(activity!!, object : Observer<UserPreferenceData?> {
                     override fun onChanged(userPreferenceData: UserPreferenceData?) {
                         userPreferenceData.let {
@@ -93,7 +93,7 @@ class FavouritesFragment : Fragment() {
                             disposable.add(Observable.just(favouritePageIdList)
                                     .subscribeOn(Schedulers.io())
                                     .map {
-                                        it.asSequence().map { appSettingsRepository.findPageById(it) }.filter { it != null }.toList()
+                                        it.asSequence().map { appSettingsRepository.findPageById(it) }.filter { it != null }.sortedBy { it!!.name!! }.toList()
                                     }
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribeWith(object : DisposableObserver<List<Page?>>() {

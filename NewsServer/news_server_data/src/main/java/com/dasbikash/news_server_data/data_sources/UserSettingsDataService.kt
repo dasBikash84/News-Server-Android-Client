@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.data_sources
 
+import android.content.Context
 import android.content.Intent
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBUserSettingsUtils
 import com.dasbikash.news_server_data.models.room_entity.Page
@@ -29,8 +30,8 @@ internal interface UserSettingsDataService{
     fun getCurrentUserName():String?
     fun getDefaultPageGroupSettings():Map<String, PageGroup>
     fun checkIfLoogedAsAdmin():Boolean
-    fun addPageToFavList(page: Page)
-    fun removePageFromFavList(page: Page)
+    fun addPageToFavList(page: Page,context: Context)
+    fun removePageFromFavList(page: Page,context:Context)
     fun addPageGroup(pageGroup: PageGroup)
     fun deletePageGroup(pageGroup: PageGroup)
     fun savePageGroup(oldId: String, pageGroup: PageGroup)
