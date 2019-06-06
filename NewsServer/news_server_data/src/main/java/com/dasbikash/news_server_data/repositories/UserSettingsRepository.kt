@@ -17,7 +17,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
@@ -121,6 +120,7 @@ abstract class UserSettingsRepository {
                 doPostLogInProcessing(UserLogInResponse(response), context)
                 return Pair(SignInResult.SUCCESS, null)
             } catch (ex: Exception) {
+                mUserSettingsDataService.getLogInStatus()
                 LoggerUtils.printStackTrace(ex)
                 when (ex) {
                     is SettingsServerException -> return Pair(SignInResult.SETTINGS_UPLOAD_ERROR, ex)
@@ -129,6 +129,7 @@ abstract class UserSettingsRepository {
                 }
             }
         } else {
+            mUserSettingsDataService.getLogInStatus()
             when {
                 response == null -> return Pair(SignInResult.USER_ABORT, Throwable("Canceled by user."))
                 else -> {
@@ -286,9 +287,9 @@ abstract class UserSettingsRepository {
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
-                            if (it){
-                                Toast.makeText(context, SETTINGS_CHANGE_REVERT_MESSAGE,Toast.LENGTH_SHORT).show()
-                            }
+//                            if (it){
+//                                Toast.makeText(context, SETTINGS_CHANGE_REVERT_MESSAGE,Toast.LENGTH_SHORT).show()
+//                            }
                         }
             } else {
                 LoggerUtils.debugLog("No INSTANCE found of ${INSTANCE::class.java.simpleName}.", this::class.java)
@@ -312,9 +313,9 @@ abstract class UserSettingsRepository {
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
-                            if (it){
-                                Toast.makeText(context,SETTINGS_CHANGE_REVERT_MESSAGE,Toast.LENGTH_SHORT).show()
-                            }
+//                            if (it){
+//                                Toast.makeText(context,SETTINGS_CHANGE_REVERT_MESSAGE,Toast.LENGTH_SHORT).show()
+//                            }
                         }
             } else {
                 LoggerUtils.debugLog("No INSTANCE found of ${INSTANCE::class.java.simpleName}.", this::class.java)
@@ -333,9 +334,9 @@ abstract class UserSettingsRepository {
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
-                            if (it){
-                                Toast.makeText(context,SETTINGS_CHANGE_REVERT_MESSAGE,Toast.LENGTH_SHORT).show()
-                            }
+//                            if (it){
+//                                Toast.makeText(context,SETTINGS_CHANGE_REVERT_MESSAGE,Toast.LENGTH_SHORT).show()
+//                            }
                         }
             } else {
                 LoggerUtils.debugLog("No INSTANCE found of ${INSTANCE::class.java.simpleName}.", this::class.java)
@@ -354,9 +355,9 @@ abstract class UserSettingsRepository {
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
-                            if (it){
-                                Toast.makeText(context,SETTINGS_CHANGE_REVERT_MESSAGE,Toast.LENGTH_SHORT).show()
-                            }
+//                            if (it){
+//                                Toast.makeText(context,SETTINGS_CHANGE_REVERT_MESSAGE,Toast.LENGTH_SHORT).show()
+//                            }
                         }
             } else {
                 LoggerUtils.debugLog("No INSTANCE found of ${INSTANCE::class.java.simpleName}.", this::class.java)
