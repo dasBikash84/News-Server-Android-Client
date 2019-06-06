@@ -4,20 +4,13 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
-android {
+apply from: project.property("news_server.signing") + ".gradle";
 
-    signingConfigs {
-        release {
-            storeFile file('/media/bikash/Work/project_works/News Server/data/keyStore/new/news_server_key.jks')
-            storePassword 'sadsakib201215'
-            keyAlias = 'key0'
-            keyPassword 'sadsakib201215'
-        }
-    }
+android {
     compileSdkVersion 28
 
     defaultConfig {
-        minSdkVersion 17
+        minSdkVersion 19
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -34,11 +27,11 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
         }
     }
 
 }
+
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
