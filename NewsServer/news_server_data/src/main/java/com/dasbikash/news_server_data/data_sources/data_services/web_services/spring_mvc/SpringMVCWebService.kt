@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.spring_mvc
 
+import androidx.annotation.Keep
 import com.dasbikash.news_server_data.models.room_entity.*
 
 import retrofit2.Call
@@ -73,12 +74,12 @@ internal interface SpringMVCWebService {
                 .build()
     }
 
-    class Articles(val articles: List<Article>)
-    class Languages(val languages: List<Language>)
-    class Countries(val countries: List<Country>)
-    class Newspapers(val newspapers: List<Newspaper>)
-    class Pages(val pages: List<Page>)
-    class PageGroups(val pageGroupMap: Map<String, PageGroup>)
-    class SettingsUpdateLog(val updateTime:Date)
-    class SettingsUpdateLogs(val settingsUpdateLogs:List<SettingsUpdateLog>)
+    @Keep class Articles(val articles: List<Article>)
+    @Keep class Languages(val languages: List<Language>)
+    @Keep class Countries(val countries: List<Country>)
+    @Keep class Newspapers(val newspapers: List<Newspaper>)
+    @Keep class Pages(val pages: List<Page>)
+    @Keep class PageGroups(val pageGroupMap: Map<String, PageGroup>)
+    @Keep class SettingsUpdateLog(val updateTime:Date)
+    @Keep class SettingsUpdateLogs(val settingsUpdateLogs:List<SettingsUpdateLog>)
 }

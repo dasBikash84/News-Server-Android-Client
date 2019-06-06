@@ -110,7 +110,6 @@ internal object DataServiceImplProvider {
             LoggerUtils.debugLog("userSettingServiceOption:${userSettingServiceOption.name}",this::class.java)
             initAppSettingsDataService()
             initNewsDataService()
-            initUserSettingsDataService()
             return true
         }else {
             return false

@@ -165,15 +165,21 @@ class InitFragment : Fragment() {
                     .initAppSettings(context!!)
             emitter.onNext(DataLoadingStatus.APP_SETTINGS_DATA_LOADED)
 
-            RepositoryFactory
-                    .getUserSettingsRepository(context!!)
-                    .initUserSettings(context!!)
-            emitter.onNext(DataLoadingStatus.USER_SETTINGS_DATA_LOADED)
+//            RepositoryFactory
+//                    .getUserSettingsRepository(context!!)
+//                    .initUserSettings(context!!)
+//            emitter.onNext(DataLoadingStatus.USER_SETTINGS_DATA_LOADED)
 
             RepositoryFactory
                     .getFreshNewsDataRepository(context!!)
                     .init(context!!)
             emitter.onNext(DataLoadingStatus.NEWS_DATA_REPO_INITIATED)
+
+            RepositoryFactory
+                    .getUserSettingsRepository(context!!)
+                    .initUserSettings(context!!)
+
+            emitter.onNext(DataLoadingStatus.USER_SETTINGS_DATA_LOADED)
 
             emitter.onComplete()
         }

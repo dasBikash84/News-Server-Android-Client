@@ -18,6 +18,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -44,6 +45,7 @@ import com.dasbikash.news_server_data.utills.ImageLoadingDisposer
 import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -58,12 +60,16 @@ class FavouritesFragment : Fragment() {
     private lateinit var mCoordinatorLayout: CoordinatorLayout
     private lateinit var mScroller: NestedScrollView
     private lateinit var mFavItemsHolder: RecyclerView
+    private lateinit var mNoFavPageMsgHolder: LinearLayout
+    private lateinit var mNoFavPageLogInButton: MaterialButton
 
     lateinit var mFavouritePagesListAdapter: FavouritePagesListAdapter
 
     private val disposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
     private lateinit var mHomeViewModel: HomeViewModel
+
+    private val postLogInAction = {mNoFavPageLogInButton.visibility = View.GONE}
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -75,19 +81,30 @@ class FavouritesFragment : Fragment() {
         mCoordinatorLayout = view.findViewById(R.id.fav_frag_coor_layout)
         mScroller = view.findViewById(R.id.fav_frag_item_scroller)
         mFavItemsHolder = view.findViewById(R.id.fav_frag_item_holder)
+        mNoFavPageMsgHolder = view.findViewById(R.id.no_fav_page_found_message_holder)
+        mNoFavPageLogInButton = view.findViewById(R.id.no_fav_page_found_log_in_button)
 
         mFavouritePagesListAdapter = FavouritePagesListAdapter(context!!)
 
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
 
+        mNoFavPageLogInButton.setOnClickListener {(activity!! as SignInHandler).launchSignInActivity({postLogInAction()})}
+
         mFavItemsHolder.adapter = mFavouritePagesListAdapter
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
-        ItemTouchHelper(FavPageSwipeToDeleteCallback(mFavouritePagesListAdapter, activity!! as SignInHandler, activity!! as WorkInProcessWindowOperator))
+        val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
+
+        ItemTouchHelper(FavPageSwipeToDeleteCallback(mFavouritePagesListAdapter, activity!! as SignInHandler, activity!! as WorkInProcessWindowOperator,postLogInAction))
                 .attachToRecyclerView(mFavItemsHolder)
+        if (userSettingsRepository.checkIfLoggedIn()){postLogInAction()}
 
         mHomeViewModel.getUserPreferenceLiveData()
                 .observe(activity!!, object : Observer<UserPreferenceData?> {
                     override fun onChanged(userPreferenceData: UserPreferenceData?) {
+                        if (userPreferenceData==null){
+                            mNoFavPageMsgHolder.visibility = View.VISIBLE
+                            mScroller.visibility = View.GONE
+                        }
                         userPreferenceData.let {
                             val favouritePageIdList = it?.favouritePageIds?.toList() ?: emptyList()
                             disposable.add(Observable.just(favouritePageIdList)
@@ -99,6 +116,13 @@ class FavouritesFragment : Fragment() {
                                     .subscribeWith(object : DisposableObserver<List<Page?>>() {
                                         override fun onComplete() {}
                                         override fun onNext(pageList: List<Page?>) {
+                                            if(pageList.isNullOrEmpty()){
+                                                mNoFavPageMsgHolder.visibility = View.VISIBLE
+                                                mScroller.visibility = View.GONE
+                                            }else{
+                                                mNoFavPageMsgHolder.visibility = View.GONE
+                                                mScroller.visibility = View.VISIBLE
+                                            }
                                             mFavouritePagesListAdapter.submitList(pageList)
                                         }
 
@@ -265,7 +289,8 @@ class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: Compos
 
 class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAdapter,
                                    val signInHandler: SignInHandler,
-                                   val workInProcessWindowOperator: WorkInProcessWindowOperator) :
+                                   val workInProcessWindowOperator: WorkInProcessWindowOperator,
+                                   val postLogInAction:()->Unit) :
         ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT or ItemTouchHelper.LEFT) {
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
         return false
@@ -331,9 +356,7 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
                     DialogUtils.AlertDialogDetails(
                             message = message, positiveButtonText = "Sign in and continue",
                             doOnPositivePress = {
-                                signInHandler.launchSignInActivity({
-//                                    removeFavItemDialog.show()
-                                })
+                                signInHandler.launchSignInActivity({postLogInAction()})
                             }, doOnNegetivePress = negetiveAction,
                             isCancelable = false
                     )

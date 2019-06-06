@@ -26,6 +26,9 @@ import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.dasbikash.news_server_data.utills.LoggerUtils
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
@@ -66,6 +69,13 @@ internal object RealtimeDBUserSettingsUtils {
     }
 
     fun signOutUser() {
+        LoggerUtils.debugLog("signOutUser()",this::class.java)
+        completeSignOut()
+        signInAnonymously()
+    }
+
+    fun completeSignOut(){
+        LoggerUtils.debugLog("completeSignOut()",this::class.java)
         FirebaseAuth.getInstance().signOut()
     }
 
@@ -313,6 +323,29 @@ internal object RealtimeDBUserSettingsUtils {
         settingsServerException?.let { return false }
 
         return true
+    }
 
+    fun signInAnonymously(){
+
+        LoggerUtils.debugLog("completeSignOut()",this::class.java)
+
+        val firebaseAuth = FirebaseAuth.getInstance()
+        firebaseAuth.signOut()
+
+        val lock = Object()
+        var settingsServerException: SettingsServerException? = SettingsServerException()
+
+        firebaseAuth.signInAnonymously()
+                .addOnCompleteListener(object :OnCompleteListener<AuthResult>{
+                    override fun onComplete(task: Task<AuthResult>) {
+                        if (task.isSuccessful){
+                            settingsServerException = null
+                        }
+                        synchronized(lock) { lock.notify() }
+                    }
+                })
+
+        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+        settingsServerException?.let { throw it }
     }
 }

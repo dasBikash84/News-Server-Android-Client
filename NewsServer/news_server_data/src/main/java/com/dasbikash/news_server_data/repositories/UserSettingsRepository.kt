@@ -230,8 +230,8 @@ abstract class UserSettingsRepository {
     }
 
     fun signOutUser(context: Context) {
-        resetUserSettings(context)
         mUserSettingsDataService.signOutUser()
+        resetUserSettings(context)
     }
 
     fun getLogInIntent(): Intent? {

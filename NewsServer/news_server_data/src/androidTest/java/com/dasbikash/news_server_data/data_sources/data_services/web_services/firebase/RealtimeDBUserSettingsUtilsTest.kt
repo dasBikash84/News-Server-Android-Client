@@ -11,18 +11,17 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.models
+package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
-import android.os.Build
-import com.google.firebase.database.ServerValue
+import org.junit.Assert.*
 
-internal data class UserSettingsUpdateDetails(
-        val timeStamp: Map<String,String> = ServerValue.TIMESTAMP,
-        var userIp:String,
-        var deviceDetails:String = "BRAND: ${Build.BRAND} Manufacture: ${Build.MANUFACTURER} " +
-                                    "MODEL: ${Build.MODEL} SDK_INT: ${Build.VERSION.SDK_INT}"
-){
-    companion object{
-        const val NULL_IP = "255.255.255.255"
+class RealtimeDBUserSettingsUtilsTest {
+
+    @org.junit.Before
+    fun setUp() {
+    }
+
+    @org.junit.After
+    fun tearDown() {
     }
 }

@@ -11,18 +11,20 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.models
+package com.dasbikash.news_server_data.utills
 
-import android.os.Build
-import com.google.firebase.database.ServerValue
+import android.widget.ImageView
+import io.reactivex.disposables.Disposable
 
-internal data class UserSettingsUpdateDetails(
-        val timeStamp: Map<String,String> = ServerValue.TIMESTAMP,
-        var userIp:String,
-        var deviceDetails:String = "BRAND: ${Build.BRAND} Manufacture: ${Build.MANUFACTURER} " +
-                                    "MODEL: ${Build.MODEL} SDK_INT: ${Build.VERSION.SDK_INT}"
-){
-    companion object{
-        const val NULL_IP = "255.255.255.255"
+class ImageLoadingDisposer(val imageView: ImageView) : Disposable {
+    private var disposed = false
+
+    override fun isDisposed() = disposed
+
+    override fun dispose() {
+        if (!disposed) {
+            ImageUtils.cancelRequestForImageView(imageView)
+            disposed = true
+        }
     }
 }

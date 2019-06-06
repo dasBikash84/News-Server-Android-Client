@@ -18,6 +18,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -48,6 +49,7 @@ class SavedArticlesFragment : Fragment() {
 
     private lateinit var mSavedArticlePreviewHolder: RecyclerView
     private lateinit var mListAdapter: SavedArticlePreviewListAdapter
+    private lateinit var mNoSavedArticleMsgHolder: LinearLayout
 
     private lateinit var mNewsDataRepository: NewsDataRepository
 
@@ -62,6 +64,7 @@ class SavedArticlesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         LoggerUtils.debugLog("onViewCreated", this::class.java)
         mSavedArticlePreviewHolder = view.findViewById(R.id.saved_article_preview_holder)
+        mNoSavedArticleMsgHolder = view.findViewById(R.id.no_saved_article_found_message_holder)
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
 
         mListAdapter = SavedArticlePreviewListAdapter { item -> doOnArticleClick(item) }
@@ -71,14 +74,18 @@ class SavedArticlesFragment : Fragment() {
 
         ViewModelProviders.of(activity!!).get(HomeViewModel::class.java).getSavedArticlesLiveData()
                 .observe(this, object : androidx.lifecycle.Observer<List<SavedArticle>> {
-                    override fun onChanged(t: List<SavedArticle>?) {
-                        t?.let {
-                            mListAdapter.submitList(it.sortedBy { it.newspaperName + it.pageName }.toList())
+                    override fun onChanged(savedArticleList: List<SavedArticle>?) {
+                        if (savedArticleList==null){mNoSavedArticleMsgHolder.visibility=View.VISIBLE}
+                        savedArticleList?.let {
+                            if (it.isNotEmpty()) {
+                                mListAdapter.submitList(it.sortedBy { it.newspaperName + it.pageName }.toList())
+                                mNoSavedArticleMsgHolder.visibility=View.GONE
+                            }else{
+                                mNoSavedArticleMsgHolder.visibility=View.VISIBLE
+                            }
                         }
-
                     }
                 })
-
     }
 
     fun doOnArticleClick(savedArticle: SavedArticle) {

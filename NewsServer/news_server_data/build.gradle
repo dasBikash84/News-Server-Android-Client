@@ -54,13 +54,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore:19.0.2'
 
 
+    def androidxTestRunnerVersion = '1.2.0'
+    androidTestImplementation "androidx.test:runner:$androidxTestRunnerVersion"
+    androidTestImplementation "androidx.test:rules:$androidxTestRunnerVersion"
+    androidTestImplementation "androidx.test:core:$androidxTestRunnerVersion"
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:2.19.0'
-    // Core library
-    androidTestImplementation 'androidx.test:core:1.2.0'
-    // AndroidJUnitRunner and JUnit Rules
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test:rules:1.2.0'
     //    implementation 'io.reactivex.rxjava2:rxjava:2.2.6'
     def room_version = "2.1.0-rc01"
     implementation "androidx.room:room-runtime:$room_version"

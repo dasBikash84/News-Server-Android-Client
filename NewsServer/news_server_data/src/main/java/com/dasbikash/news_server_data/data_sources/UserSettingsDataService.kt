@@ -35,5 +35,6 @@ internal interface UserSettingsDataService{
     fun addPageGroup(pageGroup: PageGroup,context: Context)
     fun deletePageGroup(pageGroup: PageGroup,context: Context)
     fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup,context: Context)
+//    fun completeSignOut()
 //    fun getCurrentUser():FirebaseUser?
 }

@@ -20,6 +20,32 @@
     android:paddingBottom="?attr/actionBarSize"
     android:background="@color/colorPageBackground">
 
+    <LinearLayout
+        android:id="@+id/no_saved_article_found_message_holder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.button.MaterialButton
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:paddingStart="16dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="4dp"
+            android:text="@string/no_saved_article_found_message"
+            android:textAllCaps="false"
+            android:textColor="@color/article_title_color"
+            android:textSize="16sp"
+            android:clickable = "false"/>
+    </LinearLayout>
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

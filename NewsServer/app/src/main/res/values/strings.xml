@@ -55,4 +55,7 @@
     <string name="plus_text">+</string>
     <string name="minus_text">-</string>
     <string name="delete_article_from_local_storage_menu_item_title">Delete Article</string>
+    <string name="no_fav_page_found_message">No Page added to favourites list</string>
+    <string name="no_fav_page_found_log_in_text">Log in to add page</string>
+    <string name="no_saved_article_found_message">No saved article to display.</string>
 </resources>

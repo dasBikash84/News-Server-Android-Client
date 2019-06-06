@@ -21,8 +21,11 @@ import com.dasbikash.news_server_data.data_sources.data_services.web_services.fi
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
+
+//internal enum class LogInStatus{NULL,}
 
 internal object RealtimeDbUserSettingsDataService: UserSettingsDataService {
 
@@ -36,12 +39,28 @@ internal object RealtimeDbUserSettingsDataService: UserSettingsDataService {
             AuthUI.IdpConfig.EmailBuilder().build())
 
     //true if logged in
-    override fun getLogInStatus() =
-            FirebaseAuth.getInstance().currentUser != null
+
+    override fun getLogInStatus():Boolean {
+        LoggerUtils.debugLog("getLogInStatus()",this::class.java)
+
+        val firebaseAuth = FirebaseAuth.getInstance()// != null
+        if (firebaseAuth.currentUser == null){
+            RealtimeDBUserSettingsUtils.signInAnonymously()
+            return false
+        }
+        if (firebaseAuth.currentUser!!.isAnonymous){
+            return false
+        }
+        return true
+    }
 
     override fun signOutUser(){
         RealtimeDBUserSettingsUtils.signOutUser()
     }
+
+//    override fun completeSignOut(){
+//        RealtimeDBUserSettingsUtils.completeSignOut()
+//    }
 
     override fun getLastUserSettingsUpdateTime(): Long {
         return RealtimeDBUserSettingsUtils.getLastUserSettingsUpdateTime()
@@ -56,13 +75,14 @@ internal object RealtimeDbUserSettingsDataService: UserSettingsDataService {
     }
 
     override fun getLogInIntent(): Intent? {
-        if (!getLogInStatus()){
+        RealtimeDBUserSettingsUtils.completeSignOut()
+//        if (!getLogInStatus()){
             return AuthUI.getInstance()
                     .createSignInIntentBuilder()
                     .setAvailableProviders(mSignInProviders)
                     .build()
-        }
-        return null
+//        }
+//        return null
     }
 
     override fun getDefaultPageGroupSettings(): Map<String, PageGroup> {

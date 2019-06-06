@@ -22,7 +22,8 @@
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/page_title_holder"
         android:layout_width="match_parent"
-        android:layout_height="32dp"
+        android:layout_height="wrap_content"
+        android:minHeight="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -47,7 +48,7 @@
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/page_title"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:gravity="start|center_vertical"
                 tools:text="Page Title"
                 android:paddingTop="2dp"

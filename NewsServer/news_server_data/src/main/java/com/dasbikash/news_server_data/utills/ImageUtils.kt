@@ -75,17 +75,3 @@ object ImageUtils {
         LoggerUtils.debugLog("cancelRequestForImageView", this::class.java)
     }
 }
-
-
-class ImageLoadingDisposer(val imageView: ImageView) : Disposable {
-    private var disposed = false
-
-    override fun isDisposed() = disposed
-
-    override fun dispose() {
-        if (!disposed) {
-            ImageUtils.cancelRequestForImageView(imageView)
-            disposed = true
-        }
-    }
-}

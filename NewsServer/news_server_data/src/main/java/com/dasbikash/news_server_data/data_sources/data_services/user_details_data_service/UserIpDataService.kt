@@ -14,6 +14,7 @@
 package com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service
 
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
+import com.dasbikash.news_server_data.models.IpAddress
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -57,8 +58,4 @@ internal object UserIpDataService {
         }
         return result!!
     }
-}
-
-class IpAddress{
-    var ip:String?=null
 }
