@@ -330,7 +330,7 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
                             } else {
                                 LoggerUtils.debugLog(e.message ?: e::class.java.simpleName
                                 + " Error", this@FavPageSwipeToDeleteCallback::class.java)
-                                DisplayUtils.showShortToast(viewHolder.itemView.context, "Error!! Please retry.")
+                                DisplayUtils.showErrorRetryToast(viewHolder.itemView.context)
                             }
                             workInProcessWindowOperator.removeWorkInProcessWindow()
                             favouritePagesListAdapter.notifyDataSetChanged()

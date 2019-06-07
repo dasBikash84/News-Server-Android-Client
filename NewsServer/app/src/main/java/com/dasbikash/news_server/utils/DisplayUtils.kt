@@ -285,28 +285,19 @@ object DisplayUtils {
                 "Welcome ${userSettingsRepository.getCurrentUserName()?.replace("<br>","") ?: ""}")
     }
 
-    fun showShortSnack(coordinatorLayout: CoordinatorLayout,message: String) {
-        Snackbar
-                .make(coordinatorLayout, message, Snackbar.LENGTH_SHORT)
-                .show()
-    }
+    fun showShortSnack(coordinatorLayout: CoordinatorLayout,message: String) =
+        Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_SHORT).show()
 
-    fun showLongSnack(coordinatorLayout: CoordinatorLayout,message: String) {
-        Snackbar
-                .make(coordinatorLayout, message, Snackbar.LENGTH_LONG)
-                .show()
-    }
+    fun showLongSnack(coordinatorLayout: CoordinatorLayout,message: String) =
+        Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_LONG).show()
 
-    fun showShortToast(context: Context,message: String) {
-        Toast
-                .makeText(context,message, Toast.LENGTH_SHORT)
-                .show()
-    }
+    fun showShortToast(context: Context,message: String) =
+        Toast.makeText(context,message, Toast.LENGTH_SHORT).show()
 
-    fun showLongToast(context: Context,message: String) {
-        Toast
-                .makeText(context,message, Toast.LENGTH_LONG)
-                .show()
-    }
+    fun showErrorRetryToast(context: Context) =
+        Toast.makeText(context,context.resources.getString(R.string.error_retry_message), Toast.LENGTH_SHORT).show()
+
+    fun showLongToast(context: Context,message: String)=
+        Toast.makeText(context,message, Toast.LENGTH_LONG).show()
 
 }

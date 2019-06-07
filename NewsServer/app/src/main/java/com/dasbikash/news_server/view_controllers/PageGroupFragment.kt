@@ -228,7 +228,7 @@ class PageGroupHolder(itemView: View, val fragmentManager: FragmentManager,
                                                                     ?: e.cause.toString()
                                                                     ?: e::class.java.simpleName
                                                                     + " Error", this::class.java)
-                                                            DisplayUtils.showShortToast(itemView.context!!, "Error!! Please retry.")
+                                                            DisplayUtils.showErrorRetryToast(itemView.context!!)
                                                         }
                                                         workInProcessWindowOperator.removeWorkInProcessWindow()
                                                     }

@@ -355,7 +355,7 @@ class PageGroupEditFragment : Fragment() {
 //                                    Toast.makeText(context, "Data Saved!!", Toast.LENGTH_SHORT).show()
                                     exit()
                                 } else {
-                                    Toast.makeText(context, "Error!! Please retry!!", Toast.LENGTH_SHORT).show()
+                                    DisplayUtils.showErrorRetryToast(context!!)
                                 }
                             }
 
@@ -364,7 +364,7 @@ class PageGroupEditFragment : Fragment() {
                                     NetConnectivityUtility.showNoInternetToastAnyWay(this@PageGroupEditFragment.context!!)
                                 }else {
                                     LoggerUtils.debugLog(e.message ?: e::class.java.simpleName+" Error",this::class.java)
-                                    DisplayUtils.showShortToast(this@PageGroupEditFragment.context!!,"Error!! Please retry.")
+                                    DisplayUtils.showErrorRetryToast(this@PageGroupEditFragment.context!!)
                                 }
 
                                 (activity as WorkInProcessWindowOperator).removeWorkInProcessWindow()
