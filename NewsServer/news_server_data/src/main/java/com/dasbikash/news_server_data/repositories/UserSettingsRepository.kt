@@ -156,7 +156,7 @@ abstract class UserSettingsRepository {
             return true
         }
         userPreferenceData.favouritePageIds.add(page.id)
-        mUserSettingsDataService.addPageToFavList(page,context)
+        mUserSettingsDataService.addPageToFavList(page)
         saveUserPreferenceDataToLocalDb(userPreferenceData)
         saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
 
@@ -172,7 +172,7 @@ abstract class UserSettingsRepository {
             return true
         }
         userPreferenceData.favouritePageIds.remove(page.id)
-        mUserSettingsDataService.removePageFromFavList(page,context)
+        mUserSettingsDataService.removePageFromFavList(page)
         saveUserPreferenceDataToLocalDb(userPreferenceData)
         saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
 
@@ -183,7 +183,7 @@ abstract class UserSettingsRepository {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         LoggerUtils.debugLog("addPageGroup: ${pageGroup.name}", this::class.java)
 
-        mUserSettingsDataService.addPageGroup(pageGroup,context)
+        mUserSettingsDataService.addPageGroup(pageGroup)
         addPageGroupsToLocalDb(listOf<PageGroup>(pageGroup))
         saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
         return true
@@ -193,7 +193,7 @@ abstract class UserSettingsRepository {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         LoggerUtils.debugLog("deletePageGroup: ${pageGroup.name}", this::class.java)
 
-        mUserSettingsDataService.deletePageGroup(pageGroup,context)
+        mUserSettingsDataService.deletePageGroup(pageGroup)
         deletePageGroupFromLocalDb(pageGroup)
         saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
         return true
@@ -203,7 +203,7 @@ abstract class UserSettingsRepository {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         LoggerUtils.debugLog("savePageGroup: ${pageGroup.name}", this::class.java)
 
-        mUserSettingsDataService.savePageGroup(oldPageGroup, pageGroup,context)
+        mUserSettingsDataService.savePageGroup(oldPageGroup, pageGroup)
         deletePageGroupFromLocalDb(oldPageGroup)
         addPageGroupsToLocalDb(listOf(pageGroup))
         saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
@@ -271,7 +271,7 @@ abstract class UserSettingsRepository {
 
 
         @SuppressLint("CheckResult")
-        internal fun undoAddPageToFavList(page: Page, context: Context) {
+        internal fun undoAddPageToFavList(page: Page) {
             if (::INSTANCE.isInitialized) {
                 LoggerUtils.debugLog("undoAddPageToFavList: ${page.name}", this::class.java)
                 Observable.just(page)
@@ -286,18 +286,14 @@ abstract class UserSettingsRepository {
                             return@map true
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-//                            if (it){
-//                                Toast.makeText(context, SETTINGS_CHANGE_REVERT_MESSAGE,Toast.LENGTH_SHORT).show()
-//                            }
-                        }
+                        .subscribe()
             } else {
                 LoggerUtils.debugLog("No INSTANCE found of ${INSTANCE::class.java.simpleName}.", this::class.java)
             }
         }
 
         @SuppressLint("CheckResult")
-        internal fun undoRemovePageFromFavList(page: Page, context: Context) {
+        internal fun undoRemovePageFromFavList(page: Page) {
             if (::INSTANCE.isInitialized) {
                 LoggerUtils.debugLog("undoRemovePageFromFavList: ${page.name}", this::class.java)
                 Observable.just(page)
@@ -312,18 +308,14 @@ abstract class UserSettingsRepository {
                             return@map true
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-//                            if (it){
-//                                Toast.makeText(context,SETTINGS_CHANGE_REVERT_MESSAGE,Toast.LENGTH_SHORT).show()
-//                            }
-                        }
+                        .subscribe()
             } else {
                 LoggerUtils.debugLog("No INSTANCE found of ${INSTANCE::class.java.simpleName}.", this::class.java)
             }
         }
 
         @SuppressLint("CheckResult")
-        internal fun undoAddPageGroup(pageGroup: PageGroup, context: Context) {
+        internal fun undoAddPageGroup(pageGroup: PageGroup) {
             if (::INSTANCE.isInitialized) {
                 LoggerUtils.debugLog("undoAddPageGroup. ID: ${pageGroup.name}", this::class.java)
                 Observable.just(pageGroup)
@@ -333,18 +325,14 @@ abstract class UserSettingsRepository {
                             true
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-//                            if (it){
-//                                Toast.makeText(context,SETTINGS_CHANGE_REVERT_MESSAGE,Toast.LENGTH_SHORT).show()
-//                            }
-                        }
+                        .subscribe()
             } else {
                 LoggerUtils.debugLog("No INSTANCE found of ${INSTANCE::class.java.simpleName}.", this::class.java)
             }
         }
 
         @SuppressLint("CheckResult")
-        internal fun undoDeletePageGroup(pageGroup: PageGroup, context: Context) {
+        internal fun undoDeletePageGroup(pageGroup: PageGroup) {
             if (::INSTANCE.isInitialized) {
                 LoggerUtils.debugLog("undoDeletePageGroup. ID: ${pageGroup.name}", this::class.java)
                 Observable.just(pageGroup)
@@ -354,11 +342,7 @@ abstract class UserSettingsRepository {
                             true
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-//                            if (it){
-//                                Toast.makeText(context,SETTINGS_CHANGE_REVERT_MESSAGE,Toast.LENGTH_SHORT).show()
-//                            }
-                        }
+                        .subscribe()
             } else {
                 LoggerUtils.debugLog("No INSTANCE found of ${INSTANCE::class.java.simpleName}.", this::class.java)
             }

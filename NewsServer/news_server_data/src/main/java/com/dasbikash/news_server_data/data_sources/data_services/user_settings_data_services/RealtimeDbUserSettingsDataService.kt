@@ -93,24 +93,24 @@ internal object RealtimeDbUserSettingsDataService: UserSettingsDataService {
         return RealtimeDBUserSettingsUtils.checkIfLoogedAsAdmin()
     }
 
-    override fun addPageToFavList(page: Page,context:Context) {
-        return RealtimeDBUserSettingsUtils.addPageToFavList(page,context)
+    override fun addPageToFavList(page: Page) {
+        return RealtimeDBUserSettingsUtils.addPageToFavList(page)
     }
 
-    override fun removePageFromFavList(page: Page,context:Context) {
-        return RealtimeDBUserSettingsUtils.removePageFromFavList(page,context)
+    override fun removePageFromFavList(page: Page) {
+        return RealtimeDBUserSettingsUtils.removePageFromFavList(page)
     }
 
-    override fun addPageGroup(pageGroup: PageGroup,context: Context) {
-        return RealtimeDBUserSettingsUtils.addPageGroup(pageGroup,context)
+    override fun addPageGroup(pageGroup: PageGroup) {
+        return RealtimeDBUserSettingsUtils.addPageGroup(pageGroup)
     }
 
-    override fun deletePageGroup(pageGroup: PageGroup,context: Context) {
-        return RealtimeDBUserSettingsUtils.deletePageGroup(pageGroup,context)
+    override fun deletePageGroup(pageGroup: PageGroup) {
+        return RealtimeDBUserSettingsUtils.deletePageGroup(pageGroup)
     }
 
-    override fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup,context: Context) {
-        return RealtimeDBUserSettingsUtils.savePageGroup(oldPageGroup,pageGroup,context)
+    override fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup) {
+        return RealtimeDBUserSettingsUtils.savePageGroup(oldPageGroup,pageGroup)
     }
     //    override fun getCurrentUser(): FirebaseUser? {
 //        return FirebaseAuth.getInstance().currentUser

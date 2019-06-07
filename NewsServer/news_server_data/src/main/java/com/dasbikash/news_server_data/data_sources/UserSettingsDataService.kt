@@ -30,11 +30,11 @@ internal interface UserSettingsDataService{
     fun getCurrentUserName():String?
     fun getDefaultPageGroupSettings():Map<String, PageGroup>
     fun checkIfLoogedAsAdmin():Boolean
-    fun addPageToFavList(page: Page,context: Context)
-    fun removePageFromFavList(page: Page,context:Context)
-    fun addPageGroup(pageGroup: PageGroup,context: Context)
-    fun deletePageGroup(pageGroup: PageGroup,context: Context)
-    fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup,context: Context)
+    fun addPageToFavList(page: Page)
+    fun removePageFromFavList(page: Page)
+    fun addPageGroup(pageGroup: PageGroup)
+    fun deletePageGroup(pageGroup: PageGroup)
+    fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup)
 //    fun completeSignOut()
 //    fun getCurrentUser():FirebaseUser?
 }

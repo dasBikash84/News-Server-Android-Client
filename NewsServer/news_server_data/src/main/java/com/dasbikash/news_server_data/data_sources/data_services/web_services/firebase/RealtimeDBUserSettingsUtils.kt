@@ -34,6 +34,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 
 internal object RealtimeDBUserSettingsUtils {
 
@@ -172,7 +174,7 @@ internal object RealtimeDBUserSettingsUtils {
     private fun getFavPageRef(page: Page) =
             RealtimeDBUtils.mUserSettingsRootReference.child(getLoggedInFirebaseUser().uid).child(FAV_PAGE_ID_MAP_NODE).child(page.id)
 
-    private fun changePageStateOnFavList(page: Page, context: Context, status: Boolean) {
+    private fun changePageStateOnFavList(page: Page, status: Boolean) {
         val favPageRef = getFavPageRef(page)
         favPageRef.setValue(status)
                 .addOnCompleteListener { task ->
@@ -180,10 +182,10 @@ internal object RealtimeDBUserSettingsUtils {
                     } else {
                         when (status) {
                             true -> {
-                                UserSettingsRepository.undoAddPageToFavList(page, context)
+                                UserSettingsRepository.undoAddPageToFavList(page)
                             }
                             false -> {
-                                UserSettingsRepository.undoRemovePageFromFavList(page, context)
+                                UserSettingsRepository.undoRemovePageFromFavList(page)
                             }
                         }
                     }
@@ -194,7 +196,9 @@ internal object RealtimeDBUserSettingsUtils {
 
     enum class PageGroupEditAction { ADD, DELETE }
 
-    private fun uploadPageGroupData(pageGroup: PageGroup, context: Context, pageGroupEditAction: PageGroupEditAction) {
+    private fun uploadPageGroupData(pageGroup: PageGroup, pageGroupEditAction: PageGroupEditAction
+                                    ,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null)
+    {
         LoggerUtils.debugLog("uploadPageGroupData. Action: ${pageGroupEditAction.name} for ${pageGroup.name}", this::class.java)
         val pageGroupEntryRef = getPageGroupEntryRef(pageGroup.name)
         pageGroupEntryRef.setValue(when (pageGroupEditAction) {
@@ -203,14 +207,26 @@ internal object RealtimeDBUserSettingsUtils {
         })
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
+                        doOnSuccess?.let {
+                            Observable.just(it)
+                                    .subscribeOn(Schedulers.io())
+                                    .map { it() }
+                                    .subscribe()
+                        }
                     } else {
                         when (pageGroupEditAction) {
                             RealtimeDBUserSettingsUtils.PageGroupEditAction.ADD -> {
-                                UserSettingsRepository.undoAddPageGroup(pageGroup, context)
+                                UserSettingsRepository.undoAddPageGroup(pageGroup)
                             }
                             RealtimeDBUserSettingsUtils.PageGroupEditAction.DELETE -> {
-                                UserSettingsRepository.undoDeletePageGroup(pageGroup, context)
+                                UserSettingsRepository.undoDeletePageGroup(pageGroup)
                             }
+                        }
+                        doOnFailure?.let {
+                            Observable.just(it)
+                                    .subscribeOn(Schedulers.io())
+                                    .map { it() }
+                                    .subscribe()
                         }
                     }
                 }
@@ -237,16 +253,25 @@ internal object RealtimeDBUserSettingsUtils {
         return favPageIdMapForRemoteDb.toMap()
     }
 
-    fun addPageGroup(pageGroup: PageGroup, context: Context) = uploadPageGroupData(pageGroup, context, RealtimeDBUserSettingsUtils.PageGroupEditAction.ADD)
-    fun deletePageGroup(pageGroup: PageGroup, context: Context) = uploadPageGroupData(pageGroup, context, RealtimeDBUserSettingsUtils.PageGroupEditAction.DELETE)
+    fun addPageGroup(pageGroup: PageGroup
+                     ,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null) =
+            uploadPageGroupData(pageGroup, RealtimeDBUserSettingsUtils.PageGroupEditAction.ADD,doOnSuccess,doOnFailure)
+    fun deletePageGroup(pageGroup: PageGroup
+                        ,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null) =
+            uploadPageGroupData(pageGroup, RealtimeDBUserSettingsUtils.PageGroupEditAction.DELETE,doOnSuccess,doOnFailure)
 
-    fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup, context: Context) {
-        deletePageGroup(oldPageGroup, context)
-        addPageGroup(pageGroup, context)
+    fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup) {
+        deletePageGroup(oldPageGroup, doOnSuccess = {
+            addPageGroup(pageGroup, doOnFailure = {
+                addPageGroup(oldPageGroup)
+                UserSettingsRepository.undoDeletePageGroup(oldPageGroup)
+            })
+        })
+
     }
 
-    fun addPageToFavList(page: Page, context: Context) = changePageStateOnFavList(page, context, true)
-    fun removePageFromFavList(page: Page, context: Context) = changePageStateOnFavList(page, context, false)
+    fun addPageToFavList(page: Page) = changePageStateOnFavList(page, true)
+    fun removePageFromFavList(page: Page) = changePageStateOnFavList(page, false)
 
 
     fun getLastUserSettingsUpdateTime(): Long {
