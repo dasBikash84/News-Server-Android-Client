@@ -31,6 +31,7 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
+import com.dasbikash.news_server.utils.OnceSettableBoolean
 import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
@@ -47,7 +48,6 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
-import java.lang.IllegalArgumentException
 
 class PageGroupEditFragment : Fragment() {
 
@@ -71,6 +71,8 @@ class PageGroupEditFragment : Fragment() {
     private lateinit var mPageGroup: PageGroup
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
+    private var mInitDone = OnceSettableBoolean()
+    private var mInitInitiated = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_page_group_edit, container, false)
@@ -81,7 +83,11 @@ class PageGroupEditFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         doOnCreate()
-        mBackPressTaskTag = (activity as BackPressQueueManager).addTaskToQueue { doOnExit() }
+        addBackPressAction()
+    }
+
+    private fun addBackPressAction() {
+        mBackPressTaskTag = (activity as BackPressQueueManager).addTaskToQueue { cancelButtonClickAction({addBackPressAction()}) }
     }
 
     private fun doOnCreate() {
@@ -183,41 +189,52 @@ class PageGroupEditFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
+
+        init()
+    }
+
+    private fun init() {
+        if (!mInitDone.get() && !mInitInitiated) {
+            mInitInitiated = true
+            mDisposable.add(
+                    Observable.just(mMode)
+                            .subscribeOn(Schedulers.io())
+                            .map {
+                                if (it == OPERATING_MODE.EDIT && mPageGroupName.isNotBlank()) {
+                                    val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
+                                    val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
+                                    mPageGroup = userSettingsRepository.findPageGroupByName(mPageGroupName)!!
+                                    mPageGroup.pageList?.asSequence()
+                                            ?.map { appSettingsRepository.findPageById(it) }
+                                            ?.forEach {
+                                                it?.let {
+                                                    LoggerUtils.debugLog("Page found: ${it.name}", this::class.java)
+                                                    mPageGroup.pageEntityList.add(it)
+                                                }
+                                            }
+                                }
+                            }
+                            .doOnDispose { mInitInitiated=false }
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeWith(object : DisposableObserver<Unit>() {
+                                override fun onComplete() {}
+                                override fun onNext(t: Unit) {
+                                    initView()
+                                    mInitDone.set()
+                                    mInitInitiated = false
+                                }
+
+                                override fun onError(e: Throwable) {
+                                    exit()
+                                }
+                            })
+            )
+        }
     }
 
     override fun onResume() {
         super.onResume()
-
-        mDisposable.add(
-                Observable.just(mMode)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            if (it == OPERATING_MODE.EDIT && mPageGroupName.isNotBlank()) {
-                                val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
-                                val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
-                                mPageGroup = userSettingsRepository.findPageGroupByName(mPageGroupName)!!
-                                mPageGroup.pageList?.asSequence()
-                                        ?.map { appSettingsRepository.findPageById(it) }
-                                        ?.forEach {
-                                            it?.let {
-                                                LoggerUtils.debugLog("Page found: ${it.name}", this::class.java)
-                                                mPageGroup.pageEntityList.add(it)
-                                            }
-                                        }
-                            }
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Unit>() {
-                            override fun onComplete() {}
-                            override fun onNext(t: Unit) {
-                                initView()
-                            }
-
-                            override fun onError(e: Throwable) {
-                                cancelButtonClickAction()
-                            }
-                        })
-        )
+        init()
     }
 
     private fun initView() {
@@ -332,17 +349,19 @@ class PageGroupEditFragment : Fragment() {
         }
     }
 
-    private fun cancelButtonClickAction() {
+    private fun cancelButtonClickAction(negitiveButtonAction:(()->Unit)?=null) {
 
         if (checkIfModified()) {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                     message = DISCARD_CHANGES_AND_EXIT_MESSAGE, positiveButtonText = "Yes",
-                    negetiveButtonText = "No", doOnPositivePress = {exit()}))
+                    negetiveButtonText = "No", doOnPositivePress = {exit()},doOnNegetivePress=negitiveButtonAction ?:{}
+                    ,isCancelable=negitiveButtonAction==null))
                     .show()
         } else {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                     message = EXIT_PROMPT_MESSAGE, positiveButtonText = "Yes",
-                    negetiveButtonText = "No", doOnPositivePress = {exit()}))
+                    negetiveButtonText = "No", doOnPositivePress = {exit()},doOnNegetivePress=negitiveButtonAction?: {}
+                    ,isCancelable=negitiveButtonAction==null))
                     .show()
         }
     }
