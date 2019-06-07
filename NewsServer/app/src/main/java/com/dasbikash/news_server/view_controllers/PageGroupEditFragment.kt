@@ -87,7 +87,7 @@ class PageGroupEditFragment : Fragment() {
     }
 
     private fun addBackPressAction() {
-        mBackPressTaskTag = (activity as BackPressQueueManager).addToBackPressTaskQueue { cancelButtonClickAction({addBackPressAction()}) }
+        mBackPressTaskTag = (activity as BackPressQueueManager).addToBackPressTaskQueue { cancelButtonClickAction({ addBackPressAction() }) }
     }
 
     private fun doOnCreate() {
@@ -137,12 +137,13 @@ class PageGroupEditFragment : Fragment() {
         }
 
         mResetButton.setOnClickListener {
-            if (checkIfModified()) {
+            val modificationStatus = getDataModificationStatus()
+            if (modificationStatus == DataModificationStatus.MODIFIED) {
                 DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                         message = DISCARD_CHANGES_MESSAGE, doOnPositivePress = { initView() }
                 )).show()
-            }else{
-                DisplayUtils.showShortSnack(view as CoordinatorLayout,NO_MODIFICATIONS_MESSAGE)
+            } else {
+                DisplayUtils.showShortSnack(view as CoordinatorLayout, NO_MODIFICATIONS_MESSAGE)
             }
         }
 
@@ -214,7 +215,7 @@ class PageGroupEditFragment : Fragment() {
                                             }
                                 }
                             }
-                            .doOnDispose { mInitInitiated=false }
+                            .doOnDispose { mInitInitiated = false }
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribeWith(object : DisposableObserver<Unit>() {
                                 override fun onComplete() {}
@@ -296,14 +297,14 @@ class PageGroupEditFragment : Fragment() {
         }
     }
 
-    private fun swapPagePositionOnList(page1:Page,page2: Page){
-        if (!mCurrentPageList.contains(page1) || !mCurrentPageList.contains(page2)){
+    private fun swapPagePositionOnList(page1: Page, page2: Page) {
+        if (!mCurrentPageList.contains(page1) || !mCurrentPageList.contains(page2)) {
             return
         }
-        val position1= mCurrentPageList.indexOf(page1)
-        val position2= mCurrentPageList.indexOf(page2)
-        mCurrentPageList.set(position1,page2)
-        mCurrentPageList.set(position2,page1)
+        val position1 = mCurrentPageList.indexOf(page1)
+        val position2 = mCurrentPageList.indexOf(page2)
+        mCurrentPageList.set(position1, page2)
+        mCurrentPageList.set(position2, page1)
         submitCurrentListToAdapter()
     }
 
@@ -313,9 +314,9 @@ class PageGroupEditFragment : Fragment() {
                             target: RecyclerView.ViewHolder): Boolean {
             val mobilePage = (viewHolder as CurrentPageViewHolder).mPage
             val targetPage = (target as CurrentPageViewHolder).mPage
-            LoggerUtils.debugLog("Mobile page: ${mobilePage.name}|${mobilePage.newspaperId}",this@PageGroupEditFragment::class.java)
-            LoggerUtils.debugLog("Target page: ${targetPage.name}|${targetPage.newspaperId}",this@PageGroupEditFragment::class.java)
-            swapPagePositionOnList(mobilePage,targetPage)
+            LoggerUtils.debugLog("Mobile page: ${mobilePage.name}|${mobilePage.newspaperId}", this@PageGroupEditFragment::class.java)
+            LoggerUtils.debugLog("Target page: ${targetPage.name}|${targetPage.newspaperId}", this@PageGroupEditFragment::class.java)
+            swapPagePositionOnList(mobilePage, targetPage)
             return true
         }
 
@@ -335,49 +336,71 @@ class PageGroupEditFragment : Fragment() {
         }
     }
 
-    private fun checkIfModified(): Boolean {
-        if (mMode == OPERATING_MODE.CREATE &&
-                mPageGroupNameEditText.text.toString().isBlank() &&
-                mCurrentPageList.size == 0) {
-            return false
-        } else {
-            return !(mMode == OPERATING_MODE.EDIT &&
-                    mPageGroupNameEditText.text.trim().toString().equals(mPageGroup.name) &&
-                    mCurrentPageList.size == mPageGroup.pageEntityList.size &&
-                    mCurrentPageList.asSequence().map { Pair(mCurrentPageList.indexOf(it), it) }
-                            .filter { mCurrentPageList.get(it.first).id != mPageGroup.pageEntityList.get(it.first).id }.count() == 0)
+    private enum class DataModificationStatus {MODIFIED, NO_MODIFICATION}
+    private enum class DataStatus {OK, EMPTY_GROUP_TITLE, NO_PAGE_ADDED}
+
+    private fun getDataStatus(): DataStatus{
+        if (mPageGroupNameEditText.text.toString().isBlank()){
+            return DataStatus.EMPTY_GROUP_TITLE
+        }else if (mCurrentPageList.isEmpty()){
+            return DataStatus.NO_PAGE_ADDED
+        }else{
+            return DataStatus.OK
         }
     }
 
-    private fun cancelButtonClickAction(negitiveButtonAction:(()->Unit)?=null) {
+    private fun getDataModificationStatus(): DataModificationStatus {
+        if (mMode == OPERATING_MODE.CREATE &&
+                mPageGroupNameEditText.text.toString().isBlank() &&
+                        mCurrentPageList.isEmpty()) {
+            return DataModificationStatus.NO_MODIFICATION
+        } else if (mMode == OPERATING_MODE.EDIT &&
+                mPageGroupNameEditText.text.trim().toString().equals(mPageGroup.name) &&
+                mCurrentPageList.size == mPageGroup.pageEntityList.size &&
+                mCurrentPageList.asSequence().map { Pair(mCurrentPageList.indexOf(it), it) }
+                        .filter { mCurrentPageList.get(it.first).id != mPageGroup.pageEntityList.get(it.first).id }.count() == 0) {
+            return DataModificationStatus.NO_MODIFICATION
+        }
+        return DataModificationStatus.MODIFIED
+    }
 
-        if (checkIfModified()) {
+    private fun cancelButtonClickAction(negitiveButtonAction: (() -> Unit)? = null) {
+        if (getDataModificationStatus() == DataModificationStatus.MODIFIED) {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                     message = DISCARD_CHANGES_AND_EXIT_MESSAGE, positiveButtonText = "Yes",
-                    negetiveButtonText = "No", doOnPositivePress = {exit()},doOnNegetivePress=negitiveButtonAction ?:{}
-                    ,isCancelable=negitiveButtonAction==null))
+                    negetiveButtonText = "No", doOnPositivePress = { exit() }, doOnNegetivePress = negitiveButtonAction
+                    ?: {}
+                    , isCancelable = negitiveButtonAction == null))
                     .show()
         } else {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                     message = EXIT_PROMPT_MESSAGE, positiveButtonText = "Yes",
-                    negetiveButtonText = "No", doOnPositivePress = {exit()},doOnNegetivePress=negitiveButtonAction?: {}
-                    ,isCancelable=negitiveButtonAction==null))
+                    negetiveButtonText = "No", doOnPositivePress = { exit() }, doOnNegetivePress = negitiveButtonAction
+                    ?: {}
+                    , isCancelable = negitiveButtonAction == null))
                     .show()
         }
     }
 
     private fun doneButtonClickAction() {
 
-        if (!checkIfModified()) {
+        if (getDataModificationStatus() == DataModificationStatus.NO_MODIFICATION) {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                     message = NO_MODIFICATION_AND_EXIT_MESSAGE, doOnPositivePress = { exit() }
             )).show()
             return
         }
 
-        DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
-                message = SAVE_CHANGES_AND_EXIT_MESSAGE, doOnPositivePress = { saveChangesAndExit() }
-        )).show()
+        val dataStatus = getDataStatus()
+        if (dataStatus == DataStatus.NO_PAGE_ADDED){
+            DisplayUtils.showShortSnack(view as CoordinatorLayout, NO_PAGE_ADDED_MESSAGE)
+        }else if (dataStatus==DataStatus.EMPTY_GROUP_TITLE){
+            DisplayUtils.showShortSnack(view as CoordinatorLayout, EMPTY_GROUP_TITLE_MESSAGE)
+        }else {
+            DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
+                    message = SAVE_CHANGES_AND_EXIT_MESSAGE, doOnPositivePress = { saveChangesAndExit() }
+            )).show()
+        }
     }
 
     private fun saveChangesAndExit() {
@@ -437,6 +460,8 @@ class PageGroupEditFragment : Fragment() {
         private const val DISCARD_CHANGES_AND_EXIT_MESSAGE = "Discard changes and exit?"
         private const val EXIT_PROMPT_MESSAGE = "Exit?"
         private const val NO_MODIFICATION_AND_EXIT_MESSAGE = "No modifications. Exit?"
+        private const val NO_PAGE_ADDED_MESSAGE = "No page added!!!"
+        private const val EMPTY_GROUP_TITLE_MESSAGE = "Empty page group name !!!"
         private const val NO_MODIFICATIONS_MESSAGE = "No modifications!!!"
         private const val SAVE_CHANGES_AND_EXIT_MESSAGE = "Save changes and exit?"
         private const val DISCARD_CHANGES_MESSAGE = "Discard changes and reset?"
