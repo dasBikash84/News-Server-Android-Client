@@ -39,7 +39,6 @@
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:lines="2"
-            app:layout_constraintBottom_toTopOf="@+id/article_preview_image"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -51,12 +50,21 @@
             android:background="@android:color/white"
             android:gravity="center"
             android:padding="2dp"
-            android:src="@drawable/pc_bg"
-            app:layout_constraintBottom_toTopOf="@+id/article_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/page_title" />
+            app:layout_constraintTop_toBottomOf="@+id/page_title"
+            android:visibility="gone"/>
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/article_preview_ph_image"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:gravity="center"
+            android:padding="2dp"
+            android:src="@drawable/pc_bg"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/article_preview_image" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/article_title"
@@ -71,10 +79,24 @@
             android:textColor="@android:color/black"
             android:textSize="14sp"
             android:lines="2"
-            app:layout_constraintBottom_toTopOf="@+id/article_time"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/article_preview_image" />
+            app:layout_constraintTop_toBottomOf="@id/article_preview_ph_image"
+            android:visibility="gone"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/article_title_ph"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:gravity="center"
+            android:background="@color/snow_white2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/article_title"  />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/article_time"
@@ -89,12 +111,25 @@
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:lines="1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/article_title_ph"
+            android:visibility="gone" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/article_time_ph"
+            android:layout_width="match_parent"
+            android:layout_height="12dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            android:gravity="center"
+            android:background="@color/snow_white2"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/article_title" />
+            app:layout_constraintTop_toBottomOf="@+id/article_time" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 </com.google.android.material.card.MaterialCardView>

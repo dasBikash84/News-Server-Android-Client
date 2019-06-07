@@ -21,8 +21,7 @@
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/page_group_title_holder"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="32dp"
+        android:layout_height="40dp"
         app:layout_constraintBottom_toTopOf="@+id/page_group_items_holder"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -31,9 +30,9 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="start|center_vertical"
-            android:layout_marginStart="8dp">
+            android:background="@color/colorPageBackground">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/down_arrow"
@@ -42,7 +41,6 @@
                 android:src="@drawable/baseline_arrow_drop_down_black_24"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/right_arrow"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 android:foregroundGravity="center"/>
@@ -53,15 +51,15 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/baseline_arrow_right_black_24"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/page_group_title"
                 app:layout_constraintStart_toEndOf="@+id/down_arrow"
                 app:layout_constraintTop_toTopOf="parent"
-                android:foregroundGravity="center" />
+                android:foregroundGravity="center"
+                />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/page_group_title"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:gravity="start|center_vertical"
                 tools:text="Page Group Title"
@@ -78,7 +76,7 @@
                 android:layout_marginEnd="16dp"
                 android:padding="4dp"
                 app:srcCompat="@drawable/ic_edit"
-                android:background="@android:color/white"
+                android:background="@android:color/transparent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

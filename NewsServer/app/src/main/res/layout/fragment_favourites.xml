@@ -16,7 +16,7 @@
     android:id="@+id/fav_frag_coor_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPageBackground"
+    android:background="@android:color/white"
     android:paddingTop="?attr/actionBarSize"
     android:paddingBottom="?attr/actionBarSize">
 

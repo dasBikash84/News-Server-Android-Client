@@ -289,6 +289,11 @@ class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner) :
         mDisposable.clear()
     }
 
+    override fun onResume(owner: LifecycleOwner) {
+        LoggerUtils.debugLog("onResume", this::class.java)
+        notifyDataSetChanged()
+    }
+
     override fun onPause(owner: LifecycleOwner) {
         LoggerUtils.debugLog("Disposing", this::class.java)
         mDisposable.clear()

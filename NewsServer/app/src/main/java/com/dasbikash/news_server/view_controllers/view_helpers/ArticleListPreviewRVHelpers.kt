@@ -49,8 +49,8 @@ import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import java.util.*
 
-class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holderResId: Int,
-                             val homeViewModel: HomeViewModel,val showNewsPaperName:Int=0,val pageTitleLineCount:Int=1) :
+class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner, @LayoutRes val holderResId: Int,
+                             val homeViewModel: HomeViewModel, val showNewsPaperName: Int = 0, val pageTitleLineCount: Int = 1) :
         ListAdapter<Page, LatestArticlePreviewHolder>(PageDiffCallback), DefaultLifecycleObserver {
 
     init {
@@ -61,7 +61,7 @@ class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holde
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LatestArticlePreviewHolder {
         val view = LayoutInflater.from(parent.context).inflate(holderResId, parent, false)
-        return LatestArticlePreviewHolder(view,showNewsPaperName,pageTitleLineCount,mDisposable)
+        return LatestArticlePreviewHolder(view, showNewsPaperName, pageTitleLineCount, mDisposable)
     }
 
     override fun onBindViewHolder(holder: LatestArticlePreviewHolder, position: Int) {
@@ -87,29 +87,29 @@ class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holde
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<Any>() {
                             override fun onComplete() {
-                                LoggerUtils.debugLog( "onComplete for page ${page.name} Np: ${page.newspaperId} L2",this::class.java)
+                                LoggerUtils.debugLog("onComplete for page ${page.name} Np: ${page.newspaperId} L2", this::class.java)
                             }
 
                             @Suppress("UNCHECKED_CAST")
                             override fun onNext(articleData: Any) {
                                 if (articleData is Pair<*, *>) {
-                                    LoggerUtils.debugLog("art displayed for page: ${page.name} Np: ${page.newspaperId}",this::class.java)
+                                    LoggerUtils.debugLog("art displayed for page: ${page.name} Np: ${page.newspaperId}", this::class.java)
                                     val articleDataResult = articleData as Pair<String?, Article>
-                                    holder.bind(page,articleDataResult.first,articleDataResult.second)
+                                    holder.bind(page, articleDataResult.first, articleDataResult.second)
                                 }
                             }
 
                             override fun onError(e: Throwable) {
-                                if (e is CompositeException){
-                                    if(e.exceptions.filter { it is NoInternertConnectionException }.count() > 0){
+                                if (e is CompositeException) {
+                                    if (e.exceptions.filter { it is NoInternertConnectionException }.count() > 0) {
                                         NetConnectivityUtility.showNoInternetToast(holder.itemView.context)
-                                    }else if (e.exceptions.filter { it is DataNotFoundException }.count() > 0){
-                                        LoggerUtils.debugLog("DataNotFoundException",this::class.java)
-                                    }else if (e.exceptions.filter { it is DataServerException }.count() > 0){
-                                        LoggerUtils.debugLog("DataServerException",this::class.java)
+                                    } else if (e.exceptions.filter { it is DataNotFoundException }.count() > 0) {
+                                        LoggerUtils.debugLog("DataNotFoundException", this::class.java)
+                                    } else if (e.exceptions.filter { it is DataServerException }.count() > 0) {
+                                        LoggerUtils.debugLog("DataServerException", this::class.java)
                                     }
                                 }
-                                LoggerUtils.debugLog( e.message + "${e::class.java.simpleName} for page Np: ${page.newspaperId} ${page.name} L2",this::class.java)
+                                LoggerUtils.debugLog(e.message + "${e::class.java.simpleName} for page Np: ${page.newspaperId} ${page.name} L2", this::class.java)
                             }
                         })
         )
@@ -117,17 +117,22 @@ class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holde
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        LoggerUtils.debugLog("Disposing",this::class.java)
+        LoggerUtils.debugLog("Disposing", this::class.java)
         mDisposable.clear()
     }
 
+    override fun onResume(owner: LifecycleOwner) {
+        LoggerUtils.debugLog("onResume", this::class.java)
+        notifyDataSetChanged()
+    }
+
     override fun onPause(owner: LifecycleOwner) {
-        LoggerUtils.debugLog("Disposing",this::class.java)
+        LoggerUtils.debugLog("Disposing", this::class.java)
         mDisposable.clear()
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
-        LoggerUtils.debugLog("Disposing",this::class.java)
+        LoggerUtils.debugLog("Disposing", this::class.java)
         mDisposable.clear()
     }
 
@@ -138,15 +143,21 @@ class PagePreviewListAdapter(lifecycleOwner: LifecycleOwner,@LayoutRes val holde
 
 }
 
-class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName:Int=0
-                                 ,pageTitleLineCount:Int=1,val compositeDisposable: CompositeDisposable)
+class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName: Int = 0
+                                 , pageTitleLineCount: Int = 1, val compositeDisposable: CompositeDisposable)
     : RecyclerView.ViewHolder(itemView) {
 
     val pageTitle: TextView
     val articlePreviewImage: ImageView
     val articleTitle: TextView
     val articlePublicationTime: TextView
-    var imageLoadingDisposer:Disposable?=null
+
+    val articlePreviewImagePlaceHolder: ImageView
+    val articleTitlePlaceHolder: TextView
+    val articlePublicationTimePlaceHolder: TextView
+
+
+    var imageLoadingDisposer: Disposable? = null
 
     lateinit var mArticle: Article
 
@@ -155,26 +166,32 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName:Int=0
         articlePreviewImage = itemView.findViewById(R.id.article_preview_image)
         articleTitle = itemView.findViewById(R.id.article_title)
         articlePublicationTime = itemView.findViewById(R.id.article_time)
+
+        articlePreviewImagePlaceHolder = itemView.findViewById(R.id.article_preview_ph_image)
+        articleTitlePlaceHolder = itemView.findViewById(R.id.article_title_ph)
+        articlePublicationTimePlaceHolder = itemView.findViewById(R.id.article_time_ph)
+
         pageTitle.setLines(pageTitleLineCount)
-        itemView.setOnClickListener{}
+        itemView.setOnClickListener {}
     }
 
     lateinit var mPage: Page
 
-    fun disposeImageLoader(){
+    fun disposeImageLoader() {
         imageLoadingDisposer?.dispose()
     }
 
     @SuppressLint("CheckResult")
     fun disableDisplay(page: Page) {
 
-        articlePreviewImage.visibility = View.INVISIBLE
-        articleTitle.visibility = View.INVISIBLE
-        articlePublicationTime.visibility = View.INVISIBLE
+        hideArticlePreviewImage()
+        hideArticleTitle()
+        hideArticlePublicationTime()
+        itemView.setOnClickListener {}
 
         mPage = page
 
-        if (showNewsPaperName>0){
+        if (showNewsPaperName > 0) {
             Observable.just(page)
                     .subscribeOn(Schedulers.io())
                     .map {
@@ -186,7 +203,7 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName:Int=0
                         pageTitle.text = StringBuilder(page.name).append(" | ").append(it.name).toString()
                         pageTitle.visibility = View.VISIBLE
                     }
-        }else {
+        } else {
             pageTitle.text = page.name
             pageTitle.visibility = View.VISIBLE
         }
@@ -198,23 +215,23 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName:Int=0
 
         Handler(Looper.getMainLooper()).postDelayed({
             articleTitle.text = mArticle.title
-            articleTitle.visibility = View.VISIBLE
+            showPageTitle()
 
             articlePublicationTime.text = dateString
-            articlePublicationTime.visibility = View.VISIBLE
-            LoggerUtils.debugLog("Page: ${page.name!!} dateString: ${dateString}",this::class.java)
-        },10L)
+            showArticlePublicationTime()
+            LoggerUtils.debugLog("Page: ${page.name!!} dateString: ${dateString}", this::class.java)
+        }, 10L)
 
         imageLoadingDisposer = ImageLoadingDisposer(articlePreviewImage)
         compositeDisposable.add(imageLoadingDisposer!!)
-        ImageUtils.customLoader(articlePreviewImage,mArticle.previewImageLink,
-                                    R.drawable.pc_bg,R.drawable.app_big_logo,
-                                    {
-                                        compositeDisposable.delete(imageLoadingDisposer!!)
-                                        imageLoadingDisposer=null
-                                    })
+        ImageUtils.customLoader(articlePreviewImage, mArticle.previewImageLink,
+                R.drawable.pc_bg, R.drawable.app_big_logo,
+                {
+                    compositeDisposable.delete(imageLoadingDisposer!!)
+                    imageLoadingDisposer = null
+                })
 
-        articlePreviewImage.visibility = View.VISIBLE
+        showArticlePreviewImage()
 
         //Add click listner
         itemView.setOnClickListener(View.OnClickListener {
@@ -224,5 +241,35 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName:Int=0
                     )
             )
         })
+    }
+
+    private fun showPageTitle() {
+        articleTitle.visibility = View.VISIBLE
+        articleTitlePlaceHolder.visibility = View.GONE
+    }
+
+    private fun showArticlePublicationTime() {
+        articlePublicationTime.visibility = View.VISIBLE
+        articlePublicationTimePlaceHolder.visibility = View.GONE
+    }
+
+    private fun showArticlePreviewImage() {
+        articlePreviewImage.visibility = View.VISIBLE
+        articlePreviewImagePlaceHolder.visibility = View.GONE
+    }
+
+    private fun hideArticlePreviewImage() {
+        articlePreviewImage.visibility = View.GONE
+        articlePreviewImagePlaceHolder.visibility = View.VISIBLE
+    }
+
+    private fun hideArticleTitle() {
+        articleTitle.visibility = View.GONE
+        articleTitlePlaceHolder.visibility = View.VISIBLE
+    }
+
+    private fun hideArticlePublicationTime() {
+        articlePublicationTime.visibility = View.GONE
+        articlePublicationTimePlaceHolder.visibility = View.VISIBLE
     }
 }

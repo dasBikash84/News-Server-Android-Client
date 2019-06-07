@@ -19,6 +19,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -142,7 +143,7 @@ class FavouritePagesListAdapter(val context: Context) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavouritePagePreviewHolder {
         return FavouritePagePreviewHolder(LayoutInflater.from(context).inflate(
-                R.layout.view_article_perview_parent_width, parent, false), disposable)
+                R.layout.view_article_perview_for_fav_page, parent, false), disposable)
     }
 
     override fun onBindViewHolder(holder: FavouritePagePreviewHolder, position: Int) {
@@ -168,11 +169,15 @@ class FavouritePagesListAdapter(val context: Context) :
 
 class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: CompositeDisposable) : RecyclerView.ViewHolder(itemview) {
 
+    val articlePreviewHolder:LinearLayout
     private val pageTitle: AppCompatTextView
     private val pageTitleHolder: MaterialCardView
     private val articleTitle: AppCompatTextView
     private val articlePublicationTime: AppCompatTextView
     private val articleImage: AppCompatImageView
+
+    val articleTitlePlaceHolder: TextView
+    val articlePublicationTimePlaceHolder: TextView
 
     lateinit var mPage: Page
     lateinit var mNewspaper: Newspaper
@@ -180,10 +185,14 @@ class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: Compos
 
     init {
         pageTitleHolder = itemview.findViewById(R.id.page_title_holder) as MaterialCardView
+        articlePreviewHolder = itemView.findViewById(R.id.article_preview_holder)
         pageTitle = itemview.findViewById(R.id.page_title)
         articleTitle = itemview.findViewById(R.id.article_title)
         articlePublicationTime = itemview.findViewById(R.id.article_time)
         articleImage = itemview.findViewById(R.id.article_preview_image)
+
+        articleTitlePlaceHolder = itemView.findViewById(R.id.article_title_ph)
+        articlePublicationTimePlaceHolder = itemView.findViewById(R.id.article_time_ph)
     }
 
     fun bind(page: Page?, newspaper: Newspaper) {
@@ -203,6 +212,7 @@ class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: Compos
 
         pageTitleHolder.setOnClickListener {
             if (!::mArticle.isInitialized) {
+                showChilds()
                 val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
                 val newsDataRepository = RepositoryFactory.getNewsDataRepository(itemView.context)
                 var language: Language
@@ -222,12 +232,17 @@ class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: Compos
 
                             override fun onNext(data: Any) {
                                 if (data is Pair<*, *>) {
-                                    showChilds()
+//                                    showChilds()
                                     @Suppress("UNCHECKED_CAST")
                                     mArticle = (data as Pair<Article, String>).first
 
                                     articleTitle.text = mArticle.title
                                     articlePublicationTime.text = data.second
+
+                                    articleTitlePlaceHolder.visibility=View.GONE
+                                    articlePublicationTimePlaceHolder.visibility=View.GONE
+                                    articleTitle.visibility = View.VISIBLE
+                                    articlePublicationTime.visibility = View.VISIBLE
 
                                     val imageLoadingDisposer: Disposable = ImageLoadingDisposer(articleImage)
                                     compositeDisposable.add(imageLoadingDisposer)
@@ -260,12 +275,12 @@ class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: Compos
 
                                     }
                                 }
+                                hideChilds()
                             }
                         })
             } else {
-                if (articleTitle.visibility == View.GONE) {
+                if (articlePreviewHolder.visibility == View.GONE) {
                     showChilds()
-
                 } else {
                     hideChilds()
                 }
@@ -274,15 +289,11 @@ class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: Compos
     }
 
     private fun hideChilds() {
-        articleTitle.visibility = View.GONE
-        articlePublicationTime.visibility = View.GONE
-        articleImage.visibility = View.GONE
+        articlePreviewHolder.visibility = View.GONE
     }
 
     private fun showChilds() {
-        articleTitle.visibility = View.VISIBLE
-        articlePublicationTime.visibility = View.VISIBLE
-        articleImage.visibility = View.VISIBLE
+        articlePreviewHolder.visibility = View.VISIBLE
     }
 
 }

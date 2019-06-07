@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
+import com.dasbikash.news_server.utils.OnceSettableBoolean
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.view_helpers.PageDiffCallback
 import com.dasbikash.news_server.view_controllers.view_helpers.PagePreviewListAdapter
@@ -53,6 +54,9 @@ class NewspaperPerviewFragment : Fragment() {
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
     lateinit var mAppSettingsRepository: AppSettingsRepository
 
+    private var mInitDone = OnceSettableBoolean()
+    private var mInitInitiated = false
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_newspaper_page_list_preview_holder, container, false)
     }
@@ -68,28 +72,38 @@ class NewspaperPerviewFragment : Fragment() {
 
         (activity as NavigationHost)
                 .showBottomNavigationView(true)
+        init()
     }
 
     override fun onResume() {
         super.onResume()
+        init()
+    }
 
-        mDisposable.add(
-                Observable.just(true)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            mAppSettingsRepository
-                                    .getTopPagesForNewspaper(mNewspaper)
-                                    .sortedBy { it.id }
-                                    .toCollection(mutableListOf())
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe({
-                            LoggerUtils.debugLog( "newspaper: ${mNewspaper.name}, top page count: ${it.size}",this::class.java)
-                            mListAdapter = TopPagePreviewListAdapter(this, mAppSettingsRepository, ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
-                            mPagePreviewList.adapter = mListAdapter
-                            mListAdapter.submitList(it.toList())
-                        })
-        )
+    private fun init() {
+        if (!mInitDone.get() && !mInitInitiated) {
+            mInitInitiated = true
+            mDisposable.add(
+                    Observable.just(true)
+                            .subscribeOn(Schedulers.io())
+                            .map {
+                                mAppSettingsRepository
+                                        .getTopPagesForNewspaper(mNewspaper)
+                                        .sortedBy { it.id }
+                                        .toCollection(mutableListOf())
+                            }
+                            .doOnDispose { mInitInitiated = false }
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe({
+                                LoggerUtils.debugLog( "newspaper: ${mNewspaper.name}, top page count: ${it.size}",this::class.java)
+                                mInitDone.set()
+                                mInitInitiated = false
+                                mListAdapter = TopPagePreviewListAdapter(this, mAppSettingsRepository, ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
+                                mPagePreviewList.adapter = mListAdapter
+                                mListAdapter.submitList(it.toList())
+                            })
+            )
+        }
     }
 
     companion object {
