@@ -21,9 +21,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Toast
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -47,6 +47,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
+import java.lang.IllegalArgumentException
 
 class PageGroupEditFragment : Fragment() {
 
@@ -63,7 +64,7 @@ class PageGroupEditFragment : Fragment() {
 
     private lateinit var mPageGroupName: String
     private lateinit var mMode: OPERATING_MODE
-    private lateinit var mBackPressTaskTag:String
+    private lateinit var mBackPressTaskTag: String
 
     private val mCurrentPageList = mutableListOf<Page>()
     private val mSearchResultPageList = mutableListOf<Page>()
@@ -130,7 +131,13 @@ class PageGroupEditFragment : Fragment() {
         }
 
         mResetButton.setOnClickListener {
-            initView()
+            if (checkIfModified()) {
+                DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
+                        message = DISCARD_CHANGES_MESSAGE, doOnPositivePress = { initView() }
+                )).show()
+            }else{
+                DisplayUtils.showShortSnack(view as CoordinatorLayout,NO_MODIFICATIONS_MESSAGE)
+            }
         }
 
         mCancelButton.setOnClickListener {
@@ -193,7 +200,7 @@ class PageGroupEditFragment : Fragment() {
                                         ?.map { appSettingsRepository.findPageById(it) }
                                         ?.forEach {
                                             it?.let {
-                                                LoggerUtils.debugLog( "Page found: ${it.name}",this::class.java)
+                                                LoggerUtils.debugLog("Page found: ${it.name}", this::class.java)
                                                 mPageGroup.pageEntityList.add(it)
                                             }
                                         }
@@ -216,20 +223,20 @@ class PageGroupEditFragment : Fragment() {
     private fun initView() {
         mCurrentPageList.clear()
         mSearchResultPageList.clear()
-        LoggerUtils.debugLog( "initView",this::class.java)
+        LoggerUtils.debugLog("initView", this::class.java)
 
         when (mMode) {
             OPERATING_MODE.EDIT -> {
                 mPageGroupNameEditText.setText(mPageGroupName)
                 mCurrentPageList.addAll(mPageGroup.pageEntityList)
-                LoggerUtils.debugLog( "pageEntityList: ${mPageGroup.pageEntityList.map { it.name }.toList()}",this::class.java)
-                LoggerUtils.debugLog( "mCurrentPageList: ${mCurrentPageList.map { it.name }.toList()}",this::class.java)
+                LoggerUtils.debugLog("pageEntityList: ${mPageGroup.pageEntityList.map { it.name }.toList()}", this::class.java)
+                LoggerUtils.debugLog("mCurrentPageList: ${mCurrentPageList.map { it.name }.toList()}", this::class.java)
             }
             OPERATING_MODE.CREATE -> {
                 mPageGroupNameEditText.setText("")
             }
         }
-        mCurrentPageListAdapter.submitList(mCurrentPageList.toList())
+        submitCurrentListToAdapter()
         mPageSearchBoxEditText.setText("")
         mSearchResultPageListAdapter.submitList(mSearchResultPageList.toList())
     }
@@ -261,10 +268,10 @@ class PageGroupEditFragment : Fragment() {
             labelStringBuilder.append("${newspaper.name}")
             mPageLabelTextView.text = labelStringBuilder.toString()
             itemView.setOnClickListener {
-                LoggerUtils.debugLog( "I am clicked",this::class.java)
+                LoggerUtils.debugLog("I am clicked", this::class.java)
                 if (!mCurrentPageList.contains(mPage)) {
                     mCurrentPageList.add(0, mPage)
-                    mCurrentPageListAdapter.submitList(mCurrentPageList.toList())
+                    submitCurrentListToAdapter()
                 }
                 mSearchResultPageList.remove(mPage)
                 mSearchResultPageListAdapter.submitList(mSearchResultPageList.toList())
@@ -272,20 +279,42 @@ class PageGroupEditFragment : Fragment() {
         }
     }
 
+    private fun swapPagePositionOnList(page1:Page,page2: Page){
+        if (!mCurrentPageList.contains(page1) || !mCurrentPageList.contains(page2)){
+            return
+        }
+        val position1= mCurrentPageList.indexOf(page1)
+        val position2= mCurrentPageList.indexOf(page2)
+        mCurrentPageList.set(position1,page2)
+        mCurrentPageList.set(position2,page1)
+        submitCurrentListToAdapter()
+    }
+
     private inner class CurrentPageSwipeToDeleteCallback() :
-            ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT or ItemTouchHelper.LEFT) {
+            ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT or ItemTouchHelper.LEFT) {
         override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
                             target: RecyclerView.ViewHolder): Boolean {
-            return false
+            val mobilePage = (viewHolder as CurrentPageViewHolder).mPage
+            val targetPage = (target as CurrentPageViewHolder).mPage
+            LoggerUtils.debugLog("Mobile page: ${mobilePage.name}|${mobilePage.newspaperId}",this@PageGroupEditFragment::class.java)
+            LoggerUtils.debugLog("Target page: ${targetPage.name}|${targetPage.newspaperId}",this@PageGroupEditFragment::class.java)
+            swapPagePositionOnList(mobilePage,targetPage)
+            return true
         }
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-            LoggerUtils.debugLog( "Page to remove: ${(viewHolder as CurrentPageViewHolder).mPage.name}",this::class.java)
+            LoggerUtils.debugLog("Page to remove: ${(viewHolder as CurrentPageViewHolder).mPage.name}", this::class.java)
             if (mCurrentPageList.remove((viewHolder).mPage)) {
-                LoggerUtils.debugLog( "Page to removed:",this::class.java)
-                LoggerUtils.debugLog( "mCurrentPageList: ${mCurrentPageList.map { it.name }.toList()}",this::class.java)
-                mCurrentPageListAdapter.submitList(mCurrentPageList.toList())
+                LoggerUtils.debugLog("Page removed", this::class.java)
+                LoggerUtils.debugLog("mCurrentPageList: ${mCurrentPageList.map { it.name }.toList()}", this::class.java)
+                submitCurrentListToAdapter()
             }
+        }
+    }
+
+    private fun submitCurrentListToAdapter() {
+        if (::mCurrentPageListAdapter.isInitialized) {
+            mCurrentPageListAdapter.submitList(mCurrentPageList.toList())
         }
     }
 
@@ -294,22 +323,27 @@ class PageGroupEditFragment : Fragment() {
                 mPageGroupNameEditText.text.toString().isBlank() &&
                 mCurrentPageList.size == 0) {
             return false
-        } else return !(mMode == OPERATING_MODE.EDIT &&
-                mPageGroupNameEditText.text.trim().toString().equals(mPageGroup.name) &&
-                mCurrentPageList.size == mPageGroup.pageEntityList.size &&
-                mCurrentPageList.filter { !mPageGroup.pageEntityList.contains(it) }.count() == 0)
+        } else {
+            return !(mMode == OPERATING_MODE.EDIT &&
+                    mPageGroupNameEditText.text.trim().toString().equals(mPageGroup.name) &&
+                    mCurrentPageList.size == mPageGroup.pageEntityList.size &&
+                    mCurrentPageList.asSequence().map { Pair(mCurrentPageList.indexOf(it), it) }
+                            .filter { mCurrentPageList.get(it.first).id != mPageGroup.pageEntityList.get(it.first).id }.count() == 0)
+        }
     }
 
     private fun cancelButtonClickAction() {
 
         if (checkIfModified()) {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
-                    title = "Exit!", message = "Discard changes and exit?", positiveButtonText = "Yes",
-                    negetiveButtonText = "No", doOnPositivePress = {
-                exit()
-            })).show()
+                    message = DISCARD_CHANGES_AND_EXIT_MESSAGE, positiveButtonText = "Yes",
+                    negetiveButtonText = "No", doOnPositivePress = {exit()}))
+                    .show()
         } else {
-            exit()
+            DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
+                    message = EXIT_PROMPT_MESSAGE, positiveButtonText = "Yes",
+                    negetiveButtonText = "No", doOnPositivePress = {exit()}))
+                    .show()
         }
     }
 
@@ -317,11 +351,17 @@ class PageGroupEditFragment : Fragment() {
 
         if (!checkIfModified()) {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
-                    message = "No modifications. Exit?", doOnPositivePress = { exit() }
+                    message = NO_MODIFICATION_AND_EXIT_MESSAGE, doOnPositivePress = { exit() }
             )).show()
             return
         }
 
+        DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
+                message = SAVE_CHANGES_AND_EXIT_MESSAGE, doOnPositivePress = { saveChangesAndExit() }
+        )).show()
+    }
+
+    private fun saveChangesAndExit() {
         val newPageGroupName = mPageGroupNameEditText.text.toString()
 
         val newPageGroup = PageGroup()
@@ -362,8 +402,9 @@ class PageGroupEditFragment : Fragment() {
                             override fun onError(e: Throwable) {
                                 if (e is NoInternertConnectionException) {
                                     NetConnectivityUtility.showNoInternetToastAnyWay(this@PageGroupEditFragment.context!!)
-                                }else {
-                                    LoggerUtils.debugLog(e.message ?: e::class.java.simpleName+" Error",this::class.java)
+                                } else {
+                                    LoggerUtils.debugLog(e.message ?: e::class.java.simpleName
+                                    + " Error", this::class.java)
                                     DisplayUtils.showErrorRetryToast(this@PageGroupEditFragment.context!!)
                                 }
 
@@ -374,7 +415,13 @@ class PageGroupEditFragment : Fragment() {
     }
 
     companion object {
-        const val ARG_PAGE_GROUP_NAME = "com.dasbikash.news_server.views.PageGroupEditFragment.ARG_PAGE_GROUP_NAME"
+        private const val DISCARD_CHANGES_AND_EXIT_MESSAGE = "Discard changes and exit?"
+        private const val EXIT_PROMPT_MESSAGE = "Exit?"
+        private const val NO_MODIFICATION_AND_EXIT_MESSAGE = "No modifications. Exit?"
+        private const val NO_MODIFICATIONS_MESSAGE = "No modifications!!!"
+        private const val SAVE_CHANGES_AND_EXIT_MESSAGE = "Save changes and exit?"
+        private const val DISCARD_CHANGES_MESSAGE = "Discard changes and reset?"
+        private const val ARG_PAGE_GROUP_NAME = "com.dasbikash.news_server.views.PageGroupEditFragment.ARG_PAGE_GROUP_NAME"
 
         fun getInstance(pageGroupName: String = ""): PageGroupEditFragment {
             val args = Bundle()
