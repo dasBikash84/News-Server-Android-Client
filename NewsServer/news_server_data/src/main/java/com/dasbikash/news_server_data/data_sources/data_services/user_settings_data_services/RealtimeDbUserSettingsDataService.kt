@@ -27,7 +27,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 //internal enum class LogInStatus{NULL,}
 
-internal object RealtimeDbUserSettingsDataService: UserSettingsDataService {
+internal object RealtimeDbUserSettingsDataService : UserSettingsDataService {
 
     override fun getCurrentUserName(): String? {
         return RealtimeDBUserSettingsUtils.getCurrentUserName()
@@ -40,27 +40,23 @@ internal object RealtimeDbUserSettingsDataService: UserSettingsDataService {
 
     //true if logged in
 
-    override fun getLogInStatus():Boolean {
-        LoggerUtils.debugLog("getLogInStatus()",this::class.java)
+    override fun getLogInStatus(): Boolean {
+        LoggerUtils.debugLog("getLogInStatus()", this::class.java)
 
         val firebaseAuth = FirebaseAuth.getInstance()// != null
-        if (firebaseAuth.currentUser == null){
+        if (firebaseAuth.currentUser == null) {
             RealtimeDBUserSettingsUtils.signInAnonymously()
             return false
         }
-        if (firebaseAuth.currentUser!!.isAnonymous){
+        if (firebaseAuth.currentUser!!.isAnonymous) {
             return false
         }
         return true
     }
 
-    override fun signOutUser(){
+    override fun signOutUser() {
         RealtimeDBUserSettingsUtils.signOutUser()
     }
-
-//    override fun completeSignOut(){
-//        RealtimeDBUserSettingsUtils.completeSignOut()
-//    }
 
     override fun getLastUserSettingsUpdateTime(): Long {
         return RealtimeDBUserSettingsUtils.getLastUserSettingsUpdateTime()
@@ -76,17 +72,15 @@ internal object RealtimeDbUserSettingsDataService: UserSettingsDataService {
 
     override fun getLogInIntent(): Intent? {
         RealtimeDBUserSettingsUtils.completeSignOut()
-//        if (!getLogInStatus()){
-            return AuthUI.getInstance()
-                    .createSignInIntentBuilder()
-                    .setAvailableProviders(mSignInProviders)
-                    .build()
-//        }
-//        return null
+        return AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setAvailableProviders(mSignInProviders)
+                .build()
     }
 
     override fun getDefaultPageGroupSettings(): Map<String, PageGroup> {
-        return RealtimeDBAppSettingsUtils.getServerAppSettingsData().page_groups?.toMap() ?: emptyMap()
+        return RealtimeDBAppSettingsUtils.getServerAppSettingsData().page_groups?.toMap()
+                ?: emptyMap()
     }
 
     override fun checkIfLoogedAsAdmin(): Boolean {
@@ -110,7 +104,7 @@ internal object RealtimeDbUserSettingsDataService: UserSettingsDataService {
     }
 
     override fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup) {
-        return RealtimeDBUserSettingsUtils.savePageGroup(oldPageGroup,pageGroup)
+        return RealtimeDBUserSettingsUtils.savePageGroup(oldPageGroup, pageGroup)
     }
     //    override fun getCurrentUser(): FirebaseUser? {
 //        return FirebaseAuth.getInstance().currentUser

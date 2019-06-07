@@ -13,28 +13,25 @@
 
 package com.dasbikash.news_server_data.data_sources
 
-import android.content.Context
 import android.content.Intent
-import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBUserSettingsUtils
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 
-internal interface UserSettingsDataService{
+internal interface UserSettingsDataService {
+    fun getLogInStatus(): Boolean
+    fun getLogInIntent(): Intent?
+    fun signOutUser()
+    fun getCurrentUserName(): String?
+    fun checkIfLoogedAsAdmin(): Boolean
+    fun getDefaultPageGroupSettings(): Map<String, PageGroup>
     fun getLastUserSettingsUpdateTime(): Long
     fun getUserPreferenceData(): UserPreferenceData
-    fun getLogInStatus():Boolean
-    fun getLogInIntent():Intent?
     fun uploadUserPreferenceData(userPreferenceData: UserPreferenceData)
-    fun signOutUser()
-    fun getCurrentUserName():String?
-    fun getDefaultPageGroupSettings():Map<String, PageGroup>
-    fun checkIfLoogedAsAdmin():Boolean
     fun addPageToFavList(page: Page)
     fun removePageFromFavList(page: Page)
     fun addPageGroup(pageGroup: PageGroup)
     fun deletePageGroup(pageGroup: PageGroup)
     fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup)
-//    fun completeSignOut()
 //    fun getCurrentUser():FirebaseUser?
 }

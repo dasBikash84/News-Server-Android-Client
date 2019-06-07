@@ -78,6 +78,11 @@ internal object RealtimeDBUserSettingsUtils {
 
     fun completeSignOut(){
         LoggerUtils.debugLog("completeSignOut()",this::class.java)
+        FirebaseAuth.getInstance().currentUser?.let {
+            if (it.isAnonymous){
+                it.delete()
+            }
+        }
         FirebaseAuth.getInstance().signOut()
     }
 
