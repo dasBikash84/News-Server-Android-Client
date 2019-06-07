@@ -21,7 +21,7 @@ abstract class ActivityWithBackPressQueueManager:AppCompatActivity(),BackPressQu
     private val backPressTaskMap = mutableMapOf<String,()->Unit>()
     private val backPressTaskTagList = mutableListOf<String>()
 
-    override fun addTaskToQueue(task: () -> Unit): String {
+    override fun addToBackPressTaskQueue(task: () -> Unit): String {
         ExceptionUtils.thowExceptionIfNotOnMainThred()
         val uuid= UUID.randomUUID().toString()
         backPressTaskMap.put(uuid,task)
@@ -52,6 +52,6 @@ abstract class ActivityWithBackPressQueueManager:AppCompatActivity(),BackPressQu
 }
 
 interface BackPressQueueManager{
-    fun addTaskToQueue(task:()->Unit):String
+    fun addToBackPressTaskQueue(task:()->Unit):String
     fun removeTaskFromQueue(taskTag:String)
 }

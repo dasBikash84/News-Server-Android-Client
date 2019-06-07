@@ -23,7 +23,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -396,7 +395,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                                 transTextSize = it
                                 mTextSizeChangeFrame.visibility = View.VISIBLE
                                 mTextSizeChangeFrame.bringToFront()
-                                changeTextFontBackPressActionTag = addTaskToQueue { changeTextFontAction() }
+                                changeTextFontBackPressActionTag = addToBackPressTaskQueue { changeTextFontAction() }
                             }
             )
         } else {

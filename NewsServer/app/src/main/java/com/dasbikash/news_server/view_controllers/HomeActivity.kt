@@ -15,6 +15,7 @@ package com.dasbikash.news_server.view_controllers
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -49,10 +50,13 @@ import io.reactivex.schedulers.Schedulers
 
 class HomeActivity : ActivityWithBackPressQueueManager(),
         NavigationHost, HomeNavigator, SignInHandler, WorkInProcessWindowOperator {
-
-    private val SIGN_OUT_PROMPT = "Sign Out?"
-    private val SIGNED_OUT_MESSAGE = "Signed out."
-    private val SIGN_OUT_ERROR_MSG = "Sign out Error!! Please retry."
+    companion object{
+        private const val EXIT_TOAST_MESSAGE = "Press back again to exit."
+        private const val SIGN_OUT_PROMPT = "Sign Out?"
+        private const val SIGNED_OUT_MESSAGE = "Signed out."
+        private const val SIGN_OUT_ERROR_MSG = "Sign out Error!! Please retry."
+        private const val EXIT_WAIT_WINDOW = 2000L
+    }
 
     private lateinit var mToolbar: Toolbar
     private lateinit var mAppBar: AppBarLayout
@@ -97,6 +101,22 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
             mBottomNavigationView.visibility = View.INVISIBLE
             mAppBar.visibility = View.INVISIBLE
             loadInitFragment()
+        }
+        addBackPressAction()
+    }
+
+    private fun addBackPressAction(){
+        addToBackPressTaskQueue {
+            DisplayUtils.showShortToast(this,EXIT_TOAST_MESSAGE)
+            mDisposable.add(
+                    Observable.just(true)
+                            .subscribeOn(Schedulers.io())
+                            .map {
+                                SystemClock.sleep(EXIT_WAIT_WINDOW)
+                            }
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe({addBackPressAction()})
+            )
         }
     }
 
@@ -325,7 +345,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                 removeTaskFromQueue(backPressActionTagForLogInMenuHolder!!)
             }
             backPressActionTagForLogInMenuHolder =
-                    addTaskToQueue { mLogInMenuHolder.visibility = View.GONE }
+                    addToBackPressTaskQueue { mLogInMenuHolder.visibility = View.GONE }
         } else {
             hideLogInMenuHolder()
         }

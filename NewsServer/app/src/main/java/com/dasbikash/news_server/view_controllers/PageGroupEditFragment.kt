@@ -87,7 +87,7 @@ class PageGroupEditFragment : Fragment() {
     }
 
     private fun addBackPressAction() {
-        mBackPressTaskTag = (activity as BackPressQueueManager).addTaskToQueue { cancelButtonClickAction({addBackPressAction()}) }
+        mBackPressTaskTag = (activity as BackPressQueueManager).addToBackPressTaskQueue { cancelButtonClickAction({addBackPressAction()}) }
     }
 
     private fun doOnCreate() {

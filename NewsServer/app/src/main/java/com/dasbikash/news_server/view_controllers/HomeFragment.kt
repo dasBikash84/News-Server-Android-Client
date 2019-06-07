@@ -171,7 +171,7 @@ class HomeFragment : Fragment() {
                                                                                 (activity as BackPressQueueManager).removeTaskFromQueue(backPressTaskTag!!)
                                                                             }
                                                                             backPressTaskTag =
-                                                                                    (activity as BackPressQueueManager).addTaskToQueue { mSearchResultListAdapter.submitList(emptyList()) }
+                                                                                    (activity as BackPressQueueManager).addToBackPressTaskQueue { mSearchResultListAdapter.submitList(emptyList()) }
                                                                         }
                                                                     }
                                                                     override fun onError(e: Throwable) {}
