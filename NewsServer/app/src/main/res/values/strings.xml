@@ -41,7 +41,7 @@
     <string name="no_internet_message">No internet connection!</string>
     <string name="log_in_app_menu_item_title">Log in/Sign up</string>
     <string name="page_search_text_box_hint">Page Search</string>
-    <string name="pagegroup_title_input_hint">Pagegroup Name</string>
+    <string name="pagegroup_title_input_hint">Pagegroup Name(max 80 characters)</string>
     <string name="page_search_to_add_text_box_hint">Search Page by name to add</string>
     <string name="current_page_list_title">Current pages</string>
     <string name="done_text">Done</string>
