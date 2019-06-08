@@ -31,7 +31,7 @@
     <string name="save_article_locally_menu_item_title">Save Article</string>
     <string name="remove_from_favourites_menu_item_title">Remove page from favourites</string>
     <string name="add_to_favourites_menu_item_title">Add page to favourites</string>
-    <string name="change_text_font_menu_item_title">Change article text font</string>
+    <string name="change_text_font_menu_item_title">Change font size</string>
     <string name="bmi_home_title">Home</string>
     <string name="bmi_more_title">More</string>
     <string name="bmi_saved_artiles_title">Saved</string>
