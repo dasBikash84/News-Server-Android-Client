@@ -28,10 +28,9 @@ internal interface UserSettingsDataService {
     fun getLastUserSettingsUpdateTime(): Long
     fun getUserPreferenceData(): UserPreferenceData
     fun uploadUserPreferenceData(userPreferenceData: UserPreferenceData)
-    fun addPageToFavList(page: Page)
-    fun removePageFromFavList(page: Page)
-    fun addPageGroup(pageGroup: PageGroup)
-    fun deletePageGroup(pageGroup: PageGroup)
-    fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup)
+    fun addPageToFavList(page: Page,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null)
+    fun removePageFromFavList(page: Page,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null)
+    fun addPageGroup(pageGroup: PageGroup,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null)
+    fun deletePageGroup(pageGroup: PageGroup,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null)
 //    fun getCurrentUser():FirebaseUser?
 }

@@ -14,6 +14,8 @@
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
 import android.content.Context
+import androidx.annotation.Keep
+import androidx.room.Ignore
 import com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service.UserIpDataService
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
 import com.dasbikash.news_server_data.exceptions.SettingsServerUnavailable
@@ -33,6 +35,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.Exclude
 import com.google.firebase.database.ValueEventListener
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
@@ -71,15 +74,21 @@ internal object RealtimeDBUserSettingsUtils {
     }
 
     fun signOutUser() {
-        LoggerUtils.debugLog("signOutUser()",this::class.java)
+        LoggerUtils.debugLog("signOutUser()", this::class.java)
         completeSignOut()
         signInAnonymously()
     }
 
-    fun completeSignOut(){
-        LoggerUtils.debugLog("completeSignOut()",this::class.java)
+    private fun signOutFreshUser() {
+        LoggerUtils.debugLog("signOutFreshUser()", this::class.java)
+        FirebaseAuth.getInstance().currentUser?.delete()
+        signInAnonymously()
+    }
+
+    fun completeSignOut() {
+        LoggerUtils.debugLog("completeSignOut()", this::class.java)
         FirebaseAuth.getInstance().currentUser?.let {
-            if (it.isAnonymous){
+            if (it.isAnonymous) {
                 it.delete()
             }
         }
@@ -150,11 +159,41 @@ internal object RealtimeDBUserSettingsUtils {
 
         userSettingsNodes.favPageIdMapRef
                 .setValue(getFavPageIdMapForRemoteDb(userPreferenceData.favouritePageIds))
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        executeBackGroundTask {
+                            userSettingsNodes.pageGroupListRef
+                                    .setValue(getPageGroupMapForRemoteDb(userPreferenceData.pageGroups.toMap()))
+                                    .addOnCompleteListener { task ->
+                                        if (task.isSuccessful) {
+                                            executeBackGroundTask {
+                                                addSettingsUpdateTime()
+                                            }
+                                        } else {
+                                            executeBackGroundTask { signOutFreshUser() }
+                                        }
+                                    }
+                        }
+                    } else {
+                        executeBackGroundTask { signOutFreshUser() }
+                    }
+                }
 
-        userSettingsNodes.pageGroupListRef
-                .setValue(userPreferenceData.pageGroups)
+    }
 
-        addSettingsUpdateTime()
+    private fun getFavPageIdMapForRemoteDb(favouritePageIds: List<String>): Map<String, Boolean> {
+        val favPageIdMapForRemoteDb = mutableMapOf<String, Boolean>()
+        favouritePageIds.asSequence().forEach { favPageIdMapForRemoteDb.put(it, true) }
+        return favPageIdMapForRemoteDb.toMap()
+    }
+
+    private fun getPageGroupMapForRemoteDb(pageGroups:Map<String,PageGroup>): Map<String, PageGroupForRemoteDb> {
+        val pageGroupMapForRemoteDb = mutableMapOf<String,PageGroupForRemoteDb>()
+        pageGroups.values.asSequence().forEach {
+            val pageGroupForRemoteDb = PageGroupForRemoteDb.getInstance(it)
+            pageGroupMapForRemoteDb.put(pageGroupForRemoteDb.name,pageGroupForRemoteDb)
+        }
+        return pageGroupMapForRemoteDb.toMap()
     }
 
     private fun getIpAddress(): String {
@@ -179,64 +218,54 @@ internal object RealtimeDBUserSettingsUtils {
     private fun getFavPageRef(page: Page) =
             RealtimeDBUtils.mUserSettingsRootReference.child(getLoggedInFirebaseUser().uid).child(FAV_PAGE_ID_MAP_NODE).child(page.id)
 
-    private fun changePageStateOnFavList(page: Page, status: Boolean) {
+    private fun changePageStateOnFavList(page: Page, status: Boolean
+                                         , doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null) {
         val favPageRef = getFavPageRef(page)
         favPageRef.setValue(status)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                    } else {
-                        when (status) {
-                            true -> {
-                                UserSettingsRepository.undoAddPageToFavList(page)
-                            }
-                            false -> {
-                                UserSettingsRepository.undoRemovePageFromFavList(page)
-                            }
+                        executeBackGroundTask {
+                            addSettingsUpdateTime()
+                            doOnSuccess?.let { it() }
                         }
+                    } else {
+                        doOnFailure?.let { it() }
                     }
                 }
-
-        addSettingsUpdateTime()
     }
 
-    enum class PageGroupEditAction { ADD, DELETE }
+    fun addPageToFavList(page: Page, doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null) = changePageStateOnFavList(page, true, doOnSuccess, doOnFailure)
+    fun removePageFromFavList(page: Page, doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null) = changePageStateOnFavList(page, false, doOnSuccess, doOnFailure)
+
+    private enum class PageGroupEditAction { ADD, DELETE }
 
     private fun uploadPageGroupData(pageGroup: PageGroup, pageGroupEditAction: PageGroupEditAction
-                                    ,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null)
-    {
+                                    , doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null) {
         LoggerUtils.debugLog("uploadPageGroupData. Action: ${pageGroupEditAction.name} for ${pageGroup.name}", this::class.java)
         val pageGroupEntryRef = getPageGroupEntryRef(pageGroup.name)
         pageGroupEntryRef.setValue(when (pageGroupEditAction) {
-            RealtimeDBUserSettingsUtils.PageGroupEditAction.ADD -> pageGroup
+            RealtimeDBUserSettingsUtils.PageGroupEditAction.ADD -> PageGroupForRemoteDb.getInstance(pageGroup)
             RealtimeDBUserSettingsUtils.PageGroupEditAction.DELETE -> null
         })
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        doOnSuccess?.let {
-                            Observable.just(it)
-                                    .subscribeOn(Schedulers.io())
-                                    .map { it() }
-                                    .subscribe()
+                        executeBackGroundTask {
+                            addSettingsUpdateTime()
+                            doOnSuccess?.let { it() }
                         }
                     } else {
-                        when (pageGroupEditAction) {
-                            RealtimeDBUserSettingsUtils.PageGroupEditAction.ADD -> {
-                                UserSettingsRepository.undoAddPageGroup(pageGroup)
-                            }
-                            RealtimeDBUserSettingsUtils.PageGroupEditAction.DELETE -> {
-                                UserSettingsRepository.undoDeletePageGroup(pageGroup)
-                            }
-                        }
-                        doOnFailure?.let {
-                            Observable.just(it)
-                                    .subscribeOn(Schedulers.io())
-                                    .map { it() }
-                                    .subscribe()
-                        }
+                        doOnFailure?.let { it() }
                     }
                 }
-        addSettingsUpdateTime()
     }
+
+    fun addPageGroup(pageGroup: PageGroup
+                     , doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null) =
+            uploadPageGroupData(pageGroup, RealtimeDBUserSettingsUtils.PageGroupEditAction.ADD, doOnSuccess, doOnFailure)
+
+    fun deletePageGroup(pageGroup: PageGroup
+                        , doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null) =
+            uploadPageGroupData(pageGroup, RealtimeDBUserSettingsUtils.PageGroupEditAction.DELETE, doOnSuccess, doOnFailure)
 
     private fun getPageGroupEntryRef(pageGroupEntryId: String) =
             RealtimeDBUtils.mUserSettingsRootReference.child(getLoggedInFirebaseUser().uid)
@@ -252,31 +281,15 @@ internal object RealtimeDBUserSettingsUtils {
                 .setValue(UserSettingsUpdateDetails(userIp = ipAddress))
     }
 
-    private fun getFavPageIdMapForRemoteDb(favouritePageIds: List<String>): Map<String, Boolean> {
-        val favPageIdMapForRemoteDb = mutableMapOf<String, Boolean>()
-        favouritePageIds.asSequence().forEach { favPageIdMapForRemoteDb.put(it, true) }
-        return favPageIdMapForRemoteDb.toMap()
+    private fun executeBackGroundTask(task: () -> Unit) {
+        LoggerUtils.debugLog("executeBackGroundTask", this::class.java)
+        Observable.just(task)
+                .subscribeOn(Schedulers.io())
+                .map {
+                    task()
+                }
+                .subscribe()
     }
-
-    fun addPageGroup(pageGroup: PageGroup
-                     ,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null) =
-            uploadPageGroupData(pageGroup, RealtimeDBUserSettingsUtils.PageGroupEditAction.ADD,doOnSuccess,doOnFailure)
-    fun deletePageGroup(pageGroup: PageGroup
-                        ,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null) =
-            uploadPageGroupData(pageGroup, RealtimeDBUserSettingsUtils.PageGroupEditAction.DELETE,doOnSuccess,doOnFailure)
-
-    fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup) {
-        deletePageGroup(oldPageGroup, doOnSuccess = {
-            addPageGroup(pageGroup, doOnFailure = {
-                addPageGroup(oldPageGroup)
-                UserSettingsRepository.undoDeletePageGroup(oldPageGroup)
-            })
-        })
-
-    }
-
-    fun addPageToFavList(page: Page) = changePageStateOnFavList(page, true)
-    fun removePageFromFavList(page: Page) = changePageStateOnFavList(page, false)
 
 
     fun getLastUserSettingsUpdateTime(): Long {
@@ -355,9 +368,9 @@ internal object RealtimeDBUserSettingsUtils {
         return true
     }
 
-    fun signInAnonymously(){
+    fun signInAnonymously() {
 
-        LoggerUtils.debugLog("completeSignOut()",this::class.java)
+        LoggerUtils.debugLog("completeSignOut()", this::class.java)
 
         val firebaseAuth = FirebaseAuth.getInstance()
         firebaseAuth.signOut()
@@ -366,9 +379,9 @@ internal object RealtimeDBUserSettingsUtils {
         var settingsServerException: SettingsServerException? = SettingsServerException()
 
         firebaseAuth.signInAnonymously()
-                .addOnCompleteListener(object :OnCompleteListener<AuthResult>{
+                .addOnCompleteListener(object : OnCompleteListener<AuthResult> {
                     override fun onComplete(task: Task<AuthResult>) {
-                        if (task.isSuccessful){
+                        if (task.isSuccessful) {
                             settingsServerException = null
                         }
                         synchronized(lock) { lock.notify() }
@@ -377,5 +390,16 @@ internal object RealtimeDBUserSettingsUtils {
 
         synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
         settingsServerException?.let { throw it }
+    }
+    @Keep
+    private data class PageGroupForRemoteDb(
+            val name: String,
+            val pageList: List<String>
+    ){
+        companion object{
+            fun getInstance(pageGroup: PageGroup):PageGroupForRemoteDb{
+                return PageGroupForRemoteDb(pageGroup.name,pageGroup.pageList!!)
+            }
+        }
     }
 }

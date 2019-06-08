@@ -87,24 +87,20 @@ internal object RealtimeDbUserSettingsDataService : UserSettingsDataService {
         return RealtimeDBUserSettingsUtils.checkIfLoogedAsAdmin()
     }
 
-    override fun addPageToFavList(page: Page) {
-        return RealtimeDBUserSettingsUtils.addPageToFavList(page)
+    override fun addPageToFavList(page: Page, doOnSuccess: (() -> Unit)?, doOnFailure: (() -> Unit)?) {
+        return RealtimeDBUserSettingsUtils.addPageToFavList(page,doOnSuccess, doOnFailure)
     }
 
-    override fun removePageFromFavList(page: Page) {
-        return RealtimeDBUserSettingsUtils.removePageFromFavList(page)
+    override fun removePageFromFavList(page: Page, doOnSuccess: (() -> Unit)?, doOnFailure: (() -> Unit)?) {
+        return RealtimeDBUserSettingsUtils.removePageFromFavList(page,doOnSuccess, doOnFailure)
     }
 
-    override fun addPageGroup(pageGroup: PageGroup) {
-        return RealtimeDBUserSettingsUtils.addPageGroup(pageGroup)
+    override fun addPageGroup(pageGroup: PageGroup, doOnSuccess: (() -> Unit)?, doOnFailure: (() -> Unit)?) {
+        return RealtimeDBUserSettingsUtils.addPageGroup(pageGroup,doOnSuccess, doOnFailure)
     }
 
-    override fun deletePageGroup(pageGroup: PageGroup) {
-        return RealtimeDBUserSettingsUtils.deletePageGroup(pageGroup)
-    }
-
-    override fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup) {
-        return RealtimeDBUserSettingsUtils.savePageGroup(oldPageGroup, pageGroup)
+    override fun deletePageGroup(pageGroup: PageGroup, doOnSuccess: (() -> Unit)?, doOnFailure: (() -> Unit)?) {
+        return RealtimeDBUserSettingsUtils.deletePageGroup(pageGroup,doOnSuccess, doOnFailure)
     }
     //    override fun getCurrentUser(): FirebaseUser? {
 //        return FirebaseAuth.getInstance().currentUser

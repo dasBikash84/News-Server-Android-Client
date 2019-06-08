@@ -50,7 +50,7 @@ abstract class UserSettingsRepository {
     abstract protected fun getUserPreferenceDataFromLocalDB(): UserPreferenceData
     abstract protected fun saveUserPreferenceDataToLocalDb(userPreferenceData: UserPreferenceData)
     abstract protected fun addPageGroupsToLocalDb(pageGroups: List<PageGroup>)
-    abstract protected fun deletePageGroupFromLocalDb(pageGroup:PageGroup)
+    abstract protected fun deletePageGroupFromLocalDb(pageGroup: PageGroup)
     abstract protected fun getLocalPreferenceData(): List<UserPreferenceData>
     abstract fun findPageGroupByName(pageGroupName: String): PageGroup?
     abstract fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?>
@@ -156,10 +156,14 @@ abstract class UserSettingsRepository {
             return true
         }
         userPreferenceData.favouritePageIds.add(page.id)
-        mUserSettingsDataService.addPageToFavList(page)
+        mUserSettingsDataService.addPageToFavList(page,doOnSuccess ={executeBackGroundTask {
+                                                        saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)}},
+                                                    doOnFailure = {executeBackGroundTask {
+                                                        userPreferenceData.favouritePageIds.remove(page.id)
+                                                        saveUserPreferenceDataToLocalDb(userPreferenceData)
+                                                    }}
+                                                )
         saveUserPreferenceDataToLocalDb(userPreferenceData)
-        saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
-
         return true
     }
 
@@ -172,10 +176,14 @@ abstract class UserSettingsRepository {
             return true
         }
         userPreferenceData.favouritePageIds.remove(page.id)
-        mUserSettingsDataService.removePageFromFavList(page)
+        mUserSettingsDataService.removePageFromFavList(page,doOnSuccess ={executeBackGroundTask {
+                                                                saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)}},
+                                                            doOnFailure = {executeBackGroundTask {
+                                                                userPreferenceData.favouritePageIds.add(page.id)
+                                                                saveUserPreferenceDataToLocalDb(userPreferenceData)
+                                                            }}
+                                                        )
         saveUserPreferenceDataToLocalDb(userPreferenceData)
-        saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
-
         return true
     }
 
@@ -183,9 +191,13 @@ abstract class UserSettingsRepository {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         LoggerUtils.debugLog("addPageGroup: ${pageGroup.name}", this::class.java)
 
-        mUserSettingsDataService.addPageGroup(pageGroup)
+        mUserSettingsDataService.addPageGroup(pageGroup,doOnSuccess ={executeBackGroundTask {
+                                                                saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)}},
+                                                        doOnFailure = {executeBackGroundTask {
+                                                            deletePageGroupFromLocalDb(pageGroup)
+                                                        }}
+                                                )
         addPageGroupsToLocalDb(listOf<PageGroup>(pageGroup))
-        saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
         return true
     }
 
@@ -193,9 +205,13 @@ abstract class UserSettingsRepository {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         LoggerUtils.debugLog("deletePageGroup: ${pageGroup.name}", this::class.java)
 
-        mUserSettingsDataService.deletePageGroup(pageGroup)
+        mUserSettingsDataService.deletePageGroup(pageGroup,doOnSuccess ={executeBackGroundTask {
+                                                                saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)}},
+                                                            doOnFailure = {executeBackGroundTask {
+                                                                addPageGroupsToLocalDb(listOf<PageGroup>(pageGroup))
+                                                            }}
+                                                )
         deletePageGroupFromLocalDb(pageGroup)
-        saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
         return true
     }
 
@@ -203,11 +219,26 @@ abstract class UserSettingsRepository {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         LoggerUtils.debugLog("savePageGroup: ${pageGroup.name}", this::class.java)
 
-        mUserSettingsDataService.savePageGroup(oldPageGroup, pageGroup)
-        deletePageGroupFromLocalDb(oldPageGroup)
-        addPageGroupsToLocalDb(listOf(pageGroup))
-        saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
+        mUserSettingsDataService.deletePageGroup(oldPageGroup,doOnSuccess =
+                                                        {executeBackGroundTask {
+                                                            deletePageGroupFromLocalDb(oldPageGroup)
+                                                            mUserSettingsDataService.addPageGroup(pageGroup,doOnSuccess =
+                                                                    {executeBackGroundTask {
+                                                                        addPageGroupsToLocalDb(listOf<PageGroup>(pageGroup))
+                                                                        saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
+                                                                    }},doOnFailure = {executeBackGroundTask {addPageGroupsToLocalDb(listOf<PageGroup>(oldPageGroup))}})
+                                                        }})
         return true
+    }
+
+    private fun executeBackGroundTask(task:()->Unit){
+        LoggerUtils.debugLog("executeBackGroundTask", this::class.java)
+        Observable.just(task)
+                .subscribeOn(Schedulers.io())
+                .map {
+                    task()
+                }
+                .subscribe()
     }
 
     private fun updateUserSettingsIfModified(context: Context) {
@@ -215,7 +246,7 @@ abstract class UserSettingsRepository {
         LoggerUtils.debugLog("updateUserSettingsIfModified", this::class.java)
 
         val serverLastUserSettingsUpdateTime = mUserSettingsDataService.getLastUserSettingsUpdateTime()
-        if ( serverLastUserSettingsUpdateTime > getLastUserSettingsUpdateTime(context)) {
+        if (serverLastUserSettingsUpdateTime > getLastUserSettingsUpdateTime(context)) {
             val userPreferenceData = getServerUserPreferenceData()
             userPreferenceData.id = UUID.randomUUID().toString()
             nukeUserPreferenceDataTable()
@@ -254,7 +285,6 @@ abstract class UserSettingsRepository {
     companion object {
         @Volatile
         private lateinit var INSTANCE: UserSettingsRepository
-        private const val SETTINGS_CHANGE_REVERT_MESSAGE = "Settings chnage reverted due to server error."
 
         internal fun getImpl(context: Context, dbImplementation: DbImplementation): UserSettingsRepository {
             if (!::INSTANCE.isInitialized) {
@@ -267,85 +297,6 @@ abstract class UserSettingsRepository {
                 }
             }
             return INSTANCE
-        }
-
-
-        @SuppressLint("CheckResult")
-        internal fun undoAddPageToFavList(page: Page) {
-            if (::INSTANCE.isInitialized) {
-                LoggerUtils.debugLog("undoAddPageToFavList: ${page.name}", this::class.java)
-                Observable.just(page)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            val userPreferenceData = INSTANCE.getUserPreferenceDataFromLocalDB()
-                            if (!userPreferenceData.favouritePageIds.contains(it.id)) {
-                                return@map false
-                            }
-                            userPreferenceData.favouritePageIds.remove(it.id)
-                            INSTANCE.saveUserPreferenceDataToLocalDb(userPreferenceData)
-                            return@map true
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe()
-            } else {
-                LoggerUtils.debugLog("No INSTANCE found of ${INSTANCE::class.java.simpleName}.", this::class.java)
-            }
-        }
-
-        @SuppressLint("CheckResult")
-        internal fun undoRemovePageFromFavList(page: Page) {
-            if (::INSTANCE.isInitialized) {
-                LoggerUtils.debugLog("undoRemovePageFromFavList: ${page.name}", this::class.java)
-                Observable.just(page)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            val userPreferenceData = INSTANCE.getUserPreferenceDataFromLocalDB()
-                            if (userPreferenceData.favouritePageIds.contains(it.id)) {
-                                return@map false
-                            }
-                            userPreferenceData.favouritePageIds.add(it.id)
-                            INSTANCE.saveUserPreferenceDataToLocalDb(userPreferenceData)
-                            return@map true
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe()
-            } else {
-                LoggerUtils.debugLog("No INSTANCE found of ${INSTANCE::class.java.simpleName}.", this::class.java)
-            }
-        }
-
-        @SuppressLint("CheckResult")
-        internal fun undoAddPageGroup(pageGroup: PageGroup) {
-            if (::INSTANCE.isInitialized) {
-                LoggerUtils.debugLog("undoAddPageGroup. ID: ${pageGroup.name}", this::class.java)
-                Observable.just(pageGroup)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            INSTANCE.deletePageGroupFromLocalDb(it)
-                            true
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe()
-            } else {
-                LoggerUtils.debugLog("No INSTANCE found of ${INSTANCE::class.java.simpleName}.", this::class.java)
-            }
-        }
-
-        @SuppressLint("CheckResult")
-        internal fun undoDeletePageGroup(pageGroup: PageGroup) {
-            if (::INSTANCE.isInitialized) {
-                LoggerUtils.debugLog("undoDeletePageGroup. ID: ${pageGroup.name}", this::class.java)
-                Observable.just(pageGroup)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            INSTANCE.addPageGroupsToLocalDb(listOf<PageGroup>(pageGroup))
-                            true
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe()
-            } else {
-                LoggerUtils.debugLog("No INSTANCE found of ${INSTANCE::class.java.simpleName}.", this::class.java)
-            }
         }
     }
 
