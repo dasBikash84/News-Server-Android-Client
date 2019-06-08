@@ -77,8 +77,8 @@ class SavedArticlesFragment : Fragment() {
                     override fun onChanged(savedArticleList: List<SavedArticle>?) {
                         if (savedArticleList==null){mNoSavedArticleMsgHolder.visibility=View.VISIBLE}
                         savedArticleList?.let {
+                            mListAdapter.submitList(it.sortedBy { it.newspaperName + it.pageName }.toList())
                             if (it.isNotEmpty()) {
-                                mListAdapter.submitList(it.sortedBy { it.newspaperName + it.pageName }.toList())
                                 mNoSavedArticleMsgHolder.visibility=View.GONE
                             }else{
                                 mNoSavedArticleMsgHolder.visibility=View.VISIBLE

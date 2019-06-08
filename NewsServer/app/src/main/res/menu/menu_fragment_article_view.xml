@@ -18,5 +18,5 @@
         android:id="@+id/save_article_locally_menu_item"
         android:icon="@drawable/ic_save"
         android:title="@string/save_article_locally_menu_item_title"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="collapseActionView"/>
 </menu>
