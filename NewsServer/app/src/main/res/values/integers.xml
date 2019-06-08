@@ -15,4 +15,6 @@
 <resources>
     <integer name="card_flip_time_full">300</integer>
     <integer name="card_flip_time_half">150</integer>
+    <integer name="page_group_name_max_char">100</integer>
+    <integer name="page_search_max_char">15</integer>
 </resources>

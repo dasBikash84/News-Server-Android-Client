@@ -40,13 +40,15 @@
                 android:padding="4dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toTopOf="parent"
+                app:counterEnabled="true"
+                app:counterMaxLength="@integer/page_group_name_max_char">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/pagegroup_name_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:maxLength="80"/>
+                    android:maxLength="@integer/page_group_name_max_char"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -102,7 +104,8 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/page_search_box_edit_text"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:maxLength="@integer/page_search_max_char"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 

@@ -137,13 +137,14 @@ class PageGroupEditFragment : Fragment() {
         }
 
         mResetButton.setOnClickListener {
+            mPageSearchBoxEditText.setText("")
             val modificationStatus = getDataModificationStatus()
             if (modificationStatus == DataModificationStatus.MODIFIED) {
                 DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                         message = DISCARD_CHANGES_MESSAGE, doOnPositivePress = { initView() }
                 )).show()
             } else {
-                DisplayUtils.showShortSnack(view as CoordinatorLayout, NO_MODIFICATIONS_MESSAGE)
+//                DisplayUtils.showShortSnack(view as CoordinatorLayout, NO_MODIFICATIONS_MESSAGE)
             }
         }
 
