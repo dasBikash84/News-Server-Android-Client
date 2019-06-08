@@ -221,13 +221,21 @@ abstract class UserSettingsRepository {
 
         mUserSettingsDataService.deletePageGroup(oldPageGroup,doOnSuccess =
                                                         {executeBackGroundTask {
-                                                            deletePageGroupFromLocalDb(oldPageGroup)
                                                             mUserSettingsDataService.addPageGroup(pageGroup,doOnSuccess =
                                                                     {executeBackGroundTask {
-                                                                        addPageGroupsToLocalDb(listOf<PageGroup>(pageGroup))
-                                                                        saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
-                                                                    }},doOnFailure = {executeBackGroundTask {addPageGroupsToLocalDb(listOf<PageGroup>(oldPageGroup))}})
-                                                        }})
+                                                                        saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)}},
+                                                                    doOnFailure = {executeBackGroundTask {
+                                                                        addPageGroupsToLocalDb(listOf<PageGroup>(oldPageGroup))
+                                                                        deletePageGroupFromLocalDb(pageGroup)
+                                                                    }})
+                                                        }},
+                                                        doOnFailure = {executeBackGroundTask {
+                                                            addPageGroupsToLocalDb(listOf<PageGroup>(oldPageGroup))
+                                                            deletePageGroupFromLocalDb(pageGroup)
+                                                        }}
+                                                )
+        deletePageGroupFromLocalDb(oldPageGroup)
+        addPageGroupsToLocalDb(listOf<PageGroup>(pageGroup))
         return true
     }
 
