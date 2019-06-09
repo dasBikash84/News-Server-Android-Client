@@ -20,6 +20,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ListAdapter
@@ -41,6 +42,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.atomic.AtomicBoolean
 
 class NewspaperPerviewFragment : Fragment() {
 
@@ -49,13 +51,14 @@ class NewspaperPerviewFragment : Fragment() {
 
     private lateinit var mPagePreviewList: RecyclerView
     private lateinit var mListAdapter: TopPagePreviewListAdapter
+    private lateinit var mTopPageList: List<Page>
 
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
     lateinit var mAppSettingsRepository: AppSettingsRepository
 
     private var mInitDone = OnceSettableBoolean()
-    private var mInitInitiated = false
+    private var mInitInitiated = AtomicBoolean(false)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_newspaper_page_list_preview_holder, container, false)
@@ -81,26 +84,29 @@ class NewspaperPerviewFragment : Fragment() {
     }
 
     private fun init() {
-        if (!mInitDone.get() && !mInitInitiated) {
-            mInitInitiated = true
+        if (!mInitDone.get()) {
             mDisposable.add(
                     Observable.just(true)
                             .subscribeOn(Schedulers.io())
                             .map {
-                                mAppSettingsRepository
-                                        .getTopPagesForNewspaper(mNewspaper)
-                                        .sortedBy { it.id }
-                                        .toCollection(mutableListOf())
+                                if (!mInitInitiated.get()  && !mInitDone.get()) {
+                                    mInitInitiated.set(true)
+                                    mTopPageList =  mAppSettingsRepository
+                                                        .getTopPagesForNewspaper(mNewspaper)
+                                                        .sortedBy { it.id }
+                                                        .toList()
+                                }
                             }
-                            .doOnDispose { mInitInitiated = false }
+                            .doOnDispose { mInitInitiated.set(false) }
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe({
-                                LoggerUtils.debugLog( "newspaper: ${mNewspaper.name}, top page count: ${it.size}",this::class.java)
-                                mInitDone.set()
-                                mInitInitiated = false
-                                mListAdapter = TopPagePreviewListAdapter(this, mAppSettingsRepository, ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
-                                mPagePreviewList.adapter = mListAdapter
-                                mListAdapter.submitList(it.toList())
+                                if(::mTopPageList.isInitialized && this.lifecycle.currentState==Lifecycle.State.RESUMED && !mInitDone.get()) {
+                                    mInitDone.set()
+                                    LoggerUtils.debugLog( "newspaper: ${mNewspaper.name}, top page count: ${mTopPageList.size}",this::class.java)
+                                    mListAdapter = TopPagePreviewListAdapter(this, mAppSettingsRepository, ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
+                                    mPagePreviewList.adapter = mListAdapter
+                                    mListAdapter.submitList(mTopPageList)
+                                }
                             })
             )
         }

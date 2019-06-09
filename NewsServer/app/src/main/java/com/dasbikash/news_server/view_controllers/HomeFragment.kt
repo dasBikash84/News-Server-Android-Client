@@ -85,7 +85,7 @@ class HomeFragment : Fragment() {
 
         data_load_progress.visibility = View.GONE //not to be displayed on this page
 
-        val mFragmentStatePagerAdapter =  object : FragmentStatePagerAdapter(activity!!.supportFragmentManager){
+        val mFragmentStatePagerAdapter =  object : FragmentStatePagerAdapter(activity!!.supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT){
             override fun getItemPosition(`object`: Any): Int {
                 return PagerAdapter.POSITION_NONE
             }
