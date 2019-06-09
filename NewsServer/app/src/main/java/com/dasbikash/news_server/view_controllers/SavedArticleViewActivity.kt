@@ -66,7 +66,7 @@ class SavedArticleViewActivity : AppCompatActivity() {
         getSupportActionBar()!!.setDisplayShowHomeEnabled(true)
 
         mFragmentStatePagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager,
-                FragmentStatePagerAdapter.BEHAVIOR_SET_USER_VISIBLE_HINT) {
+                FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
             override fun getItemPosition(fragment: Any) = PagerAdapter.POSITION_NONE
             override fun getItem(position: Int): Fragment {

@@ -142,7 +142,7 @@ class ArticleViewFragment : Fragment() {
         DisplayUtils.displayHtmlText(mArticleText, mArticle.articleText!!)
 
         if (mArticle.imageLinkList != null && mArticle.imageLinkList!!.size > 0) {
-            mArticleImageListAdapter = ArticleImageListAdapter(this)
+            mArticleImageListAdapter = ArticleImageListAdapter(this,mArticleTextSize!!.toFloat())
             mArticleImageHolder.adapter = mArticleImageListAdapter
             mArticleImageListAdapter.submitList(mArticle.imageLinkList)
             mArticleImageHolder.visibility = View.VISIBLE
@@ -257,7 +257,7 @@ object ArticleImageDiffCallback : DiffUtil.ItemCallback<ArticleImage>() {
     }
 }
 
-class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner) :
+class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner,val mArticleTextSize:Float) :
         ListAdapter<ArticleImage, ArticleImageHolder>(ArticleImageDiffCallback), DefaultLifecycleObserver {
 
     init {
@@ -270,12 +270,12 @@ class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner) :
         return ArticleImageHolder(
                 LayoutInflater.from(parent.context)
                         .inflate(R.layout.view_article_image, parent, false),
-                mDisposable
+                mDisposable,mArticleTextSize
         )
     }
 
     override fun onBindViewHolder(holder: ArticleImageHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position),position+1,itemCount)
     }
 
     override fun onViewRecycled(holder: ArticleImageHolder) {
@@ -305,25 +305,35 @@ class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner) :
     }
 }
 
-class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDisposable) : RecyclerView.ViewHolder(itemView) {
+class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDisposable, textFontSize:Float) : RecyclerView.ViewHolder(itemView) {
 
     val mArticleImage: AppCompatImageView
     val mImageCaption: AppCompatTextView
+    val mCurrentImagePositionText: AppCompatTextView
     var imageLoadingDisposer: Disposable? = null
 
     init {
         mArticleImage = itemView.findViewById(R.id.article_image)
         mImageCaption = itemView.findViewById(R.id.article_image_caption)
+        mCurrentImagePositionText = itemView.findViewById(R.id.current_image_position)
+
+        mImageCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize)
+        mCurrentImagePositionText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize)
     }
 
     fun disposeImageLoader() {
         imageLoadingDisposer?.dispose()
     }
 
-    fun bind(articleImage: ArticleImage) {
+    fun bind(articleImage: ArticleImage,currentImagePosition:Int,totalImageCount:Int) {
         if (articleImage.link != null) {
             itemView.visibility = View.VISIBLE
 
+            mCurrentImagePositionText.text = StringBuilder("${currentImagePosition}")
+                                                .append("/")
+                                                .append("${totalImageCount}")
+                                                .toString()
+            mCurrentImagePositionText.bringToFront()
             imageLoadingDisposer = ImageLoadingDisposer(mArticleImage)
             compositeDisposable.add(imageLoadingDisposer!!)
 

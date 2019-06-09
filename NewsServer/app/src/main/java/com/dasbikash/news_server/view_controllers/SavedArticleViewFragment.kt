@@ -15,6 +15,7 @@ package com.dasbikash.news_server.view_controllers
 
 import android.content.Context
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.*
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.Fragment
@@ -38,11 +39,12 @@ class SavedArticleViewFragment : Fragment() {
     private lateinit var mArticlePublicationText: AppCompatTextView
     private lateinit var mArticleText: AppCompatTextView
     private lateinit var mArticleImageHolder: RecyclerView
-    private val mArticleImageListAdapter = ArticleImageListAdapter(this)
+    private lateinit var mArticleImageListAdapter : ArticleImageListAdapter
 
     private lateinit var mArticleDateString: String
     private lateinit var mSavedArticle: SavedArticle
     private lateinit var mArticleId: String
+    private var mArticleTextSize: Int? = null
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
@@ -71,7 +73,6 @@ class SavedArticleViewFragment : Fragment() {
         LoggerUtils.debugLog(mArticleId, this::class.java)
 
         findViewItems(view)
-        mArticleImageHolder.adapter = mArticleImageListAdapter
 
     }
 
@@ -86,12 +87,10 @@ class SavedArticleViewFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         LoggerUtils.debugLog("onStart", this::class.java)
+        init()
     }
 
-    override fun onResume() {
-        super.onResume()
-        LoggerUtils.debugLog("onResume", this::class.java)
-
+    private fun init() {
         mDisposable.add(
                 Observable.just(mArticleId)
                         .subscribeOn(Schedulers.io())
@@ -102,6 +101,7 @@ class SavedArticleViewFragment : Fragment() {
                                 mSavedArticle = newsDataRepository.findSavedArticleById(it)!!
                                 val language = appSettingsRepository.getLanguageByPage(appSettingsRepository.findPageById(mSavedArticle.pageId)!!)
                                 mArticleDateString = DisplayUtils.getSavedArticlePublicationDateString(mSavedArticle, language, context!!)!!
+                                mArticleTextSize = DisplayUtils.getArticleTextSize(context!!)
                             }
                         }
                         .doOnError {
@@ -113,13 +113,16 @@ class SavedArticleViewFragment : Fragment() {
                             override fun onComplete() {}
                             override fun onNext(t: Unit) {
                                 mArticlePageDetails.text = StringBuilder(mSavedArticle.pageName).append(" | ")
-                                                                .append(mSavedArticle.newspaperName).toString()
+                                        .append(mSavedArticle.newspaperName).toString()
                                 mArticleTitle.text = mSavedArticle.title
+                                mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, mArticleTextSize!!.toFloat())
                                 mArticlePublicationText.text = mArticleDateString
                                 DisplayUtils.displayHtmlText(mArticleText, mSavedArticle.articleText!!)
+                                mArticleImageListAdapter = ArticleImageListAdapter(this@SavedArticleViewFragment,mArticleTextSize!!.toFloat())
+                                mArticleImageHolder.adapter = mArticleImageListAdapter
                                 mSavedArticle.imageLinkList?.let {
                                     mArticleImageListAdapter.submitList(it.asSequence().filter { !it.link.isNullOrEmpty() }.map {
-                                        LoggerUtils.debugLog(it.link.toString(),this@SavedArticleViewFragment::class.java)
+                                        LoggerUtils.debugLog(it.link.toString(), this@SavedArticleViewFragment::class.java)
                                         it
                                     }.toList())
                                 }
