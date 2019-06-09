@@ -44,7 +44,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_news_paper_group.*
-import kotlinx.android.synthetic.main.fragment_init.*
 
 class NewsPaperGroupFragment : Fragment() {
 
@@ -94,8 +93,6 @@ class NewsPaperGroupFragment : Fragment() {
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
 
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(this.context!!)
-
-        data_load_progress.visibility = View.GONE //not to be displayed on this page
 
         val mFragmentStatePagerAdapter =  object : FragmentStatePagerAdapter(activity!!.supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT){
             override fun getItemPosition(`object`: Any): Int {
@@ -153,7 +150,6 @@ class NewsPaperGroupFragment : Fragment() {
                                     mHomeViewPager.adapter = mFragmentStatePagerAdapter
                                     mHomeViewPager.setCurrentItem(0)
 
-                                    splash_screen.visibility = View.GONE
                                     mViewPagerTitleScroller.visibility = View.VISIBLE
                                     mHomeViewPager.visibility = View.VISIBLE
                                     page_search_text_box_layout.visibility = View.VISIBLE
@@ -187,7 +183,10 @@ class NewsPaperGroupFragment : Fragment() {
                                                                                 (activity as BackPressQueueManager).removeTaskFromQueue(backPressTaskTag!!)
                                                                             }
                                                                             backPressTaskTag =
-                                                                                    (activity as BackPressQueueManager).addToBackPressTaskQueue { mSearchResultListAdapter.submitList(emptyList()) }
+                                                                                    (activity as BackPressQueueManager).addToBackPressTaskQueue {
+                                                                                        mSearchResultListAdapter.submitList(emptyList())
+                                                                                        mPageSearchResultContainer.visibility = View.GONE
+                                                                                    }
                                                                         }
                                                                     }
                                                                     override fun onError(e: Throwable) {}

@@ -16,16 +16,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include
-        android:id="@+id/splash_screen"
-        layout="@layout/fragment_init"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/page_search_text_box_layout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -37,7 +27,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/splash_screen">
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/page_search_box_edit_text"
@@ -53,7 +43,7 @@
         android:layout_height="0dp"
         android:background="@android:color/transparent"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/home_view_pager"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/page_search_text_box_layout">
