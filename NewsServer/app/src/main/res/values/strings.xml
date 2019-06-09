@@ -59,4 +59,6 @@
     <string name="no_fav_page_found_log_in_text">Log in to add page</string>
     <string name="no_saved_article_found_message">No saved article to display.</string>
     <string name="error_retry_message">Error!!! Please retry.</string>
+    <string name="bmi_bn_title">বাংলা</string>
+    <string name="bmi_eng_title">English</string>
 </resources>

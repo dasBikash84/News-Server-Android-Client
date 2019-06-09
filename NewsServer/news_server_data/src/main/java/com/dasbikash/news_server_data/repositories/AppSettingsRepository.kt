@@ -46,6 +46,7 @@ abstract class AppSettingsRepository {
     abstract fun findMatchingPages(it: String): List<Page>
 
     abstract fun getLanguageByPage(page: Page): Language
+    abstract fun getLanguageByNewspaper(newspaper: Newspaper): Language
     abstract fun getNewspaperByPage(page: Page): Newspaper
     abstract fun findPageById(pageId: String): Page?
 

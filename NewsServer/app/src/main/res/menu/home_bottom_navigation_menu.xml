@@ -15,10 +15,20 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/bottom_menu_item_eng"
+        android:icon="@drawable/ic_eng"
+        android:title="@string/bmi_eng_title"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/bottom_menu_item_bn"
+        android:icon="@drawable/ic_bn"
+        android:title="@string/bmi_bn_title"
+        app:showAsAction="always" />
+    <!--<item
         android:id="@+id/bottom_menu_item_home"
         android:icon="@drawable/ic_home_pink_24dp"
         android:title="@string/bmi_home_title"
-        app:showAsAction="always" />
+        app:showAsAction="always" />-->
     <item
         android:id="@+id/bottom_menu_item_page_group"
         android:icon="@drawable/ic_page_group_pink_24dp"

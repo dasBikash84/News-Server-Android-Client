@@ -139,7 +139,7 @@ class InitFragment : Fragment() {
                                         .getNewsPapersLiveData()
                                         .observe(activity!!, object : Observer<List<Newspaper>> {
                                             override fun onChanged(newspapers: List<Newspaper>?) {
-                                                (activity as HomeNavigator).loadHomeFragment()
+                                                (activity as HomeNavigator).loadEngNpFragment()
                                             }
                                         })
                             }

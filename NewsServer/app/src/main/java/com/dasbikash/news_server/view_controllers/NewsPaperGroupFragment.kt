@@ -43,16 +43,18 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.android.synthetic.main.fragment_news_paper_group.*
 import kotlinx.android.synthetic.main.fragment_init.*
 
-class HomeFragment : Fragment() {
+class NewsPaperGroupFragment : Fragment() {
 
     private lateinit var mViewPagerTitleScroller: ViewPagerTitleScroller
     private lateinit var mHomeViewPager:ViewPager
     private lateinit var mPageSearchTextBox:EditText
     private lateinit var mPageSearchResultHolder:RecyclerView
     private lateinit var mPageSearchResultContainer:ViewGroup
+
+    private lateinit var mLanguageString:String
 
     private var backPressTaskTag:String?=null
 
@@ -64,14 +66,24 @@ class HomeFragment : Fragment() {
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
+    fun isBngNpFragment():Boolean{
+        return mLanguageString.equals(NewsPaperLanguage.BANGLA.language)
+    }
+    fun isEngNpFragment():Boolean{
+        return mLanguageString.equals(NewsPaperLanguage.ENGLISH.language)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        return inflater.inflate(R.layout.fragment_news_paper_group, container, false)
     }
 
     private val MINIMUM_CHAR_LENGTH_FOR_PAGE_SEARCH = 3
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        mLanguageString = (arguments!!.getString(ARG_NEWS_LANGUAGE))!!
+
         mViewPagerTitleScroller = view.findViewById(R.id.newspaper_name_scroller)
         mHomeViewPager = view.findViewById(R.id.home_view_pager)
         mPageSearchTextBox = view.findViewById(R.id.page_search_box_edit_text)
@@ -119,6 +131,10 @@ class HomeFragment : Fragment() {
                             .subscribeOn(Schedulers.computation())
                             .map {
                                 newspapers
+                                        ?.filter {
+                                            val language = appSettingsRepository.getLanguageByNewspaper(it)
+                                            language.name!!.contains(mLanguageString)
+                                        }
                                         ?.sortedBy { it.getPosition() }
                                         ?.map { PagableNewsPaper(it) }
                                         ?.forEach { mNewsPapers.add(it) }
@@ -193,6 +209,31 @@ class HomeFragment : Fragment() {
                     )
                 }
             })
+    }
+
+    companion object {
+
+        private val ARG_NEWS_LANGUAGE = "com.dasbikash.news_server.view_controllers.NewsPaperGroupFragment.ARG_NEWS_LANGUAGE"
+
+        private enum class NewsPaperLanguage(val language:String){
+            BANGLA("Bangla"),ENGLISH("English")
+        }
+
+        private fun getInstance(language:String): NewsPaperGroupFragment {
+            val args = Bundle()
+            args.putString(ARG_NEWS_LANGUAGE, language)
+            val fragment = NewsPaperGroupFragment()
+            fragment.setArguments(args)
+            return fragment
+        }
+
+        fun getInstanceForBanglaNps(): NewsPaperGroupFragment {
+            return getInstance(NewsPaperLanguage.BANGLA.language)
+        }
+
+        fun getInstanceForEnglishNps(): NewsPaperGroupFragment {
+            return getInstance(NewsPaperLanguage.ENGLISH.language)
+        }
     }
 }
 

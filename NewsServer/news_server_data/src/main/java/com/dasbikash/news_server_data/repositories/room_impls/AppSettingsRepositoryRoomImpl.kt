@@ -81,6 +81,10 @@ internal class AppSettingsRepositoryRoomImpl internal constructor(context: Conte
         return mDatabase.newsPaperDao.findById(page.newspaperId ?: "")
     }
 
+    override fun getLanguageByNewspaper(newspaper: Newspaper): Language {
+        return mDatabase.languageDao.findByLanguageId(newspaper.languageId!!)
+    }
+
     override fun findMatchingPages(it: String): List<Page> {
         return mDatabase.pageDao.findByNameContent("%"+it+"%")
     }

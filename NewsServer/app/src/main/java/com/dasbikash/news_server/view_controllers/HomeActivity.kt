@@ -161,30 +161,38 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
     private fun setUpBottomNavigationView() {
 
         mBottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.main_frame)
             when (menuItem.itemId) {
-                R.id.bottom_menu_item_home -> {
-                    if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is HomeFragment)) {
+                R.id.bottom_menu_item_eng -> {
+                    if (!(currentFragment is NewsPaperGroupFragment && currentFragment.isEngNpFragment())) {
                         mAppBar.visibility = View.GONE
-                        loadHomeFragment()
+                        loadEngNpFragment()
+                    }
+                    true
+                }
+                R.id.bottom_menu_item_bn -> {
+                    if (!(currentFragment is NewsPaperGroupFragment && currentFragment.isBngNpFragment())) {
+                        mAppBar.visibility = View.GONE
+                        loadBngNpFragment()
                     }
                     true
                 }
                 R.id.bottom_menu_item_page_group -> {
-                    if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is PageGroupFragment)) {
+                    if (!(currentFragment is PageGroupFragment)) {
                         mAppBar.visibility = View.VISIBLE
                         loadPageGroupFragment()
                     }
                     true
                 }
                 R.id.bottom_menu_item_favourites -> {
-                    if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is FavouritesFragment)) {
+                    if (!(currentFragment is FavouritesFragment)) {
                         mAppBar.visibility = View.VISIBLE
                         loadFavouritesFragment()
                     }
                     true
                 }
                 R.id.bottom_menu_item_saved_articles -> {
-                    if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is SavedArticlesFragment)) {
+                    if (!(currentFragment is SavedArticlesFragment)) {
                         mAppBar.visibility = View.VISIBLE
                         loadSavedArticlesFragment()
                     }
@@ -269,8 +277,13 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
         navigateTo(InitFragment())
     }
 
-    override fun loadHomeFragment() {
-        navigateTo(HomeFragment())
+    override fun loadBngNpFragment() {
+        navigateTo(NewsPaperGroupFragment.getInstanceForBanglaNps())
+        mBottomNavigationView.visibility = View.VISIBLE
+    }
+
+    override fun loadEngNpFragment() {
+        navigateTo(NewsPaperGroupFragment.getInstanceForEnglishNps())
         mBottomNavigationView.visibility = View.VISIBLE
     }
 
