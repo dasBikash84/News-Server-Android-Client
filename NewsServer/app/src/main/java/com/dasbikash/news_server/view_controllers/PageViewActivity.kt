@@ -20,6 +20,7 @@ import android.os.SystemClock
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -79,9 +80,8 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
     }
 
     private lateinit var mDrawerLayout: DrawerLayout
-    private lateinit var mArticleLoadingProgressBarDrawerHolder: ConstraintLayout
+    private lateinit var mArticleLoadingProgressBarDrawerHolder: ViewGroup
     private lateinit var mArticlePreviewListHolder: RecyclerView
-    private lateinit var mLoadMoreArticleButton: Button
 
     private lateinit var mPageViewContainer: CoordinatorLayout
     private lateinit var mArticleViewContainer: ViewPager
@@ -344,10 +344,8 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
         mArticleLoadingProgressBarDrawerHolder = mDrawerLayout.findViewById(R.id.article_loading_progress_bar_drawer_holder)
         mArticlePreviewListHolder = mDrawerLayout.findViewById(R.id.article_preview_list_holder)
-        mLoadMoreArticleButton = mDrawerLayout.findViewById(R.id.load_more_articel_button)
 
         mArticleLoadingProgressBarDrawerHolder.setOnClickListener { }
-        mLoadMoreArticleButton.setOnClickListener { loadMoreArticles() }
     }
 
     private fun makeTextSizeEffective() {
@@ -453,7 +451,6 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                                     when (throwable) {
                                         is DataNotFoundException -> {
                                             mInvHaveMoreArticle.set()
-                                            mLoadMoreArticleButton.visibility = View.GONE
                                         }
                                         is DataServerNotAvailableExcepption -> {
                                             DisplayUtils.showShortSnack(mPageViewContainer, "Remote server error! Please try again later.")

@@ -200,7 +200,7 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName: Int = 0
                     }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe {
-                        pageTitle.text = StringBuilder(page.name).append(" | ").append(it.name).toString()
+                        pageTitle.text = StringBuilder(page.name!!).append(" | ").append(it.name).toString()
                         pageTitle.visibility = View.VISIBLE
                     }
         } else {

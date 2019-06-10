@@ -31,15 +31,15 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:layout_marginTop="60dp"
-        android:fitsSystemWindows="true"
-        android:background="@color/colorPageBackground">
+        android:background="@color/colorPageBackground"
+        android:fitsSystemWindows="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@android:color/transparent">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <androidx.appcompat.widget.LinearLayoutCompat
                 android:id="@+id/article_loading_progress_bar_drawer_holder"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -57,48 +57,20 @@
                     android:layout_height="60dp"
                     android:layout_gravity="center"
                     android:background="@android:color/transparent"
-                    android:indeterminate="true"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    android:indeterminate="true"/>
+            </androidx.appcompat.widget.LinearLayoutCompat>
 
-            <androidx.core.widget.NestedScrollView
-                android:id="@+id/article_preview_list_scroller"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:background="@android:color/transparent"
-                android:overScrollMode="never"
-                android:paddingTop="16dp"
-                android:paddingBottom="60dp"
-                android:scrollbarSize="0dp"
-                android:scrollbars="none"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/article_preview_list_holder"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    android:orientation="vertical"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-            </androidx.core.widget.NestedScrollView>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/load_more_articel_button"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/article_preview_list_holder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:text="@string/load_more_articel_text"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_gravity="center"
+                android:background="@android:color/transparent"
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                android:visibility="gone"/>
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.navigation.NavigationView>
 </androidx.drawerlayout.widget.DrawerLayout>
