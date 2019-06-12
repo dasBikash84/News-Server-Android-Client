@@ -32,6 +32,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
@@ -189,7 +190,6 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
     override fun onResume() {
         super.onResume()
-//        refreshFavStatus()
         loadMoreArticles()
     }
 
@@ -280,6 +280,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
         mTextSizeChangeMinusButton = findViewById(R.id.minus_text_size_change)
         mTextSizeChangeOkButton = findViewById(R.id.ok_text_size_change)
 
+        mTextSizeChangeFrame.setOnClickListener { }
         mTextSizeChangeCancelButton.setOnClickListener { changeTextFontAction() }
         mTextSizeChangePlusButton.setOnClickListener { incrementTextSize() }
         mTextSizeChangeMinusButton.setOnClickListener { decrementTextSize() }
@@ -294,7 +295,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
         mArticleLoadingProgressBarMiddle.setOnClickListener { }
 
         mFragmentStatePagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager,
-                FragmentStatePagerAdapter.BEHAVIOR_SET_USER_VISIBLE_HINT) {
+                BEHAVIOR_SET_USER_VISIBLE_HINT) {
             override fun getItemPosition(fragment: Any): Int {
                 if (mTextSizeChangeFrame.visibility == View.GONE) {
                     return PagerAdapter.POSITION_UNCHANGED
@@ -316,17 +317,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                 return mArticleList.size
             }
         }
-        mArticleViewContainer.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
-            override fun onPageScrollStateChanged(state: Int) {
-            }
 
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-            }
-
-            override fun onPageSelected(position: Int) {
-                invalidateOptionsMenu()
-            }
-        })
         mArticleViewContainer.adapter = mFragmentStatePagerAdapter
         mArticleViewContainer.setCurrentItem(0)
     }

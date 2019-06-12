@@ -95,14 +95,13 @@ class ArticleViewFragment : Fragment() {
         super.onStart()
         LoggerUtils.debugLog("onStart", this::class.java)
 
+        mWaitScreen.visibility = View.VISIBLE
         mWaitScreen.bringToFront()
 
-        if (!::mDateString.isInitialized) {
-            initArticleData()
-        }
+        initArticleData()
     }
 
-    private fun initArticleData(doAfterInit: (() -> Unit)? = null) {
+    private fun initArticleData(doAfterInit: ((textSize:Float) -> Unit)? = null) {
         mDisposable.add(
                 Observable.just(mArticleId)
                         .subscribeOn(Schedulers.io())
@@ -113,7 +112,7 @@ class ArticleViewFragment : Fragment() {
                                     mArticle.imageLinkList
                                             ?.asSequence()
                                             ?.filter {
-                                                !(it.link?.isBlank() ?: true)
+                                                it.link?.isNotBlank() ?: false
                                             }?.toList()
                             if (mTransientTextSize!! >= DisplayUtils.MIN_ARTICLE_TEXT_SIZE) {
                                 mArticleTextSize = mTransientTextSize
@@ -127,15 +126,20 @@ class ArticleViewFragment : Fragment() {
                         .subscribeWith(object : DisposableObserver<Unit>() {
                             override fun onComplete() {}
                             override fun onNext(t: Unit) {
-                                doAfterInit?.let { doAfterInit() }
+                                activity!!.invalidateOptionsMenu()
+                                displayArticle()
                             }
 
                             override fun onError(e: Throwable) {}
                         }))
     }
 
-    fun displayArticle() {
-        mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, mArticleTextSize!!.toFloat())
+    private fun displayArticle(textSize:Float?=null) {
+        if (textSize!=null) {
+            mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize)
+        }else{
+            mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, mArticleTextSize!!.toFloat())
+        }
 
         mArticleTitle.text = mArticle.title
         mArticlePublicationText.text = mDateString
@@ -150,18 +154,6 @@ class ArticleViewFragment : Fragment() {
             mArticleImageHolder.visibility = View.GONE
         }
         mWaitScreen.visibility = View.GONE
-    }
-
-
-    override fun onResume() {
-        super.onResume()
-        LoggerUtils.debugLog("onResume", this::class.java)
-
-        if (::mDateString.isInitialized) {
-            displayArticle()
-        } else {
-            initArticleData { displayArticle() }
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
