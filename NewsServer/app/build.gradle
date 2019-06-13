@@ -11,16 +11,16 @@ android {
         applicationId "com.dasbikash.news_server"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 8
-        versionName "4.1"
+        versionCode 9
+        versionName "5.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
-            shrinkResources false
-            minifyEnabled false
+            shrinkResources true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
