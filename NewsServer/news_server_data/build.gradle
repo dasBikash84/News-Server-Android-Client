@@ -36,7 +36,7 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     //noinspection GradleCompatible
-    implementation 'androidx.appcompat:appcompat:1.1.0-alpha05'
+    implementation 'androidx.appcompat:appcompat:1.1.0-beta01'
 
     implementation 'com.google.firebase:firebase-core:16.0.9'
     implementation 'com.google.firebase:firebase-database:17.0.0'
@@ -48,11 +48,32 @@ dependencies {
 
 
     def androidxTestRunnerVersion = '1.2.0'
-    androidTestImplementation "androidx.test:runner:$androidxTestRunnerVersion"
-    androidTestImplementation "androidx.test:rules:$androidxTestRunnerVersion"
+    def extJUnitVersion = '1.1.0'
+    def truthVersion = '1.2.0-beta01'
+    def espressoVersion = "3.2.0"
+    def robolectricVersion = "4.3"
+
     androidTestImplementation "androidx.test:core:$androidxTestRunnerVersion"
+    androidTestImplementation "androidx.test:core-ktx:$androidxTestRunnerVersion"
+    androidTestImplementation "androidx.test.ext:junit:$extJUnitVersion"
+    androidTestImplementation "androidx.test.ext:junit-ktx:$extJUnitVersion"
+    androidTestImplementation "androidx.test:runner:$androidxTestRunnerVersion"
+    androidTestImplementation 'androidx.test.espresso:espresso-core:' + espressoVersion
+
+    testImplementation "androidx.test:core:$androidxTestRunnerVersion"
+    testImplementation "androidx.test:core-ktx:$androidxTestRunnerVersion"
+    testImplementation 'androidx.test.ext:junit:' + extJUnitVersion
     testImplementation 'junit:junit:4.12'
+    testImplementation 'androidx.test.ext:truth:' + truthVersion
+    testImplementation 'androidx.test.espresso:espresso-core:' + espressoVersion
+    testImplementation 'androidx.test.espresso:espresso-intents:' + espressoVersion
+    testImplementation 'org.robolectric:robolectric:' + robolectricVersion
+
+
+    androidTestImplementation "androidx.test:rules:$androidxTestRunnerVersion"
+
     testImplementation 'org.mockito:mockito-core:2.19.0'
+
     //    implementation 'io.reactivex.rxjava2:rxjava:2.2.6'
     def room_version = "2.1.0-rc01"
     implementation "androidx.room:room-runtime:$room_version"
@@ -70,4 +91,6 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.2.6'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.0'
+    androidTestImplementation 'junit:junit:4.12'
 }

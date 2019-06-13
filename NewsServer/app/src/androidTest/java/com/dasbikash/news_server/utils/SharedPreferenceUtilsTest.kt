@@ -15,7 +15,7 @@ package com.dasbikash.news_server.utils
 
 import android.content.Context
 import androidx.test.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.After
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -68,4 +68,8 @@ class SharedPreferenceUtilsTest {
         SystemClock.sleep(1000)
         LoggerUtils.debugLog(SharedPreferenceUtils.getData(appContext,defaultValue = false,key = "test_Boolean").toString(),this::class.java)
     }*/
+    @org.junit.Test
+    fun getWebPageContent() {
+        println("https://square.github.io/okhttp/")
+    }
 }

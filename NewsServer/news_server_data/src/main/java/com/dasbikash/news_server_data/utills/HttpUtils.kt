@@ -11,35 +11,16 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server_data.data_sources.data_services.news_data_services.spring_mvc
+package com.dasbikash.news_server_data.utills
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
-@RunWith(AndroidJUnit4::class)
-//@LargeTest
-class SpringMVCNewsDataServiceTest {
+object HttpUtils {
 
-    @Before
-    fun setUp() {
-    }
-
-    @After
-    fun tearDown() {
-    }
-
-    @Test
-    fun getLatestArticleByTopLevelPageId() {
-    }
-
-    @Test
-    fun getLatestArticlesByPageId() {
-    }
-
-    @Test
-    fun getArticlesAfterLastId() {
+    fun getWebPageContent(url:String):String?{
+        val client = OkHttpClient()
+        val request = Request.Builder().url(url).build()
+        return client.newCall(request).execute().body()?.string()
     }
 }
