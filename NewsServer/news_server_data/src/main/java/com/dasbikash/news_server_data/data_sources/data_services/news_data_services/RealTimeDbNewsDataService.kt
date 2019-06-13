@@ -27,7 +27,6 @@ internal object RealTimeDbNewsDataService : NewsDataService() {
         return RealTimeDbArticleDataUtils.getArticlesBeforeLastArticle(page, lastArticle, articleRequestSize)
     }
 
-    override fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int) =
+            RealTimeDbArticleDataUtils.getArticlesAfterLastArticle(page,lastArticle,articleRequestSize)
 }
