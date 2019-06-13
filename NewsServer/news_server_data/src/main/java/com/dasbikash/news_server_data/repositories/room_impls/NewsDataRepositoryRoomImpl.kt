@@ -58,7 +58,11 @@ internal class NewsDataRepositoryRoomImpl internal constructor(context: Context)
         return newsServerDatabase.articleDao.getArticleLiveDataForPage(page.id)
     }
 
-    override fun saveArticleToLocalDisk(article: Article,context: Context): SavedArticle {
+    override fun getArticleCountForPage(page: Page): Int {
+        return newsServerDatabase.articleDao.getArticleCountForPage(page.id)
+    }
+
+    override fun saveArticleToLocalDisk(article: Article, context: Context): SavedArticle {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
 
         val page = newsServerDatabase.pageDao.findById(article.pageId!!)

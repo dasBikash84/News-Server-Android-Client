@@ -21,7 +21,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ProgressBar
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.LinearLayoutCompat
@@ -32,7 +31,6 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
@@ -56,6 +54,7 @@ import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView
@@ -87,7 +86,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
     private lateinit var mPageViewContainer: CoordinatorLayout
     private lateinit var mArticleViewContainer: ViewPager
     private lateinit var mFragmentStatePagerAdapter: FragmentStatePagerAdapter
-    private lateinit var mArticleLoadingProgressBarMiddle: ProgressBar
+    private lateinit var mArticleLoadingProgressBarEnd: ProgressBar
 
     private lateinit var mWaitScreen: LinearLayoutCompat
 
@@ -127,7 +126,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
         mPage = (intent!!.getParcelableExtra(EXTRA_PAGE_TO_DISPLAY)) as Page
 
         initDrawerComponents()
-        initViewPager()
+        findPagerItems()
         initTextChangeViewComponents()
 
         mWaitScreen = findViewById(R.id.wait_screen_for_settings_change)
@@ -143,7 +142,9 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                 .observe(this, object : androidx.lifecycle.Observer<List<Article>> {
                     override fun onChanged(articleList: List<Article>?) {
                         articleList?.let {
-                            postArticlesForDisplay(articleList)
+                            if (it.isNotEmpty()) {
+                                postArticlesForDisplay(it)
+                            }
                         }
                     }
                 })
@@ -190,7 +191,24 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
     override fun onResume() {
         super.onResume()
-        loadMoreArticles()
+        mDisposable.add(
+                Observable.just(mPage)
+                        .observeOn(Schedulers.io())
+                        .map {
+                            mNewsDataRepository.getArticleCountForPage(mPage) <= 1
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<Boolean>() {
+                            override fun onComplete() {}
+                            override fun onNext(needToLoadMoreArticles: Boolean) {
+                                if (needToLoadMoreArticles) {
+                                    loadMoreArticles()
+                                }
+                            }
+
+                            override fun onError(e: Throwable) {}
+                        })
+        )
     }
 
     override fun onPause() {
@@ -289,11 +307,6 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
     private fun initViewPager() {
 
-        mPageViewContainer = findViewById(R.id.page_view_container)
-        mArticleViewContainer = findViewById(R.id.article_view_container)
-        mArticleLoadingProgressBarMiddle = findViewById(R.id.article_loading_progress_bar_middle)
-        mArticleLoadingProgressBarMiddle.setOnClickListener { }
-
         mFragmentStatePagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager,
                 BEHAVIOR_SET_USER_VISIBLE_HINT) {
             override fun getItemPosition(fragment: Any): Int {
@@ -320,6 +333,13 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
         mArticleViewContainer.adapter = mFragmentStatePagerAdapter
         mArticleViewContainer.setCurrentItem(0)
+    }
+
+    private fun findPagerItems() {
+        mPageViewContainer = findViewById(R.id.page_view_container)
+        mArticleViewContainer = findViewById(R.id.article_view_container)
+        mArticleLoadingProgressBarEnd = findViewById(R.id.article_loading_progress_bar_end)
+        mArticleLoadingProgressBarEnd.setOnClickListener { }
     }
 
     private fun initDrawerComponents() {
@@ -418,12 +438,24 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
             mArticleLoadRunning = true
             mDisposable.add(
                     Observable.just(mPage)
-                            .subscribeOn(Schedulers.io())
+                            .observeOn(Schedulers.io())
                             .map {
                                 if (!::mLanguage.isInitialized) {
                                     mLanguage = mAppSettingsRepository.getLanguageByPage(mPage)
                                 }
-                                if (mArticleList.isEmpty()) {
+                                mNewsDataRepository.getArticleCountForPage(mPage) == 0
+                            }
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .map {
+                                if (it) {
+                                    showWaitScreen()
+                                    removeWorkInProcessWindow()
+                                }
+                                it
+                            }
+                            .observeOn(Schedulers.io())
+                            .map {
+                                if (it) {
                                     mNewsDataRepository.getLatestArticleByPage(mPage)
                                 }
                                 mNewsDataRepository.downloadMoreArticlesByPage(mPage)
@@ -432,13 +464,15 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                             .subscribeWith(object : DisposableObserver<List<Article>>() {
                                 override fun onComplete() {
                                     mArticleLoadRunning = false
-                                    removeWorkInProcessWindow()//hideProgressBars()
+                                    removeWorkInProcessWindow()
+                                    hideWaitScreen()
                                 }
 
                                 override fun onNext(articleList: List<Article>) {}
                                 override fun onError(throwable: Throwable) {
                                     mArticleLoadRunning = false
-                                    removeWorkInProcessWindow()//hideProgressBars()
+                                    removeWorkInProcessWindow()
+                                    hideWaitScreen()
                                     when (throwable) {
                                         is DataNotFoundException -> {
                                             mInvHaveMoreArticle.set()
@@ -461,15 +495,15 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
     private fun hideProgressBars() {
         mArticleLoadingProgressBarDrawerHolder.visibility = View.GONE
-        mArticleLoadingProgressBarMiddle.visibility = View.GONE
+        mArticleLoadingProgressBarEnd.visibility = View.GONE
     }
 
     private fun showProgressBars() {
         mArticleLoadingProgressBarDrawerHolder.visibility = View.VISIBLE
-        mArticleLoadingProgressBarMiddle.visibility = View.VISIBLE
+        mArticleLoadingProgressBarEnd.visibility = View.VISIBLE
 
         mArticleLoadingProgressBarDrawerHolder.bringToFront()
-        mArticleLoadingProgressBarMiddle.bringToFront()
+        mArticleLoadingProgressBarEnd.bringToFront()
     }
 
     private fun postArticlesForDisplay(articleList: List<Article>) {

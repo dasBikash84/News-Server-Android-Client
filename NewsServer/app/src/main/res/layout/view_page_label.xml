@@ -36,12 +36,12 @@
 
     <android.view.View
         android:id="@+id/bottom_bar"
-        android:layout_height="3dp"
+        android:layout_height="4dp"
         android:layout_width="120dp"
         android:layout_gravity="center"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:background="@color/dark_green"
+        android:background="@android:color/white"
         android:visibility="gone"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

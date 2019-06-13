@@ -17,6 +17,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.google.firebase.database.Exclude
 import com.google.gson.annotations.Expose
 import java.io.Serializable
 import java.util.*
@@ -35,6 +36,8 @@ data class Article(
         @PrimaryKey
         var id: String="",
         var pageId: String?=null,
+        @Exclude
+        @com.google.firebase.firestore.Exclude
         @Expose(serialize = false, deserialize = false)
         var newspaperId: String?=null, //Have to fill after fetch from server
         var title: String?=null,
@@ -43,16 +46,11 @@ data class Article(
         var publicationTime: Date? = null,
         var imageLinkList: List<ArticleImage>? = null,
         var previewImageLink: String? = null,
+        @Exclude
+        @com.google.firebase.firestore.Exclude
         @Expose(serialize = false, deserialize = false)
-        private var created:Long = 0L
+        var created:Long = System.currentTimeMillis()
 ) : Serializable {
-
-    fun getCreated():Long{
-        return System.currentTimeMillis()
-    }
-    fun setCreated(time:Long){
-        created = time
-    }
 
     override fun toString(): String {
         return "Article(id='$id', pageId=$pageId, newspaperId=$newspaperId, title=$title, publicationTime=$publicationTime)"

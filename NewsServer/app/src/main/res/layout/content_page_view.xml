@@ -144,16 +144,15 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/article_loading_progress_bar_middle"/>
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <ProgressBar
-            android:id="@+id/article_loading_progress_bar_middle"
+            android:id="@+id/article_loading_progress_bar_end"
             android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:background="@android:color/transparent"
+            android:background="@android:color/white"
             android:indeterminate="true"
-            app:layout_constraintStart_toEndOf="@+id/article_view_container"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

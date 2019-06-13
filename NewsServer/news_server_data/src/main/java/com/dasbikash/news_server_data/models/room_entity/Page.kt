@@ -34,6 +34,7 @@ data class Page(
         var parentPageId: String?=null,
         var name: String?=null,
         @Expose(serialize = false,deserialize = false)
+        @Exclude
         @com.google.firebase.firestore.Exclude
         var articleFetchStatus: String = PageArticleFetchStatus.NOT_SYNCED
 ): Parcelable {

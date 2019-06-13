@@ -40,7 +40,7 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
     private val MAX_PARALLEL_ARTICLE_REQUEST = 10
     private var currentArticleRequestCount = AtomicInteger(0)
 
-    private val MIN_ARTICLE_REFRESH_INTERVAL = 5 * 60 * 1000L
+    private val MIN_ARTICLE_REFRESH_INTERVAL = 10 * 60 * 1000L
 
 
     init {
@@ -81,7 +81,7 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
                     val input = it
 
                     it.third?.let {
-                        if (System.currentTimeMillis() - it.getCreated() < MIN_ARTICLE_REFRESH_INTERVAL) {
+                        if (System.currentTimeMillis() - it.created < MIN_ARTICLE_REFRESH_INTERVAL) {
                             return@map Pair(input.first, it)
                         }
                     }

@@ -94,10 +94,9 @@ abstract class NewsDataRepository {
     }
 
     abstract fun getArticleLiveDataForPage(page: Page): LiveData<List<Article>>
+    abstract fun getArticleCountForPage(page: Page): Int
 
     companion object {
-
-        private val MIN_ARTICLE_REFRESH_INTERVAL = 5 * 60 * 1000L
 
         @Volatile
         private lateinit var INSTANCE: NewsDataRepository
