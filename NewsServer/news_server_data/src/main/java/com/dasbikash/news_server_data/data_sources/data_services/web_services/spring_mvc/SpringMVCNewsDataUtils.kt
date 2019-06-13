@@ -13,7 +13,6 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.spring_mvc
 
-import android.util.Log
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
@@ -30,80 +29,54 @@ internal object SpringMVCNewsDataUtils {
     private val springMVCWebService = SpringMVCWebService.RETROFIT.create(SpringMVCWebService::class.java)
 
     fun getRawLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
-
-        val lock = Object()
-        val articles = mutableListOf<Article>()
-        var dataServerException: DataServerException? = null
-
-        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id}",this::class.java)
-
-        springMVCWebService
-                .getLatestArticlesByPageId(page.id, articleRequestSize)
-                .enqueue(object : Callback<SpringMVCWebService.Articles?> {
-                    override fun onFailure(call: Call<SpringMVCWebService.Articles?>, throwable: Throwable) {
-                        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} onFailure",this::class.java)
-                        dataServerException = DataServerNotAvailableExcepption(throwable)
-                        synchronized(lock) { lock.notify() }
-                    }
-
-                    override fun onResponse(call: Call<SpringMVCWebService.Articles?>, response: Response<SpringMVCWebService.Articles?>) {
-                        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} onResponse",this::class.java)
-                        if (response.isSuccessful) {
-
-                            LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} onResponse isSuccessful",this::class.java)
-                            response.body()?.let { articles.addAll(it.articles) }
-                        } else {
-
-                            LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} onResponse not Successful",this::class.java)
-                            dataServerException = DataNotFoundException()
-
-                        }
-                        synchronized(lock) { lock.notify() }
-                    }
-                })
-
-
-        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before wait",this::class.java)
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
-
-        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before throw it",this::class.java)
-        dataServerException?.let { throw it }
-
-        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before throw DataNotFoundException()",this::class.java)
-        if (articles.size == 0 ){throw DataNotFoundException()
-        }
-
-        LoggerUtils.debugLog("getRawLatestArticlesByPage for: ${page.id} before return",this::class.java)
-        return articles
+        return getArticlesForCall(page,springMVCWebService.getLatestArticlesByPageId(page.id, articleRequestSize))
     }
 
     fun getArticlesBeforeLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
+        return getArticlesForCall(page,springMVCWebService.getArticlesBeforeLastId(page.id, lastArticle.id, articleRequestSize))
+    }
+
+    fun getArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
+        return getArticlesForCall(page,springMVCWebService.getArticlesAfterLastId(page.id, lastArticle.id, articleRequestSize))
+    }
+
+    fun getArticlesForCall(page: Page, call:Call<SpringMVCWebService.Articles>): List<Article> {
 
         val lock = Object()
         val articles = mutableListOf<Article>()
         var dataServerException: DataServerException? = null
 
-        springMVCWebService
-                .getArticlesAfterLastId(page.id, lastArticle.id, articleRequestSize)
-                .enqueue(object : Callback<SpringMVCWebService.Articles?> {
-                    override fun onFailure(call: Call<SpringMVCWebService.Articles?>, throwable: Throwable) {
-                        dataServerException = DataServerNotAvailableExcepption(throwable)
-                        synchronized(lock) { lock.notify() }
+        call.enqueue(object : Callback<SpringMVCWebService.Articles?> {
+                override fun onFailure(call: Call<SpringMVCWebService.Articles?>, throwable: Throwable) {
+                    LoggerUtils.debugLog("getArticlesForCall for: ${page.id} onFailure",this::class.java)
+                    dataServerException = DataServerNotAvailableExcepption(throwable)
+                    synchronized(lock) { lock.notify() }
+                }
+
+                override fun onResponse(call: Call<SpringMVCWebService.Articles?>, response: Response<SpringMVCWebService.Articles?>) {
+                    LoggerUtils.debugLog("getArticlesForCall for: ${page.id} onResponse",this::class.java)
+                    if (response.isSuccessful) {
+                        response.body()?.let { articles.addAll(it.articles) }
+                    } else {
+                        dataServerException = DataNotFoundException()
+
                     }
+                    synchronized(lock) { lock.notify() }
+                }
+            })
 
-                    override fun onResponse(call: Call<SpringMVCWebService.Articles?>, response: Response<SpringMVCWebService.Articles?>) {
-                        if (response.isSuccessful) {
-                            response.body()?.let { articles.addAll(it.articles) }
-                        } else {
-                            dataServerException = DataNotFoundException()
-
-                        }
-                        synchronized(lock) { lock.notify() }
-                    }
-                })
-
+        LoggerUtils.debugLog("getArticlesForCall for: ${page.id} before wait",this::class.java)
         synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+
+        LoggerUtils.debugLog("getArticlesForCall for: ${page.id} before throw it",this::class.java)
         dataServerException?.let { throw it }
+
+        LoggerUtils.debugLog("getArticlesForCall for: ${page.id} before throw DataNotFoundException()",this::class.java)
+        if (articles.size == 0 ){
+            throw DataNotFoundException()
+        }
+
+        LoggerUtils.debugLog("getArticlesForCall for: ${page.id} before return",this::class.java)
         return articles
     }
 }

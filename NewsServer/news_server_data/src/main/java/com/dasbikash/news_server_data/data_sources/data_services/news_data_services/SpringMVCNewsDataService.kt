@@ -29,6 +29,6 @@ internal object SpringMVCNewsDataService : NewsDataService() {
     }
 
     override fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return SpringMVCNewsDataUtils.getArticlesAfterLastArticle(page, lastArticle, articleRequestSize)
     }
 }

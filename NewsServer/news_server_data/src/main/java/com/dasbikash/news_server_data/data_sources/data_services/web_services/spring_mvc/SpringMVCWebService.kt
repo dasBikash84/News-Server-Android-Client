@@ -50,15 +50,19 @@ internal interface SpringMVCWebService {
     fun getLatestArticlesByPageId(@Path("pageId") pageId: String,
                                   @Query("article_count") resultSize: Int?): Call<Articles>
 
+    @GET(ARTICLES_BEFORE_LAST_ID_PATH)
+    fun getArticlesBeforeLastId(@Path("pageId") pageId: String,
+                                @Path("lastArticleId") lastArticleId: String,
+                                @Query("article_count") resultSize: Int?): Call<Articles>
+
     @GET(ARTICLES_AFTER_LAST_ID_PATH)
     fun getArticlesAfterLastId(@Path("pageId") pageId: String,
-                               @Path("lastArticleId") lastArticleId: String,
-                               @Query("article_count") resultSize: Int?): Call<Articles>
+                                @Path("lastArticleId") lastArticleId: String,
+                                @Query("article_count") resultSize: Int?): Call<Articles>
 
     companion object {
 
-        const val BASE_URL = "http://192.168.0.104:8097/"
-        //        const val TOP_LEVEL_PAGE_ARTICLE_URL = "articles/top-level-page-id/{topLevelPageId}/latest-article"
+        const val BASE_URL = "http://192.168.0.101:8097/"
         const val LANGUAGES_PATH = "languages"
         const val COUNTRIES_PATH = "countries"
         const val NEWSPAPERS_PATH = "newspapers"
@@ -66,7 +70,8 @@ internal interface SpringMVCWebService {
         const val PAGE_GROUPS_PATH = "page-groups"
         const val SETTINGS_UPDATE_LOG_PATH = "settings-update-logs"
         const val LATEST_ARTICLE_BY_PAGE_ID_PATH = "articles/page-id/{pageId}"
-        const val ARTICLES_AFTER_LAST_ID_PATH = "articles/page-id/{pageId}/last-article-id/{lastArticleId}"
+        const val ARTICLES_BEFORE_LAST_ID_PATH = "articles/page-id/{pageId}/before/last-article-id/{lastArticleId}"
+        const val ARTICLES_AFTER_LAST_ID_PATH = "articles/page-id/{pageId}/after/last-article-id/{lastArticleId}"
 
         val RETROFIT = Retrofit.Builder()
                 .baseUrl(BASE_URL)
