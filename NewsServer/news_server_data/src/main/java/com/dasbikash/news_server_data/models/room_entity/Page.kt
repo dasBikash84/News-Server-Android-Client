@@ -36,7 +36,7 @@ data class Page(
         @Expose(serialize = false,deserialize = false)
         @Exclude
         @com.google.firebase.firestore.Exclude
-        var articleFetchStatus: String = PageArticleFetchStatus.NOT_SYNCED
+        var articleFetchStatus: String = PageArticleFetchStatus.HAS_MORE_ARTICLE
 ): Parcelable {
     var hasChild:Boolean = false
     var hasData:Boolean = false
@@ -95,7 +95,6 @@ data class Page(
 }
 
 object PageArticleFetchStatus{
-    const val SYNCED_WITH_SERVER: String ="synced"
-    const val NOT_SYNCED: String ="notSynced"
-    const val END_REACHED: String ="atEnd"
+    const val HAS_MORE_ARTICLE: String ="has_more_article"
+    const val END_REACHED: String ="at_end"
 }

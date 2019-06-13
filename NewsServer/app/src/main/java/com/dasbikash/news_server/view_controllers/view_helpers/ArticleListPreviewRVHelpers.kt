@@ -184,9 +184,7 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName: Int = 0
     @SuppressLint("CheckResult")
     fun disableDisplay(page: Page) {
 
-        hideArticlePreviewImage()
-        hideArticleTitle()
-        hideArticlePublicationTime()
+        showPlaceHolders()
         itemView.setOnClickListener {}
 
         mPage = page
@@ -213,14 +211,12 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName: Int = 0
 
         mArticle = article
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            articleTitle.text = mArticle.title
-            showPageTitle()
+        articleTitle.text = mArticle.title
+        showPageTitle()
+        articlePublicationTime.text = dateString
+        showArticlePublicationTime()
 
-            articlePublicationTime.text = dateString
-            showArticlePublicationTime()
-            LoggerUtils.debugLog("Page: ${page.name!!} dateString: ${dateString}", this::class.java)
-        }, 10L)
+        LoggerUtils.debugLog("Page: ${page.name!!} dateString: ${dateString}", this::class.java)
 
         imageLoadingDisposer = ImageLoadingDisposer(articlePreviewImage)
         compositeDisposable.add(imageLoadingDisposer!!)
@@ -229,9 +225,8 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName: Int = 0
                 {
                     compositeDisposable.delete(imageLoadingDisposer!!)
                     imageLoadingDisposer = null
+                    showArticlePreviewImage()
                 })
-
-        showArticlePreviewImage()
 
         //Add click listner
         itemView.setOnClickListener(View.OnClickListener {
@@ -241,6 +236,12 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName: Int = 0
                     )
             )
         })
+    }
+
+    private fun showPlaceHolders() {
+        hideArticlePreviewImage()
+        hideArticleTitle()
+        hideArticlePublicationTime()
     }
 
     private fun showPageTitle() {

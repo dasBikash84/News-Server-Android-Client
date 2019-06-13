@@ -17,7 +17,7 @@ import com.dasbikash.news_server_data.data_sources.data_services.news_data_servi
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 
-internal interface NewsDataService {
+internal abstract class NewsDataService {
 
     companion object {
         const val DEFAULT_ARTICLE_REQUEST_SIZE = 5
@@ -25,31 +25,29 @@ internal interface NewsDataService {
     }
 
     //Latest articles from any page
-    fun getRawLatestArticlesByPage(page: Page,
-                                   articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>
+    abstract protected fun getRawLatestArticlesByPage(page: Page,
+                                   articleRequestSize: Int = DEFAULT_ARTICLE_REQUEST_SIZE): List<Article>
+
+    //Articles before last article ID
+    abstract protected fun getRawArticlesBeforeLastArticle(page: Page, lastArticle: Article,
+                                        articleRequestSize: Int = DEFAULT_ARTICLE_REQUEST_SIZE): List<Article>
 
     //Articles after last article ID
-    fun getRawArticlesAfterLastArticle(page: Page, lastArticle:Article,
-                                  articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>
+    abstract protected fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article,
+                                        articleRequestSize: Int = DEFAULT_ARTICLE_REQUEST_SIZE): List<Article>
 
 
+    fun getLatestArticlesByPage(page: Page,articleRequestSize: Int = DEFAULT_ARTICLE_REQUEST_SIZE) =
+            processFetchedArticleData(page, getRawLatestArticlesByPage(page, articleRequestSize))
 
-    fun getLatestArticlesByPage(page: Page,
-                                articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>{
-        val articleList = getRawLatestArticlesByPage(page,articleRequestSize)
-        if (articleList.size >0){
-            articleList.asSequence().forEach { NewsDataServiceUtils.processFetchedArticleData(it, page) }
-        }
-        return articleList
-    }
+    fun getArticlesBeforeLastArticle(page: Page, lastArticle: Article,
+                                     articleRequestSize: Int = DEFAULT_ARTICLE_REQUEST_SIZE) =
+            processFetchedArticleData(page, getRawArticlesBeforeLastArticle(page, lastArticle, articleRequestSize))
 
-    fun getArticlesAfterLastArticle(page: Page, lastArticle:Article,
-                                  articleRequestSize:Int = DEFAULT_ARTICLE_REQUEST_SIZE):List<Article>{
+    fun getArticlesAfterLastArticle(page: Page, lastArticle: Article,
+                                     articleRequestSize: Int = DEFAULT_ARTICLE_REQUEST_SIZE) =
+            processFetchedArticleData(page, getRawArticlesAfterLastArticle(page, lastArticle, articleRequestSize))
 
-        val articleList = getRawArticlesAfterLastArticle(page,lastArticle,articleRequestSize)
-        if (articleList.size >0){
-            articleList.asSequence().forEach { NewsDataServiceUtils.processFetchedArticleData(it, page) }
-        }
-        return articleList
-    }
+    private fun processFetchedArticleData(page: Page, articleList: List<Article>) =
+        articleList.asSequence().map { NewsDataServiceUtils.processFetchedArticleData(it, page) }.toList()
 }

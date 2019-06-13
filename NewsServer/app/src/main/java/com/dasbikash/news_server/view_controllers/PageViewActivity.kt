@@ -54,7 +54,6 @@ import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
-import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView
@@ -458,7 +457,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                                 if (it) {
                                     mNewsDataRepository.getLatestArticleByPage(mPage)
                                 }
-                                mNewsDataRepository.downloadMoreArticlesByPage(mPage)
+                                mNewsDataRepository.downloadPreviousArticlesByPage(mPage)
                             }
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribeWith(object : DisposableObserver<List<Article>>() {

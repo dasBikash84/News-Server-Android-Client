@@ -73,7 +73,7 @@ internal object RealTimeDbArticleDataUtils {
         return articles
     }
 
-    fun getArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
+    fun getArticlesBeforeLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
 
         val lock = Object()
         val articles = mutableListOf<Article>()

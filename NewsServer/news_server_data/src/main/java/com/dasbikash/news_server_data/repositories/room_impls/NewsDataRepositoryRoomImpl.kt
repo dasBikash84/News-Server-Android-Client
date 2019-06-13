@@ -35,16 +35,6 @@ internal class NewsDataRepositoryRoomImpl internal constructor(context: Context)
         return newsServerDatabase.articleDao.findById(articleId)
     }
 
-    override fun setPageAsNotSynced(page: Page) {
-        page.articleFetchStatus = PageArticleFetchStatus.NOT_SYNCED
-        newsServerDatabase.pageDao.save(page)
-    }
-
-    override fun setPageAsSynced(page: Page) {
-        page.articleFetchStatus = PageArticleFetchStatus.SYNCED_WITH_SERVER
-        newsServerDatabase.pageDao.save(page)
-    }
-
     override fun setPageAsEndReached(page: Page) {
         page.articleFetchStatus = PageArticleFetchStatus.END_REACHED
         newsServerDatabase.pageDao.save(page)
@@ -114,13 +104,6 @@ internal class NewsDataRepositoryRoomImpl internal constructor(context: Context)
         return newsServerDatabase.savedArticleDao.findById(savedArticleId)
     }
 
-    override fun getLastArticle(page: Page): Article? {
-        when(page.articleFetchStatus){
-            PageArticleFetchStatus.SYNCED_WITH_SERVER ->
-                    { return newsServerDatabase.articleDao.getLastArticleForSyncedPage(page.id) }
-            PageArticleFetchStatus.NOT_SYNCED->
-                    { return newsServerDatabase.articleDao.getLastArticleForDesyncedPage(page.id) }
-            else -> return null
-        }
-    }
+    override fun getOldestArticle(page: Page)  =
+            newsServerDatabase.articleDao.getOldestArticleForPage(page.id)
 }

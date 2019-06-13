@@ -16,6 +16,8 @@ package com.dasbikash.news_server.view_models
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import com.dasbikash.news_server_data.exceptions.DataNotFoundException
+import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
@@ -40,7 +42,7 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
     private val MAX_PARALLEL_ARTICLE_REQUEST = 10
     private var currentArticleRequestCount = AtomicInteger(0)
 
-    private val MIN_ARTICLE_REFRESH_INTERVAL = 10 * 60 * 1000L
+    private val MIN_ARTICLE_REFRESH_INTERVAL = 60 * 1000L
 
 
     init {
@@ -100,7 +102,12 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
 
                     var article: Article? = null
                     try {
-                        article = mNewsDataRepository.getLatestArticleByPage(it.second)
+                        if (it.third != null) {
+                            val newArticles = mNewsDataRepository.downloadNewArticlesByPage(it.second, it.third!!)
+                            article = newArticles.sortedBy { it.publicationTime!!.time }.last()
+                        } else {
+                            article = mNewsDataRepository.getLatestArticleByPage(it.second)
+                        }
                     } catch (ex: Exception) {
                         if (!amDisposed) {
                             throw ex
@@ -112,7 +119,7 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
                 }.onErrorReturn {
                     currentArticleRequestCount.decrementAndGet()
                     throw it
-                }.doOnDispose{
+                }.doOnDispose {
                     amDisposed = true
                 }
     }

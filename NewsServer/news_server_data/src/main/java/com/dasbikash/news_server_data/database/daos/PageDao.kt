@@ -41,8 +41,8 @@ internal interface PageDao {
     @Query("SELECT * FROM Page WHERE name LIKE :nameContent")
     fun findByNameContent(nameContent: String): List<Page>
 
-    @Query("UPDATE Page SET articleFetchStatus='${PageArticleFetchStatus.NOT_SYNCED}'")
-    fun markAllNotSynced()
+    @Query("UPDATE Page SET articleFetchStatus='${PageArticleFetchStatus.HAS_MORE_ARTICLE}'")
+    fun markAllHasMoreArticle()
 
     @Update
     fun save(page: Page)

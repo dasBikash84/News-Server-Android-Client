@@ -18,13 +18,14 @@ import com.dasbikash.news_server_data.data_sources.data_services.web_services.fi
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 
-internal object CloudFireStoreNewsDataService : NewsDataService {
+internal object CloudFireStoreNewsDataService : NewsDataService() {
 
-    override fun getRawLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
-        return CloudFireStoreArticleDataUtils.getLatestArticlesByPage(page,articleRequestSize)
-    }
+    override fun getRawLatestArticlesByPage(page: Page, articleRequestSize: Int) =
+            CloudFireStoreArticleDataUtils.getLatestArticlesByPage(page,articleRequestSize)
 
-    override fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
-        return CloudFireStoreArticleDataUtils.getArticlesAfterLastArticle(page,lastArticle,articleRequestSize)
-    }
+    override fun getRawArticlesBeforeLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int) =
+            CloudFireStoreArticleDataUtils.getArticlesBeforeLastArticle(page,lastArticle,articleRequestSize)
+
+    override fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int) =
+            CloudFireStoreArticleDataUtils.getArticlesAfterLastArticle(page,lastArticle,articleRequestSize)
 }

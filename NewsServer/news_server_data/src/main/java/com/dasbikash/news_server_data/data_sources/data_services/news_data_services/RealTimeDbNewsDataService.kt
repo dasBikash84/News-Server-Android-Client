@@ -18,12 +18,16 @@ import com.dasbikash.news_server_data.data_sources.data_services.web_services.fi
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 
-internal object RealTimeDbNewsDataService : NewsDataService {
+internal object RealTimeDbNewsDataService : NewsDataService() {
     override fun getRawLatestArticlesByPage(page: Page, articleRequestSize: Int): List<Article> {
         return RealTimeDbArticleDataUtils.getLatestArticlesByPage(page,articleRequestSize)
     }
 
+    override fun getRawArticlesBeforeLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
+        return RealTimeDbArticleDataUtils.getArticlesBeforeLastArticle(page, lastArticle, articleRequestSize)
+    }
+
     override fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
-        return RealTimeDbArticleDataUtils.getArticlesAfterLastArticle(page, lastArticle, articleRequestSize)
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

@@ -26,7 +26,7 @@ internal interface ArticleDao {
     @Query("SELECT * FROM Article WHERE id=:id")
     fun findById(id: String): Article?
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addArticles(articles: List<Article>)
 
     @Query("DELETE FROM Article")
@@ -36,12 +36,9 @@ internal interface ArticleDao {
     fun getLatestArticleByPageId(pageId: String):Article?
 
     @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationTime ASC limit 1")
-    fun getLastArticleForSyncedPage(pageId: String): Article?
+    fun getOldestArticleForPage(pageId: String): Article?
 
-    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY created DESC limit 1")
-    fun getLastArticleForDesyncedPage(pageId: String): Article?
-
-    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY created ASC")
+    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationTime DESC")
     fun getArticleLiveDataForPage(pageId:String): LiveData<List<Article>>
 
     @Query("SELECT COUNT(*) FROM Article WHERE pageId=:pageId")

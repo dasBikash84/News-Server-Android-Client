@@ -19,9 +19,9 @@ import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
+import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
-import com.dasbikash.news_server_data.models.room_entity.PageArticleFetchStatus
 import com.dasbikash.news_server_data.models.room_entity.SavedArticle
 import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
 import com.dasbikash.news_server_data.repositories.room_impls.NewsDataRepositoryRoomImpl
@@ -34,11 +34,9 @@ abstract class NewsDataRepository {
     abstract fun getLatestArticleByPageFromLocalDb(page: Page): Article?
     abstract fun findArticleById(articleId: String): Article?
 
-    abstract protected fun setPageAsNotSynced(page: Page)
-    abstract protected fun setPageAsSynced(page: Page)
     abstract protected fun setPageAsEndReached(page: Page)
     abstract protected fun insertArticles(articles: List<Article>)
-    abstract protected fun getLastArticle(page: Page): Article?
+    abstract protected fun getOldestArticle(page: Page): Article?
 
     abstract fun saveArticleToLocalDisk(article: Article, context: Context): SavedArticle
     abstract fun checkIfAlreadySaved(article: Article): Boolean
@@ -53,36 +51,23 @@ abstract class NewsDataRepository {
     fun init(context: Context) {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val db = NewsServerDatabase.getDatabase(context)
-        db.pageDao.markAllNotSynced()
+        db.pageDao.markAllHasMoreArticle()
         db.articleDao.nukeTable()
     }
 
     fun getLatestArticleByPage(page: Page): Article {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val article = newsDataService.getLatestArticlesByPage(page, 1).first()
-        if (findArticleById(article.id) == null) {
-            setPageAsNotSynced(page)
-            insertArticle(article)
-        } else {
-            setPageAsSynced(page)
-        }
+        insertArticle(article)
         return article
     }
 
-    fun downloadMoreArticlesByPage(page: Page): List<Article> {
+    fun downloadPreviousArticlesByPage(page: Page): List<Article> {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        val article = getLastArticle(page)
+        val article = getOldestArticle(page)
         article?.let {
             try {
-                val articles = newsDataService.getArticlesAfterLastArticle(page, it)
-                if (page.articleFetchStatus == PageArticleFetchStatus.NOT_SYNCED) {
-                    for (articleData in articles) {
-                        if (findArticleById(articleData.id) != null) {
-                            setPageAsSynced(page)
-                            break
-                        }
-                    }
-                }
+                val articles = newsDataService.getArticlesBeforeLastArticle(page, it)
                 insertArticles(articles)
                 return articles
             } catch (ex: DataNotFoundException) {
@@ -91,6 +76,19 @@ abstract class NewsDataRepository {
             }
         }
         throw DataNotFoundException()
+    }
+
+    fun downloadNewArticlesByPage(page: Page, latestArticle: Article): List<Article> {
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        val articles = mutableListOf<Article>()
+        try {
+            articles.addAll(newsDataService.getArticlesAfterLastArticle(page, latestArticle))
+        }catch (ex: DataServerException) {
+            latestArticle.resetCreated()
+            articles.add(latestArticle)
+        }
+        insertArticles(articles)
+        return articles
     }
 
     abstract fun getArticleLiveDataForPage(page: Page): LiveData<List<Article>>

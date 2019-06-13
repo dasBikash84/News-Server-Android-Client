@@ -52,6 +52,10 @@ data class Article(
         var created:Long = System.currentTimeMillis()
 ) : Serializable {
 
+    fun resetCreated(){
+        created = System.currentTimeMillis()
+    }
+
     override fun toString(): String {
         return "Article(id='$id', pageId=$pageId, newspaperId=$newspaperId, title=$title, publicationTime=$publicationTime)"
     }
