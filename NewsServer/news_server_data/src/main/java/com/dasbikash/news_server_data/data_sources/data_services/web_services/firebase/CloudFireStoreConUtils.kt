@@ -25,9 +25,12 @@ internal object CloudFireStoreConUtils {
     private const val PAGE_GROUPS_COLLECTION_LABEL = "page_groups"
     private const val APP_SETTINGS_UPDATE_TIME_COLLECTION_LABEL = "update_time"
 
+    private const val PAGE_DOWNLOAD_REQUEST_COLLECTION_LABEL = "page_download_request"
+    private const val PAGE_DOWNLOAD_REQUEST_RESPONSE_COLLECTION_LABEL = "page_download_request_response"
+
     private const val ARTICLE_COLLECTION = "articles"
 
-    private fun getDbConnection(): FirebaseFirestore {
+    internal fun getDbConnection(): FirebaseFirestore {
         return FirebaseFirestore.getInstance()
     }
 
@@ -51,5 +54,13 @@ internal object CloudFireStoreConUtils {
 
     internal fun getArticleCollectionRef(): CollectionReference {
         return getDbConnection().collection(ARTICLE_COLLECTION)
+    }
+
+    internal fun getPageDownloadRequestRef(): CollectionReference {
+        return getDbConnection().collection(PAGE_DOWNLOAD_REQUEST_COLLECTION_LABEL)
+    }
+
+    internal fun getPageDownloadRequestResponseRef(): CollectionReference {
+        return getDbConnection().collection(PAGE_DOWNLOAD_REQUEST_RESPONSE_COLLECTION_LABEL)
     }
 }

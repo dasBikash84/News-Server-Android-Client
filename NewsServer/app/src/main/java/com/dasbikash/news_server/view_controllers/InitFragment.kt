@@ -36,6 +36,7 @@ import com.dasbikash.news_server_data.exceptions.DataSourceNotFoundException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
+import com.dasbikash.news_server_data.page_request_server.PageRequestServerInitiator
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
@@ -46,9 +47,6 @@ import io.reactivex.schedulers.Schedulers
 import java.util.*
 
 class InitFragment : Fragment() {
-
-
-    private lateinit var mHomeViewModel: HomeViewModel
 
     private lateinit var mProgressBar: ProgressBar
     private lateinit var mNoInternetMessage: TextView
@@ -134,8 +132,8 @@ class InitFragment : Fragment() {
                             }
 
                             override fun onComplete() {
-                                mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
-                                mHomeViewModel
+                                PageRequestServerInitiator.initWork(context!!)
+                                ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
                                         .getNewsPapersLiveData()
                                         .observe(activity!!, object : Observer<List<Newspaper>> {
                                             override fun onChanged(newspapers: List<Newspaper>?) {
