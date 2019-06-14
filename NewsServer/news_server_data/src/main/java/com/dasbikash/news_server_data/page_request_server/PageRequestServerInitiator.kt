@@ -14,6 +14,7 @@
 package com.dasbikash.news_server_data.page_request_server
 
 import android.content.Context
+import android.os.Build
 import androidx.work.*
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
@@ -39,10 +40,17 @@ object PageRequestServerInitiator {
 
     private fun doInit(context: Context) {
         LoggerUtils.debugLog("doInit",this::class.java)
-        val constraints = Constraints.Builder()
+
+        var constraintBuilder = Constraints.Builder()
                                 .setRequiresBatteryNotLow(true)
                                 .setRequiredNetworkType(NetworkType.CONNECTED)
-                                .build()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            constraintBuilder = constraintBuilder.setRequiresDeviceIdle(true)
+        }
+
+        val constraints = constraintBuilder.build()
+
         val workRequest =
                 PeriodicWorkRequestBuilder<PageRequestServerWorker>(PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS, TimeUnit.MILLISECONDS)
                         .setConstraints(constraints)

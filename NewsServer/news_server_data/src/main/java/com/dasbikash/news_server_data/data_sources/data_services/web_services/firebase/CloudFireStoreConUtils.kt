@@ -27,6 +27,7 @@ internal object CloudFireStoreConUtils {
 
     private const val PAGE_DOWNLOAD_REQUEST_COLLECTION_LABEL = "page_download_request"
     private const val PAGE_DOWNLOAD_REQUEST_RESPONSE_COLLECTION_LABEL = "page_download_request_response"
+    private const val PAGE_DOWNLOAD_REQUEST_WORKER_LOG_COLLECTION_LABEL = "page_download_request_worker_log"
 
     private const val ARTICLE_COLLECTION = "articles"
 
@@ -62,5 +63,9 @@ internal object CloudFireStoreConUtils {
 
     internal fun getPageDownloadRequestResponseRef(): CollectionReference {
         return getDbConnection().collection(PAGE_DOWNLOAD_REQUEST_RESPONSE_COLLECTION_LABEL)
+    }
+
+    internal fun getPageDownloadRequestWorkerLogRef(): CollectionReference {
+        return getDbConnection().collection(PAGE_DOWNLOAD_REQUEST_WORKER_LOG_COLLECTION_LABEL)
     }
 }

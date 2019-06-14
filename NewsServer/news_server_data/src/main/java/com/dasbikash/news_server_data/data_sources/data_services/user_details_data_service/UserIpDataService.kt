@@ -13,8 +13,8 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service
 
-import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.models.IpAddress
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -22,40 +22,45 @@ import retrofit2.Response
 internal object UserIpDataService {
 
     private const val MAX_WAITING_MS_FOR_NET_RESPONSE = 30000L
+    const val NULL_IP = "255.255.255.255"
 
-    private val userIpWebService
-            = UserIpWebService.RETROFIT.create(UserIpWebService::class.java)
+    private val userIpWebService = UserIpWebService.RETROFIT.create(UserIpWebService::class.java)
 
-    private var ipAddress:String?=null
+    private var ipAddress: String? = null
 
     fun getIpAddress(): String {
+        LoggerUtils.debugLog("getIpAddress", this::class.java)
 
         ipAddress?.let { return ipAddress!! }
 
         val lock = Object()
         val call = userIpWebService.getIpAddress()
 
-        var result:String? = null
-
-        call.enqueue(object : Callback<IpAddress>{
+        call.enqueue(object : Callback<IpAddress> {
             override fun onFailure(call: Call<IpAddress>, t: Throwable) {
-                synchronized(lock){lock.notify()}
+                LoggerUtils.debugLog("onFailure", this::class.java)
+                synchronized(lock) { lock.notify() }
             }
+
             override fun onResponse(call: Call<IpAddress>, response: Response<IpAddress>) {
-                if (response.isSuccessful){
+                LoggerUtils.debugLog("onResponse", this::class.java)
+                if (response.isSuccessful) {
+                    LoggerUtils.debugLog("isSuccessful", this::class.java)
                     ipAddress = response.body()!!.ip!!
-                    result = ipAddress
                 }
 
-                synchronized(lock){lock.notify()}
+                synchronized(lock) { lock.notify() }
             }
         })
 
-        synchronized(lock){lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE)}
+        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
 
-        if (result.isNullOrEmpty()){
-            throw DataNotFoundException()
+        ipAddress?.let {
+            LoggerUtils.debugLog("return ipAddress!!", this::class.java)
+            return ipAddress!!
         }
-        return result!!
+        LoggerUtils.debugLog("return NULL_IP", this::class.java)
+
+        return NULL_IP
     }
 }

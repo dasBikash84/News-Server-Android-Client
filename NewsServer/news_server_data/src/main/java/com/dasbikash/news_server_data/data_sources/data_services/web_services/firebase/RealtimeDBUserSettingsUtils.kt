@@ -196,16 +196,6 @@ internal object RealtimeDBUserSettingsUtils {
         return pageGroupMapForRemoteDb.toMap()
     }
 
-    private fun getIpAddress(): String {
-        var ipAddress: String
-        try {
-            ipAddress = UserIpDataService.getIpAddress()
-        } catch (ex: Throwable) {
-            ipAddress = UserSettingsUpdateDetails.NULL_IP
-        }
-        return ipAddress
-    }
-
     private fun getLoggedInFirebaseUser(): FirebaseUser {
         val user = FirebaseAuth.getInstance().currentUser
 
@@ -275,10 +265,9 @@ internal object RealtimeDBUserSettingsUtils {
         val user = getLoggedInFirebaseUser()
         val userSettingsNodes = getUserSettingsNodes(user)
 
-        val ipAddress: String = getIpAddress()
         userSettingsNodes.updateLogRef
                 .push()
-                .setValue(UserSettingsUpdateDetails(userIp = ipAddress))
+                .setValue(UserSettingsUpdateDetails(userIp = UserIpDataService.getIpAddress()))
     }
 
     private fun executeBackGroundTask(task: () -> Unit) {

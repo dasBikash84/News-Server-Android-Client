@@ -66,6 +66,7 @@ internal class PageRequestServerWorker(appContext: Context, workerParams: Worker
         if (pageDownLoadRequestResponseMap.isNotEmpty()) {
             CloudFireStorePageRequestServerUtils.writeArticleData(pageDownLoadRequestResponseMap)
         }
+        CloudFireStorePageRequestServerUtils.logPageDownLoadRequestWorkerTask(pageDownLoadRequestResponseMap)
         LoggerUtils.debugLog("doWork exiting", this::class.java)
         return Result.success()
     }
