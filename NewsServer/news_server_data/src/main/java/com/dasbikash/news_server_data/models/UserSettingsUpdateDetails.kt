@@ -14,15 +14,12 @@
 package com.dasbikash.news_server_data.models
 
 import android.os.Build
+import com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service.UserIpDataService
 import com.google.firebase.database.ServerValue
 
 internal data class UserSettingsUpdateDetails(
         val timeStamp: Map<String,String> = ServerValue.TIMESTAMP,
-        var userIp:String,
+        var userIp:String= UserIpDataService.getIpAddress(),
         var deviceDetails:String = "BRAND: ${Build.BRAND} Manufacture: ${Build.MANUFACTURER} " +
                                     "MODEL: ${Build.MODEL} SDK_INT: ${Build.VERSION.SDK_INT}"
-){
-    companion object{
-        const val NULL_IP = "255.255.255.255"
-    }
-}
+)

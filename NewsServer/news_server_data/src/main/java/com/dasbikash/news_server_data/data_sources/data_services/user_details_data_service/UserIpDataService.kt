@@ -31,8 +31,6 @@ internal object UserIpDataService {
     fun getIpAddress(): String {
         LoggerUtils.debugLog("getIpAddress", this::class.java)
 
-        ipAddress?.let { return ipAddress!! }
-
         val lock = Object()
         val call = userIpWebService.getIpAddress()
 

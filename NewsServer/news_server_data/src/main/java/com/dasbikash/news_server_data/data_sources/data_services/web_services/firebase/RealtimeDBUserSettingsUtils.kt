@@ -267,7 +267,7 @@ internal object RealtimeDBUserSettingsUtils {
 
         userSettingsNodes.updateLogRef
                 .push()
-                .setValue(UserSettingsUpdateDetails(userIp = UserIpDataService.getIpAddress()))
+                .setValue(UserSettingsUpdateDetails())
     }
 
     private fun executeBackGroundTask(task: () -> Unit) {

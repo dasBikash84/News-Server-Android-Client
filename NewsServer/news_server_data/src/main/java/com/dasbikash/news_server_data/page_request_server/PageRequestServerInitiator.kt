@@ -45,9 +45,9 @@ object PageRequestServerInitiator {
                                 .setRequiresBatteryNotLow(true)
                                 .setRequiredNetworkType(NetworkType.CONNECTED)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            constraintBuilder = constraintBuilder.setRequiresDeviceIdle(true)
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            constraintBuilder = constraintBuilder.setRequiresDeviceIdle(true)
+//        }
 
         val constraints = constraintBuilder.build()
 
