@@ -13,14 +13,12 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
-import android.os.Build
 import android.os.SystemClock
 import androidx.annotation.Keep
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.user_details_data_service.UserIpDataService
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
-import com.dasbikash.news_server_data.models.UserSettingsUpdateDetails
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
@@ -131,8 +129,8 @@ internal data class PageDownLoadRequestResponse(
 @Keep
 internal data class PageDownLoadRequestWorkerLog(
         val userIp: String = UserIpDataService.getIpAddress(),
-        val deviceDetails: String = "BRAND: ${Build.BRAND} Manufacture: ${Build.MANUFACTURER} " +
-                "MODEL: ${Build.MODEL} SDK_INT: ${Build.VERSION.SDK_INT}",
+//        val deviceDetails: String = "BRAND: ${Build.BRAND} Manufacture: ${Build.MANUFACTURER} " +
+//                "MODEL: ${Build.MODEL} SDK_INT: ${Build.VERSION.SDK_INT}",
         val created: Timestamp = Timestamp(Date()),
         val servedDocumentList:String?=null
 ){

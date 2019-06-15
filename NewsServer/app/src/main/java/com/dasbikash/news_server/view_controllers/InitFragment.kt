@@ -126,13 +126,11 @@ class InitFragment : Fragment() {
                                     }
                                 }
                                 LoggerUtils.printStackTrace(e)
-//                                Toast.makeText(activity, "onError: " + e.javaClass.canonicalName!!,
-//                                        Toast.LENGTH_SHORT).show()
                                 doOnError(e)
                             }
 
                             override fun onComplete() {
-                                PageRequestServerInitiator.initWork(context!!)
+//                                PageRequestServerInitiator.initWork(context!!)
                                 ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
                                         .getNewsPapersLiveData()
                                         .observe(activity!!, object : Observer<List<Newspaper>> {
