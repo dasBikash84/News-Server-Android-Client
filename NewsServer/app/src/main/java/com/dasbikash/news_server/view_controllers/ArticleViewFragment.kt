@@ -90,7 +90,7 @@ class ArticleViewFragment : Fragment() {
         mArticleImageHolder = view.findViewById(R.id.article_image_holder)
         mArticleText = view.findViewById(R.id.article_text)
         mWaitScreen = view.findViewById(R.id.wait_screen_for_data_loading)
-        mWaitScreen.setOnClickListener {  }
+//        mWaitScreen.setOnClickListener {  }
     }
 
     override fun onStart() {
@@ -107,7 +107,7 @@ class ArticleViewFragment : Fragment() {
         mWaitScreen.bringToFront()
     }
 
-    private fun initArticleData(doAfterInit: ((textSize:Float) -> Unit)? = null) {
+    private fun initArticleData() {
         mDisposable.add(
                 Observable.just(mArticleId)
                         .subscribeOn(Schedulers.io())
