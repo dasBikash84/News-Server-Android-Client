@@ -17,8 +17,8 @@ import com.dasbikash.news_server_data.data_sources.data_services.user_details_da
 import com.google.firebase.database.ServerValue
 
 internal data class UserSettingsUpdateDetails(
-        val timeStamp: Map<String,String> = ServerValue.TIMESTAMP,
-        var userIp:String= UserIpDataService.getIpAddress()//,
+        val timeStamp: Map<String,String> = ServerValue.TIMESTAMP//,
+//        var userIp:String= UserIpDataService.getIpAddress()//,
 //        var deviceDetails:String = "BRAND: ${Build.BRAND} Manufacture: ${Build.MANUFACTURER} " +
 //                                    "MODEL: ${Build.MODEL} SDK_INT: ${Build.VERSION.SDK_INT}"
 )

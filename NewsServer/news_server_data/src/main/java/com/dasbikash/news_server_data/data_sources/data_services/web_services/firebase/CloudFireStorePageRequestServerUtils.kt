@@ -128,7 +128,7 @@ internal data class PageDownLoadRequestResponse(
 
 @Keep
 internal data class PageDownLoadRequestWorkerLog(
-        val userIp: String = UserIpDataService.getIpAddress(),
+//        val userIp: String = UserIpDataService.getIpAddress(),
 //        val deviceDetails: String = "BRAND: ${Build.BRAND} Manufacture: ${Build.MANUFACTURER} " +
 //                "MODEL: ${Build.MODEL} SDK_INT: ${Build.VERSION.SDK_INT}",
         val created: Timestamp = Timestamp(Date()),
