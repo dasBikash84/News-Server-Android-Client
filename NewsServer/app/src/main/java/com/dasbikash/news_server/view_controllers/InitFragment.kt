@@ -38,6 +38,7 @@ import com.dasbikash.news_server_data.exceptions.SettingsServerException
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.page_request_server.PageRequestServerInitiator
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.Observable
@@ -120,17 +121,12 @@ class InitFragment : Fragment() {
 
                             override fun onError(e: Throwable) {
                                 LoggerUtils.debugLog("onError: " + e.javaClass.canonicalName!!, this::class.java)
-                                Arrays.asList(e.stackTrace).asSequence().forEach {
-                                    it.iterator().forEach {
-                                        LoggerUtils.debugLog("onError: " + it.toString(), this::class.java)
-                                    }
-                                }
                                 LoggerUtils.printStackTrace(e)
                                 doOnError(e)
                             }
 
                             override fun onComplete() {
-//                                PageRequestServerInitiator.initWork(context!!)
+                                PageRequestServerInitiator.initWork(context!!)
                                 ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
                                         .getNewsPapersLiveData()
                                         .observe(activity!!, object : Observer<List<Newspaper>> {

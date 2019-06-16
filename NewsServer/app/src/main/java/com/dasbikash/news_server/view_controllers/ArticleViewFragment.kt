@@ -34,6 +34,7 @@ import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.ArticleImage
 import com.dasbikash.news_server_data.models.room_entity.Language
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.translator.TranslatorUtils
 import com.dasbikash.news_server_data.utills.ImageLoadingDisposer
 import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
@@ -89,16 +90,21 @@ class ArticleViewFragment : Fragment() {
         mArticleImageHolder = view.findViewById(R.id.article_image_holder)
         mArticleText = view.findViewById(R.id.article_text)
         mWaitScreen = view.findViewById(R.id.wait_screen_for_data_loading)
+        mWaitScreen.setOnClickListener {  }
     }
 
     override fun onStart() {
         super.onStart()
         LoggerUtils.debugLog("onStart", this::class.java)
 
-        mWaitScreen.visibility = View.VISIBLE
-        mWaitScreen.bringToFront()
+        showWaitScreen()
 
         initArticleData()
+    }
+
+    private fun showWaitScreen() {
+        mWaitScreen.visibility = View.VISIBLE
+        mWaitScreen.bringToFront()
     }
 
     private fun initArticleData(doAfterInit: ((textSize:Float) -> Unit)? = null) {
@@ -119,7 +125,7 @@ class ArticleViewFragment : Fragment() {
                             } else {
                                 mArticleTextSize = DisplayUtils.getArticleTextSize(context!!)
                             }
-                            mDateString = DisplayUtils.getArticlePublicationDateString(mArticle, mLanguage, context!!)
+                            mDateString = DisplayUtils.getArticlePublicationDateString(mArticle, mLanguage, context!!,true)
                                     ?: ""
                         }
                         .observeOn(AndroidSchedulers.mainThread())
@@ -153,12 +159,20 @@ class ArticleViewFragment : Fragment() {
         } else {
             mArticleImageHolder.visibility = View.GONE
         }
+        hideWaitScreen()
+    }
+
+    private fun hideWaitScreen() {
         mWaitScreen.visibility = View.GONE
     }
 
+    private var mTranslationDone = false
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_fragment_article_view, menu)
+        if (mTranslationDone){
+            menu.findItem(R.id.translate_article_menu_item).setVisible(false)
+        }
         if (::mArticle.isInitialized) {
             mDisposable.add(
                     Observable.just(mArticle)
@@ -189,8 +203,58 @@ class ArticleViewFragment : Fragment() {
                     DialogUtils.AlertDialogDetails(message = "Save Article?", doOnPositivePress = { saveArticleLocallyAction() }))
                     .show()
             return true
+        }else if (item.itemId == R.id.translate_article_menu_item) {
+            DialogUtils.createAlertDialog(context!!,
+                    DialogUtils.AlertDialogDetails(message = "Translate Article?", doOnPositivePress = { translateArticleAction() }))
+                    .show()
+            return true
         }
         return false
+    }
+
+    private fun translateArticleAction() {
+        var amDisposed = false
+        showWaitScreen()
+        mDisposable.add(
+                Observable.just(mArticle)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            var translatedText:String=""
+                            try {
+                                if (mLanguage.name!!.contains("bangla",true)){
+                                    translatedText = TranslatorUtils.translateToEnglish(it.articleText!!)
+                                }else{
+                                    translatedText =  TranslatorUtils.translateToBangla(it.articleText!!)
+                                }
+                            } catch (ex: Exception) {
+                                if (!amDisposed) {
+                                    throw ex
+                                }
+                            }
+                            translatedText
+                        }.onErrorReturn {
+                            throw it
+                        }.doOnDispose {
+                            amDisposed = true
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<String>() {
+                            override fun onComplete() {
+                                hideWaitScreen()
+                            }
+                            override fun onNext(translatedText:String) {
+                                if (translatedText.isNotBlank()) {
+                                    DisplayUtils.displayHtmlText(mArticleText, translatedText)
+                                    mTranslationDone = true
+                                    activity!!.invalidateOptionsMenu()
+                                }
+                            }
+
+                            override fun onError(e: Throwable) {
+                                hideWaitScreen()
+                            }
+                        })
+        )
     }
 
     private fun saveArticleLocallyAction() {

@@ -127,41 +127,46 @@ object DisplayUtils {
         return positionString
     }
 
-    fun getSavedArticlePublicationDateString(savedArticle: SavedArticle, language: Language, context: Context): String? {
-        return getArticlePublicationDateStringFromPublicationTime(savedArticle.publicationTime,language,context)
+    fun getSavedArticlePublicationDateString(savedArticle: SavedArticle, language: Language, context: Context,getFullDate:Boolean=false): String? {
+        return getArticlePublicationDateStringFromPublicationTime(savedArticle.publicationTime,language,context,getFullDate)
     }
 
 
-    fun getArticlePublicationDateString(article: Article, language: Language, context: Context): String? {
-        return getArticlePublicationDateStringFromPublicationTime(article.publicationTime,language,context)
+    fun getArticlePublicationDateString(article: Article, language: Language, context: Context,getFullDate:Boolean=false): String? {
+        return getArticlePublicationDateStringFromPublicationTime(article.publicationTime,language,context,getFullDate)
     }
 
-    private fun getArticlePublicationDateStringFromPublicationTime(publicationTime:Date?,language: Language, context: Context):String?{
+    private fun getArticlePublicationDateStringFromPublicationTime(publicationTime:Date?,language: Language,
+                                                                   context: Context,getFullDate:Boolean):String?{
 
         val simpleDateFormat = SimpleDateFormat(context.getResources().getString(R.string.display_date_format_long))
 
         var diffTs = System.currentTimeMillis()
         var publicationTimeString: String? = null
 
-        publicationTime?.let {
+        if (!getFullDate) {
+            publicationTime?.let {
 
-            diffTs = diffTs - it.time
+                diffTs = diffTs - it.time
 
-            if (diffTs <= MINUTE_IN_MS) {
-                publicationTimeString = JUST_NOW_TIME_STRING
-            } else if (diffTs < HOUR_IN_MS) {
-                publicationTimeString = (diffTs / MINUTE_IN_MS).toInt().toString() + " " +
-                        (if (diffTs > TWO_MINUTES_IN_MS) MINUTES_TIME_STRING else MINUTE_TIME_STRING) +
-                        " " + AGO_TIME_STRING
-            } else if (diffTs < DAY_IN_MS) {
-                publicationTimeString = (diffTs / HOUR_IN_MS).toString() + " " +
-                        (if (diffTs > TWO_HOURS_IN_MS) HOURS_TIME_STRING else HOUR_TIME_STRING) +
-                        " " + AGO_TIME_STRING
-            } else if (diffTs < TWO_DAYS_IN_MS) {
-                publicationTimeString = YESTERDAY_TIME_STRING
-            } else {
-                publicationTimeString = simpleDateFormat.format(publicationTime.time)
+                if (diffTs <= MINUTE_IN_MS) {
+                    publicationTimeString = JUST_NOW_TIME_STRING
+                } else if (diffTs < HOUR_IN_MS) {
+                    publicationTimeString = (diffTs / MINUTE_IN_MS).toInt().toString() + " " +
+                            (if (diffTs > TWO_MINUTES_IN_MS) MINUTES_TIME_STRING else MINUTE_TIME_STRING) +
+                            " " + AGO_TIME_STRING
+                } else if (diffTs < DAY_IN_MS) {
+                    publicationTimeString = (diffTs / HOUR_IN_MS).toString() + " " +
+                            (if (diffTs > TWO_HOURS_IN_MS) HOURS_TIME_STRING else HOUR_TIME_STRING) +
+                            " " + AGO_TIME_STRING
+                } else if (diffTs < TWO_DAYS_IN_MS) {
+                    publicationTimeString = YESTERDAY_TIME_STRING
+                } else {
+                    publicationTimeString = simpleDateFormat.format(publicationTime.time)
+                }
             }
+        }else{
+            publicationTime?.let {publicationTimeString = simpleDateFormat.format(publicationTime.time)}
         }
 
         if (!language.name!!.contains("English") && !language.name!!.contains("english")){
@@ -249,10 +254,11 @@ object DisplayUtils {
 
     @Suppress("DEPRECATION")
     fun displayHtmlText(textView: TextView, text: String) {
+        val textForDisplay = text.replace(Regex("(<br>\\s?){3,}"),"<br><br>")
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            textView.text = Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY)
+            textView.text = Html.fromHtml(textForDisplay, Html.FROM_HTML_MODE_LEGACY)
         } else {
-            textView.text = Html.fromHtml(text)
+            textView.text = Html.fromHtml(textForDisplay)
         }
     }
 

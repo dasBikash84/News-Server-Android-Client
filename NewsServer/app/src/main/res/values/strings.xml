@@ -61,4 +61,5 @@
     <string name="error_retry_message">Error!!! Please retry.</string>
     <string name="bmi_bn_title">বাংলা</string>
     <string name="bmi_eng_title">English</string>
+    <string name="translate_article_menu_item_title">Translate Article</string>
 </resources>

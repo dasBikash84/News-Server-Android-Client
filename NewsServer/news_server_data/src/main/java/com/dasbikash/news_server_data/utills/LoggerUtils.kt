@@ -22,7 +22,7 @@ object LoggerUtils {
 
     fun printStackTrace(ex:Throwable){
         if (opMode==LoggerUtils.OpMode.DEBUG){
-            ex.printStackTrace()
+            debugLog("Error StackTrace: \n" + ExceptionUtils.getStackTraceAsString(ex), this::class.java)
         }
     }
 

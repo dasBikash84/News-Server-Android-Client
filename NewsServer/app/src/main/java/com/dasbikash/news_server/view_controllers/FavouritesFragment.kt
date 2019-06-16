@@ -222,7 +222,7 @@ class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: Compos
                             val article = newsDataRepository.getLatestArticleByPage(it)
                             article.let {
                                 language = appSettingsRepository.getLanguageByPage(mPage)
-                                return@map Pair(it, DisplayUtils.getArticlePublicationDateString(article, language, itemView.context))
+                                return@map Pair(it, DisplayUtils.getArticlePublicationDateString(article, language, itemView.context,true))
                             }
                         }
                         .observeOn(AndroidSchedulers.mainThread())

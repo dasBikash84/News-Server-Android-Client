@@ -17,6 +17,8 @@ import android.os.Looper
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.NotOnMainThreadException
 import com.dasbikash.news_server_data.exceptions.OnMainThreadException
+import java.lang.Exception
+import java.util.*
 
 object ExceptionUtils {
 
@@ -48,5 +50,15 @@ object ExceptionUtils {
 
     fun checkRequestValidityBeforeLocalDiskAccess() {
         thowExceptionIfOnMainThred()
+    }
+
+    fun getStackTraceAsString(ex:Throwable):String{
+        val stackTracebuilder = StringBuilder("")
+        Arrays.asList(ex.stackTrace).asSequence().forEach {
+            it.iterator().forEach {
+                stackTracebuilder.append(it.toString()).append("\n")
+            }
+        }
+        return stackTracebuilder.toString()
     }
 }
