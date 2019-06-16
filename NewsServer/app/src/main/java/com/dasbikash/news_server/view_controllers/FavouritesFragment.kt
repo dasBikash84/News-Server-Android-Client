@@ -70,7 +70,7 @@ class FavouritesFragment : Fragment() {
 
     private lateinit var mHomeViewModel: HomeViewModel
 
-    private val postLogInAction = {mNoFavPageLogInButton.visibility = View.GONE}
+    private val postLogInAction = { mNoFavPageLogInButton.visibility = View.GONE }
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -89,20 +89,22 @@ class FavouritesFragment : Fragment() {
 
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
 
-        mNoFavPageLogInButton.setOnClickListener {(activity!! as SignInHandler).launchSignInActivity({postLogInAction()})}
+        mNoFavPageLogInButton.setOnClickListener { (activity!! as SignInHandler).launchSignInActivity({ postLogInAction() }) }
 
         mFavItemsHolder.adapter = mFavouritePagesListAdapter
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
         val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
 
-        ItemTouchHelper(FavPageSwipeToDeleteCallback(mFavouritePagesListAdapter, activity!! as SignInHandler, activity!! as WorkInProcessWindowOperator,postLogInAction))
+        ItemTouchHelper(FavPageSwipeToDeleteCallback(mFavouritePagesListAdapter, activity!! as SignInHandler, activity!! as WorkInProcessWindowOperator, postLogInAction))
                 .attachToRecyclerView(mFavItemsHolder)
-        if (userSettingsRepository.checkIfLoggedIn()){postLogInAction()}
+        if (userSettingsRepository.checkIfLoggedIn()) {
+            postLogInAction()
+        }
 
         mHomeViewModel.getUserPreferenceLiveData()
                 .observe(activity!!, object : Observer<UserPreferenceData?> {
                     override fun onChanged(userPreferenceData: UserPreferenceData?) {
-                        if (userPreferenceData==null){
+                        if (userPreferenceData == null) {
                             mNoFavPageMsgHolder.visibility = View.VISIBLE
                             mScroller.visibility = View.GONE
                         }
@@ -117,10 +119,10 @@ class FavouritesFragment : Fragment() {
                                     .subscribeWith(object : DisposableObserver<List<Page?>>() {
                                         override fun onComplete() {}
                                         override fun onNext(pageList: List<Page?>) {
-                                            if(pageList.isNullOrEmpty()){
+                                            if (pageList.isNullOrEmpty()) {
                                                 mNoFavPageMsgHolder.visibility = View.VISIBLE
                                                 mScroller.visibility = View.GONE
-                                            }else{
+                                            } else {
                                                 mNoFavPageMsgHolder.visibility = View.GONE
                                                 mScroller.visibility = View.VISIBLE
                                             }
@@ -169,7 +171,7 @@ class FavouritePagesListAdapter(val context: Context) :
 
 class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: CompositeDisposable) : RecyclerView.ViewHolder(itemview) {
 
-    val articlePreviewHolder:LinearLayout
+    val articlePreviewHolder: LinearLayout
     private val pageTitle: AppCompatTextView
     private val pageTitleHolder: MaterialCardView
     private val articleTitle: AppCompatTextView
@@ -222,7 +224,7 @@ class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: Compos
                             val article = newsDataRepository.getLatestArticleByPage(it)
                             article.let {
                                 language = appSettingsRepository.getLanguageByPage(mPage)
-                                return@map Pair(it, DisplayUtils.getArticlePublicationDateString(article, language, itemView.context,true))
+                                return@map Pair(it, DisplayUtils.getArticlePublicationDateString(article, language, itemView.context, true))
                             }
                         }
                         .observeOn(AndroidSchedulers.mainThread())
@@ -239,8 +241,8 @@ class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: Compos
                                     articleTitle.text = mArticle.title
                                     articlePublicationTime.text = data.second
 
-                                    articleTitlePlaceHolder.visibility=View.GONE
-                                    articlePublicationTimePlaceHolder.visibility=View.GONE
+                                    articleTitlePlaceHolder.visibility = View.GONE
+                                    articlePublicationTimePlaceHolder.visibility = View.GONE
                                     articleTitle.visibility = View.VISIBLE
                                     articlePublicationTime.visibility = View.VISIBLE
 
@@ -251,11 +253,9 @@ class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: Compos
                                             R.drawable.pc_bg, R.drawable.app_big_logo,
                                             { compositeDisposable.delete(imageLoadingDisposer) })
 
-                                    mArticle.previewImageLink?.let {
-                                        articleImage.setOnClickListener {
-                                            itemView.context.startActivity(
-                                                    PageViewActivity.getIntentForPageDisplay(itemView.context, mPage))
-                                        }
+                                    articleImage.setOnClickListener {
+                                        itemView.context.startActivity(
+                                                PageViewActivity.getIntentForPageDisplay(itemView.context, mPage))
                                     }
                                 }
                             }
@@ -301,7 +301,7 @@ class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: Compos
 class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePagesListAdapter,
                                    val signInHandler: SignInHandler,
                                    val workInProcessWindowOperator: WorkInProcessWindowOperator,
-                                   val postLogInAction:()->Unit) :
+                                   val postLogInAction: () -> Unit) :
         ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT or ItemTouchHelper.LEFT) {
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
         return false
@@ -367,7 +367,7 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
                     DialogUtils.AlertDialogDetails(
                             message = message, positiveButtonText = "Sign in and continue",
                             doOnPositivePress = {
-                                signInHandler.launchSignInActivity({postLogInAction()})
+                                signInHandler.launchSignInActivity({ postLogInAction() })
                             }, doOnNegetivePress = negetiveAction,
                             isCancelable = false
                     )
