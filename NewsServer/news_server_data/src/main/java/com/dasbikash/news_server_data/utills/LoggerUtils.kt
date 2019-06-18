@@ -17,27 +17,22 @@ import android.util.Log
 import com.dasbikash.news_server_data.BuildConfig
 
 object LoggerUtils {
-    private val opMode = if (BuildConfig.DEBUG){OpMode.DEBUG}else{OpMode.RELEASE}
     private const val TAG = "NS>>"
     private const val MAX_TAG_LENGTH = 23
 
     fun printStackTrace(ex:Throwable){
-        if (opMode==LoggerUtils.OpMode.DEBUG){
+        if (BuildConfig.DEBUG){
             debugLog("Error StackTrace: \n" + ExceptionUtils.getStackTraceAsString(ex), this::class.java)
         }
     }
 
     fun <T> debugLog(message:String,type:Class<T>){
-        if (opMode == OpMode.DEBUG) {
+        if (BuildConfig.DEBUG) {
             var classNameEndIndex = type.simpleName.length
             if (classNameEndIndex > (MAX_TAG_LENGTH- TAG.length)){
                 classNameEndIndex = MAX_TAG_LENGTH- TAG.length
             }
             Log.d(TAG + type.simpleName.substring(0,classNameEndIndex), message)
         }
-    }
-
-    private enum class OpMode{
-        DEBUG,RELEASE
     }
 }

@@ -16,6 +16,7 @@ package com.dasbikash.news_server_data.page_request_server
 import android.content.Context
 import android.os.Build
 import androidx.work.*
+import com.dasbikash.news_server_data.BuildConfig
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import java.util.concurrent.TimeUnit
@@ -26,10 +27,12 @@ object PageRequestServerInitiator {
     const private val INIT_FLAG = "com.dasbikash.news_server_data.page_request_server.INIT_FLAG"
 
     fun initWork(context: Context){
-        LoggerUtils.debugLog("initWork",this::class.java)
-        if (!checkIfWorkInitiated(context)){
-            doInit(context)
-            saveInitFlag(context)
+        if (BuildConfig.DEBUG) {
+            LoggerUtils.debugLog("initWork", this::class.java)
+            if (!checkIfWorkInitiated(context)) {
+                doInit(context)
+                saveInitFlag(context)
+            }
         }
     }
 
@@ -41,13 +44,9 @@ object PageRequestServerInitiator {
     private fun doInit(context: Context) {
         LoggerUtils.debugLog("doInit",this::class.java)
 
-        var constraintBuilder = Constraints.Builder()
+        val constraintBuilder = Constraints.Builder()
                                 .setRequiresBatteryNotLow(true)
                                 .setRequiredNetworkType(NetworkType.CONNECTED)
-
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            constraintBuilder = constraintBuilder.setRequiresDeviceIdle(true)
-//        }
 
         val constraints = constraintBuilder.build()
 
