@@ -126,7 +126,7 @@ class InitFragment : Fragment() {
                             }
 
                             override fun onComplete() {
-//                                PageRequestServerInitiator.initWork(context!!)
+                                PageRequestServerInitiator.initWork(context!!)
                                 ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
                                         .getNewsPapersLiveData()
                                         .observe(activity!!, object : Observer<List<Newspaper>> {

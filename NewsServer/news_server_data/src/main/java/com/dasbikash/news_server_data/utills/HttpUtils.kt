@@ -15,12 +15,32 @@ package com.dasbikash.news_server_data.utills
 
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 
 object HttpUtils {
 
-    fun getWebPageContent(url:String):String?{
+    const val ERROR_CONTENT = "Error"
+
+    fun getWebPageContent(url: String): String? {
         val client = OkHttpClient()
         val request = Request.Builder().url(url).build()
-        return client.newCall(request).execute().body()?.string()
+        var response: Response? = null
+        try {
+            response = client.newCall(request).execute()
+            if (response != null) {
+                val pageContent: String
+                if (response.isSuccessful) {
+                    pageContent = response.body()?.string() ?: ERROR_CONTENT
+                } else {
+                    pageContent = ERROR_CONTENT
+                }
+                response.close()
+                return pageContent
+            }
+        } catch (ex: Exception) {
+            LoggerUtils.printStackTrace(ex)
+            response?.close()
+        }
+        return null
     }
 }
