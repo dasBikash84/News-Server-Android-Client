@@ -14,9 +14,10 @@
 package com.dasbikash.news_server_data.utills
 
 import android.util.Log
+import com.dasbikash.news_server_data.BuildConfig
 
 object LoggerUtils {
-    private val opMode = OpMode.DEBUG
+    private val opMode = if (BuildConfig.DEBUG){OpMode.DEBUG}else{OpMode.RELEASE}
     private const val TAG = "NS>>"
     private const val MAX_TAG_LENGTH = 23
 
