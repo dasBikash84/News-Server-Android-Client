@@ -13,18 +13,31 @@
 
 package com.dasbikash.news_server_data.page_request_server
 
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.*
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.CloudFireStorePageRequestServerUtils
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.PageDownLoadRequest
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.PageDownLoadRequestResponse
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.PageDownLoadRequestSettings
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealTimeDbPageRequestServerUtils
+import com.dasbikash.news_server_data.utills.LoggerUtils
 
 internal object PageRequestServerUtils {
 
+    private lateinit var mPageDownLoadRequestSettings: PageDownLoadRequestSettings
+
+    private fun getPageDownLoadRequestSettings():PageDownLoadRequestSettings{
+        if (!::mPageDownLoadRequestSettings.isInitialized){
+            mPageDownLoadRequestSettings = RealTimeDbPageRequestServerUtils.getPageDownLoadRequestSettings()
+            LoggerUtils.debugLog(mPageDownLoadRequestSettings.toString(),this::class.java)
+        }
+        return mPageDownLoadRequestSettings
+    }
+
     fun getPageDownLoadRequests(): Map<String, PageDownLoadRequest> =
-            RealTimeDbPageRequestServerUtils.getPageDownLoadRequests()
+            RealTimeDbPageRequestServerUtils.getPageDownLoadRequests(getPageDownLoadRequestSettings().getFetchChunkSize())
 
     fun getRequestSservingChunkSizeLimit() =
-            RealTimeDbPageRequestServerUtils.REQUEST_SERVING_CHUNK_SIZE_LIMIT
+            getPageDownLoadRequestSettings().requestServingChunkSize
 
     fun checkIfPageDownLoadRequestExists(pageDownLoadRequestId: String): Boolean =
             RealTimeDbPageRequestServerUtils.checkIfPageDownLoadRequestExists(pageDownLoadRequestId)
@@ -34,4 +47,8 @@ internal object PageRequestServerUtils {
 
     fun logPageDownLoadRequestWorkerTask(servedDocumentIdList: List<String>)=
             CloudFireStorePageRequestServerUtils.logPageDownLoadRequestWorkerTask(servedDocumentIdList)
+
+    fun getDailyMaxServingCountForNp(npId:String):Int =
+            getPageDownLoadRequestSettings().getDailyMaxServingCountForNp(npId)
+
 }

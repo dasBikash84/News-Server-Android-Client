@@ -13,8 +13,6 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
-import android.util.Log
-import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.models.DefaultAppSettings
@@ -27,6 +25,7 @@ import com.google.firebase.firestore.Query
 internal object CloudFireStoreAppSettingsUtils{
 
     private const val SETTINGS_UPDATE_TIME_FIELD_NAME = "updateTime"
+    private const val WAITING_MS_FOR_NET_RESPONSE = 30000L
 
     fun getServerAppSettingsUpdateTime(): Long{
 
@@ -54,7 +53,7 @@ internal object CloudFireStoreAppSettingsUtils{
                 }
 
         //Log.d(TAG,"getServerAppSettingsUpdateTime before wait")
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
 
         //Log.d(TAG,"getServerAppSettingsUpdateTime before throw it")
         dataServerException?.let { throw it }
@@ -103,7 +102,7 @@ internal object CloudFireStoreAppSettingsUtils{
                 }
 
         //Log.d(TAG,"getCountries before wait")
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
 
         //Log.d(TAG,"getCountries before throw it")
         dataServerException?.let { throw it }
@@ -140,7 +139,7 @@ internal object CloudFireStoreAppSettingsUtils{
                 }
 
         //Log.d(TAG,"getLanguages before wait")
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
 
         //Log.d(TAG,"getLanguages before throw it")
         dataServerException?.let { throw it }
@@ -177,7 +176,7 @@ internal object CloudFireStoreAppSettingsUtils{
                 }
 
         //Log.d(TAG,"getNewspapers before wait")
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
 
         //Log.d(TAG,"getNewspapers before throw it")
         dataServerException?.let { throw it }
@@ -214,7 +213,7 @@ internal object CloudFireStoreAppSettingsUtils{
                 }
 
         //Log.d(TAG,"getPages before wait")
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
 
         //Log.d(TAG,"getPages before throw it")
         dataServerException?.let { throw it }
@@ -251,7 +250,7 @@ internal object CloudFireStoreAppSettingsUtils{
                 }
 
         //Log.d(TAG,"getPageGroups before wait")
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
 
         //Log.d(TAG,"getPageGroups before throw it")
         dataServerException?.let { throw it }

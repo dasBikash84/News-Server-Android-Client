@@ -25,6 +25,7 @@ internal object RealtimeDBUtils {
     private const val ARTICLE_DATA_ROOT_NODE = "article_data"
     private const val ADMION_LIST_NODE = "admin_list"
     private const val PAGE_DOWNLOAD_REQUEST_NODE = "page_download_request"
+    private const val PAGE_DOWNLOAD_REQUEST_SETTINGS_NODE = "page_download_request_settings"
 
     val mFBDataBase: FirebaseDatabase
 
@@ -38,5 +39,6 @@ internal object RealtimeDBUtils {
     val mArticleDataRootReference: DatabaseReference = mRootReference.child(ARTICLE_DATA_ROOT_NODE)
     val mAdminListReference: DatabaseReference = mRootReference.child(ADMION_LIST_NODE)
     val mPageDownLoadRequestReference: DatabaseReference = mRootReference.child(PAGE_DOWNLOAD_REQUEST_NODE)
+    val mPageDownLoadRequestSettingsReference: DatabaseReference = mRootReference.child(PAGE_DOWNLOAD_REQUEST_SETTINGS_NODE)
 }
 

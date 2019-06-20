@@ -14,7 +14,6 @@
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
 import androidx.annotation.Keep
-import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -25,10 +24,9 @@ import kotlin.random.Random
 
 internal object RealTimeDbPageRequestServerUtils {
 
-    const val REQUEST_SERVING_CHUNK_SIZE_LIMIT = 25
-    const val FETCH_TIMES = 2
+    const val WAITING_MS_FOR_NET_RESPONSE = 30000L
 
-    fun getPageDownLoadRequests(): Map<String, PageDownLoadRequest> {
+    fun getPageDownLoadRequests(fetchChunkSize:Int): Map<String, PageDownLoadRequest> {
 
         val lock = Object()
         val pageDownLoadRequestMap = mutableMapOf<String, PageDownLoadRequest>()
@@ -37,10 +35,10 @@ internal object RealTimeDbPageRequestServerUtils {
 
         if (Random(System.currentTimeMillis()).nextBoolean()) {
             LoggerUtils.debugLog("limitToFirst", this::class.java)
-            query = RealtimeDBUtils.mPageDownLoadRequestReference.limitToFirst(REQUEST_SERVING_CHUNK_SIZE_LIMIT * FETCH_TIMES)
+            query = RealtimeDBUtils.mPageDownLoadRequestReference.limitToFirst(fetchChunkSize)
         } else {
             LoggerUtils.debugLog("limitToLast", this::class.java)
-            query = RealtimeDBUtils.mPageDownLoadRequestReference.limitToLast(REQUEST_SERVING_CHUNK_SIZE_LIMIT * FETCH_TIMES)
+            query = RealtimeDBUtils.mPageDownLoadRequestReference.limitToLast(fetchChunkSize)
         }
 
         query.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -62,7 +60,7 @@ internal object RealTimeDbPageRequestServerUtils {
             })
 
         LoggerUtils.debugLog("getPageDownLoadRequests before wait", this::class.java)
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
 
         LoggerUtils.debugLog("getPageDownLoadRequests before return", this::class.java)
         return pageDownLoadRequestMap.toMap()
@@ -91,13 +89,41 @@ internal object RealTimeDbPageRequestServerUtils {
                 })
 
         LoggerUtils.debugLog("checkIfPageDownLoadRequestExists before wait", this::class.java)
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
 
         LoggerUtils.debugLog("checkIfPageDownLoadRequestExists before true return", this::class.java)
         data?.let { return true }
 
         LoggerUtils.debugLog("checkIfPageDownLoadRequestExists before false return", this::class.java)
         return false
+    }
+
+    fun getPageDownLoadRequestSettings():PageDownLoadRequestSettings{
+
+        val lock = Object()
+        var data: PageDownLoadRequestSettings = PageDownLoadRequestSettings()
+
+        RealtimeDBUtils.mPageDownLoadRequestSettingsReference
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onCancelled(error: DatabaseError) {
+                        LoggerUtils.debugLog("getPageDownLoadRequestSettings onCancelled. Error msg: ${error.message}", this::class.java)
+                        synchronized(lock) { lock.notify() }
+                    }
+
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            LoggerUtils.debugLog("getPageDownLoadRequestSettings onDataChange", this::class.java)
+                            data = dataSnapshot.getValue(PageDownLoadRequestSettings::class.java)!!
+                        }
+                        synchronized(lock) { lock.notify() }
+                    }
+                })
+
+        LoggerUtils.debugLog("getPageDownLoadRequestSettings before wait", this::class.java)
+        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+
+        LoggerUtils.debugLog("getPageDownLoadRequestSettings before return", this::class.java)
+        return data
     }
 
 }
@@ -108,3 +134,24 @@ internal data class PageDownLoadRequest(
         var link: String? = null,
         var requestId: String? = null
 )
+
+@Keep
+internal data class PageDownLoadRequestSettings(
+        var requestServingChunkSize:Int = DEFAULT_REQUEST_SERVING_CHUNK_SIZE,
+        var fetchMultiplier:Double = DEFAULT_FETCH_MULTIPLIER,
+        var dailyMaxServingCountForNp: Map<String, Int> = mapOf()
+){
+    companion object{
+        const val DEFAULT_REQUEST_SERVING_CHUNK_SIZE = 10
+        const val DEFAULT_FETCH_MULTIPLIER = 1.5
+        const val DEFAULT_DAILY_MAX_SERVING_COUNT_FOR_NP = 100
+    }
+    fun getDailyMaxServingCountForNp(npId:String):Int{
+        if (dailyMaxServingCountForNp.keys.contains(npId)){
+            return dailyMaxServingCountForNp.get(npId)!!
+        }
+        return DEFAULT_DAILY_MAX_SERVING_COUNT_FOR_NP
+    }
+    fun getFetchChunkSize():Int =
+            (requestServingChunkSize*fetchMultiplier).toInt()
+}
