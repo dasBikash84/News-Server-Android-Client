@@ -13,7 +13,9 @@
 
 package com.dasbikash.news_server_data.page_request_server
 
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.CloudFireStorePageRequestServerUtils
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.PageDownLoadRequest
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.PageDownLoadRequestResponse
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealTimeDbPageRequestServerUtils
 
 internal object PageRequestServerUtils {
@@ -23,4 +25,13 @@ internal object PageRequestServerUtils {
 
     fun getRequestSservingChunkSizeLimit() =
             RealTimeDbPageRequestServerUtils.REQUEST_SERVING_CHUNK_SIZE_LIMIT
+
+    fun checkIfPageDownLoadRequestExists(pageDownLoadRequestId: String): Boolean =
+            RealTimeDbPageRequestServerUtils.checkIfPageDownLoadRequestExists(pageDownLoadRequestId)
+
+    fun writeArticleData(pageDownLoadRequestResponseData: Pair<String, PageDownLoadRequestResponse>) =
+            CloudFireStorePageRequestServerUtils.writeArticleData(pageDownLoadRequestResponseData)
+
+    fun logPageDownLoadRequestWorkerTask(servedDocumentIdList: List<String>)=
+            CloudFireStorePageRequestServerUtils.logPageDownLoadRequestWorkerTask(servedDocumentIdList)
 }
