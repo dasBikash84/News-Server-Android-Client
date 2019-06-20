@@ -19,6 +19,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.CloudFireStorePageRequestServerUtils
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.PageDownLoadRequestResponse
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealTimeDbPageRequestServerUtils
 import com.dasbikash.news_server_data.utills.HttpUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
@@ -26,7 +27,7 @@ import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 internal class PageRequestServerWorker(appContext: Context, workerParams: WorkerParameters)
     : Worker(appContext, workerParams) {
 
-    companion object{
+    companion object {
         val NP_IDS_RESTRICTED_ON_WIFI = listOf("NP_ID_2")
         val MIN_DELAY_MS_BETWEEN_REQUESTS = 5000L
     }
@@ -35,37 +36,40 @@ internal class PageRequestServerWorker(appContext: Context, workerParams: Worker
         LoggerUtils.debugLog("doWork entry", this::class.java)
 
         var nextRequestTs = System.currentTimeMillis()
-        val pageDownLoadRequestMap = CloudFireStorePageRequestServerUtils.getPageDownLoadRequests()
+
+        val pageDownLoadRequestMap = RealTimeDbPageRequestServerUtils.getPageDownLoadRequests()
+
         val servedDocumentIdList = mutableListOf<String>()
-        LoggerUtils.debugLog("Page DownLoad Request chunk size: ${pageDownLoadRequestMap.size}", this::class.java)
+        LoggerUtils.debugLog("Featched page downLoad request chunk size: ${pageDownLoadRequestMap.size}", this::class.java)
 
-        pageDownLoadRequestMap.keys.asSequence().forEach {
-            val pageDownLoadRequest = pageDownLoadRequestMap.get(it)!!
+        pageDownLoadRequestMap.keys.shuffled().take(RealTimeDbPageRequestServerUtils.REQUEST_SERVING_CHUNK_SIZE_LIMIT).asSequence()
+                .forEach {
+                    val pageDownLoadRequest = pageDownLoadRequestMap.get(it)!!
 
-            if (NetConnectivityUtility.isConnected &&
-                    (NetConnectivityUtility.isOnMobileDataNetwork ||
-                    !NP_IDS_RESTRICTED_ON_WIFI.contains(pageDownLoadRequest.newsPaperId))) {
+                    if (NetConnectivityUtility.isConnected &&
+                            (NetConnectivityUtility.isOnMobileDataNetwork ||
+                                    !NP_IDS_RESTRICTED_ON_WIFI.contains(pageDownLoadRequest.newsPaperId))) {
 
-                LoggerUtils.debugLog(pageDownLoadRequest.toString(), this::class.java)
+                        LoggerUtils.debugLog(pageDownLoadRequest.toString(), this::class.java)
 
-                if (pageDownLoadRequest.link != null) {
-                    if (nextRequestTs> System.currentTimeMillis()){
-                        SystemClock.sleep(nextRequestTs-System.currentTimeMillis())
-                    }
-                    nextRequestTs = System.currentTimeMillis() + MIN_DELAY_MS_BETWEEN_REQUESTS
-                    val pageContent = HttpUtils.getWebPageContent(pageDownLoadRequest.link!!)
-                    if (pageContent != null) {
-                        CloudFireStorePageRequestServerUtils
-                                .writeArticleData(Pair(it,PageDownLoadRequestResponse(
-                                                            link = pageDownLoadRequest.link!!, pageContent = pageContent)))
-                        LoggerUtils.debugLog("servedDocumentId: ${it}", this::class.java)
-                        servedDocumentIdList.add(it)
+                        if (pageDownLoadRequest.link != null && RealTimeDbPageRequestServerUtils.checkIfPageDownLoadRequestExists(it)) {
+                            if (nextRequestTs > System.currentTimeMillis()) {
+                                SystemClock.sleep(nextRequestTs - System.currentTimeMillis())
+                            }
+                            nextRequestTs = System.currentTimeMillis() + MIN_DELAY_MS_BETWEEN_REQUESTS
+                            val pageContent = HttpUtils.getWebPageContent(pageDownLoadRequest.link!!)
+                            if (pageContent != null && RealTimeDbPageRequestServerUtils.checkIfPageDownLoadRequestExists(it)) {
+                                CloudFireStorePageRequestServerUtils
+                                        .writeArticleData(Pair(pageDownLoadRequest.requestId!!, PageDownLoadRequestResponse(
+                                                link = pageDownLoadRequest.link!!, pageContent = pageContent)))
+                                LoggerUtils.debugLog("servedDocumentId: ${it}", this::class.java)
+                                servedDocumentIdList.add(it)
+                            }
+                        }
+                    } else {
+                        LoggerUtils.debugLog("Skipped restricted NP(${NP_IDS_RESTRICTED_ON_WIFI}) on Wify.", this::class.java)
                     }
                 }
-            }else{
-                LoggerUtils.debugLog("Skipped restricted NP(${NP_IDS_RESTRICTED_ON_WIFI}) on Wify.", this::class.java)
-            }
-        }
         CloudFireStorePageRequestServerUtils.logPageDownLoadRequestWorkerTask(servedDocumentIdList)
         LoggerUtils.debugLog("doWork exiting", this::class.java)
         return Result.success()
