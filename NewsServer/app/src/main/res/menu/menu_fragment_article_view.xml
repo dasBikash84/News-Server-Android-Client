@@ -18,7 +18,8 @@
         android:id="@+id/translate_article_menu_item"
         android:icon="@drawable/ic_translate"
         android:title="@string/translate_article_menu_item_title"
-        app:showAsAction="collapseActionView"/>
+        app:showAsAction="collapseActionView"
+        android:visible="false"/>
     <item
         android:id="@+id/save_article_locally_menu_item"
         android:icon="@drawable/ic_save"

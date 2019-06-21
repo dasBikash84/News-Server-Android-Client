@@ -203,16 +203,16 @@ class ArticleViewFragment : Fragment() {
                     DialogUtils.AlertDialogDetails(message = "Save Article?", doOnPositivePress = { saveArticleLocallyAction() }))
                     .show()
             return true
-        }else if (item.itemId == R.id.translate_article_menu_item) {
+        }/*else if (item.itemId == R.id.translate_article_menu_item) {
             DialogUtils.createAlertDialog(context!!,
                     DialogUtils.AlertDialogDetails(message = "Translate Article?", doOnPositivePress = { translateArticleAction() }))
                     .show()
             return true
-        }
+        }*/
         return false
     }
 
-    private fun translateArticleAction() {
+    /*private fun translateArticleAction() {
         var amDisposed = false
         showWaitScreen()
         mDisposable.add(
@@ -255,7 +255,7 @@ class ArticleViewFragment : Fragment() {
                             }
                         })
         )
-    }
+    }*/
 
     private fun saveArticleLocallyAction() {
         mDisposable.add(

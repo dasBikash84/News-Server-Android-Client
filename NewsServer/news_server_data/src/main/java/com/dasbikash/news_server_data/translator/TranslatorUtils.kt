@@ -13,19 +13,8 @@
 
 package com.dasbikash.news_server_data.translator
 
-import com.dasbikash.news_server_data.exceptions.TranslatorException
-import com.dasbikash.news_server_data.utills.ExceptionUtils
-import com.dasbikash.news_server_data.utills.LoggerUtils
-import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage
-import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage
-import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator
-import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions
-import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions
-
-
-
 object TranslatorUtils {
-    private val WAITING_MS_FOR_NET_RESPONSE: Long = 60000L
+    /*private val WAITING_MS_FOR_NET_RESPONSE: Long = 60000L
     private val mEnglishToBanglaTranslator:FirebaseTranslator
     private val mBanglaToEnglishTranslator:FirebaseTranslator
     private val mModelDownloadConditions = FirebaseModelDownloadConditions.Builder().build()
@@ -87,5 +76,5 @@ object TranslatorUtils {
             translateText(text, mEnglishToBanglaTranslator)
 
     fun translateToEnglish(text:String)=
-            translateText(text, mBanglaToEnglishTranslator)
+            translateText(text, mBanglaToEnglishTranslator)*/
 }

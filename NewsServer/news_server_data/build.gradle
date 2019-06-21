@@ -38,15 +38,15 @@ dependencies {
     //noinspection GradleCompatible
     implementation 'androidx.appcompat:appcompat:1.1.0-beta01'
 
-    implementation 'com.google.firebase:firebase-core:16.0.9'
-    implementation 'com.google.firebase:firebase-database:17.0.0'
-    implementation 'com.google.firebase:firebase-auth:17.0.0'
-    implementation 'com.google.android.gms:play-services-auth:16.0.1'
+    implementation 'com.google.firebase:firebase-core:17.0.0'
+    implementation 'com.google.firebase:firebase-database:18.0.0'
+    implementation 'com.google.firebase:firebase-auth:18.0.0'
+    implementation 'com.google.android.gms:play-services-auth:17.0.0'
     implementation 'com.firebaseui:firebase-ui-auth:4.3.1'
-    implementation 'com.google.firebase:firebase-ml-natural-language:19.0.1'
-    implementation 'com.google.firebase:firebase-ml-natural-language-translate-model:19.0.1'
+//    implementation 'com.google.firebase:firebase-ml-natural-language:20.0.0'
+//    implementation 'com.google.firebase:firebase-ml-natural-language-translate-model:20.0.0'
 
-    implementation 'com.google.firebase:firebase-firestore:19.0.2'
+    implementation 'com.google.firebase:firebase-firestore:20.0.0'
 
 
     def androidxTestRunnerVersion = '1.2.0'
@@ -96,7 +96,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.12.0'
     androidTestImplementation 'junit:junit:4.12'
 
-    def work_version = "2.1.0-beta01"
+    def work_version = "2.1.0-beta02"
     implementation "androidx.work:work-runtime-ktx:$work_version"
     implementation "androidx.work:work-rxjava2:$work_version"
     androidTestImplementation "androidx.work:work-testing:$work_version"
