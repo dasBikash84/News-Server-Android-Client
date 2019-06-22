@@ -46,17 +46,17 @@ object NetConnectivityUtility : BroadcastReceiver() {
             val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val sActiveNetworkInfo: NetworkInfo?
 
-                sActiveNetworkInfo = connectivityManager.activeNetworkInfo
+            sActiveNetworkInfo = connectivityManager.activeNetworkInfo
 
             if (sActiveNetworkInfo != null && sActiveNetworkInfo.isConnected) {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                     mCurrentNetworkType = when (sActiveNetworkInfo.type) {
                         ConnectivityManager.TYPE_WIFI -> NetConnectivityUtility.NETWORK_TYPE.WIFI
                         ConnectivityManager.TYPE_MOBILE,
-                            ConnectivityManager.TYPE_MOBILE_DUN,
-                            ConnectivityManager.TYPE_MOBILE_HIPRI,
-                            ConnectivityManager.TYPE_MOBILE_MMS,
-                            ConnectivityManager.TYPE_MOBILE_SUPL -> NetConnectivityUtility.NETWORK_TYPE.MOBILE
+                        ConnectivityManager.TYPE_MOBILE_DUN,
+                        ConnectivityManager.TYPE_MOBILE_HIPRI,
+                        ConnectivityManager.TYPE_MOBILE_MMS,
+                        ConnectivityManager.TYPE_MOBILE_SUPL -> NetConnectivityUtility.NETWORK_TYPE.MOBILE
                         ConnectivityManager.TYPE_BLUETOOTH -> NetConnectivityUtility.NETWORK_TYPE.BLUETOOTH
                         ConnectivityManager.TYPE_ETHERNET -> NetConnectivityUtility.NETWORK_TYPE.ETHERNET
                         ConnectivityManager.TYPE_WIMAX -> NetConnectivityUtility.NETWORK_TYPE.WIMAX
@@ -82,6 +82,7 @@ object NetConnectivityUtility : BroadcastReceiver() {
             } else {
                 mCurrentNetworkType = NetConnectivityUtility.NETWORK_TYPE.DC
             }
+            LoggerUtils.fileLog("Current Network Type: ${mCurrentNetworkType.name}",this::class.java,context)
         }
     }
 
@@ -110,21 +111,21 @@ object NetConnectivityUtility : BroadcastReceiver() {
             return mCurrentNetworkType != NetConnectivityUtility.NETWORK_TYPE.UN_INITIALIZED
         }
 
-    fun initialize(context: Context){
+    fun initialize(context: Context) {
         context.registerReceiver(this, intentFilterForConnectivityChangeBroadcastReceiver)
     }
 
-    fun showNoInternetToast(context: Context){
-        if (!isConnected && !mNoInternertToastShown){
+    fun showNoInternetToast(context: Context) {
+        if (!isConnected && !mNoInternertToastShown) {
             mNoInternertToastShown = true
-            Toast.makeText(context, NO_INTERNET_TOAST_MESSAGE,Toast.LENGTH_LONG).show()
+            Toast.makeText(context, NO_INTERNET_TOAST_MESSAGE, Toast.LENGTH_LONG).show()
         }
     }
 
-    fun showNoInternetToastAnyWay(context: Context){
-        if (!isConnected){
+    fun showNoInternetToastAnyWay(context: Context) {
+        if (!isConnected) {
             mNoInternertToastShown = true
-            Toast.makeText(context, NO_INTERNET_TOAST_MESSAGE,Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, NO_INTERNET_TOAST_MESSAGE, Toast.LENGTH_SHORT).show()
         }
     }
 }

@@ -55,7 +55,10 @@ internal object RealtimeDBAppSettingsUtils{
             }
         })
 
-        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
+
         if (appSettingsNotFound != null) {
             throw appSettingsNotFound as SettingsServerException
         }
@@ -90,7 +93,10 @@ internal object RealtimeDBAppSettingsUtils{
             }
         })
 
-        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
+
         if (appSettingsNotFound != null) {
             throw appSettingsNotFound as SettingsServerException
         }

@@ -28,9 +28,12 @@ internal object RealtimeDBUtils {
     private const val PAGE_DOWNLOAD_REQUEST_SETTINGS_NODE = "page_download_request_settings"
 
     val mFBDataBase: FirebaseDatabase
+    private const val CACHE_SIZE_BYTES = 5*1024*1024L //5MB
 
     init {
         mFBDataBase = FirebaseDatabase.getInstance()
+        mFBDataBase.setPersistenceEnabled(true)
+        mFBDataBase.setPersistenceCacheSizeBytes(CACHE_SIZE_BYTES)
     }
 
     val mRootReference = mFBDataBase.reference

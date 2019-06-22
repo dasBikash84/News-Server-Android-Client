@@ -13,7 +13,12 @@
 
 package com.dasbikash.news_server.view_controllers
 
+import android.app.DownloadManager
+import android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
+import android.content.Context.DOWNLOAD_SERVICE
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.util.TypedValue
 import android.view.*
 import androidx.appcompat.widget.AppCompatImageView
@@ -35,6 +40,7 @@ import com.dasbikash.news_server_data.models.room_entity.ArticleImage
 import com.dasbikash.news_server_data.models.room_entity.Language
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.translator.TranslatorUtils
+import com.dasbikash.news_server_data.utills.FileDownloaderUtils
 import com.dasbikash.news_server_data.utills.ImageLoadingDisposer
 import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
@@ -44,6 +50,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
+import java.util.*
 
 class ArticleViewFragment : Fragment() {
 
@@ -398,6 +405,12 @@ class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDispo
                     {
                         compositeDisposable.delete(imageLoadingDisposer!!)
                         imageLoadingDisposer = null
+                        mArticleImage.setOnLongClickListener {
+                            DialogUtils.createAlertDialog(itemView.context,DialogUtils.AlertDialogDetails(
+                                    message = "Download Image?",doOnPositivePress = {downloadImageAction(articleImage.link!!)}
+                            )).show()
+                            true
+                        }
                     })
 
             if (articleImage.caption != null) {
@@ -406,5 +419,9 @@ class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDispo
                 mImageCaption.visibility = View.GONE
             }
         }
+    }
+
+    private fun downloadImageAction(link:String) {
+        FileDownloaderUtils.downloadImageInExternalFilesDir(itemView.context,link)
     }
 }

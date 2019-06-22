@@ -21,7 +21,7 @@ import java.util.*
 
 internal object CloudFireStorePageRequestServerUtils {
 
-    fun writeArticleData(pageDownLoadRequestResponseData: Pair<String,PageDownLoadRequestResponse>) {
+    fun writeArticleData(pageDownLoadRequestResponseData: Pair<String,PageDownLoadRequestResponse>):Boolean {
 
         LoggerUtils.debugLog("writeArticleData", this::class.java)
 
@@ -31,6 +31,7 @@ internal object CloudFireStorePageRequestServerUtils {
         do {
             SystemClock.sleep(100L)
         } while (!writeTask.isComplete)
+        return writeTask.isSuccessful
     }
 
     fun logPageDownLoadRequestWorkerTask(servedDocumentIdList: List<String>){

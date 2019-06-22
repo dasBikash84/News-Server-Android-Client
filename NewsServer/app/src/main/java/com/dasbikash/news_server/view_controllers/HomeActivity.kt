@@ -24,6 +24,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
+import com.dasbikash.news_server.BuildConfig
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
@@ -88,6 +89,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        LoggerUtils.debugLog("Start",this::class.java,this)
         setContentView(R.layout.activity_home)
         mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
 
@@ -317,9 +319,23 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     logInAppMenuItemClickAction()
                     return true
                 }
+                R.id.display_log_app_menu_item -> {
+                    displayLogAppMenuItemClickAction()
+                    return true
+                }
             }
         }
         return false
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_layout_basic, menu)
+        menu.findItem(R.id.display_log_app_menu_item).setVisible(BuildConfig.DEBUG)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    private fun displayLogAppMenuItemClickAction() {
+        LoggerUtils.displayLogFileData(this)
     }
 
     private fun launchSignOutDialog() {
@@ -426,11 +442,6 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                             }
                         })
         )
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_layout_basic, menu)
-        return super.onCreateOptionsMenu(menu)
     }
 
     private fun shareAppMenuItemClickAction() {

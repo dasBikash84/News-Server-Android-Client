@@ -33,6 +33,13 @@ internal object PageRequestServerUtils {
         return mPageDownLoadRequestSettings
     }
 
+    private fun getDailyMaxServingCountForNp(npId:String):Int =
+            getPageDownLoadRequestSettings().getDailyMaxServingCountForNp(npId)
+
+    private fun getTodaysServingCountForNp(npId:String):Int {
+        TODO()
+    }
+
     fun getPageDownLoadRequests(): Map<String, PageDownLoadRequest> =
             RealTimeDbPageRequestServerUtils.getPageDownLoadRequests(getPageDownLoadRequestSettings().getFetchChunkSize())
 
@@ -48,7 +55,13 @@ internal object PageRequestServerUtils {
     fun logPageDownLoadRequestWorkerTask(servedDocumentIdList: List<String>)=
             CloudFireStorePageRequestServerUtils.logPageDownLoadRequestWorkerTask(servedDocumentIdList)
 
-    fun getDailyMaxServingCountForNp(npId:String):Int =
-            getPageDownLoadRequestSettings().getDailyMaxServingCountForNp(npId)
+    fun incrementTodaysServingCountForNp(npId:String){
+        TODO()
+    }
+
+    fun shouldServeRequestForNp(npId:String):Boolean{
+//        return getTodaysServingCountForNp(npId) <= getDailyMaxServingCountForNp(npId)
+        return true
+    }
 
 }

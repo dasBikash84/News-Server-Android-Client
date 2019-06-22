@@ -51,7 +51,9 @@ internal object UserIpDataService {
             }
         })
 
-        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         ipAddress?.let {
             LoggerUtils.debugLog("return ipAddress!!", this::class.java)

@@ -71,7 +71,9 @@ internal object SpringMVCAppSettingsUtils {
 
 
         LoggerUtils.debugLog( "getServerAppSettingsUpdateTime before wait",this::class.java)
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         LoggerUtils.debugLog( "getServerAppSettingsUpdateTime before throw it",this::class.java)
         dataServerException?.let { throw it }
@@ -137,7 +139,9 @@ internal object SpringMVCAppSettingsUtils {
 
 
         LoggerUtils.debugLog( "getPageGroups before wait",this::class.java)
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         LoggerUtils.debugLog( "getPageGroups before throw it",this::class.java)
         dataServerException?.let { throw it }
@@ -187,7 +191,9 @@ internal object SpringMVCAppSettingsUtils {
 
 
         LoggerUtils.debugLog( "getPages before wait",this::class.java)
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         LoggerUtils.debugLog( "getPages before throw it",this::class.java)
         dataServerException?.let { throw it }
@@ -242,7 +248,9 @@ internal object SpringMVCAppSettingsUtils {
 
 
         LoggerUtils.debugLog( "getNewspapers before wait",this::class.java)
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         LoggerUtils.debugLog( "getNewspapers before throw it",this::class.java)
         dataServerException?.let { throw it }
@@ -297,7 +305,9 @@ internal object SpringMVCAppSettingsUtils {
 
 
         LoggerUtils.debugLog( "getLanguages before wait",this::class.java)
-        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         LoggerUtils.debugLog( "getLanguages before throw it",this::class.java)
         dataServerException?.let { throw it }
@@ -352,7 +362,9 @@ internal object SpringMVCAppSettingsUtils {
 
 
         LoggerUtils.debugLog( "getCountries before wait",this::class.java)
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         LoggerUtils.debugLog( "getCountries before throw it",this::class.java)
         dataServerException?.let { throw it }

@@ -103,6 +103,7 @@ class InitFragment : Fragment() {
 
         mProgressBar.visibility = View.VISIBLE
         mProgressBar.isIndeterminate = true
+        var amDisposed = false
 
         mDisposable.add(
                 getDataLoadingStatusObservable(initDelay)

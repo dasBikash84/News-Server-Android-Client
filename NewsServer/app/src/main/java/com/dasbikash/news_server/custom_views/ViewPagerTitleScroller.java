@@ -181,7 +181,7 @@ public class ViewPagerTitleScroller extends RecyclerView {
     void doOnTitleClick(PageKey pageKey) {
 
         if (mTitleClickListner == null) {
-            LoggerUtils.INSTANCE.debugLog("Empty click action.", this.getClass());
+            LoggerUtils.INSTANCE.debugLog("Empty click action.", this.getClass(),null);
         } else {
             mTitleClickListner.onTitleClick(pageKey);
         }
@@ -201,7 +201,7 @@ public class ViewPagerTitleScroller extends RecyclerView {
     private PageKey activeItem;
 
     public void setCurrentItem(PageKey pageKey) {
-        LoggerUtils.INSTANCE.debugLog("setCurrentItem: " + pageKey.getKeyString(), this.getClass());
+        LoggerUtils.INSTANCE.debugLog("setCurrentItem: " + pageKey.getKeyString(), this.getClass(),null);
         activeItem = pageKey;
         scrollToPosition(mPageKeys.indexOf(pageKey));
         new Handler(Looper.getMainLooper())

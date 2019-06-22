@@ -60,7 +60,9 @@ internal object RealTimeDbPageRequestServerUtils {
             })
 
         LoggerUtils.debugLog("getPageDownLoadRequests before wait", this::class.java)
-        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         LoggerUtils.debugLog("getPageDownLoadRequests before return", this::class.java)
         return pageDownLoadRequestMap.toMap()
@@ -89,7 +91,9 @@ internal object RealTimeDbPageRequestServerUtils {
                 })
 
         LoggerUtils.debugLog("checkIfPageDownLoadRequestExists before wait", this::class.java)
-        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         LoggerUtils.debugLog("checkIfPageDownLoadRequestExists before true return", this::class.java)
         data?.let { return true }
@@ -120,7 +124,9 @@ internal object RealTimeDbPageRequestServerUtils {
                 })
 
         LoggerUtils.debugLog("getPageDownLoadRequestSettings before wait", this::class.java)
-        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         LoggerUtils.debugLog("getPageDownLoadRequestSettings before return", this::class.java)
         return data

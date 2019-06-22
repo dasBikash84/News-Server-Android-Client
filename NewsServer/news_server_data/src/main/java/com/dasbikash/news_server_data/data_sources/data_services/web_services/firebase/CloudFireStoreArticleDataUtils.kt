@@ -84,7 +84,9 @@ internal object CloudFireStoreArticleDataUtils {
             }
 
         LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before wait",this::class.java)
-        synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before throw it",this::class.java)
         dataServerException?.let { throw it }

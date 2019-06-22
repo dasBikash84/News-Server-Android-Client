@@ -53,7 +53,9 @@ internal object CloudFireStoreAppSettingsUtils{
                 }
 
         //Log.d(TAG,"getServerAppSettingsUpdateTime before wait")
-        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         //Log.d(TAG,"getServerAppSettingsUpdateTime before throw it")
         dataServerException?.let { throw it }
@@ -102,7 +104,9 @@ internal object CloudFireStoreAppSettingsUtils{
                 }
 
         //Log.d(TAG,"getCountries before wait")
-        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         //Log.d(TAG,"getCountries before throw it")
         dataServerException?.let { throw it }
@@ -139,7 +143,9 @@ internal object CloudFireStoreAppSettingsUtils{
                 }
 
         //Log.d(TAG,"getLanguages before wait")
-        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         //Log.d(TAG,"getLanguages before throw it")
         dataServerException?.let { throw it }
@@ -176,7 +182,9 @@ internal object CloudFireStoreAppSettingsUtils{
                 }
 
         //Log.d(TAG,"getNewspapers before wait")
-        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         //Log.d(TAG,"getNewspapers before throw it")
         dataServerException?.let { throw it }
@@ -213,7 +221,9 @@ internal object CloudFireStoreAppSettingsUtils{
                 }
 
         //Log.d(TAG,"getPages before wait")
-        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         //Log.d(TAG,"getPages before throw it")
         dataServerException?.let { throw it }
@@ -250,7 +260,9 @@ internal object CloudFireStoreAppSettingsUtils{
                 }
 
         //Log.d(TAG,"getPageGroups before wait")
-        synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         //Log.d(TAG,"getPageGroups before throw it")
         dataServerException?.let { throw it }

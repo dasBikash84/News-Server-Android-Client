@@ -136,7 +136,9 @@ internal object RealtimeDBUserSettingsUtils {
                     }
                 })
         LoggerUtils.debugLog("before synchronized(lock)", this@RealtimeDBUserSettingsUtils::class.java)
-        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
         LoggerUtils.debugLog("after synchronized(lock)", this@RealtimeDBUserSettingsUtils::class.java)
         userSettingsException?.let { throw userSettingsException as SettingsServerException }
         if (data == null) {
@@ -313,7 +315,9 @@ internal object RealtimeDBUserSettingsUtils {
                         synchronized(lock) { lock.notify() }
                     }
                 })
-        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         settingsServerException?.let { throw it }
 
@@ -350,7 +354,9 @@ internal object RealtimeDBUserSettingsUtils {
                     }
                 })
 
-        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+        try {
+            synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
         settingsServerException?.let { return false }
 
@@ -372,12 +378,18 @@ internal object RealtimeDBUserSettingsUtils {
                     override fun onComplete(task: Task<AuthResult>) {
                         if (task.isSuccessful) {
                             settingsServerException = null
+                        }else{
+                            task.exception?.let {
+                                settingsServerException = SettingsServerException(it)
+                            }
                         }
                         synchronized(lock) { lock.notify() }
                     }
                 })
+        try {
+            synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
 
-        synchronized(lock) { lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE) }
         settingsServerException?.let { throw it }
     }
     @Keep

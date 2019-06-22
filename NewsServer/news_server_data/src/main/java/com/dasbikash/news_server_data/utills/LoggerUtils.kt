@@ -13,26 +13,66 @@
 
 package com.dasbikash.news_server_data.utills
 
+import android.content.Context
+import android.os.Environment
+import android.os.SystemClock
 import android.util.Log
 import com.dasbikash.news_server_data.BuildConfig
+import java.io.File
+import java.util.*
 
 object LoggerUtils {
     private const val TAG = "NS>>"
     private const val MAX_TAG_LENGTH = 23
+    private const val LOG_FILE_NAME = "ns_log.txt"
+    private lateinit var mLogFile: File
 
-    fun printStackTrace(ex:Throwable){
-        if (BuildConfig.DEBUG){
+    fun printStackTrace(ex: Throwable) {
+        if (BuildConfig.DEBUG) {
             debugLog("Error StackTrace: \n" + ExceptionUtils.getStackTraceAsString(ex), this::class.java)
         }
     }
 
-    fun <T> debugLog(message:String,type:Class<T>){
+    fun <T> debugLog(message: String, type: Class<T>, context: Context? = null) {
         if (BuildConfig.DEBUG) {
             var classNameEndIndex = type.simpleName.length
-            if (classNameEndIndex > (MAX_TAG_LENGTH- TAG.length)){
-                classNameEndIndex = MAX_TAG_LENGTH- TAG.length
+            if (classNameEndIndex > (MAX_TAG_LENGTH - TAG.length)) {
+                classNameEndIndex = MAX_TAG_LENGTH - TAG.length
             }
-            Log.d(TAG + type.simpleName.substring(0,classNameEndIndex), message)
+            Log.d(TAG + type.simpleName.substring(0, classNameEndIndex), message)
+            context?.let {
+                if (!::mLogFile.isInitialized) {
+                    mLogFile = File(context.filesDir.absolutePath + LOG_FILE_NAME)
+                }
+            }
+        }
+    }
+
+    fun <T> fileLog(message: String, type: Class<T>, context: Context? = null) {
+        if (BuildConfig.DEBUG) {
+            if (!::mLogFile.isInitialized) {
+                context?.let {
+                    mLogFile = File(context.filesDir.absolutePath + LOG_FILE_NAME)
+                }
+            }
+            if (::mLogFile.isInitialized) {
+                debugLog(message, type,context)
+                mLogFile.appendText("${Date()} | ${type.canonicalName} >> ${message}\n")
+            }
+        }
+    }
+
+    fun displayLogFileData(context: Context) {
+        if (BuildConfig.DEBUG) {
+            if (!::mLogFile.isInitialized) {
+                mLogFile = File(context.filesDir.absolutePath + LOG_FILE_NAME)
+            }
+            mLogFile.useLines {
+                it.forEach {
+                    Log.d(TAG, it)
+                    SystemClock.sleep(100L)
+                }
+            }
         }
     }
 }

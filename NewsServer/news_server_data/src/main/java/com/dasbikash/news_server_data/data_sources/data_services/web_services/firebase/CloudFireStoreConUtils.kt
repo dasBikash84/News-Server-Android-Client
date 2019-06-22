@@ -15,6 +15,7 @@ package com.dasbikash.news_server_data.data_sources.data_services.web_services.f
 
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 
 internal object CloudFireStoreConUtils {
 
@@ -31,8 +32,18 @@ internal object CloudFireStoreConUtils {
 
     private const val ARTICLE_COLLECTION = "articles"
 
+    private const val CACHE_SIZE_BYTES = 5*1024*1024L //5MB
+
     internal fun getDbConnection(): FirebaseFirestore {
-        return FirebaseFirestore.getInstance()
+        val db = FirebaseFirestore.getInstance()
+
+        val settings = FirebaseFirestoreSettings.Builder()
+                                                .setPersistenceEnabled(true)
+                                                .setCacheSizeBytes(CACHE_SIZE_BYTES)
+                                                .build()
+        db.firestoreSettings = settings
+
+        return db
     }
 
     internal fun getLanguageSettingsCollectionRef() =
