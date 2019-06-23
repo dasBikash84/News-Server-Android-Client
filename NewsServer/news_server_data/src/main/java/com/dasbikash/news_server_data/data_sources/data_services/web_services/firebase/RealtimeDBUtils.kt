@@ -32,8 +32,8 @@ internal object RealtimeDBUtils {
 
     init {
         mFBDataBase = FirebaseDatabase.getInstance()
-        mFBDataBase.setPersistenceEnabled(true)
-        mFBDataBase.setPersistenceCacheSizeBytes(CACHE_SIZE_BYTES)
+//        mFBDataBase.setPersistenceEnabled(true)
+//        mFBDataBase.setPersistenceCacheSizeBytes(CACHE_SIZE_BYTES)
     }
 
     val mRootReference = mFBDataBase.reference

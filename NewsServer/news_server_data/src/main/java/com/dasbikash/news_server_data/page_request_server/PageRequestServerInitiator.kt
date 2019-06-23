@@ -46,7 +46,7 @@ object PageRequestServerInitiator {
 
         val constraintBuilder = Constraints.Builder()
                                 .setRequiresBatteryNotLow(true)
-                                .setRequiredNetworkType(NetworkType.CONNECTED)
+                                .setRequiredNetworkType(NetworkType.METERED)
 
         val constraints = constraintBuilder.build()
 

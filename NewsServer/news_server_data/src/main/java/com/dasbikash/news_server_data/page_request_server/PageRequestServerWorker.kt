@@ -37,6 +37,7 @@ internal class PageRequestServerWorker(appContext: Context, workerParams: Worker
     }
 
     override fun doWork(): Result {
+
         LoggerUtils.debugLog("doWork entry", this::class.java)
         LoggerUtils.fileLog("doWork entry", this::class.java, mContext)
 
@@ -48,9 +49,13 @@ internal class PageRequestServerWorker(appContext: Context, workerParams: Worker
         LoggerUtils.debugLog("Featched page downLoad request chunk size: ${pageDownLoadRequestMap.size}", this::class.java)
         LoggerUtils.fileLog("Featched page downLoad request chunk size: ${pageDownLoadRequestMap.size}", this::class.java, mContext)
 
+        LoggerUtils.fileLog("NetworkStatus: ${NetConnectivityUtility.refreshNetworkStatus(mContext).name}", this::class.java, mContext)
+
         pageDownLoadRequestMap.keys.shuffled().take(PageRequestServerUtils.getRequestSservingChunkSizeLimit()).asSequence()
                 .forEach {
                     val pageDownLoadRequest = pageDownLoadRequestMap.get(it)!!
+
+                    NetConnectivityUtility.refreshNetworkStatus(mContext)
 
                     if (NetConnectivityUtility.isConnected && PageRequestServerUtils.shouldServeRequestForNp(pageDownLoadRequest.newsPaperId!!) &&
                             (NetConnectivityUtility.isOnMobileDataNetwork ||
@@ -94,7 +99,7 @@ internal class PageRequestServerWorker(appContext: Context, workerParams: Worker
                     }
                 }
         PageRequestServerUtils.logPageDownLoadRequestWorkerTask(servedDocumentIdList)
-        LoggerUtils.debugLog("servedDocumentIdList.size: ${servedDocumentIdList.size}", this::class.java)
+        LoggerUtils.fileLog("servedDocumentIdList.size: ${servedDocumentIdList.size}", this::class.java)
         LoggerUtils.debugLog("doWork exiting", this::class.java)
         LoggerUtils.fileLog("doWork exiting", this::class.java, mContext)
         return Result.success()

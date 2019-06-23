@@ -38,8 +38,8 @@ internal object CloudFireStoreConUtils {
         val db = FirebaseFirestore.getInstance()
 
         val settings = FirebaseFirestoreSettings.Builder()
-                                                .setPersistenceEnabled(true)
-                                                .setCacheSizeBytes(CACHE_SIZE_BYTES)
+                                                .setPersistenceEnabled(false)
+//                                                .setCacheSizeBytes(CACHE_SIZE_BYTES)
                                                 .build()
         db.firestoreSettings = settings
 
