@@ -269,6 +269,10 @@ abstract class UserSettingsRepository {
         return mUserSettingsDataService.getLogInStatus()
     }
 
+    fun checkIfLoogedAsAdmin(): Boolean {
+        return mUserSettingsDataService.checkIfLoogedAsAdmin()
+    }
+
     fun signOutUser(context: Context) {
         mUserSettingsDataService.signOutUser()
         resetUserSettings(context)

@@ -90,6 +90,32 @@
                     android:textSize="16sp"
                     android:textAllCaps="false"
                     android:layout_gravity="center"/>
+                <LinearLayout
+                    android:id="@+id/admin_panel_holder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+                    <android.view.View
+                        android:layout_height="1dp"
+                        android:layout_width="match_parent"
+                        android:layout_gravity="center"
+                        android:background="@android:color/black"
+                        android:visibility="visible"/>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/admin_panel_button"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:gravity="center"
+                        android:text="@string/goto_admin_panel"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:textColor="@android:color/white"
+                        android:textSize="16sp"
+                        android:textAllCaps="false"
+                        android:layout_gravity="center"/>
+                </LinearLayout>
                 <!--<com.google.android.material.button.MaterialButton
                     android:id="@+id/customize_button"
                     style="@style/Widget.MaterialComponents.Button.TextButton"

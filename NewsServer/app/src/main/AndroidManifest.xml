@@ -3,34 +3,39 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.dasbikash.news_server">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".application.NewsServerApplication"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        android:allowBackup="false"
         tools:targetApi="m">
-
+        <activity android:name=".view_controllers.AdminActivity"
+            android:parentActivityName=".view_controllers.HomeActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".view_controllers.HomeActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:host="www.dasbikash.com"
                     android:pathPrefix="/news_server"
@@ -39,17 +44,19 @@
         </activity>
         <activity
             android:name=".view_controllers.PageViewActivity"
-            android:screenOrientation="portrait">
-        </activity>
-        <activity android:name=".view_controllers.SavedArticleViewActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".view_controllers.SavedArticleViewActivity"
             android:parentActivityName=".view_controllers.HomeActivity"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait"/>
 
         <uses-library
             android:name="android.test.runner"
             android:required="false" />
-        <meta-data android:name="google_analytics_adid_collection_enabled" android:value="false" />
+
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
     </application>
 
 </manifest>

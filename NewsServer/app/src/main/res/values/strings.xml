@@ -64,4 +64,6 @@
     <string name="translate_article_menu_item_title">Translate Article</string>
     <string name="display_log_app_menu_item_title">Display Log</string>
     <string name="export_log_app_menu_item_title">Export log</string>
+    <string name="goto_admin_panel">Admin Panel</string>
+    <string name="admin_activity_label">Admin Panel</string>
 </resources>

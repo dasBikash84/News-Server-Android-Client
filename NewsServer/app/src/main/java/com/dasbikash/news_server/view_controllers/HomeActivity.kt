@@ -23,6 +23,7 @@ import android.os.SystemClock
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.LinearLayout
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -55,7 +56,7 @@ import java.util.*
 
 class HomeActivity : ActivityWithBackPressQueueManager(),
         NavigationHost, HomeNavigator, SignInHandler, WorkInProcessWindowOperator {
-    companion object{
+    companion object {
         private const val EXIT_TOAST_MESSAGE = "Press back again to exit."
         private const val SIGN_OUT_PROMPT = "Sign Out?"
         private const val SIGNED_OUT_MESSAGE = "Signed out."
@@ -75,6 +76,8 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
     private lateinit var mUserDetailsTextView: AppCompatTextView
     private lateinit var mSignOutButton: MaterialButton
     private lateinit var mLogInBottomBar: View
+    private lateinit var mAdminPanelHolder: LinearLayout
+    private lateinit var mAdminPanelButton: MaterialButton
     //    private lateinit var mUserSettingEditButton:MaterialButton
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
@@ -93,7 +96,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        LoggerUtils.debugLog("Start",this::class.java,this)
+        LoggerUtils.debugLog("Start", this::class.java, this)
         setContentView(R.layout.activity_home)
         mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
 
@@ -111,9 +114,9 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
         addBackPressAction()
     }
 
-    private fun addBackPressAction(){
+    private fun addBackPressAction() {
         addToBackPressTaskQueue {
-            DisplayUtils.showShortToast(this,EXIT_TOAST_MESSAGE)
+            DisplayUtils.showShortToast(this, EXIT_TOAST_MESSAGE)
             mDisposable.add(
                     Observable.just(true)
                             .subscribeOn(Schedulers.io())
@@ -121,7 +124,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                                 SystemClock.sleep(EXIT_WAIT_WINDOW)
                             }
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe({addBackPressAction()})
+                            .subscribe({ addBackPressAction() })
             )
         }
     }
@@ -144,6 +147,14 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
         mLogInMenuHolder.setOnClickListener {
             hideLogInMenuHolder()
         }
+        mAdminPanelButton.setOnClickListener {
+            hideLogInMenuHolder()
+            launchAdminActivity()
+        }
+    }
+
+    private fun launchAdminActivity() {
+        startActivity(Intent(this,AdminActivity::class.java))
     }
 
     private fun findViewItems() {
@@ -156,6 +167,9 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
         mUserDetailsTextView = findViewById(R.id.user_name_text)
         mSignOutButton = findViewById(R.id.sign_out_button)
         mLogInBottomBar = findViewById(R.id.bottom_bar)
+
+        mAdminPanelHolder = findViewById(R.id.admin_panel_holder)
+        mAdminPanelButton = findViewById(R.id.admin_panel_button)
 //        mUserSettingEditButton = findViewById(R.id.customize_button)
     }
 
@@ -242,7 +256,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
     }
 
     var mWaitWindow: Fragment? = null
-    private fun isWaitWindowShown() = mWaitWindow!=null
+    private fun isWaitWindowShown() = mWaitWindow != null
 
     override fun loadWorkInProcessWindow() {
         mWaitWindow = FragmentWorkInProcess()
@@ -328,7 +342,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     return true
                 }
                 R.id.export_log_app_menu_item -> {
-                    doOnPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,{exportLogAppMenuItemClickAction()})
+                    doOnPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, { exportLogAppMenuItemClickAction() })
                     return true
                 }
             }
@@ -341,7 +355,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
     }
 
     private fun exportLogAppMenuItemClickAction() {
-        if (LoggerUtils.getLogFile() !=null){
+        if (LoggerUtils.getLogFile() != null) {
             this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)?.let {
                 val logFilePathBuilder = StringBuilder(it.absolutePath)
                 LoggerUtils.getLogFile()!!.apply {
@@ -351,24 +365,24 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                             .append("_")
                             .append(this.name)
                 }
-                LoggerUtils.getLogFile()!!.copyTo(File(logFilePathBuilder.toString()),true)
-                DisplayUtils.showLongToast(this,"Log file exported to: ${logFilePathBuilder.toString()}")
+                LoggerUtils.getLogFile()!!.copyTo(File(logFilePathBuilder.toString()), true)
+                DisplayUtils.showLongToast(this, "Log file exported to: ${logFilePathBuilder.toString()}")
             }
         }
     }
 
-    private fun doOnPermission(permission:String,task:()->Unit){
-        if (checkPermission(permission)){
+    private fun doOnPermission(permission: String, task: () -> Unit) {
+        if (checkPermission(permission)) {
             task()
-        }else{
+        } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),101)
+                requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 101)
             }
         }
     }
 
-    private fun checkPermission(permission:String) =
-        ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+    private fun checkPermission(permission: String) =
+            ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_layout_basic, menu)
@@ -387,7 +401,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    private var backPressActionTagForLogInMenuHolder:String?=null
+    private var backPressActionTagForLogInMenuHolder: String? = null
 
     private fun logInAppMenuItemClickAction() {
 
@@ -403,13 +417,28 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     DisplayUtils.displayHtmlText(mUserDetailsTextView, StringBuilder("").append(it).toString())
                     mUserDetailsTextView.visibility = View.VISIBLE
                 }
+                mDisposable.add(
+                        Observable.just(true)
+                                .subscribeOn(Schedulers.io())
+                                .map {
+                                    mUserSettingsRepository.checkIfLoogedAsAdmin()
+                                }
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribeWith(object : DisposableObserver<Boolean>() {
+                                    override fun onComplete() {}
+                                    override fun onNext(result: Boolean) {
+                                        if (result){mAdminPanelHolder.visibility = View.VISIBLE}
+                                    }
+                                    override fun onError(e: Throwable) {}
+                                }))
             } else {
                 mSignOutButton.visibility = View.GONE
                 mLogInBottomBar.visibility = View.GONE
                 mLogInButton.visibility = View.VISIBLE
                 mUserDetailsTextView.visibility = View.GONE
+                mAdminPanelHolder.visibility = View.GONE
             }
-            if (backPressActionTagForLogInMenuHolder!=null){
+            if (backPressActionTagForLogInMenuHolder != null) {
                 removeTaskFromQueue(backPressActionTagForLogInMenuHolder!!)
             }
             backPressActionTagForLogInMenuHolder =
@@ -447,7 +476,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                             mUserSettingsRepository.signOutUser(this)
                         }
                         .onErrorReturn {
-                            if (!amDisposed){
+                            if (!amDisposed) {
                                 throw it
                             }
                         }
@@ -464,16 +493,15 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                             }
 
                             override fun onError(e: Throwable) {
-                                if (e is CompositeException){
+                                if (e is CompositeException) {
                                     e.exceptions.asSequence().forEach {
                                         it.printStackTrace()
-                                        LoggerUtils.debugLog("Error class: ${it::class.java.canonicalName}",this@HomeActivity::class.java)
-                                        LoggerUtils.debugLog("Trace: ${it.stackTrace.asList()}",this@HomeActivity::class.java)
+                                        LoggerUtils.debugLog("Error class: ${it::class.java.canonicalName}", this@HomeActivity::class.java)
+                                        LoggerUtils.debugLog("Trace: ${it.stackTrace.asList()}", this@HomeActivity::class.java)
                                     }
-                                    if(e.exceptions.filter { it is NoInternertConnectionException }.count() > 0){
+                                    if (e.exceptions.filter { it is NoInternertConnectionException }.count() > 0) {
                                         NetConnectivityUtility.showNoInternetToastAnyWay(this@HomeActivity)
-                                    }
-                                    else {
+                                    } else {
                                         DisplayUtils.showShortSnack(mCoordinatorLayout, SIGN_OUT_ERROR_MSG)
                                     }
                                 }
@@ -508,7 +536,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                             when (processingResult.first) {
                                 UserSettingsRepository.SignInResult.SUCCESS -> {
                                     LoggerUtils.debugLog("User settings data saved.", this::class.java)
-                                    DisplayUtils.showLogInWelcomeSnack(mCoordinatorLayout,this@HomeActivity)
+                                    DisplayUtils.showLogInWelcomeSnack(mCoordinatorLayout, this@HomeActivity)
                                     actionAfterSuccessfulLogIn?.let {
                                         it()
                                     }
