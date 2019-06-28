@@ -24,7 +24,7 @@ import java.util.*
 object LoggerUtils {
     private const val TAG = "NS>>"
     private const val MAX_TAG_LENGTH = 23
-    private const val LOG_FILE_NAME = "ns_log.txt"
+    private const val LOG_FILE_NAME = "/ns_log.txt"
     private lateinit var mLogFile: File
 
     fun printStackTrace(ex: Throwable) {
@@ -74,5 +74,12 @@ object LoggerUtils {
                 }
             }
         }
+    }
+
+    fun getLogFile():File?{
+        if (::mLogFile.isInitialized) {
+            return mLogFile
+        }
+        return null
     }
 }

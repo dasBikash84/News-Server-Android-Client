@@ -13,8 +13,12 @@
 
 package com.dasbikash.news_server.view_controllers
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.SystemClock
 import android.view.Menu
 import android.view.MenuItem
@@ -23,13 +27,11 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.BuildConfig
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.utils.DialogUtils
-import com.dasbikash.news_server.utils.DisplayUtils
-import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
-import com.dasbikash.news_server.utils.OptionsIntentBuilderUtility
+import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
@@ -48,6 +50,8 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.exceptions.CompositeException
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
+import java.io.File
+import java.util.*
 
 class HomeActivity : ActivityWithBackPressQueueManager(),
         NavigationHost, HomeNavigator, SignInHandler, WorkInProcessWindowOperator {
@@ -323,19 +327,54 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     displayLogAppMenuItemClickAction()
                     return true
                 }
+                R.id.export_log_app_menu_item -> {
+                    doOnPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,{exportLogAppMenuItemClickAction()})
+                    return true
+                }
             }
         }
         return false
     }
 
+    private fun displayLogAppMenuItemClickAction() {
+        LoggerUtils.displayLogFileData(this)
+    }
+
+    private fun exportLogAppMenuItemClickAction() {
+        if (LoggerUtils.getLogFile() !=null){
+            this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)?.let {
+                val logFilePathBuilder = StringBuilder(it.absolutePath)
+                LoggerUtils.getLogFile()!!.apply {
+                    logFilePathBuilder
+                            .append("/logs/")
+                            .append(DateUtils.getFullDateStringForDb(Date()))
+                            .append("_")
+                            .append(this.name)
+                }
+                LoggerUtils.getLogFile()!!.copyTo(File(logFilePathBuilder.toString()),true)
+                DisplayUtils.showLongToast(this,"Log file exported to: ${logFilePathBuilder.toString()}")
+            }
+        }
+    }
+
+    private fun doOnPermission(permission:String,task:()->Unit){
+        if (checkPermission(permission)){
+            task()
+        }else{
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),101)
+            }
+        }
+    }
+
+    private fun checkPermission(permission:String) =
+        ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_layout_basic, menu)
         menu.findItem(R.id.display_log_app_menu_item).setVisible(BuildConfig.DEBUG)
+        menu.findItem(R.id.export_log_app_menu_item).setVisible(BuildConfig.DEBUG)
         return super.onCreateOptionsMenu(menu)
-    }
-
-    private fun displayLogAppMenuItemClickAction() {
-        LoggerUtils.displayLogFileData(this)
     }
 
     private fun launchSignOutDialog() {
