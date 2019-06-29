@@ -26,6 +26,7 @@ internal object RealtimeDBUtils {
     private const val ADMION_LIST_NODE = "admin_list"
     private const val PAGE_DOWNLOAD_REQUEST_NODE = "page_download_request"
     private const val PAGE_DOWNLOAD_REQUEST_SETTINGS_NODE = "page_download_request_settings"
+    private const val ADMIN_TASK_DATA_NODE = "admin_task_data"
 
     val mFBDataBase: FirebaseDatabase
     private const val CACHE_SIZE_BYTES = 5*1024*1024L //5MB
@@ -43,5 +44,6 @@ internal object RealtimeDBUtils {
     val mAdminListReference: DatabaseReference = mRootReference.child(ADMION_LIST_NODE)
     val mPageDownLoadRequestReference: DatabaseReference = mRootReference.child(PAGE_DOWNLOAD_REQUEST_NODE)
     val mPageDownLoadRequestSettingsReference: DatabaseReference = mRootReference.child(PAGE_DOWNLOAD_REQUEST_SETTINGS_NODE)
+    val mAdminTaskDataNode: DatabaseReference = mRootReference.child(ADMIN_TASK_DATA_NODE)
 }
 
