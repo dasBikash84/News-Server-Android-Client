@@ -17,6 +17,7 @@ import com.dasbikash.news_server_data.models.ArticleUploaderStatusChangeRequest
 import com.dasbikash.news_server_data.models.NewsPaperParserModeChangeRequest
 import com.dasbikash.news_server_data.models.NewsPaperStatusChangeRequest
 import com.dasbikash.news_server_data.models.TokenGenerationRequest
+import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 
@@ -32,6 +33,7 @@ internal object RealtimeDBAdminTaskUtils {
     }
 
     private fun addAdminTaskRequest(payload:Any,adminTaskNode: AdminTaskNode):Boolean{
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
 
         var returnValue = false
         val lock = Object()

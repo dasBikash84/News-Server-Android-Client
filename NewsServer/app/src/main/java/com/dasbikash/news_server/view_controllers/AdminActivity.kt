@@ -14,11 +14,14 @@
 package com.dasbikash.news_server.view_controllers
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.google.android.material.appbar.AppBarLayout
 
-class AdminActivity : ActivityWithBackPressQueueManager() {
+class AdminActivity : ActivityWithBackPressQueueManager(),NavigationHost {
 
     private lateinit var mToolbar: Toolbar
     private lateinit var mAppBar: AppBarLayout
@@ -37,13 +40,65 @@ class AdminActivity : ActivityWithBackPressQueueManager() {
 
 
         if (supportFragmentManager.findFragmentById(R.id.admin_frame) == null) {
-
+            loadAdminTasksFragment()
         }
+    }
+
+    private fun loadAdminTasksFragment(){
+        navigateTo(FragmentAdminTasks(),false)
+    }
+
+    fun loadNPStatusChangeRequestFragment(){
+        navigateTo(FragmentNPStatusChangeRequest(),true)
+    }
+
+    fun loadNPParserModeChangeRequestFragment(){
+        navigateTo(FragmentNPParserModeChangeRequest(),true)
+    }
+
+    fun loadArticleUploaderModeChangeRequestFragment(){
+        navigateTo(FragmentArticleUploaderModeChangeRequest(),true)
     }
 
     @Override
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
+    }
+
+    /**
+     * Trigger a navigation to the specified fragment, optionally adding a transaction to the back
+     * stack to make this navigation reversible.
+     */
+    override fun navigateTo(fragment: Fragment, addToBackstack: Boolean) {
+        val transaction = supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.admin_frame, fragment)
+
+        if (addToBackstack) {
+            transaction.addToBackStack(null)
+        }
+
+        transaction.commit()
+    }
+
+    override fun addFragment(fragment: Fragment) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun removeFragment(fragment: Fragment) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun showBottomNavigationView(show: Boolean) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun showAppBar(show: Boolean) {
+        if (show) {
+            mAppBar.visibility = View.VISIBLE
+        } else {
+            mAppBar.visibility = View.GONE
+        }
     }
 }

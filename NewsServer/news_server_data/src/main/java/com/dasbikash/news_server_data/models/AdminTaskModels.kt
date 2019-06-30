@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.models
 
+import com.google.firebase.Timestamp
 import com.google.firebase.database.ServerValue
 
 enum class ParserMode {
@@ -80,6 +81,4 @@ class ArticleUploaderStatusChangeRequest private constructor(
     }
 }
 
-class TokenGenerationRequest(
-        val timeStamp: Map<String,String> = ServerValue.TIMESTAMP
-)
+class TokenGenerationRequest(val timeStamp: Timestamp = Timestamp.now())

@@ -66,4 +66,8 @@
     <string name="export_log_app_menu_item_title">Export log</string>
     <string name="goto_admin_panel">Admin Panel</string>
     <string name="admin_activity_label">Admin Panel</string>
+    <string name="np_parser_status_change_request_text">Add news-paper on/off request </string>
+    <string name="np_parser_mode_change_request_text">Add parser mode change request for news-paper</string>
+    <string name="article_uploader_status_change_request_text">Add article uploader status change request</string>
+    <string name="token_generation_request_text">Add token generation request</string>
 </resources>
