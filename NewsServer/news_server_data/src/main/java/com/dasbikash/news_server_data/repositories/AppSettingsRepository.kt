@@ -18,6 +18,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
+import com.dasbikash.news_server_data.models.DefaultAppSettings
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
 import com.dasbikash.news_server_data.repositories.room_impls.AppSettingsRepositoryRoomImpl
@@ -65,6 +66,11 @@ abstract class AppSettingsRepository {
         LoggerUtils.debugLog("appSettingsUpdateTime: " + appSettingsUpdateTime, this::class.java)
 
         return appSettingsUpdateTime > localAppSettingsUpdateTime
+    }
+
+    fun getRawAppsettings(context: Context): DefaultAppSettings{
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        return mAppSettingsDataService.getRawAppsettings(context)
     }
 
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")

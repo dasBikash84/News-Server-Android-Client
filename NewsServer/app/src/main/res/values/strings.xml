@@ -70,4 +70,5 @@
     <string name="np_parser_mode_change_request_text">Add parser mode change request for news-paper</string>
     <string name="article_uploader_status_change_request_text">Add article uploader status change request</string>
     <string name="token_generation_request_text">Add token generation request</string>
+    <string name="newspaper_selector_spinner_title">Select news-paper</string>
 </resources>
