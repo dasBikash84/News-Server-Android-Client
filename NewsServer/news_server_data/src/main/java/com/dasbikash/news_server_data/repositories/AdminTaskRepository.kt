@@ -23,6 +23,12 @@ object AdminTaskRepository {
     fun addTokenGenerationRequest() =
             RealTimeDbAdminTaskDataService.addTokenGenerationRequest()
 
+    fun addParserTokenGenerationRequest()=
+            RealTimeDbAdminTaskDataService.addParserTokenGenerationRequest()
+
+    fun addDataCoordinatorTokenGenerationRequest()=
+            RealTimeDbAdminTaskDataService.addDataCoordinatorTokenGenerationRequest()
+
     fun addNewsPaperStatusChangeRequest(newsPaperStatusChangeRequest: NewsPaperStatusChangeRequest) =
             RealTimeDbAdminTaskDataService.addNewsPaperStatusChangeRequest(newsPaperStatusChangeRequest)
 

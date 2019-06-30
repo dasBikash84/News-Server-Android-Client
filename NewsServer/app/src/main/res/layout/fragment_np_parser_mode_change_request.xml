@@ -78,7 +78,7 @@
             android:paddingStart="8dp"
             android:paddingTop="4dp"
             android:paddingEnd="8dp"
-            android:paddingBottom="4dp"/>
+            android:paddingBottom="4dp" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/newspaper_id_text_box_layout"
@@ -113,6 +113,27 @@
                 android:maxLength="@integer/auth_token_max_char" />
 
         </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="8dp"
+            android:background="@android:color/transparent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/token_generation_request_button"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/token_generation_request_text"
+                android:textAlignment="center"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="normal" />
+        </com.google.android.material.card.MaterialCardView>
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"

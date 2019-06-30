@@ -35,25 +35,16 @@ class   FragmentAdminTasks : Fragment() {
     private lateinit var mNewsPaperStatusChangeRequestButton:MaterialButton
     private lateinit var mNewsPaperParserModeChangeRequestButton:MaterialButton
     private lateinit var mArticleUploaderStatusChangeRequestButton:MaterialButton
-    private lateinit var mTokenGenerationRequestButton:MaterialButton
-
-    private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_admin_tasks,container,false)
     }
-
-    private val TOKEN_GENERATION_REQ_PROMPT = "Add token generation request?"
-    private val TOKEN_GENERATION_SUCCESS_MESSAGE = "Token generation request added."
-    private val TOKEN_GENERATION_FAILURE_MESSAGE = "Token generation request addition failure."
-    private val TOKEN_GENERATION_ERROR_MESSAGE = "Error occured during token generation request addition."
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mNewsPaperStatusChangeRequestButton = view.findViewById(R.id.np_status_change_request_button)
         mNewsPaperParserModeChangeRequestButton = view.findViewById(R.id.np_parser_mode_change_request_button)
         mArticleUploaderStatusChangeRequestButton = view.findViewById(R.id.article_uploader_status_change_request_button)
-        mTokenGenerationRequestButton = view.findViewById(R.id.token_generation_request_button)
 
         mNewsPaperStatusChangeRequestButton.setOnClickListener {
             (activity!! as AdminActivity).loadNPStatusChangeRequestFragment()
@@ -66,34 +57,5 @@ class   FragmentAdminTasks : Fragment() {
         mArticleUploaderStatusChangeRequestButton.setOnClickListener {
             (activity!! as AdminActivity).loadArticleUploaderModeChangeRequestFragment()
         }
-
-        mTokenGenerationRequestButton.setOnClickListener {
-            DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
-                    message = TOKEN_GENERATION_REQ_PROMPT,doOnPositivePress = {addTokenGenerationRequest()}
-            )).show()
-        }
-    }
-
-    private fun addTokenGenerationRequest() {
-        mDisposable.add(
-                Observable.just(true)
-                        .subscribeOn(Schedulers.io())
-                        .map { AdminTaskRepository.addTokenGenerationRequest() }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object :DisposableObserver<Boolean>(){
-                            override fun onComplete() {}
-
-                            override fun onNext(result: Boolean) {
-                                if (result){
-                                    DisplayUtils.showShortSnack(this@FragmentAdminTasks.view!! as  CoordinatorLayout,TOKEN_GENERATION_SUCCESS_MESSAGE)
-                                }else{
-                                    DisplayUtils.showShortSnack(this@FragmentAdminTasks.view!! as  CoordinatorLayout,TOKEN_GENERATION_FAILURE_MESSAGE)
-                                }
-                            }
-
-                            override fun onError(e: Throwable) {
-                                DisplayUtils.showShortSnack(this@FragmentAdminTasks.view!! as  CoordinatorLayout,TOKEN_GENERATION_ERROR_MESSAGE)                            }
-                        })
-        )
     }
 }

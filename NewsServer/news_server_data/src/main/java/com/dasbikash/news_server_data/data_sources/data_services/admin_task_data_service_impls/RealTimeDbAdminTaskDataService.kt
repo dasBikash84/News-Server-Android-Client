@@ -24,6 +24,12 @@ internal object RealTimeDbAdminTaskDataService:AdminTaskDataService {
     override fun addTokenGenerationRequest() =
             RealtimeDBAdminTaskUtils.addTokenGenerationRequest()
 
+    override fun addParserTokenGenerationRequest()=
+            RealtimeDBAdminTaskUtils.addParserTokenGenerationRequest()
+
+    override fun addDataCoordinatorTokenGenerationRequest()=
+            RealtimeDBAdminTaskUtils.addDataCoordinatorTokenGenerationRequest()
+
     override fun addNewsPaperStatusChangeRequest(newsPaperStatusChangeRequest: NewsPaperStatusChangeRequest) =
             RealtimeDBAdminTaskUtils.addNewsPaperStatusChangeRequest(newsPaperStatusChangeRequest)
 

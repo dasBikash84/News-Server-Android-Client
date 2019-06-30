@@ -30,6 +30,7 @@ import com.dasbikash.news_server_data.models.ParserMode
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.repositories.AdminTaskRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.google.android.material.button.MaterialButton
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
@@ -44,6 +45,11 @@ class   FragmentNPParserModeChangeRequest : Fragment() {
         private val REQUEST_SUBMISSION_SUCCESS_MESSAGE = "News paper parser mode change request submitted."
         private val REQUEST_SUBMISSION_FAILURE_MESSAGE = "News paper parser mode change request submission failure."
         private val REQUEST_SUBMISSION_ERROR_MESSAGE = "Error!!!"
+
+        private const val TOKEN_GENERATION_REQ_PROMPT = "Add token generation request?"
+        private const val TOKEN_GENERATION_SUCCESS_MESSAGE = "Token generation request added."
+        private const val TOKEN_GENERATION_FAILURE_MESSAGE = "Token generation request addition failure."
+        private const val TOKEN_GENERATION_ERROR_MESSAGE = "Error occured during token generation request addition."
     }
 
     private val mNewsPapers = mutableListOf<Newspaper>()
@@ -57,6 +63,7 @@ class   FragmentNPParserModeChangeRequest : Fragment() {
     private lateinit var mOkButton: Button
     private lateinit var mCancelButton: Button
     private lateinit var mWaitScreen: LinearLayoutCompat
+    private lateinit var mTokenGenerationRequestButton: MaterialButton
 
     private lateinit var mCurrentSelectedParserMode: String
 
@@ -84,6 +91,12 @@ class   FragmentNPParserModeChangeRequest : Fragment() {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                     message = DISCARD_CHANGES_AND_EXIT_MESSAGE,
                     doOnPositivePress = { (activity as AdminActivity).onBackPressed() })).show()
+        }
+
+        mTokenGenerationRequestButton.setOnClickListener {
+            DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
+                    message = TOKEN_GENERATION_REQ_PROMPT,doOnPositivePress = {addTokenGenerationRequest()}
+            )).show()
         }
 
         mNewsPaperSelectorSpinner.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
@@ -142,6 +155,7 @@ class   FragmentNPParserModeChangeRequest : Fragment() {
         mOkButton = view.findViewById(R.id.ok_button)
         mCancelButton = view.findViewById(R.id.cancel_button)
         mWaitScreen = view.findViewById(R.id.wait_screen)
+        mTokenGenerationRequestButton = view.findViewById(R.id.token_generation_request_button)
     }
 
     private fun showWaitScreen(){
@@ -192,6 +206,29 @@ class   FragmentNPParserModeChangeRequest : Fragment() {
                             }
                         })
 
+        )
+    }
+
+    private fun addTokenGenerationRequest() {
+        mDisposable.add(
+                Observable.just(true)
+                        .subscribeOn(Schedulers.io())
+                        .map { AdminTaskRepository.addParserTokenGenerationRequest() }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object :DisposableObserver<Boolean>(){
+                            override fun onComplete() {}
+
+                            override fun onNext(result: Boolean) {
+                                if (result){
+                                    DisplayUtils.showShortSnack(this@FragmentNPParserModeChangeRequest.view!! as  CoordinatorLayout,TOKEN_GENERATION_SUCCESS_MESSAGE)
+                                }else{
+                                    DisplayUtils.showShortSnack(this@FragmentNPParserModeChangeRequest.view!! as  CoordinatorLayout,TOKEN_GENERATION_FAILURE_MESSAGE)
+                                }
+                            }
+
+                            override fun onError(e: Throwable) {
+                                DisplayUtils.showShortSnack(this@FragmentNPParserModeChangeRequest.view!! as  CoordinatorLayout,TOKEN_GENERATION_ERROR_MESSAGE)                            }
+                        })
         )
     }
 }
