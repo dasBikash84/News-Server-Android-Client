@@ -71,4 +71,7 @@
     <string name="article_uploader_status_change_request_text">Add article uploader status change request</string>
     <string name="token_generation_request_text">Add token generation request</string>
     <string name="newspaper_selector_spinner_title">Select news-paper</string>
+    <string name="newspaper_status_spinner_title">News paper status</string>
+    <string name="newspaper_id_text_box_hint">News paper Id</string>
+    <string name="auth_token_text_box_hint">Auth token</string>
 </resources>

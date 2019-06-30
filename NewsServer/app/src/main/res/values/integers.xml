@@ -17,4 +17,6 @@
     <integer name="card_flip_time_half">150</integer>
     <integer name="page_group_name_max_char">100</integer>
     <integer name="page_search_max_char">15</integer>
+    <integer name="newspaper_id_max_char">8</integer>
+    <integer name="auth_token_max_char">50</integer>
 </resources>
