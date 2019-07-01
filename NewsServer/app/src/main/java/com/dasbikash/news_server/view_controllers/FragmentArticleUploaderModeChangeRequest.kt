@@ -25,6 +25,7 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
+import com.dasbikash.news_server.view_controllers.interfaces.TokenGenerationRequestAdder
 import com.dasbikash.news_server_data.models.ArticleUploadTarget
 import com.dasbikash.news_server_data.models.ArticleUploaderStatusChangeRequest
 import com.dasbikash.news_server_data.models.TwoStateStatus
@@ -35,7 +36,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class   FragmentArticleUploaderModeChangeRequest : Fragment() {
+class   FragmentArticleUploaderModeChangeRequest : Fragment(),TokenGenerationRequestAdder {
 
     companion object {
         private const val DISCARD_CHANGES_AND_EXIT_MESSAGE = "Discard changes and exit?"
@@ -44,11 +45,6 @@ class   FragmentArticleUploaderModeChangeRequest : Fragment() {
         private val REQUEST_SUBMISSION_SUCCESS_MESSAGE = "Article uploader mode change request submitted."
         private val REQUEST_SUBMISSION_FAILURE_MESSAGE = "Article uploader  mode change request submission failure."
         private val REQUEST_SUBMISSION_ERROR_MESSAGE = "Error!!!"
-
-        private const val TOKEN_GENERATION_REQ_PROMPT = "Add token generation request?"
-        private const val TOKEN_GENERATION_SUCCESS_MESSAGE = "Token generation request added."
-        private const val TOKEN_GENERATION_FAILURE_MESSAGE = "Token generation request addition failure."
-        private const val TOKEN_GENERATION_ERROR_MESSAGE = "Error occured during token generation request addition."
     }
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
@@ -59,7 +55,6 @@ class   FragmentArticleUploaderModeChangeRequest : Fragment() {
     private lateinit var mOkButton: Button
     private lateinit var mCancelButton: Button
     private lateinit var mWaitScreen: LinearLayoutCompat
-    private lateinit var mTokenGenerationRequestButton: MaterialButton
 
     private lateinit var mCurrentSelectedArticleUploader: String
     private lateinit var mCurrentSelectedMode: String
@@ -87,12 +82,6 @@ class   FragmentArticleUploaderModeChangeRequest : Fragment() {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                     message = DISCARD_CHANGES_AND_EXIT_MESSAGE,
                     doOnPositivePress = { (activity as AdminActivity).onBackPressed() })).show()
-        }
-
-        mTokenGenerationRequestButton.setOnClickListener {
-            DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
-                    message = TOKEN_GENERATION_REQ_PROMPT,doOnPositivePress = {addTokenGenerationRequest()}
-            )).show()
         }
 
         mArticleUploaderSelectorSpinner.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
@@ -125,7 +114,6 @@ class   FragmentArticleUploaderModeChangeRequest : Fragment() {
         mOkButton = view.findViewById(R.id.ok_button)
         mCancelButton = view.findViewById(R.id.cancel_button)
         mWaitScreen = view.findViewById(R.id.wait_screen)
-        mTokenGenerationRequestButton = view.findViewById(R.id.token_generation_request_button)
     }
 
     private fun showWaitScreen(){
@@ -177,26 +165,7 @@ class   FragmentArticleUploaderModeChangeRequest : Fragment() {
         )
     }
 
-    private fun addTokenGenerationRequest() {
-        mDisposable.add(
-                Observable.just(true)
-                        .subscribeOn(Schedulers.io())
-                        .map { AdminTaskRepository.addDataCoordinatorTokenGenerationRequest() }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object :DisposableObserver<Boolean>(){
-                            override fun onComplete() {}
-
-                            override fun onNext(result: Boolean) {
-                                if (result){
-                                    DisplayUtils.showShortSnack(this@FragmentArticleUploaderModeChangeRequest.view!! as  CoordinatorLayout,TOKEN_GENERATION_SUCCESS_MESSAGE)
-                                }else{
-                                    DisplayUtils.showShortSnack(this@FragmentArticleUploaderModeChangeRequest.view!! as  CoordinatorLayout,TOKEN_GENERATION_FAILURE_MESSAGE)
-                                }
-                            }
-
-                            override fun onError(e: Throwable) {
-                                DisplayUtils.showShortSnack(this@FragmentArticleUploaderModeChangeRequest.view!! as  CoordinatorLayout,TOKEN_GENERATION_ERROR_MESSAGE)                            }
-                        })
-        )
+    override fun addTokenGenerationRequest(): Boolean {
+        return AdminTaskRepository.addDataCoordinatorTokenGenerationRequest()
     }
 }

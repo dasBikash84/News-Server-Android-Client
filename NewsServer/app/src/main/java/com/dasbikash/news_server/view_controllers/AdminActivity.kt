@@ -14,17 +14,30 @@
 package com.dasbikash.news_server.view_controllers
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.utils.DialogUtils
+import com.dasbikash.news_server.utils.DisplayUtils
+import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
+import com.dasbikash.news_server.view_controllers.interfaces.TokenGenerationRequestAdder
 import com.google.android.material.appbar.AppBarLayout
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.observers.DisposableObserver
+import io.reactivex.schedulers.Schedulers
 
-class AdminActivity : ActivityWithBackPressQueueManager(),NavigationHost {
+class AdminActivity : ActivityWithBackPressQueueManager(), NavigationHost {
 
     private lateinit var mToolbar: Toolbar
     private lateinit var mAppBar: AppBarLayout
+
+    private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,25 +52,27 @@ class AdminActivity : ActivityWithBackPressQueueManager(),NavigationHost {
         getSupportActionBar()!!.setDisplayShowHomeEnabled(true)
 
 
-        if (supportFragmentManager.findFragmentById(R.id.admin_frame) == null) {
+        if (getLoadedFragment() == null) {
             loadAdminTasksFragment()
         }
     }
 
-    private fun loadAdminTasksFragment(){
-        navigateTo(FragmentAdminTasks(),false)
+    private fun getLoadedFragment() = supportFragmentManager.findFragmentById(R.id.admin_frame)
+
+    private fun loadAdminTasksFragment() {
+        navigateTo(FragmentAdminTasks(), false)
     }
 
-    fun loadNPStatusChangeRequestFragment(){
-        navigateTo(FragmentNPStatusChangeRequest(),true)
+    fun loadNPStatusChangeRequestFragment() {
+        navigateTo(FragmentNPStatusChangeRequest(), true)
     }
 
-    fun loadNPParserModeChangeRequestFragment(){
-        navigateTo(FragmentNPParserModeChangeRequest(),true)
+    fun loadNPParserModeChangeRequestFragment() {
+        navigateTo(FragmentNPParserModeChangeRequest(), true)
     }
 
-    fun loadArticleUploaderModeChangeRequestFragment(){
-        navigateTo(FragmentArticleUploaderModeChangeRequest(),true)
+    fun loadArticleUploaderModeChangeRequestFragment() {
+        navigateTo(FragmentArticleUploaderModeChangeRequest(), true)
     }
 
     @Override
@@ -101,4 +116,67 @@ class AdminActivity : ActivityWithBackPressQueueManager(),NavigationHost {
             mAppBar.visibility = View.GONE
         }
     }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_admin_activity, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.add_token_generation_request_menu_item -> {
+                addTokenGenerationRequestAction()
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun addTokenGenerationRequestAction() {
+
+        val tokenGenerationRequestAdder = getLoadedFragment()
+
+        if (tokenGenerationRequestAdder == null || !(tokenGenerationRequestAdder is TokenGenerationRequestAdder)) {
+            DisplayUtils.showShortToast(this, TOKEN_GENERATION_NOT_SUPPORTED_MESSAGE)
+            return
+        }
+
+        DialogUtils.createAlertDialog(this, DialogUtils.AlertDialogDetails(
+                TOKEN_GENERATION_REQ_PROMPT,
+                doOnPositivePress = { addTokenGenerationRequest(tokenGenerationRequestAdder as TokenGenerationRequestAdder) }
+        )).show()
+    }
+
+    private fun addTokenGenerationRequest(tokenGenerationRequestAdder: TokenGenerationRequestAdder) {
+        mDisposable.add(
+                Observable.just(true)
+                        .subscribeOn(Schedulers.io())
+                        .map { tokenGenerationRequestAdder.addTokenGenerationRequest() }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<Boolean>() {
+                            override fun onComplete() {}
+
+                            override fun onNext(result: Boolean) {
+                                if (result) {
+                                    DisplayUtils.showShortToast(this@AdminActivity, TOKEN_GENERATION_SUCCESS_MESSAGE)
+                                } else {
+                                    DisplayUtils.showShortToast(this@AdminActivity, TOKEN_GENERATION_FAILURE_MESSAGE)
+                                }
+                            }
+
+                            override fun onError(e: Throwable) {
+                                DisplayUtils.showShortToast(this@AdminActivity, TOKEN_GENERATION_ERROR_MESSAGE)
+                            }
+                        })
+        )
+    }
+
+    companion object {
+        private const val TOKEN_GENERATION_REQ_PROMPT = "Add token generation request?"
+        private const val TOKEN_GENERATION_SUCCESS_MESSAGE = "Token generation request added."
+        private const val TOKEN_GENERATION_NOT_SUPPORTED_MESSAGE = "Token generation not supported."
+        private const val TOKEN_GENERATION_FAILURE_MESSAGE = "Token generation request addition failure."
+        private const val TOKEN_GENERATION_ERROR_MESSAGE = "Error occured during token generation request addition."
+    }
 }
+

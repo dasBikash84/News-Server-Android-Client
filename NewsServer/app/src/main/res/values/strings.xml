@@ -74,4 +74,5 @@
     <string name="newspaper_status_spinner_title">News paper status</string>
     <string name="newspaper_id_text_box_hint">News paper Id</string>
     <string name="auth_token_text_box_hint">Auth token</string>
+    <string name="add_token_generation_request_menu_item_title">Add token gen req</string>
 </resources>

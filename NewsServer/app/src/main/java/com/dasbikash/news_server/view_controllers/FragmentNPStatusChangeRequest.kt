@@ -25,6 +25,7 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
+import com.dasbikash.news_server.view_controllers.interfaces.TokenGenerationRequestAdder
 import com.dasbikash.news_server_data.models.NewsPaperStatusChangeRequest
 import com.dasbikash.news_server_data.models.OffOnStatus
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
@@ -37,7 +38,7 @@ import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
 
-class FragmentNPStatusChangeRequest : Fragment() {
+class FragmentNPStatusChangeRequest : Fragment(),TokenGenerationRequestAdder {
     companion object {
         private const val DISCARD_CHANGES_AND_EXIT_MESSAGE = "Discard changes and exit?"
         private const val SUBMIT_REQUEST_MESSAGE = "Submit request with current data?"
@@ -45,11 +46,6 @@ class FragmentNPStatusChangeRequest : Fragment() {
         private const val REQUEST_SUBMISSION_SUCCESS_MESSAGE = "News paper status change request submitted."
         private const val REQUEST_SUBMISSION_FAILURE_MESSAGE = "News paper status change request submission failure."
         private const val REQUEST_SUBMISSION_ERROR_MESSAGE = "Error!!!"
-
-        private const val TOKEN_GENERATION_REQ_PROMPT = "Add token generation request?"
-        private const val TOKEN_GENERATION_SUCCESS_MESSAGE = "Token generation request added."
-        private const val TOKEN_GENERATION_FAILURE_MESSAGE = "Token generation request addition failure."
-        private const val TOKEN_GENERATION_ERROR_MESSAGE = "Error occured during token generation request addition."
     }
 
     private val mNewsPapers = mutableListOf<Newspaper>()
@@ -63,7 +59,6 @@ class FragmentNPStatusChangeRequest : Fragment() {
     private lateinit var mOkButton: Button
     private lateinit var mCancelButton: Button
     private lateinit var mWaitScreen: LinearLayoutCompat
-    private lateinit var mTokenGenerationRequestButton: MaterialButton
 
 
     private lateinit var mCurrentSelectedStatus: String
@@ -93,12 +88,6 @@ class FragmentNPStatusChangeRequest : Fragment() {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                     message = DISCARD_CHANGES_AND_EXIT_MESSAGE,
                     doOnPositivePress = { (activity as AdminActivity).onBackPressed() })).show()
-        }
-
-        mTokenGenerationRequestButton.setOnClickListener {
-            DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
-                    message = TOKEN_GENERATION_REQ_PROMPT,doOnPositivePress = {addTokenGenerationRequest()}
-            )).show()
         }
 
         mNewsPaperSelectorSpinner.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
@@ -167,7 +156,6 @@ class FragmentNPStatusChangeRequest : Fragment() {
         mOkButton = view.findViewById(R.id.ok_button)
         mCancelButton = view.findViewById(R.id.cancel_button)
         mWaitScreen = view.findViewById(R.id.wait_screen)
-        mTokenGenerationRequestButton = view.findViewById(R.id.token_generation_request_button)
     }
 
     private fun showWaitScreen(){
@@ -218,26 +206,7 @@ class FragmentNPStatusChangeRequest : Fragment() {
         )
     }
 
-    private fun addTokenGenerationRequest() {
-        mDisposable.add(
-                Observable.just(true)
-                        .subscribeOn(Schedulers.io())
-                        .map { AdminTaskRepository.addParserTokenGenerationRequest() }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object :DisposableObserver<Boolean>(){
-                            override fun onComplete() {}
-
-                            override fun onNext(result: Boolean) {
-                                if (result){
-                                    DisplayUtils.showShortSnack(this@FragmentNPStatusChangeRequest.view!! as  CoordinatorLayout,TOKEN_GENERATION_SUCCESS_MESSAGE)
-                                }else{
-                                    DisplayUtils.showShortSnack(this@FragmentNPStatusChangeRequest.view!! as  CoordinatorLayout,TOKEN_GENERATION_FAILURE_MESSAGE)
-                                }
-                            }
-
-                            override fun onError(e: Throwable) {
-                                DisplayUtils.showShortSnack(this@FragmentNPStatusChangeRequest.view!! as  CoordinatorLayout,TOKEN_GENERATION_ERROR_MESSAGE)                            }
-                        })
-        )
+    override fun addTokenGenerationRequest(): Boolean {
+        return AdminTaskRepository.addParserTokenGenerationRequest()
     }
 }
