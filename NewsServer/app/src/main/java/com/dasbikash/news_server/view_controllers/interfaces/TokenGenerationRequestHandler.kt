@@ -15,4 +15,6 @@ package com.dasbikash.news_server.view_controllers.interfaces
 
 interface TokenGenerationRequestAdder {
     fun addTokenGenerationRequest():Boolean
+    fun showWaitScreen()
+    fun hideWaitScreen()
 }

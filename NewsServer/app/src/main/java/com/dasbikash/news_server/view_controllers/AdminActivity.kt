@@ -148,13 +148,16 @@ class AdminActivity : ActivityWithBackPressQueueManager(), NavigationHost {
     }
 
     private fun addTokenGenerationRequest(tokenGenerationRequestAdder: TokenGenerationRequestAdder) {
+        tokenGenerationRequestAdder.showWaitScreen()
         mDisposable.add(
                 Observable.just(true)
                         .subscribeOn(Schedulers.io())
                         .map { tokenGenerationRequestAdder.addTokenGenerationRequest() }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<Boolean>() {
-                            override fun onComplete() {}
+                            override fun onComplete() {
+                                tokenGenerationRequestAdder.hideWaitScreen()
+                            }
 
                             override fun onNext(result: Boolean) {
                                 if (result) {
@@ -166,6 +169,7 @@ class AdminActivity : ActivityWithBackPressQueueManager(), NavigationHost {
 
                             override fun onError(e: Throwable) {
                                 DisplayUtils.showShortToast(this@AdminActivity, TOKEN_GENERATION_ERROR_MESSAGE)
+                                tokenGenerationRequestAdder.hideWaitScreen()
                             }
                         })
         )

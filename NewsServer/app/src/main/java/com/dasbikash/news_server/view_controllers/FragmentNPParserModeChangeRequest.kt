@@ -146,13 +146,13 @@ class   FragmentNPParserModeChangeRequest : Fragment(),TokenGenerationRequestAdd
         mWaitScreen = view.findViewById(R.id.wait_screen)
     }
 
-    private fun showWaitScreen(){
+    override fun showWaitScreen(){
         mWaitScreen.visibility = View.VISIBLE
         mWaitScreen.bringToFront()
         mWaitScreen.setOnClickListener {  }
     }
 
-    private fun hideWaitScreen(){
+    override fun hideWaitScreen(){
         mWaitScreen.visibility = View.GONE
     }
 
