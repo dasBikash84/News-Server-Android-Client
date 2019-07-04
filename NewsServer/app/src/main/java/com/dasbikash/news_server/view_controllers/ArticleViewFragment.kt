@@ -159,7 +159,7 @@ class ArticleViewFragment : Fragment() {
         DisplayUtils.displayHtmlText(mArticleText, mArticle.articleText!!)
 
         if (mArticle.imageLinkList != null && mArticle.imageLinkList!!.size > 0) {
-            mArticleImageListAdapter = ArticleImageListAdapter(this,mArticleTextSize!!.toFloat())
+            mArticleImageListAdapter = ArticleImageListAdapter(this,mArticleTextSize!!.toFloat(),true)
             mArticleImageHolder.adapter = mArticleImageListAdapter
             mArticleImageListAdapter.submitList(mArticle.imageLinkList)
             mArticleImageHolder.visibility = View.VISIBLE
@@ -320,7 +320,7 @@ object ArticleImageDiffCallback : DiffUtil.ItemCallback<ArticleImage>() {
     }
 }
 
-class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner,val mArticleTextSize:Float) :
+class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner,val mArticleTextSize:Float,val enableImageDownload:Boolean=false) :
         ListAdapter<ArticleImage, ArticleImageHolder>(ArticleImageDiffCallback), DefaultLifecycleObserver {
 
     init {
@@ -333,7 +333,7 @@ class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner,val mArticleTextSiz
         return ArticleImageHolder(
                 LayoutInflater.from(parent.context)
                         .inflate(R.layout.view_article_image, parent, false),
-                mDisposable,mArticleTextSize
+                mDisposable,mArticleTextSize,enableImageDownload
         )
     }
 
@@ -368,7 +368,9 @@ class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner,val mArticleTextSiz
     }
 }
 
-class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDisposable, textFontSize:Float) : RecyclerView.ViewHolder(itemView) {
+class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDisposable, textFontSize:Float,
+                         val enableImageDownload:Boolean=false)
+    : RecyclerView.ViewHolder(itemView) {
 
     val mArticleImage: AppCompatImageView
     val mImageCaption: AppCompatTextView
@@ -405,11 +407,13 @@ class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDispo
                     {
                         compositeDisposable.delete(imageLoadingDisposer!!)
                         imageLoadingDisposer = null
-                        mArticleImage.setOnLongClickListener {
-                            DialogUtils.createAlertDialog(itemView.context,DialogUtils.AlertDialogDetails(
-                                    message = "Download Image?",doOnPositivePress = {downloadImageAction(articleImage.link!!)}
-                            )).show()
-                            true
+                        if (enableImageDownload) {
+                            mArticleImage.setOnLongClickListener {
+                                DialogUtils.createAlertDialog(itemView.context, DialogUtils.AlertDialogDetails(
+                                        message = "Download Image?", doOnPositivePress = { downloadImageAction(articleImage.link!!) }
+                                )).show()
+                                true
+                            }
                         }
                     })
 
