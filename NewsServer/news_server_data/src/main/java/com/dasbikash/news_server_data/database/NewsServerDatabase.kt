@@ -53,7 +53,7 @@ internal abstract class NewsServerDatabase internal constructor(): RoomDatabase(
 
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("CREATE TABLE `ArticleSearchKeyWord` (`id` TEXT, `created` INTEGER, PRIMARY KEY(`id`))")
+                database.execSQL("CREATE TABLE `ArticleSearchKeyWord` (`id` TEXT NOT NULL, `created` INTEGER NOT NULL, PRIMARY KEY(`id`))")
             }
         }
 

@@ -121,7 +121,7 @@ class InitFragment : Fragment() {
                             }
 
                             override fun onError(e: Throwable) {
-                                LoggerUtils.debugLog("onError: " + e.javaClass.canonicalName!!, this::class.java)
+                                LoggerUtils.debugLog("onError: ${e.javaClass.canonicalName!!} cause: ${e.message}", this::class.java)
                                 LoggerUtils.printStackTrace(e)
                                 doOnError(e)
                             }
