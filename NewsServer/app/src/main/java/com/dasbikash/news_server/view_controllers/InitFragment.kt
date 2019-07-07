@@ -27,6 +27,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.dasbikash.news_server.BuildConfig
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
@@ -37,15 +38,14 @@ import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.page_request_server.PageRequestServerInitiator
+import com.dasbikash.news_server_data.repositories.ArticleSearchRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
-import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
-import java.util.*
 
 class InitFragment : Fragment() {
 
@@ -169,7 +169,27 @@ class InitFragment : Fragment() {
                     .init(context!!)
             emitter.onNext(DataLoadingStatus.NEWS_DATA_REPO_INITIATED)
 
+            if (BuildConfig.DEBUG) {
+                testRoutine()
+            }
+
             emitter.onComplete()
+        }
+    }
+
+    private fun testRoutine() {
+//        var count = 0
+//        RealtimeDBArticleSearchUtils.getSerachKeyWords().asSequence().forEach {
+//            LoggerUtils.debugLog("Key word (${count++}): ${it}",this::class.java,context!!)
+//        }
+//        RealtimeDBArticleSearchUtils.getKeyWordSerachResult("হত্যাকারী").let {
+//            val result = it
+//            it.keys.asSequence().forEach {
+//                LoggerUtils.debugLog("${it}: ${result.get(it)}",this::class.java,context!!)
+//            }
+//        }
+        ArticleSearchRepository.getMatchingSerachKeyWords("bor", context!!).asSequence().forEach {
+            LoggerUtils.debugLog(it, this::class.java, context!!)
         }
     }
 
@@ -198,7 +218,7 @@ class InitFragment : Fragment() {
                                     }
                                 }
                                 .onErrorReturn {
-                                    if (!amDisposed){
+                                    if (!amDisposed) {
                                         throw it
                                     }
                                 }

@@ -27,6 +27,8 @@ internal object RealtimeDBUtils {
     private const val PAGE_DOWNLOAD_REQUEST_NODE = "page_download_request"
     private const val PAGE_DOWNLOAD_REQUEST_SETTINGS_NODE = "page_download_request_settings"
     private const val ADMIN_TASK_DATA_NODE = "admin_task_data"
+    private const val KEY_WORD_SERACH_RESULT_NODE = "key_word_serach_result"
+    private const val SERACH_KEY_WORDS_NODE = "serach_key_words"
 
     val mFBDataBase: FirebaseDatabase
     private const val CACHE_SIZE_BYTES = 5*1024*1024L //5MB
@@ -45,5 +47,7 @@ internal object RealtimeDBUtils {
     val mPageDownLoadRequestReference: DatabaseReference = mRootReference.child(PAGE_DOWNLOAD_REQUEST_NODE)
     val mPageDownLoadRequestSettingsReference: DatabaseReference = mRootReference.child(PAGE_DOWNLOAD_REQUEST_SETTINGS_NODE)
     val mAdminTaskDataNode: DatabaseReference = mRootReference.child(ADMIN_TASK_DATA_NODE)
+    val mKeyWordSerachResultNode: DatabaseReference = mRootReference.child(KEY_WORD_SERACH_RESULT_NODE)
+    val mSerachKeyWordsNode: DatabaseReference = mRootReference.child(SERACH_KEY_WORDS_NODE)
 }
 

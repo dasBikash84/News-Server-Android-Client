@@ -18,6 +18,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.dasbikash.news_server_data.database.daos.*
 import com.dasbikash.news_server_data.database.room_converters.ArticleImageConverter
 import com.dasbikash.news_server_data.database.room_converters.DateConverter
@@ -26,7 +28,7 @@ import com.dasbikash.news_server_data.database.room_converters.StringListConvert
 import com.dasbikash.news_server_data.models.room_entity.*
 
 @Database(entities = [Country::class, Language::class, Newspaper::class, Page::class, PageGroup::class, Article::class, UserPreferenceData::class,
-                        ArticleVisitHistory::class,SavedArticle::class], version = 1, exportSchema = false)
+                        ArticleVisitHistory::class,SavedArticle::class,ArticleSearchKeyWord::class], version = 2, exportSchema = false)
 @TypeConverters(DateConverter::class, IntListConverter::class, StringListConverter::class, ArticleImageConverter::class)
 internal abstract class NewsServerDatabase internal constructor(): RoomDatabase() {
 
@@ -37,6 +39,7 @@ internal abstract class NewsServerDatabase internal constructor(): RoomDatabase(
     abstract val pageGroupDao: PageGroupDao
     abstract val articleDao: ArticleDao
     abstract val savedArticleDao: SavedArticleDao
+    abstract val articleSearchKeyWordDao: ArticleSearchKeyWordDao
 
 
     abstract val userPreferenceDataDao: UserPreferenceDataDao
@@ -48,14 +51,20 @@ internal abstract class NewsServerDatabase internal constructor(): RoomDatabase(
         @Volatile
         private lateinit var INSTANCE: NewsServerDatabase
 
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE `ArticleSearchKeyWord` (`id` TEXT, `created` INTEGER, PRIMARY KEY(`id`))")
+            }
+        }
+
         internal fun getDatabase(context: Context): NewsServerDatabase {
             if (!::INSTANCE.isInitialized) {
                 synchronized(NewsServerDatabase::class.java) {
                     if (!::INSTANCE.isInitialized) {
-                        INSTANCE = Room.databaseBuilder(
-                                context.applicationContext,
-                                NewsServerDatabase::class.java, DATABASE_NAME)
-                                .build()
+                        INSTANCE = Room.databaseBuilder(context.applicationContext,
+                                                    NewsServerDatabase::class.java, DATABASE_NAME)
+                                                    .addMigrations(MIGRATION_1_2)
+                                                    .build()
                     }
                 }
             }
