@@ -29,18 +29,6 @@ object ArticleSearchRepository {
     private const val ONE_WEEK_IN_MS = 7 * ONE_DAY_IN_MS
     private const val MINIMUM_KEYWORD_LENGTH = 3
 
-    fun getMatchingSerachKeyWords(userInput:String,context: Context):List<String>{
-        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        val newsServerDatabase = NewsServerDatabase.getDatabase(context)
-        val matchingSerachKeyWords =
-                newsServerDatabase.articleSearchKeyWordDao
-                        .getMatchingSerachKeyWords("%${userInput.trim()}%")
-        if (matchingSerachKeyWords.isNotEmpty()) {
-            return matchingSerachKeyWords.map { it.id }
-        }
-        return emptyList()
-    }
-
     fun updateSerachKeyWordsIfRequired(context: Context):Boolean{
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val newsServerDatabase = NewsServerDatabase.getDatabase(context)
@@ -61,8 +49,16 @@ object ArticleSearchRepository {
         return RealTimeDbArticleSearchService.getSerachKeyWords()
     }
 
-    private fun getKeyWordSerachResultFromRemoteDb(keyWord: String): Map<String, String> {
-        return RealTimeDbArticleSearchService.getKeyWordSerachResult(keyWord)
+    fun getMatchingSerachKeyWords(userInput:String,context: Context):List<String>{
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        val newsServerDatabase = NewsServerDatabase.getDatabase(context)
+        val matchingSerachKeyWords =
+                newsServerDatabase.articleSearchKeyWordDao
+                        .getMatchingSerachKeyWords("%${userInput.trim()}%")
+        if (matchingSerachKeyWords.isNotEmpty()) {
+            return matchingSerachKeyWords.map { it.id }
+        }
+        return emptyList()
     }
 
     fun getArticleSearchResultForKeyWords(context: Context,keyWords: List<String>):Map<String,String>{
@@ -87,9 +83,8 @@ object ArticleSearchRepository {
         return keyWordSerachResultMap.toMap()
     }
 
-    private fun findPageById(pageId: String,context: Context): Page? {
-        val newsServerDatabase = NewsServerDatabase.getDatabase(context)
-        return newsServerDatabase.pageDao.findById(pageId)
+    private fun getKeyWordSerachResultFromRemoteDb(keyWord: String): Map<String, String> {
+        return RealTimeDbArticleSearchService.getKeyWordSerachResult(keyWord)
     }
 
     fun findArticleByIdAndPageId(articleId: String, pageId: String,context: Context):Pair<Article?,Page?> {
@@ -104,5 +99,10 @@ object ArticleSearchRepository {
             }
         }
         return Pair(article,findPageById(pageId,context))
+    }
+
+    private fun findPageById(pageId: String,context: Context): Page? {
+        val newsServerDatabase = NewsServerDatabase.getDatabase(context)
+        return newsServerDatabase.pageDao.findById(pageId)
     }
 }
