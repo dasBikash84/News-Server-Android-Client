@@ -33,7 +33,7 @@ internal interface PageDao {
     fun getTopPagesByNewsPaperId(newspaperId: String):List<Page>
 
     @Query("SELECT * FROM Page WHERE id = :pageId")
-    fun findById(pageId:String):Page
+    fun findById(pageId:String):Page?
 
     @Query("SELECT * FROM Page WHERE parentPageId= :parentPageId")
     fun getChildPagesByTopLevelPageId(parentPageId: String):List<Page>

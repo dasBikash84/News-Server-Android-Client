@@ -32,7 +32,7 @@ abstract class NewsDataRepository {
     private val newsDataService: NewsDataService = DataServiceImplProvider.getNewsDataServiceImpl()
 
     abstract fun getLatestArticleByPageFromLocalDb(page: Page): Article?
-    abstract fun findArticleById(articleId: String): Article?
+    abstract fun findArticleByIdFromLocalDb(articleId: String): Article?
 
     abstract protected fun setPageAsEndReached(page: Page)
     abstract protected fun insertArticles(articles: List<Article>)
@@ -89,6 +89,11 @@ abstract class NewsDataRepository {
         }
         insertArticles(articles)
         return articles
+    }
+
+    fun findArticleByIdFromRemoteDb(articleId: String,pageId:String): Article?{
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        return newsDataService.findArticleById(articleId,pageId)
     }
 
     abstract fun getArticleLiveDataForPage(page: Page): LiveData<List<Article>>

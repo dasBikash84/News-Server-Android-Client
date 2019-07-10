@@ -31,4 +31,8 @@ internal object SpringMVCNewsDataService : NewsDataService() {
     override fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
         return SpringMVCNewsDataUtils.getArticlesAfterLastArticle(page, lastArticle, articleRequestSize)
     }
+
+    override fun findArticleById(articleId: String, pageId: String): Article? {
+        return SpringMVCNewsDataUtils.findArticleById(articleId, pageId)
+    }
 }

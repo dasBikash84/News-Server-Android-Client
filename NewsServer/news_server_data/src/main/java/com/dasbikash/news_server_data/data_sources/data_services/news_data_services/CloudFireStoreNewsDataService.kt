@@ -28,4 +28,8 @@ internal object CloudFireStoreNewsDataService : NewsDataService() {
 
     override fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int) =
             CloudFireStoreArticleDataUtils.getArticlesAfterLastArticle(page,lastArticle,articleRequestSize)
+
+    override fun findArticleById(articleId: String, pageId: String): Article? {
+        return CloudFireStoreArticleDataUtils.findArticleById(articleId)
+    }
 }

@@ -30,4 +30,7 @@ internal interface ArticleSearchKeyWordDao {
 
     @Query("SELECT * FROM ArticleSearchKeyWord WHERE id like :searchKeyWordPortion")
     fun getMatchingSerachKeyWords(searchKeyWordPortion:String):List<ArticleSearchKeyWord>
+
+    @Query("DELETE FROM ArticleSearchKeyWord")
+    fun nukeTable()
 }

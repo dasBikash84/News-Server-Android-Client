@@ -50,4 +50,6 @@ internal abstract class NewsDataService {
 
     private fun processFetchedArticleData(page: Page, articleList: List<Article>) =
         articleList.asSequence().map { NewsDataServiceUtils.processFetchedArticleData(it, page) }.toList()
+
+    abstract fun findArticleById(articleId: String, pageId: String): Article?
 }

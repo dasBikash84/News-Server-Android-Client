@@ -31,7 +31,7 @@ internal class NewsDataRepositoryRoomImpl internal constructor(context: Context)
         return newsServerDatabase.articleDao.getLatestArticleByPageId(page.id)
     }
 
-    override fun findArticleById(articleId:String):Article?{
+    override fun findArticleByIdFromLocalDb(articleId:String):Article?{
         return newsServerDatabase.articleDao.findById(articleId)
     }
 
@@ -55,7 +55,7 @@ internal class NewsDataRepositoryRoomImpl internal constructor(context: Context)
     override fun saveArticleToLocalDisk(article: Article, context: Context): SavedArticle {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
 
-        val page = newsServerDatabase.pageDao.findById(article.pageId!!)
+        val page = newsServerDatabase.pageDao.findById(article.pageId!!)!!
         val newspaper = newsServerDatabase.newsPaperDao.findById(article.newspaperId!!)
 
         article.previewImageLink?.let {

@@ -15,32 +15,94 @@ package com.dasbikash.news_server_data.repositories
 
 import android.content.Context
 import com.dasbikash.news_server_data.data_sources.data_services.article_search_service.RealTimeDbArticleSearchService
+import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.NewsDataServiceUtils
 import com.dasbikash.news_server_data.database.NewsServerDatabase
+import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.ArticleSearchKeyWord
+import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.utills.ExceptionUtils
+import com.dasbikash.news_server_data.utills.LoggerUtils
+import java.lang.IllegalStateException
 
 object ArticleSearchRepository {
     private const val ONE_DAY_IN_MS = 24*60*60*1000L
     private const val ONE_WEEK_IN_MS = 7 * ONE_DAY_IN_MS
+    private const val MINIMUM_KEYWORD_LENGTH = 3
 
     fun getMatchingSerachKeyWords(userInput:String,context: Context):List<String>{
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        val newsServerDatabase = NewsServerDatabase.getDatabase(context)
+        val matchingSerachKeyWords =
+                newsServerDatabase.articleSearchKeyWordDao
+                        .getMatchingSerachKeyWords("%${userInput.trim()}%")
+        if (matchingSerachKeyWords.isNotEmpty()) {
+            return matchingSerachKeyWords.map { it.id }
+        }
+        return emptyList()
+    }
+
+    fun updateSerachKeyWordsIfRequired(context: Context):Boolean{
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val newsServerDatabase = NewsServerDatabase.getDatabase(context)
         val articleSearchKeyWord = newsServerDatabase.articleSearchKeyWordDao.getFirst()
         if (articleSearchKeyWord == null ||
-                (System.currentTimeMillis() - articleSearchKeyWord.created)> ONE_WEEK_IN_MS){
+                (System.currentTimeMillis() - articleSearchKeyWord.created)> ONE_DAY_IN_MS){
             val searchKeyWords = getSerachKeyWordsFromRemoteDb()
-            newsServerDatabase.articleSearchKeyWordDao.addArticleSearchKeyWords(searchKeyWords.map { ArticleSearchKeyWord(id=it) })
+            if (searchKeyWords.isNotEmpty()) {
+                newsServerDatabase.articleSearchKeyWordDao.nukeTable()
+                newsServerDatabase.articleSearchKeyWordDao.addArticleSearchKeyWords(searchKeyWords.map { ArticleSearchKeyWord(id = it) })
+                return true
+            }
         }
-        return newsServerDatabase.articleSearchKeyWordDao.getMatchingSerachKeyWords("%${userInput.trim()}%").map { it.id }
+        return false
     }
 
     private fun getSerachKeyWordsFromRemoteDb(): List<String> {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         return RealTimeDbArticleSearchService.getSerachKeyWords()
     }
 
-    fun getKeyWordSerachResult(keyWord: String): Map<String, String> {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+    private fun getKeyWordSerachResultFromRemoteDb(keyWord: String): Map<String, String> {
         return RealTimeDbArticleSearchService.getKeyWordSerachResult(keyWord)
+    }
+
+    fun getArticleSearchResultForKeyWords(context: Context,keyWords: List<String>):Map<String,String>{
+        val searchKeyWords = mutableSetOf<String>()
+        keyWords.filter { it.length>=MINIMUM_KEYWORD_LENGTH }.asSequence().forEach {
+            searchKeyWords.addAll(getMatchingSerachKeyWords(it,context))
+        }
+        searchKeyWords.addAll(keyWords)
+        LoggerUtils.debugLog("searchKeyWords: ${searchKeyWords}",this::class.java)
+        val keyWordSerachResultMap = mutableMapOf<String,String>()
+        searchKeyWords.asSequence().forEach {
+            val searchResult = getKeyWordSerachResultFromRemoteDb(it)
+            searchResult.keys.asSequence().forEach {
+                if (!keyWordSerachResultMap.contains(it)){
+                    keyWordSerachResultMap.put(it,searchResult.get(it)!!)
+                }
+            }
+        }
+        if (keyWordSerachResultMap.isEmpty()){
+            return emptyMap()
+        }
+        return keyWordSerachResultMap.toMap()
+    }
+
+    private fun findPageById(pageId: String,context: Context): Page? {
+        val newsServerDatabase = NewsServerDatabase.getDatabase(context)
+        return newsServerDatabase.pageDao.findById(pageId)
+    }
+
+    fun findArticleByIdAndPageId(articleId: String, pageId: String,context: Context):Pair<Article?,Page?> {
+        val newsDataRepository = RepositoryFactory.getNewsDataRepository(context)
+        newsDataRepository.findArticleByIdFromLocalDb(articleId)?.let {
+            return Pair(it,findPageById(pageId,context))
+        }
+        val article =  newsDataRepository.findArticleByIdFromRemoteDb(articleId, pageId)
+        article?.let {
+            findPageById(pageId, context)?.let {
+                NewsDataServiceUtils.processFetchedArticleData(article,it)
+            }
+        }
+        return Pair(article,findPageById(pageId,context))
     }
 }

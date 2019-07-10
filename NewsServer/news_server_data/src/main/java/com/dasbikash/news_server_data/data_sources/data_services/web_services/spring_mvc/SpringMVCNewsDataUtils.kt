@@ -81,4 +81,8 @@ internal object SpringMVCNewsDataUtils {
         LoggerUtils.debugLog("getArticlesForCall for: ${page.id} before return",this::class.java)
         return articles
     }
+
+    fun findArticleById(articleId: String, pageId: String): Article? {
+        return null
+    }
 }

@@ -104,4 +104,34 @@ internal object RealTimeDbArticleDataUtils {
         LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before return",this::class.java)
         return articles
     }
+
+    fun findArticleById(articleId: String, pageId: String): Article? {
+
+        val lock = Object()
+        var article:Article? = null
+
+        val query = RealtimeDBUtils.mArticleDataRootReference.child(pageId).child(articleId)
+
+        query.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onCancelled(error: DatabaseError) {
+                synchronized(lock) { lock.notify() }
+            }
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    LoggerUtils.debugLog("findArticleById for: ${articleId} onDataChange",this::class.java)
+                    article = dataSnapshot.getValue(Article::class.java)
+                }
+                synchronized(lock) { lock.notify() }
+            }
+        })
+
+        LoggerUtils.debugLog("findArticleById for: ${articleId} before wait",this::class.java)
+        try {
+            synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
+
+        LoggerUtils.debugLog("findArticleById for: ${articleId} before return",this::class.java)
+        return article
+    }
 }

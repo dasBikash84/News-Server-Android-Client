@@ -29,4 +29,8 @@ internal object RealTimeDbNewsDataService : NewsDataService() {
 
     override fun getRawArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int) =
             RealTimeDbArticleDataUtils.getArticlesAfterLastArticle(page,lastArticle,articleRequestSize)
+
+    override fun findArticleById(articleId: String, pageId: String): Article? {
+        return RealTimeDbArticleDataUtils.findArticleById(articleId,pageId)
+    }
 }

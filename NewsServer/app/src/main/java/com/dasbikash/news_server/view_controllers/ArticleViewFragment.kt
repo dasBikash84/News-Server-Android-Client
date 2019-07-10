@@ -13,12 +13,7 @@
 
 package com.dasbikash.news_server.view_controllers
 
-import android.app.DownloadManager
-import android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
-import android.content.Context.DOWNLOAD_SERVICE
-import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.util.TypedValue
 import android.view.*
 import androidx.appcompat.widget.AppCompatImageView
@@ -39,7 +34,6 @@ import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.ArticleImage
 import com.dasbikash.news_server_data.models.room_entity.Language
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
-import com.dasbikash.news_server_data.translator.TranslatorUtils
 import com.dasbikash.news_server_data.utills.FileDownloaderUtils
 import com.dasbikash.news_server_data.utills.ImageLoadingDisposer
 import com.dasbikash.news_server_data.utills.ImageUtils
@@ -50,7 +44,6 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
-import java.util.*
 
 class ArticleViewFragment : Fragment() {
 
@@ -120,7 +113,7 @@ class ArticleViewFragment : Fragment() {
                         .subscribeOn(Schedulers.io())
                         .map {
                             val newsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
-                            mArticle = newsDataRepository.findArticleById(mArticleId)!!
+                            mArticle = newsDataRepository.findArticleByIdFromLocalDb(mArticleId)!!
                             mArticle.imageLinkList =
                                     mArticle.imageLinkList
                                             ?.asSequence()

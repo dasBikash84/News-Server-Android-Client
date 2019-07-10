@@ -19,6 +19,9 @@ import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.utills.LoggerUtils
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
 
 internal object CloudFireStoreArticleDataUtils {
@@ -98,5 +101,32 @@ internal object CloudFireStoreArticleDataUtils {
 
         LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before return",this::class.java)
         return articles
+    }
+
+    fun findArticleById(articleId: String): Article? {
+
+        val lock = Object()
+        var article:Article?= null
+
+        val query = CloudFireStoreConUtils.getArticleCollectionRef().document(articleId)
+
+        query.get()
+                .addOnCompleteListener(object : OnCompleteListener<DocumentSnapshot>{
+                    override fun onComplete(task: Task<DocumentSnapshot>) {
+                        LoggerUtils.debugLog("findArticleById for: ${articleId} onComplete",this::class.java)
+                        if (task.isSuccessful){
+                            article = task.result?.toObject(Article::class.java)
+                        }
+                        synchronized(lock) { lock.notify() }
+                    }
+                })
+
+        LoggerUtils.debugLog("findArticleById for: ${articleId} before wait",this::class.java)
+        try {
+            synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
+
+        LoggerUtils.debugLog("findArticleById for: ${articleId} before return",this::class.java)
+        return article
     }
 }
