@@ -144,15 +144,15 @@ class FragmentArticleSearch : Fragment() {
     }
 
     private fun clearButtonClickAction() {
-        if (mSearchKeywordEditText.text.trim().length > 0) {
-            DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
-                    title = CLEAR_SEARCH_BOX_MESSAGE,
-                    doOnPositivePress = {
+//        if (mSearchKeywordEditText.text.trim().length > 0) {
+//            DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
+//                    title = CLEAR_SEARCH_BOX_MESSAGE,
+//                    doOnPositivePress = {
                         clearSearchEditText()
-                        showShortSnack(SEARCH_BOX_CLEARED_MESSAGE)
-                    }
-            )).show()
-        }
+//                        showShortSnack(SEARCH_BOX_CLEARED_MESSAGE)
+//                    }
+//            )).show()
+//        }
     }
 
     private fun clearSearchEditText() {
