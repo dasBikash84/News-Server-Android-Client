@@ -17,6 +17,7 @@ import android.content.Context
 import com.dasbikash.news_server_data.data_sources.data_services.article_search_service.RealTimeDbArticleSearchService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.NewsDataServiceUtils
 import com.dasbikash.news_server_data.database.NewsServerDatabase
+import com.dasbikash.news_server_data.models.ArticleSearchReasultEntry
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.ArticleSearchKeyWord
 import com.dasbikash.news_server_data.models.room_entity.Page
@@ -24,16 +25,16 @@ import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 
 object ArticleSearchRepository {
-    private const val ONE_DAY_IN_MS = 24*60*60*1000L
+    private const val ONE_DAY_IN_MS = 24 * 60 * 60 * 1000L
     private const val ONE_WEEK_IN_MS = 7 * ONE_DAY_IN_MS
     const val MINIMUM_KEYWORD_LENGTH = 3
 
-    fun updateSerachKeyWordsIfRequired(context: Context):Boolean{
+    fun updateSerachKeyWordsIfRequired(context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val newsServerDatabase = NewsServerDatabase.getDatabase(context)
         val articleSearchKeyWord = newsServerDatabase.articleSearchKeyWordDao.getFirst()
         if (articleSearchKeyWord == null ||
-                (System.currentTimeMillis() - articleSearchKeyWord.created)> ONE_DAY_IN_MS){
+                (System.currentTimeMillis() - articleSearchKeyWord.created) > ONE_DAY_IN_MS) {
             val searchKeyWords = getSerachKeyWordsFromRemoteDb()
             if (searchKeyWords.isNotEmpty()) {
                 newsServerDatabase.articleSearchKeyWordDao.nukeTable()
@@ -48,13 +49,13 @@ object ArticleSearchRepository {
         return RealTimeDbArticleSearchService.getSerachKeyWords()
     }
 
-    fun getMatchingSerachKeyWords(userInput:String,context: Context):List<String>{
+    fun getMatchingSerachKeyWords(userInput: String, context: Context): List<String> {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
 
         val matchingSerachKeyWords = mutableSetOf<ArticleSearchKeyWord>()
 
-        getMatchingOnlyFromBeginning(userInput, context).apply {matchingSerachKeyWords.addAll(this)}
-        getMatchingAll(userInput, context).apply {matchingSerachKeyWords.addAll(this)}
+        getMatchingOnlyFromBeginning(userInput, context).apply { matchingSerachKeyWords.addAll(this) }
+        getMatchingAll(userInput, context).apply { matchingSerachKeyWords.addAll(this) }
 
         if (matchingSerachKeyWords.isNotEmpty()) {
             return matchingSerachKeyWords.map { it.id }.toList()
@@ -62,78 +63,82 @@ object ArticleSearchRepository {
         return emptyList()
     }
 
-    private fun getMatchingOnlyFromBeginning(userInput:String,context: Context):List<ArticleSearchKeyWord>{
+    private fun getMatchingOnlyFromBeginning(userInput: String, context: Context): List<ArticleSearchKeyWord> {
         val newsServerDatabase = NewsServerDatabase.getDatabase(context)
         return newsServerDatabase.articleSearchKeyWordDao
                 .getMatchingSerachKeyWords("${userInput.trim()}%")
     }
 
-    private fun getMatchingAll(userInput:String,context: Context):List<ArticleSearchKeyWord>{
+    private fun getMatchingAll(userInput: String, context: Context): List<ArticleSearchKeyWord> {
         val newsServerDatabase = NewsServerDatabase.getDatabase(context)
         return newsServerDatabase.articleSearchKeyWordDao
                 .getMatchingSerachKeyWords("%${userInput.trim()}%")
     }
 
-    fun getArticleSearchResultForKeyWords(context: Context,keyWords: List<String>):Map<String,Pair<String,Set<String>>>{
+    fun getArticleSearchResultForKeyWords(context: Context, keyWords: List<String>):List<ArticleSearchReasultEntry> {
         val searchKeyWords = mutableSetOf<String>()
 
-        keyWords.filter { it.length>=MINIMUM_KEYWORD_LENGTH }.asSequence().forEach {
-            searchKeyWords.addAll(getMatchingOnlyFromBeginning(it,context).map { it.id })
+        keyWords.filter { it.length >= MINIMUM_KEYWORD_LENGTH }.asSequence().forEach {
+            searchKeyWords.addAll(getMatchingOnlyFromBeginning(it, context).map { it.id })
         }
 
-        keyWords.filter { it.length>=MINIMUM_KEYWORD_LENGTH }.asSequence().forEach {
-            searchKeyWords.addAll(getMatchingAll(it,context).map { it.id })
+        keyWords.filter { it.length >= MINIMUM_KEYWORD_LENGTH }.asSequence().forEach {
+            searchKeyWords.addAll(getMatchingAll(it, context).map { it.id })
         }
+
         searchKeyWords.addAll(keyWords)
-        LoggerUtils.debugLog("searchKeyWords: ${searchKeyWords}",this::class.java)
-        val keyWordSerachResultMap = mutableMapOf<String,Pair<String,Set<String>>>()
+        LoggerUtils.debugLog("searchKeyWords: ${searchKeyWords}", this::class.java)
+
+        val articleSearchReasultEntries = mutableListOf<ArticleSearchReasultEntry>()
+
         searchKeyWords.asSequence().forEach {
-            val searchResult = getKeyWordSerachResultFromRemoteDb(it)
+            val searchResultMap = getKeyWordSerachResultFromRemoteDb(it)
+            LoggerUtils.debugLog("searchResultMap: ${searchResultMap}", this::class.java)
             val key = it
-            LoggerUtils.debugLog("key: ${key}",this::class.java)
+//            LoggerUtils.debugLog("key: ${key}",this::class.java)
             val keyWordSet = keyWords.filter { key.contains(it) }.toSet()
-            LoggerUtils.debugLog("keyWord: ${keyWordSet}",this::class.java)
-            LoggerUtils.debugLog("searchResult: ${searchResult}",this::class.java)
-            searchResult.keys.asSequence().forEach {
-                if (!keyWordSerachResultMap.contains(it)){
-                    keyWordSerachResultMap.put(it,Pair(searchResult.get(it)!!, keyWordSet))
-                    LoggerUtils.debugLog("Pair(searchResult.get(key)!!, setOf(keyWord)): ${keyWordSerachResultMap.get(it)}",this::class.java)
-                }else{
-                    val keyWordSet = keyWordSerachResultMap.get(it)!!.second.toMutableSet()
-                    LoggerUtils.debugLog("oldSet: ${keyWordSet}",this::class.java)
-                    keyWordSet.addAll(keyWordSet)
-                    LoggerUtils.debugLog("newSet: ${keyWordSet}",this::class.java)
-                    keyWordSerachResultMap.put(it,Pair(searchResult.get(it)!!,keyWordSet.toSet()))
-                    LoggerUtils.debugLog("Pair(searchResult.get(key)!!,newSet.toSet()): ${keyWordSerachResultMap.get(it)}",this::class.java)
+//            LoggerUtils.debugLog("keyWord: ${keyWordSet}",this::class.java)
+            searchResultMap.keys.asSequence().forEach {
+                val articleId = it
+                val articleSearchReasultEntry = articleSearchReasultEntries.find { it.articleId == articleId }
+
+                if (articleSearchReasultEntry == null) {
+                    ArticleSearchReasultEntry.getInstance(articleId, searchResultMap.get(articleId)!!, keyWordSet)?.let {
+                        articleSearchReasultEntries.add(it)
+                    }
+                } else {
+                    keyWordSet.forEach { articleSearchReasultEntry.addMatchingKeyWord(it) }
                 }
             }
         }
-        val returnKeyWordSerachResultMap = mutableMapOf<String,Pair<String,Set<String>>>()
-        keyWordSerachResultMap.keys.sortedBy { keyWordSerachResultMap.get(it)!!.second.size }.asReversed().forEach {
-            returnKeyWordSerachResultMap.put(it,keyWordSerachResultMap.get(it)!!)
-        }
-        return returnKeyWordSerachResultMap.toMap()
+        articleSearchReasultEntries.sortBy { it.getMatchingKeyWords().size }
+        articleSearchReasultEntries.reverse()
+        return articleSearchReasultEntries.toList()
     }
 
     private fun getKeyWordSerachResultFromRemoteDb(keyWord: String): Map<String, String> {
         return RealTimeDbArticleSearchService.getKeyWordSerachResult(keyWord)
     }
 
-    fun findArticleByIdAndPageId(articleId: String, pageId: String,context: Context):Pair<Article?,Page?> {
-        val newsDataRepository = RepositoryFactory.getNewsDataRepository(context)
-        newsDataRepository.findArticleByIdFromLocalDb(articleId)?.let {
-            return Pair(it,findPageById(pageId,context))
-        }
-        val article =  newsDataRepository.findArticleByIdFromRemoteDb(articleId, pageId)
-        article?.let {
-            findPageById(pageId, context)?.let {
-                NewsDataServiceUtils.processFetchedArticleData(article,it)
+    fun findArticleAndPageByArticleSearchReasult(articleSearchReasultEntry:ArticleSearchReasultEntry, context: Context): Pair<Article?, Page?> {
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+
+        articleSearchReasultEntry.apply {
+            val newsDataRepository = RepositoryFactory.getNewsDataRepository(context)
+            newsDataRepository.findArticleByIdFromLocalDb(articleId)?.let {
+                return Pair(it, findPageById(pageId, context))
             }
+            val article = newsDataRepository.findArticleByIdFromRemoteDb(articleId, pageId)
+            article?.let {
+                findPageById(pageId, context)?.let {
+                    NewsDataServiceUtils.processFetchedArticleData(article, it)
+                }
+            }
+            return Pair(article, findPageById(pageId, context))
         }
-        return Pair(article,findPageById(pageId,context))
     }
 
-    private fun findPageById(pageId: String,context: Context): Page? {
+    private fun findPageById(pageId: String, context: Context): Page? {
         val newsServerDatabase = NewsServerDatabase.getDatabase(context)
         return newsServerDatabase.pageDao.findById(pageId)
     }

@@ -28,6 +28,7 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.view_helpers.TextListAdapter
+import com.dasbikash.news_server_data.models.ArticleSearchReasultEntry
 import com.dasbikash.news_server_data.repositories.ArticleSearchRepository
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
@@ -175,14 +176,14 @@ class FragmentArticleSearch : Fragment() {
                             ArticleSearchRepository.getArticleSearchResultForKeyWords(context!!, it)
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Map<String,Pair<String,Set<String>>>>() {
+                        .subscribeWith(object : DisposableObserver<List<ArticleSearchReasultEntry>>() {
                             override fun onComplete() {
                                 hideWaitScreen()
                             }
 
-                            override fun onNext(articleSearchResultMap: Map<String,Pair<String,Set<String>>>) {
-                                articleSearchResultMap.keys.asSequence().forEach {
-                                    debugLog("articleId: ${it} : pageId: ${articleSearchResultMap.get(it)}")
+                            override fun onNext(articleSearchResultMap: List<ArticleSearchReasultEntry>) {
+                                articleSearchResultMap.asSequence().forEach {
+                                    debugLog(it.toString())
                                 }
                             }
 
