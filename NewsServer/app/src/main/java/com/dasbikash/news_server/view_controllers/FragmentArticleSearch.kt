@@ -14,6 +14,8 @@
 package com.dasbikash.news_server.view_controllers
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,7 +27,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
+import com.dasbikash.news_server.view_controllers.view_helpers.TextListAdapter
 import com.dasbikash.news_server_data.repositories.ArticleSearchRepository
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.observers.DisposableObserver
+import io.reactivex.schedulers.Schedulers
 
 class FragmentArticleSearch : Fragment() {
 
@@ -35,6 +42,8 @@ class FragmentArticleSearch : Fragment() {
     private lateinit var mSearchButton: Button
     private lateinit var mClearButton: Button
     private lateinit var mSearchResultsHolder: RecyclerView
+
+    private val mKeyWordHintListAdapter = TextListAdapter({doOnKeywordHintItemClick(it)})
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
@@ -55,6 +64,8 @@ class FragmentArticleSearch : Fragment() {
         hideWaitScreen()
         mSearchKeywordHintsHolder.visibility = View.GONE
 
+        mSearchKeywordHintsHolder.adapter = mKeyWordHintListAdapter
+
         mDisposable.add(RxJavaUtils.launchBackGroundTask {
             ArticleSearchRepository.updateSerachKeyWordsIfRequired(context!!)
         })
@@ -73,10 +84,61 @@ class FragmentArticleSearch : Fragment() {
         mWaitWindow.setOnClickListener { }
         mSearchButton.setOnClickListener { searchButtonClickAction() }
         mClearButton.setOnClickListener { clearButtonClickAction() }
+
+        mSearchKeywordEditText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(editableText: Editable?) {
+                editableText?.let {
+                    it.trim().split(Regex(PATTERN_FOR_KEYWORD_SPLIT)).apply {
+                        if (this.isNotEmpty()) {
+                            mDisposable.add(
+                                    Observable.just(this.last().trim())
+                                            .subscribeOn(Schedulers.io())
+                                            .map {
+                                                if (it.length >= MINIMUM_CHAR_LENGTH_FOR_SEARCH_KEYWORD) {
+                                                    ArticleSearchRepository.getMatchingSerachKeyWords(it, context!!)
+                                                } else {
+                                                    emptyList()
+                                                }
+                                            }
+                                            .observeOn(AndroidSchedulers.mainThread())
+                                            .subscribeWith(object : DisposableObserver<List<String>>() {
+                                                override fun onComplete() {}
+
+                                                override fun onNext(keywordHintList: List<String>) {
+                                                    debugLog(keywordHintList.toString())
+                                                    if (keywordHintList.isNotEmpty()) {
+                                                        mKeyWordHintListAdapter.submitList(keywordHintList)
+                                                        mSearchKeywordHintsHolder.visibility = View.VISIBLE
+                                                    } else {
+                                                        mSearchKeywordHintsHolder.visibility = View.GONE
+                                                    }
+                                                }
+
+                                                override fun onError(e: Throwable) {}
+                                            })
+                            )
+                        } else {
+                            mKeyWordHintListAdapter.submitList(emptyList())
+                            mSearchKeywordHintsHolder.visibility = View.GONE
+                        }
+                    }
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+
+    private fun doOnKeywordHintItemClick(keyWordHint:CharSequence){
+        val lastString = mSearchKeywordEditText.text.split(Regex(PATTERN_FOR_KEYWORD_SPLIT)).last()
+        val currentText = mSearchKeywordEditText.text
+        mSearchKeywordEditText.setText(currentText.replaceRange(currentText.length-lastString.length,currentText.length,keyWordHint.toString()+" "))
+        mSearchKeywordEditText.setSelection(mSearchKeywordEditText.text.length)
     }
 
     private fun clearButtonClickAction() {
-        if (mSearchKeywordEditText.text.trim().length>0) {
+        if (mSearchKeywordEditText.text.trim().length > 0) {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                     title = CLEAR_SEARCH_BOX_MESSAGE,
                     doOnPositivePress = {
@@ -87,15 +149,15 @@ class FragmentArticleSearch : Fragment() {
         }
     }
 
-    private fun clearSearchEditText(){
+    private fun clearSearchEditText() {
         mSearchKeywordEditText.setText("")
         mSearchKeywordHintsHolder.visibility = View.GONE
     }
 
     private fun searchButtonClickAction() {
-        if (mSearchKeywordEditText.text.trim().length>0) {
+        if (mSearchKeywordEditText.text.trim().length > 0) {
             startSearch()
-        }else{
+        } else {
             showShortSnack(SEARCH_BOX_EMPTY_MESSAGE)
             clearSearchEditText()
         }
@@ -120,9 +182,11 @@ class FragmentArticleSearch : Fragment() {
         (activity as NavigationHost).showAppBar(false)
     }
 
-    companion object{
+    companion object {
         private const val CLEAR_SEARCH_BOX_MESSAGE = "Clear Search box?"
         private const val SEARCH_BOX_CLEARED_MESSAGE = "Search box cleared."
         private const val SEARCH_BOX_EMPTY_MESSAGE = "Please input keyword(s) & then press search."
+        private const val MINIMUM_CHAR_LENGTH_FOR_SEARCH_KEYWORD = 3
+        private const val PATTERN_FOR_KEYWORD_SPLIT = "[\\s+,;-]+"
     }
 }
