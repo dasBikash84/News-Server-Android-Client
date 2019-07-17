@@ -77,8 +77,13 @@ object ArticleSearchRepository {
 
     fun getArticleSearchResultForKeyWords(context: Context,keyWords: List<String>):Map<String,String>{
         val searchKeyWords = mutableSetOf<String>()
+
         keyWords.filter { it.length>=MINIMUM_KEYWORD_LENGTH }.asSequence().forEach {
-            searchKeyWords.addAll(getMatchingSerachKeyWords(it,context))
+            searchKeyWords.addAll(getMatchingOnlyFromBeginning(it,context).map { it.id })
+        }
+
+        keyWords.filter { it.length>=MINIMUM_KEYWORD_LENGTH }.asSequence().forEach {
+            searchKeyWords.addAll(getMatchingAll(it,context).map { it.id })
         }
         searchKeyWords.addAll(keyWords)
         LoggerUtils.debugLog("searchKeyWords: ${searchKeyWords}",this::class.java)
@@ -90,9 +95,6 @@ object ArticleSearchRepository {
                     keyWordSerachResultMap.put(it,searchResult.get(it)!!)
                 }
             }
-        }
-        if (keyWordSerachResultMap.isEmpty()){
-            return emptyMap()
         }
         return keyWordSerachResultMap.toMap()
     }

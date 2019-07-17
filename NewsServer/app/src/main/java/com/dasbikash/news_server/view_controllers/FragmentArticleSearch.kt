@@ -43,7 +43,7 @@ class FragmentArticleSearch : Fragment() {
     private lateinit var mClearButton: Button
     private lateinit var mSearchResultsHolder: RecyclerView
 
-    private val mKeyWordHintListAdapter = TextListAdapter({doOnKeywordHintItemClick(it)})
+    private val mKeyWordHintListAdapter = TextListAdapter({ doOnKeywordHintItemClick(it) })
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
@@ -130,10 +130,10 @@ class FragmentArticleSearch : Fragment() {
         })
     }
 
-    private fun doOnKeywordHintItemClick(keyWordHint:CharSequence){
+    private fun doOnKeywordHintItemClick(keyWordHint: CharSequence) {
         val lastString = mSearchKeywordEditText.text.split(Regex(PATTERN_FOR_KEYWORD_SPLIT)).last()
         val currentText = mSearchKeywordEditText.text
-        mSearchKeywordEditText.setText(currentText.replaceRange(currentText.length-lastString.length,currentText.length,keyWordHint.toString()+" "))
+        mSearchKeywordEditText.setText(currentText.replaceRange(currentText.length - lastString.length, currentText.length, keyWordHint.toString() + " "))
         mSearchKeywordEditText.setSelection(mSearchKeywordEditText.text.length)
     }
 
@@ -166,6 +166,28 @@ class FragmentArticleSearch : Fragment() {
     private fun startSearch() {
         debugLog("Starting article search")
         showWaitScreen()
+        mDisposable.add(
+                Observable.just(mSearchKeywordEditText.text.trim().split(Regex(PATTERN_FOR_KEYWORD_SPLIT)))
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            ArticleSearchRepository.getArticleSearchResultForKeyWords(context!!, it)
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<Map<String, String>>() {
+                            override fun onComplete() {
+                                hideWaitScreen()
+                            }
+
+                            override fun onNext(articleSearchResultMap: Map<String, String>) {
+                                articleSearchResultMap.keys.asSequence().forEach {
+                                    debugLog("articleId: ${it} : pageId: ${articleSearchResultMap.get(it)}")
+                                }
+                            }
+
+                            override fun onError(e: Throwable) {
+                                hideWaitScreen()
+                            }
+                        }))
     }
 
     private fun showWaitScreen() {
