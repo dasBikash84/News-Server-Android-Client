@@ -27,7 +27,7 @@ import java.lang.IllegalStateException
 object ArticleSearchRepository {
     private const val ONE_DAY_IN_MS = 24*60*60*1000L
     private const val ONE_WEEK_IN_MS = 7 * ONE_DAY_IN_MS
-    private const val MINIMUM_KEYWORD_LENGTH = 3
+    const val MINIMUM_KEYWORD_LENGTH = 3
 
     fun updateSerachKeyWordsIfRequired(context: Context):Boolean{
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
@@ -51,25 +51,28 @@ object ArticleSearchRepository {
 
     fun getMatchingSerachKeyWords(userInput:String,context: Context):List<String>{
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
-        val newsServerDatabase = NewsServerDatabase.getDatabase(context)
-        val matchingSerachKeyWords = mutableListOf<ArticleSearchKeyWord>()
 
-        newsServerDatabase.articleSearchKeyWordDao
-                .getMatchingSerachKeyWords("${userInput.trim()}%").apply {
-                    matchingSerachKeyWords.addAll(this)
-                }
+        val matchingSerachKeyWords = mutableSetOf<ArticleSearchKeyWord>()
 
-        newsServerDatabase.articleSearchKeyWordDao
-                .getMatchingSerachKeyWords("%${userInput.trim()}%").asSequence().forEach {
-                    if (!matchingSerachKeyWords.contains(it)){
-                        matchingSerachKeyWords.add(it)
-                    }
-                }
+        getMatchingOnlyFromBeginning(userInput, context).apply {matchingSerachKeyWords.addAll(this)}
+        getMatchingAll(userInput, context).apply {matchingSerachKeyWords.addAll(this)}
 
         if (matchingSerachKeyWords.isNotEmpty()) {
             return matchingSerachKeyWords.map { it.id }.toList()
         }
         return emptyList()
+    }
+
+    private fun getMatchingOnlyFromBeginning(userInput:String,context: Context):List<ArticleSearchKeyWord>{
+        val newsServerDatabase = NewsServerDatabase.getDatabase(context)
+        return newsServerDatabase.articleSearchKeyWordDao
+                .getMatchingSerachKeyWords("${userInput.trim()}%")
+    }
+
+    private fun getMatchingAll(userInput:String,context: Context):List<ArticleSearchKeyWord>{
+        val newsServerDatabase = NewsServerDatabase.getDatabase(context)
+        return newsServerDatabase.articleSearchKeyWordDao
+                .getMatchingSerachKeyWords("%${userInput.trim()}%")
     }
 
     fun getArticleSearchResultForKeyWords(context: Context,keyWords: List<String>):Map<String,String>{

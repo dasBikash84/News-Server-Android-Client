@@ -94,7 +94,7 @@ class FragmentArticleSearch : Fragment() {
                                     Observable.just(this.last().trim())
                                             .subscribeOn(Schedulers.io())
                                             .map {
-                                                if (it.length >= MINIMUM_CHAR_LENGTH_FOR_SEARCH_KEYWORD) {
+                                                if (it.length >= ArticleSearchRepository.MINIMUM_KEYWORD_LENGTH) {
                                                     ArticleSearchRepository.getMatchingSerachKeyWords(it, context!!)
                                                 } else {
                                                     emptyList()
@@ -186,7 +186,6 @@ class FragmentArticleSearch : Fragment() {
         private const val CLEAR_SEARCH_BOX_MESSAGE = "Clear Search box?"
         private const val SEARCH_BOX_CLEARED_MESSAGE = "Search box cleared."
         private const val SEARCH_BOX_EMPTY_MESSAGE = "Please input keyword(s) & then press search."
-        private const val MINIMUM_CHAR_LENGTH_FOR_SEARCH_KEYWORD = 3
         private const val PATTERN_FOR_KEYWORD_SPLIT = "[\\s+,;-]+"
     }
 }
