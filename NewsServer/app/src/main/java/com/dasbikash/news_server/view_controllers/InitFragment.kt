@@ -38,7 +38,6 @@ import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.page_request_server.PageRequestServerInitiator
-import com.dasbikash.news_server_data.repositories.ArticleSearchRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
@@ -132,7 +131,11 @@ class InitFragment : Fragment() {
                                         .getNewsPapersLiveData()
                                         .observe(activity!!, object : Observer<List<Newspaper>> {
                                             override fun onChanged(newspapers: List<Newspaper>?) {
-                                                (activity as HomeNavigator).loadEngNpFragment()
+                                                if (com.dasbikash.news_server_data.BuildConfig.DEBUG) {
+                                                    (activity as HomeNavigator).loadArticleSearchFragment()
+                                                }else{
+                                                    (activity as HomeNavigator).loadEngNpFragment()
+                                                }
                                             }
                                         })
                             }
@@ -178,29 +181,29 @@ class InitFragment : Fragment() {
     }
 
     private fun testRoutine() {
-        ArticleSearchRepository.updateSerachKeyWordsIfRequired(context!!).let {
-            LoggerUtils.debugLog("Going to updated Serach KeyWords.....",this::class.java)
-            if (it){
-                LoggerUtils.debugLog("Serach KeyWords updated.",this::class.java)
-            }else{
-                LoggerUtils.debugLog("Serach KeyWords kept same.",this::class.java)
-            }
-        }
-
-        val userInput = listOf("হত্যাকারী","ভজন","লুট")
-
-        val articleIdPageIdMap = ArticleSearchRepository.getArticleSearchResultForKeyWords(context!!,userInput)
-
-        articleIdPageIdMap.keys.asSequence().forEach {
-            LoggerUtils.debugLog("articleId: ${it} pageId: ${articleIdPageIdMap.get(it)}",this::class.java)
-
-        }
-        articleIdPageIdMap.keys.toList().take(5).asSequence().forEach {
-            ArticleSearchRepository.findArticleByIdAndPageId(it,articleIdPageIdMap.get(it)!!,context!!).apply {
-                LoggerUtils.debugLog("Article: ${this.first}",this::class.java)
-                LoggerUtils.debugLog("Page: ${this.second}",this::class.java)
-            }
-        }
+//        ArticleSearchRepository.updateSerachKeyWordsIfRequired(context!!).let {
+//            LoggerUtils.debugLog("Going to updated Serach KeyWords.....",this::class.java)
+//            if (it){
+//                LoggerUtils.debugLog("Serach KeyWords updated.",this::class.java)
+//            }else{
+//                LoggerUtils.debugLog("Serach KeyWords kept same.",this::class.java)
+//            }
+//        }
+//
+//        val userInput = listOf("হত্যাকারী","ভজন","লুট")
+//
+//        val articleIdPageIdMap = ArticleSearchRepository.getArticleSearchResultForKeyWords(context!!,userInput)
+//
+//        articleIdPageIdMap.keys.asSequence().forEach {
+//            LoggerUtils.debugLog("articleId: ${it} pageId: ${articleIdPageIdMap.get(it)}",this::class.java)
+//
+//        }
+//        articleIdPageIdMap.keys.toList().take(5).asSequence().forEach {
+//            ArticleSearchRepository.findArticleByIdAndPageId(it,articleIdPageIdMap.get(it)!!,context!!).apply {
+//                LoggerUtils.debugLog("Article: ${this.first}",this::class.java)
+//                LoggerUtils.debugLog("Page: ${this.second}",this::class.java)
+//            }
+//        }
 
         /*ArticleSearchRepository.getMatchingSerachKeyWords(userInput,context!!).asSequence()
                 .forEach {

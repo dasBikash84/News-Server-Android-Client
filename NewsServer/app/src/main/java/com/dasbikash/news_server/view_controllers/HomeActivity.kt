@@ -187,6 +187,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     if (!(currentFragment is NewsPaperGroupFragment && currentFragment.isEngNpFragment())) {
                         mAppBar.visibility = View.GONE
                         loadEngNpFragment()
+                        mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
                 }
@@ -194,6 +195,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     if (!(currentFragment is NewsPaperGroupFragment && currentFragment.isBngNpFragment())) {
                         mAppBar.visibility = View.GONE
                         loadBngNpFragment()
+                        mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
                 }
@@ -201,6 +203,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     if (!(currentFragment is PageGroupFragment)) {
                         mAppBar.visibility = View.VISIBLE
                         loadPageGroupFragment()
+                        mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
                 }
@@ -208,6 +211,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     if (!(currentFragment is FavouritesFragment)) {
                         mAppBar.visibility = View.VISIBLE
                         loadFavouritesFragment()
+                        mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
                 }
@@ -215,6 +219,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     if (!(currentFragment is SavedArticlesFragment)) {
                         mAppBar.visibility = View.VISIBLE
                         loadSavedArticlesFragment()
+                        mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
                 }
@@ -222,6 +227,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is MoreFragment)) {
                         mAppBar.visibility = View.VISIBLE
                         loadMoreFragment()
+                        mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
                 }*/
@@ -299,12 +305,10 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
 
     override fun loadBngNpFragment() {
         navigateTo(NewsPaperGroupFragment.getInstanceForBanglaNps())
-        mBottomNavigationView.visibility = View.VISIBLE
     }
 
     override fun loadEngNpFragment() {
         navigateTo(NewsPaperGroupFragment.getInstanceForEnglishNps())
-        mBottomNavigationView.visibility = View.VISIBLE
     }
 
     override fun loadPageGroupFragment() {
@@ -321,6 +325,11 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
 
     override fun loadMoreFragment() {
         navigateTo(MoreFragment())
+    }
+
+    override fun loadArticleSearchFragment() {
+        navigateTo(FragmentArticleSearch())
+        mBottomNavigationView.visibility = View.VISIBLE
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

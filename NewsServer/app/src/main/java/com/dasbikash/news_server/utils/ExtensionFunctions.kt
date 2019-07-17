@@ -11,15 +11,20 @@
  * limitations under the License.
  */
 
-package com.dasbikash.news_server.view_controllers.interfaces
+package com.dasbikash.news_server.utils
 
-interface HomeNavigator {
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.fragment.app.Fragment
+import com.dasbikash.news_server_data.utills.LoggerUtils
 
-    fun loadBngNpFragment()
-    fun loadEngNpFragment()
-    fun loadPageGroupFragment()
-    fun loadFavouritesFragment()
-    fun loadSavedArticlesFragment()
-    fun loadMoreFragment()
-    fun loadArticleSearchFragment()
+fun Fragment.showShortSnack(message: String){
+    if (view!=null && view is CoordinatorLayout){
+        DisplayUtils.showShortSnack(view as CoordinatorLayout,message)
+    }
 }
+
+fun Fragment.debugLog(message: String) =
+    LoggerUtils.debugLog(message,this::class.java,context)
+
+fun Any.debugLog(message: String)=
+    LoggerUtils.debugLog(message,this::class.java)
