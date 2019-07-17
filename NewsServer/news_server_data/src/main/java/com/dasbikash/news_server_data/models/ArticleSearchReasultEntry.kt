@@ -13,11 +13,17 @@
 
 package com.dasbikash.news_server_data.models
 
+import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.Page
+
 data class ArticleSearchReasultEntry(
         val articleId:String,
         val pageId:String,
         private val matchingKeyWords:MutableSet<String> = mutableSetOf()
 ){
+    var article:Article?=null
+    var page:Page?=null
+
     fun addMatchingKeyWord(keyWord: String){
         if (keyWord.isNotBlank()){
             matchingKeyWords.add(keyWord)
@@ -25,6 +31,10 @@ data class ArticleSearchReasultEntry(
     }
 
     fun getMatchingKeyWords():List<String> = matchingKeyWords.toList()
+
+    override fun toString(): String {
+        return "ArticleSearchReasultEntry(articleId='$articleId', pageId='$pageId', matchingKeyWords=$matchingKeyWords, article=$article, page=$page)"
+    }
 
     companion object{
 
@@ -39,4 +49,5 @@ data class ArticleSearchReasultEntry(
             return null
         }
     }
+
 }

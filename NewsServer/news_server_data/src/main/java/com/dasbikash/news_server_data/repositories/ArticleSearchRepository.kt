@@ -55,7 +55,7 @@ object ArticleSearchRepository {
         val matchingSerachKeyWords = mutableSetOf<ArticleSearchKeyWord>()
 
         getMatchingOnlyFromBeginning(userInput, context).apply { matchingSerachKeyWords.addAll(this) }
-        getMatchingAll(userInput, context).apply { matchingSerachKeyWords.addAll(this) }
+//        getMatchingAll(userInput, context).apply { matchingSerachKeyWords.addAll(this) }
 
         if (matchingSerachKeyWords.isNotEmpty()) {
             return matchingSerachKeyWords.map { it.id }.toList()
@@ -82,9 +82,9 @@ object ArticleSearchRepository {
             searchKeyWords.addAll(getMatchingOnlyFromBeginning(it, context).map { it.id })
         }
 
-        keyWords.filter { it.length >= MINIMUM_KEYWORD_LENGTH }.asSequence().forEach {
-            searchKeyWords.addAll(getMatchingAll(it, context).map { it.id })
-        }
+//        keyWords.filter { it.length >= MINIMUM_KEYWORD_LENGTH }.asSequence().forEach {
+//            searchKeyWords.addAll(getMatchingAll(it, context).map { it.id })
+//        }
 
         searchKeyWords.addAll(keyWords)
         LoggerUtils.debugLog("searchKeyWords: ${searchKeyWords}", this::class.java)
@@ -120,21 +120,28 @@ object ArticleSearchRepository {
         return RealTimeDbArticleSearchService.getKeyWordSerachResult(keyWord)
     }
 
-    fun findArticleAndPageByArticleSearchReasult(articleSearchReasultEntry:ArticleSearchReasultEntry, context: Context): Pair<Article?, Page?> {
+    fun processArticleSearchReasultForArticleAndPage(articleSearchReasultEntry:ArticleSearchReasultEntry, context: Context)
+            :ArticleSearchReasultEntry/*: Pair<Article?, Page?>*/ {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
 
         articleSearchReasultEntry.apply {
             val newsDataRepository = RepositoryFactory.getNewsDataRepository(context)
             newsDataRepository.findArticleByIdFromLocalDb(articleId)?.let {
-                return Pair(it, findPageById(pageId, context))
+                article = it
+                page = findPageById(pageId, context)
+//                return Pair(it, findPageById(pageId, context))
+                return this
             }
             val article = newsDataRepository.findArticleByIdFromRemoteDb(articleId, pageId)
             article?.let {
+                this.article = it
                 findPageById(pageId, context)?.let {
-                    NewsDataServiceUtils.processFetchedArticleData(article, it)
+                    page = it
+                    NewsDataServiceUtils.processFetchedArticleData(this.article!!, this.page!!)
                 }
             }
-            return Pair(article, findPageById(pageId, context))
+//            return Pair(article, findPageById(pageId, context))
+            return this
         }
     }
 

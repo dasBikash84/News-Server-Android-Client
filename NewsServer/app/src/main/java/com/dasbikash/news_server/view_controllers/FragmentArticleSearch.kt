@@ -174,6 +174,7 @@ class FragmentArticleSearch : Fragment() {
                         .subscribeOn(Schedulers.io())
                         .map {
                             ArticleSearchRepository.getArticleSearchResultForKeyWords(context!!, it)
+                                    .map { ArticleSearchRepository.processArticleSearchReasultForArticleAndPage(it,context!!) }
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<List<ArticleSearchReasultEntry>>() {
