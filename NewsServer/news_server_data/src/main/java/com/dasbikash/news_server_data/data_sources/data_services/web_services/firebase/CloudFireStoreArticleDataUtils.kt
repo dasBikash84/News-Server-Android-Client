@@ -122,9 +122,9 @@ internal object CloudFireStoreArticleDataUtils {
                 })
 
         LoggerUtils.debugLog("findArticleById for: ${articleId} before wait",this::class.java)
-        try {
+//        try {
             synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
-        }catch (ex:InterruptedException){}
+//        }catch (ex:InterruptedException){}
 
         LoggerUtils.debugLog("findArticleById for: ${articleId} before return",this::class.java)
         return article

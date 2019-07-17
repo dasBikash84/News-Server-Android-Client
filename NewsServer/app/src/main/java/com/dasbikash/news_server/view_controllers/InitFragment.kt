@@ -181,40 +181,6 @@ class InitFragment : Fragment() {
     }
 
     private fun testRoutine() {
-//        ArticleSearchRepository.updateSerachKeyWordsIfRequired(context!!).let {
-//            LoggerUtils.debugLog("Going to updated Serach KeyWords.....",this::class.java)
-//            if (it){
-//                LoggerUtils.debugLog("Serach KeyWords updated.",this::class.java)
-//            }else{
-//                LoggerUtils.debugLog("Serach KeyWords kept same.",this::class.java)
-//            }
-//        }
-//
-//        val userInput = listOf("হত্যাকারী","ভজন","লুট")
-//
-//        val articleIdPageIdMap = ArticleSearchRepository.getArticleSearchResultForKeyWords(context!!,userInput)
-//
-//        articleIdPageIdMap.keys.asSequence().forEach {
-//            LoggerUtils.debugLog("articleId: ${it} pageId: ${articleIdPageIdMap.get(it)}",this::class.java)
-//
-//        }
-//        articleIdPageIdMap.keys.toList().take(5).asSequence().forEach {
-//            ArticleSearchRepository.findArticleByIdAndPageId(it,articleIdPageIdMap.get(it)!!,context!!).apply {
-//                LoggerUtils.debugLog("Article: ${this.first}",this::class.java)
-//                LoggerUtils.debugLog("Page: ${this.second}",this::class.java)
-//            }
-//        }
-
-        /*ArticleSearchRepository.getMatchingSerachKeyWords(userInput,context!!).asSequence()
-                .forEach {
-                    LoggerUtils.debugLog("keyWord: ${it}",this::class.java)
-                    ArticleSearchRepository.getKeyWordSerachResult(it,context!!).asSequence().forEach {
-                        LoggerUtils.debugLog("Article: ${it.first}",this::class.java)
-                        LoggerUtils.debugLog("Page: ${it.second}",this::class.java)
-                    }
-                    LoggerUtils.debugLog("",this::class.java)
-                    LoggerUtils.debugLog("",this::class.java)
-                }*/
 
     }
 

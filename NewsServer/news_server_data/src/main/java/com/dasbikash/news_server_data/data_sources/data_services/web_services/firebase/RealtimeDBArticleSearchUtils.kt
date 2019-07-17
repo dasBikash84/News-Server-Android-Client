@@ -14,6 +14,7 @@
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
 import com.dasbikash.news_server_data.utills.ExceptionUtils
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -66,9 +67,11 @@ internal object RealtimeDBArticleSearchUtils {
                         synchronized(lock){lock.notify()}
                     }
                 })
-        try {
+//        try {
             synchronized(lock){lock.wait(MAX_WAITING_MS_FOR_NET_RESPONSE)}
-        }catch (ex:InterruptedException){}
+//        }catch (ex:InterruptedException){
+//            LoggerUtils.printStackTrace(ex)
+//        }
 
         return keyWordSerachResult.toMap()
     }

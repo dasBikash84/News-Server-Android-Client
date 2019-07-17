@@ -33,6 +33,7 @@ import com.dasbikash.news_server_data.repositories.ArticleSearchRepository
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.exceptions.CompositeException
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
@@ -45,6 +46,8 @@ class FragmentArticleSearch : Fragment() {
     private lateinit var mSearchButton: Button
     private lateinit var mClearButton: Button
     private lateinit var mSearchResultsHolder: RecyclerView
+
+    private var backPressTaskTag: String? = null
 
     private val mKeyWordHintListAdapter = TextListAdapter({ doOnKeywordHintItemClick(it) })
 
@@ -166,40 +169,71 @@ class FragmentArticleSearch : Fragment() {
         }
     }
 
+    private var mArticleSearchTaskDisposable: Disposable? = null
+
     private fun startSearch() {
         debugLog("Starting article search")
         showWaitScreen()
-        mDisposable.add(
+        mArticleSearchTaskDisposable =
                 Observable.just(mSearchKeywordEditText.text.trim().split(Regex(PATTERN_FOR_KEYWORD_SPLIT)))
                         .subscribeOn(Schedulers.io())
                         .map {
                             ArticleSearchRepository.getArticleSearchResultForKeyWords(context!!, it)
-                                    .map { ArticleSearchRepository.processArticleSearchReasultForArticleAndPage(it,context!!) }
+                                    .map { ArticleSearchRepository.processArticleSearchReasultForArticleAndPage(it, context!!) }
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<List<ArticleSearchReasultEntry>>() {
                             override fun onComplete() {
                                 hideWaitScreen()
+                                removeBackPressTask()
                             }
 
-                            override fun onNext(articleSearchResultMap: List<ArticleSearchReasultEntry>) {
-                                articleSearchResultMap.asSequence().forEach {
+                            override fun onNext(articleSearchResultEntries: List<ArticleSearchReasultEntry>) {
+                                articleSearchResultEntries.asSequence().forEach {
                                     debugLog(it.toString())
                                 }
                             }
 
                             override fun onError(e: Throwable) {
                                 debugLog(e::class.java.canonicalName)
-                                if (e is CompositeException){
+                                if (e is CompositeException) {
                                     e.exceptions.asSequence().forEach {
                                         LoggerUtils.printStackTrace(it)
                                     }
-                                }else{
+                                } else {
                                     LoggerUtils.printStackTrace(e)
                                 }
                                 hideWaitScreen()
+                                removeBackPressTask()
                             }
-                        }))
+                        })
+        mArticleSearchTaskDisposable?.let {
+            mDisposable.add(it)
+        }
+
+        addBackPressTask()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        hideWaitScreen()
+        removeBackPressTask()
+    }
+
+    private fun removeBackPressTask() {
+        backPressTaskTag?.let {
+            (activity as BackPressQueueManager).removeTaskFromQueue(it)
+        }
+        backPressTaskTag = null
+    }
+
+    private fun addBackPressTask() {
+        backPressTaskTag =
+                (activity as BackPressQueueManager).addToBackPressTaskQueue {
+                    mArticleSearchTaskDisposable?.dispose()
+                    hideWaitScreen()
+                    removeBackPressTask()
+                }
     }
 
     private fun showWaitScreen() {
