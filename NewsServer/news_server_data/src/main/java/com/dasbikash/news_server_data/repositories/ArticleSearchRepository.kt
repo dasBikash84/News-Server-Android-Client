@@ -22,7 +22,6 @@ import com.dasbikash.news_server_data.models.room_entity.ArticleSearchKeyWord
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
-import java.lang.IllegalStateException
 
 object ArticleSearchRepository {
     private const val ONE_DAY_IN_MS = 24*60*60*1000L
@@ -75,7 +74,7 @@ object ArticleSearchRepository {
                 .getMatchingSerachKeyWords("%${userInput.trim()}%")
     }
 
-    fun getArticleSearchResultForKeyWords(context: Context,keyWords: List<String>):Map<String,String>{
+    fun getArticleSearchResultForKeyWords(context: Context,keyWords: List<String>):Map<String,Pair<String,Set<String>>>{
         val searchKeyWords = mutableSetOf<String>()
 
         keyWords.filter { it.length>=MINIMUM_KEYWORD_LENGTH }.asSequence().forEach {
@@ -87,16 +86,33 @@ object ArticleSearchRepository {
         }
         searchKeyWords.addAll(keyWords)
         LoggerUtils.debugLog("searchKeyWords: ${searchKeyWords}",this::class.java)
-        val keyWordSerachResultMap = mutableMapOf<String,String>()
+        val keyWordSerachResultMap = mutableMapOf<String,Pair<String,Set<String>>>()
         searchKeyWords.asSequence().forEach {
             val searchResult = getKeyWordSerachResultFromRemoteDb(it)
+            val key = it
+            LoggerUtils.debugLog("key: ${key}",this::class.java)
+            val keyWordSet = keyWords.filter { key.contains(it) }.toSet()
+            LoggerUtils.debugLog("keyWord: ${keyWordSet}",this::class.java)
+            LoggerUtils.debugLog("searchResult: ${searchResult}",this::class.java)
             searchResult.keys.asSequence().forEach {
                 if (!keyWordSerachResultMap.contains(it)){
-                    keyWordSerachResultMap.put(it,searchResult.get(it)!!)
+                    keyWordSerachResultMap.put(it,Pair(searchResult.get(it)!!, keyWordSet))
+                    LoggerUtils.debugLog("Pair(searchResult.get(key)!!, setOf(keyWord)): ${keyWordSerachResultMap.get(it)}",this::class.java)
+                }else{
+                    val keyWordSet = keyWordSerachResultMap.get(it)!!.second.toMutableSet()
+                    LoggerUtils.debugLog("oldSet: ${keyWordSet}",this::class.java)
+                    keyWordSet.addAll(keyWordSet)
+                    LoggerUtils.debugLog("newSet: ${keyWordSet}",this::class.java)
+                    keyWordSerachResultMap.put(it,Pair(searchResult.get(it)!!,keyWordSet.toSet()))
+                    LoggerUtils.debugLog("Pair(searchResult.get(key)!!,newSet.toSet()): ${keyWordSerachResultMap.get(it)}",this::class.java)
                 }
             }
         }
-        return keyWordSerachResultMap.toMap()
+        val returnKeyWordSerachResultMap = mutableMapOf<String,Pair<String,Set<String>>>()
+        keyWordSerachResultMap.keys.sortedBy { keyWordSerachResultMap.get(it)!!.second.size }.asReversed().forEach {
+            returnKeyWordSerachResultMap.put(it,keyWordSerachResultMap.get(it)!!)
+        }
+        return returnKeyWordSerachResultMap.toMap()
     }
 
     private fun getKeyWordSerachResultFromRemoteDb(keyWord: String): Map<String, String> {

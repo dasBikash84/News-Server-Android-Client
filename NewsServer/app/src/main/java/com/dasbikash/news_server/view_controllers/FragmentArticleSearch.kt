@@ -29,8 +29,10 @@ import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.view_helpers.TextListAdapter
 import com.dasbikash.news_server_data.repositories.ArticleSearchRepository
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.exceptions.CompositeException
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
@@ -173,18 +175,26 @@ class FragmentArticleSearch : Fragment() {
                             ArticleSearchRepository.getArticleSearchResultForKeyWords(context!!, it)
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Map<String, String>>() {
+                        .subscribeWith(object : DisposableObserver<Map<String,Pair<String,Set<String>>>>() {
                             override fun onComplete() {
                                 hideWaitScreen()
                             }
 
-                            override fun onNext(articleSearchResultMap: Map<String, String>) {
+                            override fun onNext(articleSearchResultMap: Map<String,Pair<String,Set<String>>>) {
                                 articleSearchResultMap.keys.asSequence().forEach {
                                     debugLog("articleId: ${it} : pageId: ${articleSearchResultMap.get(it)}")
                                 }
                             }
 
                             override fun onError(e: Throwable) {
+                                debugLog(e::class.java.canonicalName)
+                                if (e is CompositeException){
+                                    e.exceptions.asSequence().forEach {
+                                        LoggerUtils.printStackTrace(it)
+                                    }
+                                }else{
+                                    LoggerUtils.printStackTrace(e)
+                                }
                                 hideWaitScreen()
                             }
                         }))
