@@ -52,11 +52,22 @@ object ArticleSearchRepository {
     fun getMatchingSerachKeyWords(userInput:String,context: Context):List<String>{
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         val newsServerDatabase = NewsServerDatabase.getDatabase(context)
-        val matchingSerachKeyWords =
-                newsServerDatabase.articleSearchKeyWordDao
-                        .getMatchingSerachKeyWords("%${userInput.trim()}%")
+        val matchingSerachKeyWords = mutableListOf<ArticleSearchKeyWord>()
+
+        newsServerDatabase.articleSearchKeyWordDao
+                .getMatchingSerachKeyWords("${userInput.trim()}%").apply {
+                    matchingSerachKeyWords.addAll(this)
+                }
+
+        newsServerDatabase.articleSearchKeyWordDao
+                .getMatchingSerachKeyWords("%${userInput.trim()}%").asSequence().forEach {
+                    if (!matchingSerachKeyWords.contains(it)){
+                        matchingSerachKeyWords.add(it)
+                    }
+                }
+
         if (matchingSerachKeyWords.isNotEmpty()) {
-            return matchingSerachKeyWords.map { it.id }
+            return matchingSerachKeyWords.map { it.id }.toList()
         }
         return emptyList()
     }
