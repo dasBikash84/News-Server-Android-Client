@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server.view_controllers
 
+import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.os.SystemClock
 import android.text.Editable
@@ -206,7 +207,7 @@ class FragmentHomeNp : Fragment() {
                         mPageSearchTextBox.visibility = View.VISIBLE
                     }
                 }
-                if (mNewsPaperMenuHolder.visibility == View.VISIBLE) {
+                if (mNewsPaperMenuHideButton.visibility == View.VISIBLE) {
                     hideNewsPaperMenu()
                 }
                 mNewsPaperMenuShowButton.visibility = View.GONE
@@ -270,7 +271,9 @@ class FragmentHomeNp : Fragment() {
     }
 
     private fun hideNewsPaperMenuHolder() {
-        mNewsPaperMenuHolder.visibility = View.GONE
+//        mNewsPaperMenuHolder.visibility = View.GONE
+        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleX",1f,0f).setDuration(100L).start()
+        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleY",1f,0f).setDuration(100L).start()
     }
 
     var backPressTaskTagForNpMenu:String? = null
@@ -290,11 +293,13 @@ class FragmentHomeNp : Fragment() {
     }
 
     private fun showNewsPaperMenuHolder() {
-        mNewsPaperMenuHolder.visibility = View.VISIBLE
+//        mNewsPaperMenuHolder.visibility = View.VISIBLE
+        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleX",0f,1f).setDuration(100L).start()
+        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleY",0f,1f).setDuration(100L).start()
     }
 
     private fun determineMenuButtonOperationAction(): NP_MENU_BUTTON_OPERATION_ACTION {
-        if (mNewsPaperMenuHolder.visibility == View.GONE &&
+        if (mNewsPaperMenuHideButton.visibility == View.GONE &&
                 mNewsPaperMenuShowButton.visibility == View.GONE) {
             if (System.currentTimeMillis() - mLastArticlePreviewScrollTime > MENU_BUTTON_HIDE_TIME_MS) {
                 return NP_MENU_BUTTON_OPERATION_ACTION.SHOW
