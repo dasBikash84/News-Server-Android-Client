@@ -20,6 +20,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -135,6 +136,15 @@ class FavouritesFragment : Fragment() {
                     }
                 })
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as AppCompatActivity).supportActionBar?.title = TITLE_TEXT
+    }
+
+    companion object{
+        private const val TITLE_TEXT = "Favourite Pages"
     }
 }
 

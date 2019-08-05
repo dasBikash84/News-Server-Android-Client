@@ -200,8 +200,8 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     true
                 }*/
                 R.id.bottom_menu_item_news_categories -> {
-                    if (!(currentFragment is FragmentNewsCategoriesView)) {
-                        mAppBar.visibility = View.GONE
+                    if (!(currentFragment is FragmentNewsCategories)) {
+                        mAppBar.visibility = View.VISIBLE
                         loadNewsCategoriesViewFragment()
                         mBottomNavigationView.visibility = View.VISIBLE
                     }
@@ -332,7 +332,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
     }
 
     override fun loadNewsCategoriesViewFragment() {
-        navigateTo(FragmentNewsCategoriesView())
+        navigateTo(FragmentNewsCategories())
     }
 
     override fun loadPageGroupFragment() {
