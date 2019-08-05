@@ -188,7 +188,7 @@
             android:id="@+id/page_article_preview_holder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/ghost_white"
+            android:background="@color/snow_white2"
             android:orientation="vertical"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
     </androidx.core.widget.NestedScrollView>

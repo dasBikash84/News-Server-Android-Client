@@ -271,9 +271,9 @@ class FragmentHomeNp : Fragment() {
     }
 
     private fun hideNewsPaperMenuHolder() {
-//        mNewsPaperMenuHolder.visibility = View.GONE
-        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleX",1f,0f).setDuration(100L).start()
-        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleY",1f,0f).setDuration(100L).start()
+        mNewsPaperMenuHolder.visibility = View.GONE
+//        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleX",1f,0f).setDuration(100L).start()
+//        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleY",1f,0f).setDuration(100L).start()
     }
 
     var backPressTaskTagForNpMenu:String? = null
@@ -293,9 +293,9 @@ class FragmentHomeNp : Fragment() {
     }
 
     private fun showNewsPaperMenuHolder() {
-//        mNewsPaperMenuHolder.visibility = View.VISIBLE
-        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleX",0f,1f).setDuration(100L).start()
-        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleY",0f,1f).setDuration(100L).start()
+        mNewsPaperMenuHolder.visibility = View.VISIBLE
+//        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleX",0f,1f).setDuration(100L).start()
+//        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleY",0f,1f).setDuration(100L).start()
     }
 
     private fun determineMenuButtonOperationAction(): NP_MENU_BUTTON_OPERATION_ACTION {
