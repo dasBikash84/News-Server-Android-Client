@@ -16,6 +16,7 @@ package com.dasbikash.news_server_data.data_sources.data_services.news_data_serv
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.CloudFireStoreArticleDataUtils
 import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.NewsCategory
 import com.dasbikash.news_server_data.models.room_entity.Page
 
 internal object CloudFireStoreNewsDataService : NewsDataService() {
@@ -31,5 +32,13 @@ internal object CloudFireStoreNewsDataService : NewsDataService() {
 
     override fun findArticleById(articleId: String, pageId: String): Article? {
         return CloudFireStoreArticleDataUtils.findArticleById(articleId)
+    }
+
+    override fun getRawLatestArticlesByNewsCategory(newsCategory: NewsCategory, articleRequestSize: Int): List<Article> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getRawArticlesByNewsCategoryBeforeLastArticle(newsCategory: NewsCategory, lastArticle: Article, articleRequestSize: Int): List<Article> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

@@ -16,6 +16,7 @@ package com.dasbikash.news_server_data.data_sources.data_services.news_data_serv
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealTimeDbArticleDataUtils
 import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.NewsCategory
 import com.dasbikash.news_server_data.models.room_entity.Page
 
 internal object RealTimeDbNewsDataService : NewsDataService() {
@@ -33,4 +34,10 @@ internal object RealTimeDbNewsDataService : NewsDataService() {
     override fun findArticleById(articleId: String, pageId: String): Article? {
         return RealTimeDbArticleDataUtils.findArticleById(articleId,pageId)
     }
+
+    override fun getRawLatestArticlesByNewsCategory(newsCategory: NewsCategory, articleRequestSize: Int)=
+            RealTimeDbArticleDataUtils.getLatestArticlesByNewsCategory(newsCategory, articleRequestSize)
+
+    override fun getRawArticlesByNewsCategoryBeforeLastArticle(newsCategory: NewsCategory, lastArticle: Article, articleRequestSize: Int)=
+            RealTimeDbArticleDataUtils.getArticlesByNewsCategoryBeforeLastArticle(newsCategory, lastArticle, articleRequestSize)
 }

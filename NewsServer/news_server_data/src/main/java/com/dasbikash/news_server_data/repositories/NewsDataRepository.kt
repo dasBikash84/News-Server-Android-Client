@@ -21,6 +21,7 @@ import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.NewsCategory
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.models.room_entity.SavedArticle
 import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
@@ -95,6 +96,28 @@ abstract class NewsDataRepository {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         return newsDataService.findArticleById(articleId,pageId)
     }
+
+    fun getLatestArticlesByNewsCategory(newsCategory: NewsCategory, context: Context): List<Article>{
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        val rawArticles = newsDataService.getRawLatestArticlesByNewsCategory(newsCategory)
+        return processRawArticlesFoundForNewsCategory(rawArticles, context)
+    }
+    fun getArticlesByNewsCategoryBeforeLastArticle(newsCategory: NewsCategory, lastArticle: Article, context: Context)
+            : List<Article>{
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        val rawArticles = newsDataService.getRawArticlesByNewsCategoryBeforeLastArticle(newsCategory,lastArticle)
+        return processRawArticlesFoundForNewsCategory(rawArticles, context)
+    }
+
+    private fun processRawArticlesFoundForNewsCategory(rawArticles: List<Article>,context: Context): List<Article> {
+        val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context)
+        return rawArticles.asSequence().filter {appSettingsRepository.findPageById(it.pageId!!) !=null}
+                .map {
+                    it.newspaperId = appSettingsRepository.getNewspaperByPage(appSettingsRepository.findPageById(it.pageId!!)!!).id
+                    it
+                }.toList()
+    }
+
 
     abstract fun getArticleLiveDataForPage(page: Page): LiveData<List<Article>>
     abstract fun getArticleCountForPage(page: Page): Int

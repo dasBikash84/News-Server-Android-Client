@@ -13,10 +13,12 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
+import androidx.annotation.Keep
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.NewsCategory
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.google.firebase.database.DataSnapshot
@@ -134,4 +136,82 @@ internal object RealTimeDbArticleDataUtils {
         LoggerUtils.debugLog("findArticleById for: ${articleId} before return",this::class.java)
         return article
     }
+
+    fun getLatestArticlesByNewsCategory(newsCategory: NewsCategory, articleRequestSize: Int): List<Article> {
+
+        val query = RealtimeDBUtils.mArticleInfoForNewsCategoriesNode
+                                .child(newsCategory.id)
+                                .orderByChild(DB_PUBLICATION_TIME_FIELD_NAME)
+                                .limitToLast(articleRequestSize)
+        return getArticleInfoForQuery(query).asSequence()
+                .filter { it.articleId.isNotBlank() && it.pageId.isNotBlank() }
+                .map { findArticleById(it.articleId,it.pageId) }
+                .filter { it!=null }
+                .toList() as List<Article>
+    }
+
+    fun getArticlesByNewsCategoryBeforeLastArticle(newsCategory: NewsCategory, lastArticle: Article, articleRequestSize: Int)
+            : List<Article> {
+
+        val query = RealtimeDBUtils.mArticleInfoForNewsCategoriesNode
+                                .child(newsCategory.id)
+                                .orderByChild(DB_PUBLICATION_TIME_FIELD_NAME)
+                                .endAt(lastArticle.publicationTimeRTDB!!.toDouble(), DB_PUBLICATION_TIME_FIELD_NAME)
+                                .limitToLast(articleRequestSize+1)
+
+        return getArticleInfoForQuery(query).asSequence()
+                .filter { it.articleId.isNotBlank() && it.pageId.isNotBlank() }
+                .map { findArticleById(it.articleId,it.pageId) }
+                .filter { it!=null }
+                .toList() as List<Article>
+    }
+
+    private fun getArticleInfoForQuery(query: Query): List<ArticleInfo> {
+
+        val lock = Object()
+        val articleInfoList = mutableListOf<ArticleInfo>()
+        var dataServerException: DataServerException? = null
+
+        query.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onCancelled(error: DatabaseError) {
+                LoggerUtils.debugLog("onCancelled. Error msg: ${error.message}",this::class.java)
+                dataServerException = DataNotFoundException(error.message)
+                synchronized(lock) { lock.notify() }
+            }
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    LoggerUtils.debugLog("onDataChange",this::class.java)
+                    LoggerUtils.debugLog("data: ${dataSnapshot.value}",this::class.java)
+                    dataSnapshot.children.asSequence()
+                            .forEach {
+                                articleInfoList.add(it.getValue(ArticleInfo::class.java)!!)
+                            }
+                }
+                synchronized(lock) { lock.notify() }
+            }
+        })
+
+        LoggerUtils.debugLog("getArticleInfoForQuery before wait",this::class.java)
+        try {
+            synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
+
+        LoggerUtils.debugLog("getArticleInfoForQuery before throw it",this::class.java)
+        dataServerException?.let { throw it }
+
+        LoggerUtils.debugLog("getArticleInfoForQuery before throw DataNotFoundException()",this::class.java)
+        if (articleInfoList.size == 0 ){
+            throw DataNotFoundException()
+        }
+
+        LoggerUtils.debugLog("getArticleInfoForQuery before return",this::class.java)
+        return articleInfoList
+    }
 }
+
+@Keep
+data class ArticleInfo(
+        var articleId:String="",
+        var pageId:String=""
+)

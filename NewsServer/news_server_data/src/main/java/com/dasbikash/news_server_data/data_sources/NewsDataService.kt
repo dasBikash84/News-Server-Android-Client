@@ -15,6 +15,7 @@ package com.dasbikash.news_server_data.data_sources
 
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.NewsDataServiceUtils
 import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.NewsCategory
 import com.dasbikash.news_server_data.models.room_entity.Page
 
 internal abstract class NewsDataService {
@@ -52,4 +53,10 @@ internal abstract class NewsDataService {
         articleList.asSequence().map { NewsDataServiceUtils.processFetchedArticleData(it, page) }.toList()
 
     abstract fun findArticleById(articleId: String, pageId: String): Article?
+
+    abstract fun getRawLatestArticlesByNewsCategory(newsCategory: NewsCategory,
+                                                      articleRequestSize: Int = DEFAULT_ARTICLE_REQUEST_SIZE): List<Article>
+
+    abstract fun getRawArticlesByNewsCategoryBeforeLastArticle(newsCategory: NewsCategory,lastArticle: Article,
+                                                      articleRequestSize: Int = DEFAULT_ARTICLE_REQUEST_SIZE): List<Article>
 }
