@@ -107,25 +107,26 @@
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/article_text_preview"
             android:layout_width="match_parent"
-            android:layout_height="90dp"
+            android:layout_height="120dp"
             android:background="@android:color/white"
-            android:gravity="center"
-            android:maxLines="4"
+            android:gravity="start"
+            android:maxLines="6"
             android:textColor="@android:color/black"
+            android:padding="6dp"
             android:textSize="14sp"
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/article_preview_image"
             app:layout_constraintBottom_toBottomOf="parent"
-            tools:text="article_text_preview" />
+            tools:text="পুলিশ জানায়, সদর উপজেলার চরপুলিয়ামারী এলাকায় কতিপয় মাদক ব্যবসায়ী অবস্থান করছে-এমন খবরের ভিত্তিতে ডিবি পুলিশের একটি টহল দল রবিবার রাত পৌনে ১টার সেখানে অভিযান চালায়। মাদক ব্যবসায়ীরা পুলিশের উপস্থিতি টের পেয়ে গুলি ও ইট ছোঁড়ে। আত্মরক্ষার্থে পুলিশও ফাঁকা গুলি চালায়। এক পর্যায়ে মাদক ব্যবসায়ীরা পালিয়ে যায়। গোলাগুলির সময় দুই পুলিশ সদস্য আহত হন। পরে ঘটনাস্থলে মাদক ব্যবসায়ী জনিকে গুলিবিদ্ধ অবস্থায় পাওয়া যায়। তাকে উদ্ধার করে ময়মনসিংহ মেডিকেল কলেজ হাসপাতালে চিকিৎসার জন্য নিয়ে গেলে চিকিৎসক মৃত ঘোষণা করেন।" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/article_text_preview_ph"
             android:layout_width="0dp"
-            android:layout_height="30dp"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="30dp"
+            android:layout_height="90dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:background="@color/snow_white2"
