@@ -34,11 +34,9 @@ internal object CloudFireStoreNewsDataService : NewsDataService() {
         return CloudFireStoreArticleDataUtils.findArticleById(articleId)
     }
 
-    override fun getRawLatestArticlesByNewsCategory(newsCategory: NewsCategory, articleRequestSize: Int): List<Article> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun getRawLatestArticlesByNewsCategory(newsCategory: NewsCategory, articleRequestSize: Int)=
+            CloudFireStoreArticleDataUtils.getLatestArticlesByNewsCategory(newsCategory, articleRequestSize)
 
-    override fun getRawArticlesByNewsCategoryBeforeLastArticle(newsCategory: NewsCategory, lastArticle: Article, articleRequestSize: Int): List<Article> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun getRawArticlesByNewsCategoryBeforeLastArticle(newsCategory: NewsCategory, lastArticle: Article, articleRequestSize: Int)=
+            CloudFireStoreArticleDataUtils.getArticlesByNewsCategoryBeforeLastArticle(newsCategory, lastArticle, articleRequestSize)
 }

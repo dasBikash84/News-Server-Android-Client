@@ -17,6 +17,7 @@ import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.NewsCategory
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.google.android.gms.tasks.OnCompleteListener
@@ -64,7 +65,7 @@ internal object CloudFireStoreArticleDataUtils {
         return getArticlesForQuery(query, page)
     }
 
-    private fun getArticlesForQuery(query: Query, page: Page): List<Article> {
+    private fun getArticlesForQuery(query: Query, page: Page?=null): List<Article> {
 
         val lock = Object()
         val articles = mutableListOf<Article>()
@@ -86,20 +87,20 @@ internal object CloudFireStoreArticleDataUtils {
                 synchronized(lock) { lock.notify() }
             }
 
-        LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before wait",this::class.java)
+        LoggerUtils.debugLog("getArticlesForQuery for: ${page?.id} before wait",this::class.java)
         try {
             synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
         }catch (ex:InterruptedException){}
 
-        LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before throw it",this::class.java)
+        LoggerUtils.debugLog("getArticlesForQuery for: ${page?.id} before throw it",this::class.java)
         dataServerException?.let { throw it }
 
-        LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before throw DataNotFoundException()",this::class.java)
+        LoggerUtils.debugLog("getArticlesForQuery for: ${page?.id} before throw DataNotFoundException()",this::class.java)
         if (articles.size == 0 ){
             throw DataNotFoundException()
         }
 
-        LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before return",this::class.java)
+        LoggerUtils.debugLog("getArticlesForQuery for: ${page?.id} before return",this::class.java)
         return articles
     }
 
@@ -128,5 +129,26 @@ internal object CloudFireStoreArticleDataUtils {
 
         LoggerUtils.debugLog("findArticleById for: ${articleId} before return",this::class.java)
         return article
+    }
+
+    fun getLatestArticlesByNewsCategory(newsCategory: NewsCategory, articleRequestSize: Int): List<Article> {
+
+        val query = CloudFireStoreConUtils.getArticleCollectionRef()
+                            .whereEqualTo(newsCategory.id,true)
+                            .orderBy(DB_PUBLICATION_TIME_FIELD_NAME, Query.Direction.DESCENDING)
+                            .limit(articleRequestSize.toLong())
+
+        return getArticlesForQuery(query)
+    }
+
+    fun getArticlesByNewsCategoryBeforeLastArticle(newsCategory: NewsCategory, lastArticle: Article, articleRequestSize: Int): List<Article> {
+
+        val query = CloudFireStoreConUtils.getArticleCollectionRef()
+                            .whereEqualTo(newsCategory.id,true)
+                            .whereLessThan(DB_PUBLICATION_TIME_FIELD_NAME,lastArticle.publicationTime!!)
+                            .orderBy(DB_PUBLICATION_TIME_FIELD_NAME, Query.Direction.DESCENDING)
+                            .limit(articleRequestSize.toLong())
+
+        return getArticlesForQuery(query)
     }
 }
