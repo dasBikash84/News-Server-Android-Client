@@ -34,6 +34,7 @@ abstract class AppSettingsRepository {
     abstract protected fun addCountries(countries: List<Country>)
     abstract protected fun addNewsPapers(newspapers: List<Newspaper>)
     abstract protected fun addPages(pages: List<Page>)
+    abstract protected fun addNewsCategories(newsCategories: List<NewsCategory>)
     abstract protected fun addPageGroups(pageGroups: List<PageGroup>)
 
     abstract protected fun getCountryCount(): Int
@@ -45,6 +46,7 @@ abstract class AppSettingsRepository {
     abstract fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page>
     abstract fun getChildPagesForTopLevelPage(topLevelPage: Page): List<Page>
     abstract fun findMatchingPages(it: String): List<Page>
+    abstract fun getNewsCategories(): List<NewsCategory>
 
     abstract fun getLanguageByPage(page: Page): Language
     abstract fun getLanguageByNewspaper(newspaper: Newspaper): Language
@@ -85,6 +87,7 @@ abstract class AppSettingsRepository {
         addCountries(ArrayList(appSettings.countries?.values))
         addNewsPapers(ArrayList(appSettings.newspapers?.values))
         addPages(ArrayList(appSettings.pages?.values))
+        addNewsCategories(ArrayList(appSettings.news_categories?.values))
 
 //        if (getPageGroupCount() == 0) {
 //            addPageGroups(ArrayList(appSettings.page_groups?.values ?: emptyList()))

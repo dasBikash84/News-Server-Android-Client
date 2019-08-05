@@ -23,6 +23,7 @@ internal object CloudFireStoreConUtils {
     private const val COUNTRIES_COLLECTION_LABEL = "countries"
     private const val NEWSPAPERS_COLLECTION_LABEL = "newspapers"
     private const val PAGES_COLLECTION_LABEL = "pages"
+    private const val NEWS_CATEGORIES_COLLECTION_LABEL = "news_categories"
     private const val PAGE_GROUPS_COLLECTION_LABEL = "page_groups"
     private const val APP_SETTINGS_UPDATE_TIME_COLLECTION_LABEL = "update_time"
 
@@ -57,6 +58,9 @@ internal object CloudFireStoreConUtils {
 
     internal fun getPageSettingsCollectionRef() =
             getDbConnection().collection(PAGES_COLLECTION_LABEL)
+
+    internal fun getNewsCategoriesCollectionRef() =
+            getDbConnection().collection(NEWS_CATEGORIES_COLLECTION_LABEL)
 
     internal fun getPageGroupSettingsCollectionRef() =
             getDbConnection().collection(PAGE_GROUPS_COLLECTION_LABEL)

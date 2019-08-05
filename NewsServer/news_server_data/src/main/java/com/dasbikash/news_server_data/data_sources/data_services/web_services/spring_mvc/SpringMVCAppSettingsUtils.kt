@@ -96,7 +96,7 @@ internal object SpringMVCAppSettingsUtils {
         val updateTime = mutableMapOf<String, Long>()
         updateTime.put("key1", getServerAppSettingsUpdateTime())
         return DefaultAppSettings(
-                countries, languages, newspapers, pages, pageGroups, HashMap(updateTime))
+                countries, languages, newspapers, pages, pageGroups, HashMap<String,NewsCategory>(),HashMap(updateTime))
     }
 
     private fun getPageGroups(): HashMap<String, PageGroup> {

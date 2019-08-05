@@ -111,6 +111,16 @@ class FragmentHomeNp : Fragment() {
         initMenuButtonOperator()
     }
 
+    override fun onPause() {
+        super.onPause()
+        if (backPressTaskTag != null) {
+            (activity as BackPressQueueManager).removeTaskFromQueue(backPressTaskTag!!)
+        }
+        if (backPressTaskTagForNpMenu != null) {
+            (activity as BackPressQueueManager).removeTaskFromQueue(backPressTaskTagForNpMenu!!)
+        }
+    }
+
     private fun findViewComponents(view: View) {
         mPageSearchTextBoxContainer = view.findViewById(R.id.page_search_text_box_layout)
         mPageSearchTextBox = view.findViewById(R.id.page_search_box_edit_text)

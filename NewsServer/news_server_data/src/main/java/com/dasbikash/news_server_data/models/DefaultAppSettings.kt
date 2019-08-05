@@ -23,6 +23,7 @@ class DefaultAppSettings(
         var newspapers: HashMap<String, Newspaper>? = null,
         var pages: HashMap<String, Page>? = null,
         var page_groups: HashMap<String, PageGroup>? = null,
+        var news_categories: HashMap<String, NewsCategory>? = null,
         var update_time: HashMap<String, Long>? = null
 ) {
 

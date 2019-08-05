@@ -75,10 +75,11 @@ internal object CloudFireStoreAppSettingsUtils{
         val newspapers: HashMap<String, Newspaper> = getNewspapers()
         val pages: HashMap<String, Page> = getPages()
         val pageGroups: HashMap<String, PageGroup> = getPageGroups()
+        val newsCategories: HashMap<String, NewsCategory> = getNewsCategories()
         val updateTime = mutableMapOf<String, Long>()
         updateTime.put("key1", getServerAppSettingsUpdateTime())
         return DefaultAppSettings(
-                countries, languages, newspapers, pages, pageGroups, HashMap(updateTime))
+                countries, languages, newspapers, pages, pageGroups, newsCategories,HashMap(updateTime))
     }
 
     private fun getCountries(): HashMap<String, Country> {
@@ -235,6 +236,45 @@ internal object CloudFireStoreAppSettingsUtils{
 
         //Log.d(TAG,"getPages before return")
         return HashMap(pages)
+    }
+
+    private fun getNewsCategories(): HashMap<String, NewsCategory> {
+
+        val lock = Object()
+        val newsCategories = mutableMapOf<String,NewsCategory>()
+        var dataServerException: DataServerException? = null
+
+        CloudFireStoreConUtils.getNewsCategoriesCollectionRef()
+                .get()
+                .addOnSuccessListener { documents ->
+                    //Log.d(TAG,"getPages")
+                    for (document in documents) {
+                        val newsCategory = document.toObject(NewsCategory::class.java)
+                        newsCategories.put(newsCategory.id,newsCategory)
+                    }
+                    synchronized(lock) { lock.notify() }
+                }
+                .addOnFailureListener { exception ->
+                    //Log.d(TAG,"getPages. Eror msg: ${exception.message}")
+                    dataServerException = DataNotFoundException(exception)
+                    synchronized(lock) { lock.notify() }
+                }
+
+        //Log.d(TAG,"getPages before wait")
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:InterruptedException){}
+
+        //Log.d(TAG,"getPages before throw it")
+        dataServerException?.let { throw it }
+
+        //Log.d(TAG,"getPages before throw DataNotFoundException()")
+        if (newsCategories.isEmpty()){
+            throw DataNotFoundException()
+        }
+
+        //Log.d(TAG,"getPages before return")
+        return HashMap(newsCategories)
     }
 
     private fun getPageGroups(): HashMap<String, PageGroup> {

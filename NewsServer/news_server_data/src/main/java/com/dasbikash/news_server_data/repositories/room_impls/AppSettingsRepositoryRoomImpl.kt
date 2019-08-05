@@ -36,6 +36,10 @@ internal class AppSettingsRepositoryRoomImpl internal constructor(context: Conte
         return mDatabase.pageDao.findAll().size
     }
 
+    override fun getNewsCategories(): List<NewsCategory> {
+        return mDatabase.newsCategoryDao.findAll()
+    }
+
     override fun nukeAppSettings() {
         mDatabase.nukeAppSettings()
     }
@@ -54,6 +58,10 @@ internal class AppSettingsRepositoryRoomImpl internal constructor(context: Conte
 
     override fun addPages(pages: List<Page>) {
         mDatabase.pageDao.addPages(ArrayList(pages))
+    }
+
+    override fun addNewsCategories(newsCategories: List<NewsCategory>) {
+        mDatabase.newsCategoryDao.addNewsCategories(newsCategories)
     }
 
     override fun addPageGroups(pageGroups:List<PageGroup>) {
