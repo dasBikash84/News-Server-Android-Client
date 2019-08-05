@@ -149,14 +149,14 @@
 
         <ImageView
             android:id="@+id/show_np_name_menu"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:contentDescription="@string/show_np_name_menu_desc"
             app:srcCompat="@drawable/ic_menu"
-            android:layout_gravity="center"
+            android:layout_gravity="start"
+            android:background="@android:color/white"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <ImageView
             android:id="@+id/hide_np_name_menu"
@@ -164,6 +164,7 @@
             android:layout_height="24dp"
             android:contentDescription="@string/hide_np_name_menu_desc"
             app:srcCompat="@drawable/ic_hide_left"
+            android:background="@android:color/white"
             android:layout_gravity="center"
             app:layout_constraintStart_toEndOf="@+id/np_name_scroller"
             app:layout_constraintTop_toTopOf="@+id/np_name_scroller"
@@ -172,17 +173,16 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/article_preview_scroller"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:overScrollMode="never"
+        android:overScrollMode="ifContentScrolls"
         android:scrollbars="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/np_language_selection_container"
-        android:visibility="visible"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="32dp">
+        android:visibility="visible">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/page_article_preview_holder"
