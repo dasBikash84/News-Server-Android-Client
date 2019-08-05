@@ -15,6 +15,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/bottom_menu_item_home"
+        android:icon="@drawable/ic_home_pink_24dp"
+        android:title="@string/bmi_home_title"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/bottom_menu_item_news_categories"
+        android:icon="@drawable/ic_categories"
+        android:title="@string/bmi_news_categories_title"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/bottom_menu_item_article_search"
+        android:icon="@drawable/ic_search"
+        android:title="@string/bmi_article_search_title"
+        app:showAsAction="ifRoom" />
+    <!--<item
         android:id="@+id/bottom_menu_item_eng"
         android:icon="@drawable/ic_eng"
         android:title="@string/bmi_eng_title"
@@ -23,31 +38,31 @@
         android:id="@+id/bottom_menu_item_bn"
         android:icon="@drawable/ic_bn"
         android:title="@string/bmi_bn_title"
-        app:showAsAction="always" />
+        app:showAsAction="always" />-->
     <!--<item
         android:id="@+id/bottom_menu_item_home"
         android:icon="@drawable/ic_home_pink_24dp"
         android:title="@string/bmi_home_title"
         app:showAsAction="always" />-->
-    <item
+    <!--<item
         android:id="@+id/bottom_menu_item_page_group"
         android:icon="@drawable/ic_page_group_pink_24dp"
         android:title="@string/bmi_page_groups_title"
-        app:showAsAction="always" />
+        app:showAsAction="always" />-->
     <item
         android:id="@+id/bottom_menu_item_favourites"
         android:icon="@drawable/ic_fav"
         android:title="@string/bmi_favourites_title"
-        app:showAsAction="always" />
-    <item
+        app:showAsAction="ifRoom" />
+    <!--<item
         android:id="@+id/bottom_menu_item_saved_articles"
         android:icon="@drawable/ic_save"
         android:title="@string/bmi_saved_artiles_title"
-        app:showAsAction="always" />
-    <!--<item
+        app:showAsAction="always" />-->
+    <item
         android:id="@+id/bottom_menu_item_more"
-        android:icon="@drawable/ic_more_vert_pink_24dp"
+        android:icon="@drawable/ic_more_vert"
         android:title="@string/bmi_more_title"
-        app:showAsAction="ifRoom" />-->
+        app:showAsAction="ifRoom" />
 
 </menu>

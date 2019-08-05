@@ -179,7 +179,6 @@ class FragmentArticleSearch : Fragment() {
                         .subscribeOn(Schedulers.io())
                         .map {
                             ArticleSearchRepository.getArticleSearchResultForKeyWords(context!!, it)
-                                    .map { ArticleSearchRepository.processArticleSearchReasultForArticleAndPage(it, context!!) }
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<List<ArticleSearchReasultEntry>>() {
@@ -192,6 +191,7 @@ class FragmentArticleSearch : Fragment() {
                                 articleSearchResultEntries.asSequence().forEach {
                                     debugLog(it.toString())
                                 }
+                                displayArticleSearchResult(articleSearchResultEntries)
                             }
 
                             override fun onError(e: Throwable) {
@@ -212,6 +212,10 @@ class FragmentArticleSearch : Fragment() {
         }
 
         addBackPressTask()
+    }
+
+    private fun displayArticleSearchResult(articleSearchResultEntries: List<ArticleSearchReasultEntry>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onPause() {

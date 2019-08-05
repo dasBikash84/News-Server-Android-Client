@@ -78,4 +78,12 @@
     <string name="search_key_input_text_box_hint">Search Article by Keywords</string>
     <string name="search_article">Search</string>
     <string name="clear_article_keywords">Clear</string>
+    <string name="show_page_search_box_image_desc">Show page search box</string>
+    <string name="hide_page_search_box_image_desc">Hide page search box</string>
+    <string name="bangla_in_bangla">বাংলা</string>
+    <string name="english_in_english">English</string>
+    <string name="hide_np_name_menu_desc">Hide Np name menu</string>
+    <string name="show_np_name_menu_desc">Show Np name menu</string>
+    <string name="bmi_news_categories_title">Categories</string>
+    <string name="bmi_article_search_title">Search Article</string>
 </resources>

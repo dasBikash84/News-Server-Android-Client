@@ -131,11 +131,12 @@ class InitFragment : Fragment() {
                                         .getNewsPapersLiveData()
                                         .observe(activity!!, object : Observer<List<Newspaper>> {
                                             override fun onChanged(newspapers: List<Newspaper>?) {
-                                                if (com.dasbikash.news_server_data.BuildConfig.DEBUG) {
+                                                /*if (com.dasbikash.news_server_data.BuildConfig.DEBUG) {
                                                     (activity as HomeNavigator).loadArticleSearchFragment()
                                                 }else{
                                                     (activity as HomeNavigator).loadEngNpFragment()
-                                                }
+                                                }*/
+                                                (activity as HomeNavigator).loadHomeNpFragment()
                                             }
                                         })
                             }

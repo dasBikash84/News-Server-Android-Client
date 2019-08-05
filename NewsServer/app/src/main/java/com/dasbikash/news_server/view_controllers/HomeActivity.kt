@@ -183,30 +183,54 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
         mBottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
             val currentFragment = supportFragmentManager.findFragmentById(R.id.main_frame)
             when (menuItem.itemId) {
-                R.id.bottom_menu_item_eng -> {
+                R.id.bottom_menu_item_home -> {
+                    if (!(currentFragment is FragmentHomeNp)) {
+                        mAppBar.visibility = View.GONE
+                        loadHomeNpFragment()
+                        mBottomNavigationView.visibility = View.VISIBLE
+                    }
+                    true
+                }
+                /*R.id.bottom_menu_item_eng -> {
                     if (!(currentFragment is NewsPaperGroupFragment && currentFragment.isEngNpFragment())) {
                         mAppBar.visibility = View.GONE
                         loadEngNpFragment()
                         mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
+                }*/
+                R.id.bottom_menu_item_news_categories -> {
+                    if (!(currentFragment is FragmentNewsCategoriesView)) {
+                        mAppBar.visibility = View.GONE
+                        loadNewsCategoriesViewFragment()
+                        mBottomNavigationView.visibility = View.VISIBLE
+                    }
+                    true
                 }
-                R.id.bottom_menu_item_bn -> {
+                /*R.id.bottom_menu_item_bn -> {
                     if (!(currentFragment is NewsPaperGroupFragment && currentFragment.isBngNpFragment())) {
                         mAppBar.visibility = View.GONE
                         loadBngNpFragment()
                         mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
+                }*/
+                R.id.bottom_menu_item_article_search -> {
+                    if (!(currentFragment is FragmentArticleSearch)) {
+                        mAppBar.visibility = View.VISIBLE
+                        loadArticleSearchFragment()
+                        mBottomNavigationView.visibility = View.VISIBLE
+                    }
+                    true
                 }
-                R.id.bottom_menu_item_page_group -> {
+                /*R.id.bottom_menu_item_page_group -> {
                     if (!(currentFragment is PageGroupFragment)) {
                         mAppBar.visibility = View.VISIBLE
                         loadPageGroupFragment()
                         mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
-                }
+                }*/
                 R.id.bottom_menu_item_favourites -> {
                     if (!(currentFragment is FavouritesFragment)) {
                         mAppBar.visibility = View.VISIBLE
@@ -215,22 +239,14 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     }
                     true
                 }
-                R.id.bottom_menu_item_saved_articles -> {
+                R.id.bottom_menu_item_more -> {
                     if (!(currentFragment is SavedArticlesFragment)) {
-                        mAppBar.visibility = View.VISIBLE
-                        loadSavedArticlesFragment()
-                        mBottomNavigationView.visibility = View.VISIBLE
-                    }
-                    true
-                }
-                /*R.id.bottom_menu_item_more -> {
-                    if (!(supportFragmentManager.findFragmentById(R.id.main_frame) is MoreFragment)) {
                         mAppBar.visibility = View.VISIBLE
                         loadMoreFragment()
                         mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
-                }*/
+                }
 
                 else -> false
             }
@@ -309,6 +325,14 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
 
     override fun loadEngNpFragment() {
         navigateTo(NewsPaperGroupFragment.getInstanceForEnglishNps())
+    }
+
+    override fun loadHomeNpFragment() {
+        navigateTo(FragmentHomeNp())
+    }
+
+    override fun loadNewsCategoriesViewFragment() {
+        navigateTo(FragmentNewsCategoriesView())
     }
 
     override fun loadPageGroupFragment() {
