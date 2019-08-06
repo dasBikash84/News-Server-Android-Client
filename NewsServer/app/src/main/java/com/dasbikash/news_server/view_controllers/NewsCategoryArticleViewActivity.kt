@@ -164,7 +164,7 @@ class NewsCategoryArticleViewActivity : AppCompatActivity() {
                                     }
                                     if (articleAdditionCount > 0) {
                                         mArticleRequestChunkSize = ARTICLE_LOAD_CHUNK_SIZE
-                                        mArticlePreviewHolderAdapter.submitList(mArticleList.sortedBy { it.publicationTime }.reversed())
+                                        mArticlePreviewHolderAdapter.submitList(mArticleList.toList())
                                     } else {
                                         mNewArticleLoadInProgress = false
                                         mArticleRequestChunkSize += ARTICLE_LOAD_CHUNK_SIZE
