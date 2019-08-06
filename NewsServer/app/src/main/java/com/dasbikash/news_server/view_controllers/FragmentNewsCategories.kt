@@ -17,7 +17,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DiffUtil
@@ -55,27 +55,25 @@ class FragmentNewsCategories : Fragment() {
     override fun onResume() {
         super.onResume()
         (activity as AppCompatActivity).supportActionBar?.title = TITLE_TEXT
-        mDisposable.add(
-                Observable.just(true)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
-                            appSettingsRepository.getNewsCategories()
+        mDisposable.add(Observable.just(true)
+                .subscribeOn(Schedulers.computation())
+                .map {
+                    val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
+                    appSettingsRepository.getNewsCategories()
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(object : DisposableObserver<List<NewsCategory>>() {
+                    override fun onComplete() {}
+
+                    override fun onNext(newsCategories: List<NewsCategory>) {
+                        newsCategories.forEach {
+                            debugLog(it.toString())
                         }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<List<NewsCategory>>() {
-                            override fun onComplete() {}
+                        mNewscategoryListAdapter.submitList(newsCategories.sortedBy { it.id })
+                    }
 
-                            override fun onNext(newsCategories: List<NewsCategory>) {
-                                newsCategories.forEach {
-                                    debugLog(it.toString())
-                                }
-                                mNewscategoryListAdapter.submitList(newsCategories.sortedBy { it.id })
-                            }
-
-                            override fun onError(e: Throwable) {}
-                        })
-        )
+                    override fun onError(e: Throwable) {}
+                }))
     }
 
     private fun findViewComponents(view: View) {
@@ -91,10 +89,10 @@ class FragmentNewsCategories : Fragment() {
 
     private fun doOnNewsCategoryNameClick(newsCategory: NewsCategory) {
         debugLog(newsCategory.toString())
-        activity!!.startActivity(NewsCategoryArticleViewActivity.getIntentForNewsCategory(context!!,newsCategory))
+        activity!!.startActivity(NewsCategoryArticleViewActivity.getIntentForNewsCategory(context!!, newsCategory))
     }
 
-    companion object{
+    companion object {
         private const val TITLE_TEXT = "Topics"
     }
 }
@@ -118,20 +116,20 @@ class NewsCategoryListAdapter(val doOnItemClick: (NewsCategory) -> Unit)
     }
 
     override fun onBindViewHolder(holder: NewsCategoryrNameHolder, position: Int) {
-        holder.bind(getItem(position),doOnItemClick)
+        holder.bind(getItem(position), doOnItemClick)
     }
 }
 
 class NewsCategoryrNameHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    val titleButton: Button
+    val textView: TextView
 
     init {
-        titleButton = itemView.findViewById(R.id.news_category_title)
+        textView = itemView.findViewById(R.id.news_category_title)
     }
 
-    fun bind(newsCategory: NewsCategory,doOnItemClick: (NewsCategory) -> Unit) {
-        titleButton.setText(newsCategory.name)
-        titleButton.setOnClickListener { doOnItemClick(newsCategory) }
+    fun bind(newsCategory: NewsCategory, doOnItemClick: (NewsCategory) -> Unit) {
+        textView.setText(newsCategory.name)
+        textView.setOnClickListener { doOnItemClick(newsCategory) }
     }
 }
