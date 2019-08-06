@@ -13,50 +13,35 @@
 
 package com.dasbikash.news_server.view_controllers
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.SystemClock
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ProgressBar
-import androidx.appcompat.app.ActionBarDrawerToggle
+import android.view.*
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.appcompat.widget.Toolbar
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager.widget.PagerAdapter
-import androidx.viewpager.widget.ViewPager
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.utils.DialogUtils
-import com.dasbikash.news_server.utils.DisplayUtils
-import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
-import com.dasbikash.news_server.utils.OnceSettableBoolean
+import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
-import com.dasbikash.news_server.view_controllers.view_helpers.ArticlePreviewListAdapter
+import com.dasbikash.news_server.view_controllers.view_helpers.ArticleDiffCallback
 import com.dasbikash.news_server.view_models.PageViewViewModel
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
-import com.dasbikash.news_server_data.exceptions.DataServerNotAvailableExcepption
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
-import com.dasbikash.news_server_data.models.room_entity.Article
-import com.dasbikash.news_server_data.models.room_entity.Language
-import com.dasbikash.news_server_data.models.room_entity.Page
-import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
+import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
+import com.dasbikash.news_server_data.utills.ImageUtils
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.navigation.NavigationView
+import com.google.android.material.appbar.AppBarLayout
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -69,81 +54,86 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
     companion object {
         const val LOG_IN_REQ_CODE = 7777
-        const val EXTRA_PAGE_TO_DISPLAY = "com.dasbikash.news_server.views.PageViewActivity.EXTRA_PAGE_TO_DISPLAY"
+        const val EXTRA_FOR_PAGE = "com.dasbikash.news_server.views.PageViewActivity.EXTRA_FOR_PAGE"
+        const val EXTRA_FOR_PURPOSE = "com.dasbikash.news_server.views.PageViewActivity.EXTRA_FOR_PURPOSE"
+        const val EXTRA_VALUE_FOR_LATEST_ARTICLE_DISPLAY = "com.dasbikash.news_server.views.PageViewActivity.LATEST_ARTICLE_DISPLAY"
+        const val EXTRA_VALUE_FOR_PAGE_BROWSING = "com.dasbikash.news_server.views.PageViewActivity.PAGE_BROWSING"
 
-        fun getIntentForPageDisplay(context: Context, page: Page): Intent {
+        fun getIntentForLatestArticleDisplay(context: Context, page: Page): Intent {
             val intent = Intent(context, PageViewActivity::class.java)
-            intent.putExtra(EXTRA_PAGE_TO_DISPLAY, page)
+            intent.putExtra(EXTRA_FOR_PAGE, page)
+            intent.putExtra(EXTRA_FOR_PURPOSE, EXTRA_VALUE_FOR_LATEST_ARTICLE_DISPLAY)
+            return intent
+        }
+
+        fun getIntentForLatestPageBrowsing(context: Context, page: Page): Intent {
+            val intent = Intent(context, PageViewActivity::class.java)
+            intent.putExtra(EXTRA_FOR_PAGE, page)
+            intent.putExtra(EXTRA_FOR_PURPOSE, EXTRA_VALUE_FOR_PAGE_BROWSING)
             return intent
         }
     }
 
-    private lateinit var mDrawerLayout: DrawerLayout
-    private lateinit var mArticleLoadingProgressBarDrawerHolder: ViewGroup
-    private lateinit var mArticlePreviewListHolder: RecyclerView
+    private lateinit var mToolbar: Toolbar
+    private lateinit var mAppBar: AppBarLayout
 
-    private lateinit var mPageViewContainer: CoordinatorLayout
-    private lateinit var mArticleViewContainer: ViewPager
-    private lateinit var mFragmentStatePagerAdapter: FragmentStatePagerAdapter
-    private lateinit var mArticleLoadingProgressBarEnd: ProgressBar
+    private lateinit var mPurposeString: String
+
+    private lateinit var mPage: Page
+    private lateinit var mLanguage: Language
+    private lateinit var mNewspaper: Newspaper
 
     private lateinit var mWaitScreen: LinearLayoutCompat
+    private lateinit var mArticlePreviewHolder: RecyclerView
+    private lateinit var mArticlePreviewHolderAdapter: ArticlePreviewListAdapterForPage
 
-    private lateinit var mArticlePreviewListAdapter: ArticlePreviewListAdapter
+    private lateinit var mPageViewContainer: CoordinatorLayout
 
-    private lateinit var mTextSizeChangeFrame: ConstraintLayout//text_size_change_frame
-    private lateinit var mTextSizeChangeCancelButton: MaterialButton//cancel_text_size_change
-    private lateinit var mTextSizeChangeOkButton: MaterialButton//plus_text_size_change
-    private lateinit var mTextSizeChangePlusButton: MaterialButton//minus_text_size_change
-    private lateinit var mTextSizeChangeMinusButton: MaterialButton//ok_text_size_change
+    private var mHasJumpedToLatestArticle = OnceSettableBoolean()
 
-    private var transTextSize = 0
-    private val mTextSizeChangeStep = 1
+    private var mIsPageOnFavList = false
 
     private lateinit var mAppSettingsRepository: AppSettingsRepository
     private lateinit var mUserSettingsRepository: UserSettingsRepository
     private lateinit var mNewsDataRepository: NewsDataRepository
 
-    private lateinit var mPage: Page
-    private lateinit var mLanguage: Language
-
-    private var mIsPageOnFavList = false
-    private var mArticleLoadRunning = false
-    private var mWaitWindowShown = false
-
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
     private val mArticleList = mutableListOf<Article>()
 
     private val mInvHaveMoreArticle = OnceSettableBoolean()
-
+    private var mArticleLoadRunning = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_page_view)
+        setContentView(R.layout.activity_page_view2)
+
+        mAppBar = findViewById(R.id.app_bar_layout)
+        mToolbar = findViewById(R.id.app_bar)
+
+        setSupportActionBar(mToolbar)
 
         @Suppress("CAST_NEVER_SUCCEEDS")
-        mPage = (intent!!.getParcelableExtra(EXTRA_PAGE_TO_DISPLAY)) as Page
+        mPage = (intent!!.getParcelableExtra(EXTRA_FOR_PAGE)) as Page
+        mPurposeString = intent!!.getStringExtra(EXTRA_FOR_PURPOSE)
 
-        initDrawerComponents()
-        findPagerItems()
-        initTextChangeViewComponents()
-
-        mWaitScreen = findViewById(R.id.wait_screen_for_settings_change)
-
-        mAppSettingsRepository = RepositoryFactory.getAppSettingsRepository(this)
-        mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
-        mNewsDataRepository = RepositoryFactory.getNewsDataRepository(this)
-
-        supportActionBar!!.setTitle(mPage.name)
+        findViewItems()
+        init()
 
         ViewModelProviders.of(this).get(PageViewViewModel::class.java)
                 .getArticleLiveDataForPage(mPage)
                 .observe(this, object : androidx.lifecycle.Observer<List<Article>> {
                     override fun onChanged(articleList: List<Article>?) {
                         articleList?.let {
+                            mArticleList.clear()
                             if (it.isNotEmpty()) {
-                                postArticlesForDisplay(it)
+                                it.asSequence().forEach {
+                                    val article = it
+                                    if (mArticleList.count { it.checkIfSameArticle(article) } == 0){
+                                        mArticleList.add(article)
+                                    }
+                                }
                             }
+                            mArticlePreviewHolderAdapter.submitList(mArticleList.toList())
                         }
                     }
                 })
@@ -164,8 +154,24 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                         invalidateOptionsMenu()
                     }
                 })
-        init()
+    }
 
+    private fun findViewItems() {
+        mArticlePreviewHolder = findViewById(R.id.article_preview_holder)
+        mWaitScreen = findViewById(R.id.wait_screen)
+        mPageViewContainer = findViewById(R.id.page_view_container)
+    }
+
+    private fun init() {
+
+        mAppSettingsRepository = RepositoryFactory.getAppSettingsRepository(this)
+        mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
+        mNewsDataRepository = RepositoryFactory.getNewsDataRepository(this)
+
+        hideWaitScreen()
+        mArticlePreviewHolderAdapter = ArticlePreviewListAdapterForPage({ doOnArticleClick(it) }, { loadMoreArticles() })
+        mArticlePreviewHolder.adapter = mArticlePreviewHolderAdapter
+//        mWaitScreen.setOnClickListener {  }
     }
 
     private fun showWaitScreen() {
@@ -177,16 +183,12 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
         mWaitScreen.visibility = View.GONE
     }
 
-    private fun init() {
-        Observable.just(mPage)
-                .subscribeOn(Schedulers.io())
-                .map {
-                    if (!::mLanguage.isInitialized) {
-                        mLanguage = mAppSettingsRepository.getLanguageByPage(mPage)
-                    }
-                }
-                .subscribe()
+    private fun doOnArticleClick(article: Article) {
+        debugLog(article.toString())
     }
+
+    private fun activityForPageBrowsing() =
+            mPurposeString.equals(EXTRA_VALUE_FOR_PAGE_BROWSING)
 
     override fun onResume() {
         super.onResume()
@@ -194,13 +196,26 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                 Observable.just(mPage)
                         .observeOn(Schedulers.io())
                         .map {
-                            mNewsDataRepository.getArticleCountForPage(mPage) <= 1
+                            if (!::mNewspaper.isInitialized){
+                                mNewspaper = mAppSettingsRepository.getNewspaperByPage(it)
+                            }
+                            if (!::mLanguage.isInitialized){
+                                mLanguage = mAppSettingsRepository.getLanguageByNewspaper(mNewspaper)
+                            }
+                            mNewsDataRepository.getLatestArticleByPageFromLocalDb(mPage)?.let {
+                                return@map it
+                            }
+                            mPage
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Boolean>() {
+                        .subscribeWith(object : DisposableObserver<Any>() {
                             override fun onComplete() {}
-                            override fun onNext(needToLoadMoreArticles: Boolean) {
-                                if (needToLoadMoreArticles) {
+                            override fun onNext(data:Any) {
+                                supportActionBar!!.setTitle("${mPage.name} | ${mNewspaper.name}")
+                                if (!mHasJumpedToLatestArticle.get() && (data is Article) && !activityForPageBrowsing()){
+                                    mHasJumpedToLatestArticle.set()
+                                    doOnArticleClick(data)
+                                }else{
                                     loadMoreArticles()
                                 }
                             }
@@ -212,15 +227,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
     override fun onPause() {
         super.onPause()
-        removeWorkInProcessWindow()
-    }
-
-    override fun onBackPressed() {
-        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-            mDrawerLayout.closeDrawer(GravityCompat.START)
-        } else {
-            super.onBackPressed()
-        }
+        hideWaitScreen()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -233,7 +240,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (!mWaitWindowShown) {
+        if (mWaitScreen.visibility != View.VISIBLE) {
             return when (item.itemId) {
                 R.id.add_to_favourites_menu_item -> {
                     addPageToFavListAction()
@@ -243,15 +250,17 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                     removePageFromFavListAction()
                     true
                 }
-                R.id.change_text_font_menu_item -> {
-                    changeTextFontAction()
-                    true
-                }
                 else -> super.onOptionsItemSelected(item)
             }
         }
         return false
     }
+
+    private fun removePageFromFavListAction() =
+            changePageFavStatus(PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE)
+
+    private fun addPageToFavListAction() =
+            changePageFavStatus(PAGE_FAV_STATUS_CHANGE_ACTION.ADD)
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -290,151 +299,13 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
         }
     }
 
-    private fun initTextChangeViewComponents() {
-        mTextSizeChangeFrame = findViewById(R.id.text_size_change_frame)
-        mTextSizeChangeCancelButton = findViewById(R.id.cancel_text_size_change)
-        mTextSizeChangePlusButton = findViewById(R.id.plus_text_size_change)
-        mTextSizeChangeMinusButton = findViewById(R.id.minus_text_size_change)
-        mTextSizeChangeOkButton = findViewById(R.id.ok_text_size_change)
-
-        mTextSizeChangeFrame.setOnClickListener { }
-        mTextSizeChangeCancelButton.setOnClickListener { changeTextFontAction() }
-        mTextSizeChangePlusButton.setOnClickListener { incrementTextSize() }
-        mTextSizeChangeMinusButton.setOnClickListener { decrementTextSize() }
-        mTextSizeChangeOkButton.setOnClickListener { makeTextSizeEffective() }
-    }
-
-    private fun initViewPager() {
-
-        mFragmentStatePagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager,
-                BEHAVIOR_SET_USER_VISIBLE_HINT) {
-            override fun getItemPosition(fragment: Any): Int {
-                if (mTextSizeChangeFrame.visibility == View.GONE) {
-                    return PagerAdapter.POSITION_UNCHANGED
-                } else {
-                    return PagerAdapter.POSITION_NONE
-                }
-            }
-
-            override fun getItem(position: Int): Fragment {
-                if (position == (mArticleList.size - 1)) {
-                    loadMoreArticles()
-                }
-                val fragment = ArticleViewFragment.getInstance(
-                        mArticleList.get(position).id, mLanguage, transTextSize)
-                return fragment
-            }
-
-            override fun getCount(): Int {
-                return mArticleList.size
-            }
-        }
-
-        mArticleViewContainer.adapter = mFragmentStatePagerAdapter
-        mArticleViewContainer.setCurrentItem(0)
-    }
-
-    private fun findPagerItems() {
-        mPageViewContainer = findViewById(R.id.page_view_container)
-        mArticleViewContainer = findViewById(R.id.article_view_container)
-        mArticleLoadingProgressBarEnd = findViewById(R.id.article_loading_progress_bar_end)
-        mArticleLoadingProgressBarEnd.setOnClickListener { }
-    }
-
-    private fun initDrawerComponents() {
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-
-        mDrawerLayout = findViewById(R.id.drawer_layout)
-        val toggle = ActionBarDrawerToggle(
-                this, mDrawerLayout, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close)
-        mDrawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-        findViewById<NavigationView>(R.id.nav_view).setOnClickListener(View.OnClickListener { closeNavigationDrawer() })
-
-        mArticleLoadingProgressBarDrawerHolder = mDrawerLayout.findViewById(R.id.article_loading_progress_bar_drawer_holder)
-        mArticlePreviewListHolder = mDrawerLayout.findViewById(R.id.article_preview_list_holder)
-
-        mArticleLoadingProgressBarDrawerHolder.setOnClickListener { }
-    }
-
-    private fun makeTextSizeEffective() {
-        mDisposable.add(
-                Observable.just(true)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            DisplayUtils.setArticleTextSize(this, transTextSize)
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe { changeTextFontAction() }
-        )
-    }
-
-    private fun decrementTextSize() {
-        if (transTextSize - mTextSizeChangeStep < DisplayUtils.MIN_ARTICLE_TEXT_SIZE) {
-            transTextSize = DisplayUtils.MIN_ARTICLE_TEXT_SIZE
-        } else {
-            transTextSize -= mTextSizeChangeStep
-        }
-        mFragmentStatePagerAdapter.notifyDataSetChanged()
-    }
-
-    private fun incrementTextSize() {
-        if (transTextSize + mTextSizeChangeStep > DisplayUtils.MAX_ARTICLE_TEXT_SIZE) {
-            transTextSize = DisplayUtils.MAX_ARTICLE_TEXT_SIZE
-        } else {
-            transTextSize += mTextSizeChangeStep
-        }
-        mFragmentStatePagerAdapter.notifyDataSetChanged()
-    }
-
-    private var changeTextFontBackPressActionTag: String? = null
-
-    private fun changeTextFontAction() {
-        if (mTextSizeChangeFrame.visibility == View.GONE) {
-            mDisposable.add(
-                    Observable.just(true)
-                            .subscribeOn(Schedulers.computation())
-                            .map {
-                                DisplayUtils.getArticleTextSize(this)
-                            }
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe {
-                                transTextSize = it
-                                mTextSizeChangeFrame.visibility = View.VISIBLE
-                                mTextSizeChangeFrame.bringToFront()
-                                changeTextFontBackPressActionTag = addToBackPressTaskQueue { changeTextFontAction() }
-                            }
-            )
-        } else {
-            transTextSize = 0
-            mFragmentStatePagerAdapter.notifyDataSetChanged()
-            mDisposable.add(
-                    Observable.just(true)
-                            .subscribeOn(Schedulers.computation())
-                            .map {
-                                SystemClock.sleep(100)
-                            }
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe {
-                                mTextSizeChangeFrame.visibility = View.GONE
-                                changeTextFontBackPressActionTag?.let {
-                                    removeTaskFromQueue(it)
-                                    changeTextFontBackPressActionTag = null
-                                }
-                            }
-            )
-        }
-    }
-
     private fun loadMoreArticles() {
 
-        if (mArticleLoadRunning) return
+        if (!mArticleLoadRunning && !mInvHaveMoreArticle.get()) {
 
-        if (!mInvHaveMoreArticle.get()) {
-
-            loadWorkInProcessWindow()//showProgressBars()
+            showWaitScreen()
             mArticleLoadRunning = true
+            var amDisposed = false
             mDisposable.add(
                     Observable.just(mPage)
                             .observeOn(Schedulers.io())
@@ -444,86 +315,52 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                                 }
                                 mNewsDataRepository.getArticleCountForPage(mPage) == 0
                             }
-                            .observeOn(AndroidSchedulers.mainThread())
                             .map {
-                                if (it) {
-                                    showWaitScreen()
-                                    removeWorkInProcessWindow()
+                                val articles = mutableListOf<Article>()
+                                try {
+                                    if (it) {
+                                        articles.add(mNewsDataRepository.getLatestArticleByPage(mPage))
+                                    }
+                                    articles.addAll(mNewsDataRepository.downloadPreviousArticlesByPage(mPage))
+                                } catch (ex: Exception) {
+                                    if (!amDisposed) {
+                                        throw ex
+                                    }
                                 }
-                                it
+                                articles.toList()
                             }
-                            .observeOn(Schedulers.io())
-                            .map {
-                                if (it) {
-                                    mNewsDataRepository.getLatestArticleByPage(mPage)
-                                }
-                                mNewsDataRepository.downloadPreviousArticlesByPage(mPage)
+                            .doOnDispose {
+                                mArticleLoadRunning = false
+                                amDisposed = true
                             }
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribeWith(object : DisposableObserver<List<Article>>() {
                                 override fun onComplete() {
                                     mArticleLoadRunning = false
-                                    removeWorkInProcessWindow()
+//                                    removeWorkInProcessWindow()
                                     hideWaitScreen()
                                 }
 
                                 override fun onNext(articleList: List<Article>) {}
                                 override fun onError(throwable: Throwable) {
                                     mArticleLoadRunning = false
-                                    removeWorkInProcessWindow()
+//                                    removeWorkInProcessWindow()
                                     hideWaitScreen()
                                     when (throwable) {
                                         is DataNotFoundException -> {
                                             mInvHaveMoreArticle.set()
                                         }
-                                        is DataServerNotAvailableExcepption -> {
-                                            DisplayUtils.showShortSnack(mPageViewContainer, "Remote server error! Please try again later.")
-                                        }
                                         is NoInternertConnectionException -> {
                                             NetConnectivityUtility.showNoInternetToast(this@PageViewActivity)
                                         }
                                         else -> {
-                                            throw throwable
+                                            LoggerUtils.printStackTrace(throwable)
                                         }
                                     }
                                 }
                             })
             )
         }
-    }
-
-    private fun hideProgressBars() {
-        mArticleLoadingProgressBarDrawerHolder.visibility = View.GONE
-        mArticleLoadingProgressBarEnd.visibility = View.GONE
-    }
-
-    private fun showProgressBars() {
-        mArticleLoadingProgressBarDrawerHolder.visibility = View.VISIBLE
-        mArticleLoadingProgressBarEnd.visibility = View.VISIBLE
-
-        mArticleLoadingProgressBarDrawerHolder.bringToFront()
-        mArticleLoadingProgressBarEnd.bringToFront()
-    }
-
-    private fun postArticlesForDisplay(articleList: List<Article>) {
-        mArticleList.clear()
-        mArticleList.addAll(articleList)
-        if (!::mArticlePreviewListAdapter.isInitialized) {
-            mArticlePreviewListAdapter = ArticlePreviewListAdapter(this, mLanguage, {
-                mArticleViewContainer.currentItem = it
-            })
-            mArticlePreviewListHolder.adapter = mArticlePreviewListAdapter
-        }
-        mArticlePreviewListAdapter.submitList(mArticleList.toList())
-        if (!::mFragmentStatePagerAdapter.isInitialized) {
-            initViewPager()
-        } else {
-            mFragmentStatePagerAdapter.notifyDataSetChanged()
-        }
-    }
-
-    private fun closeNavigationDrawer() {
-        mDrawerLayout.closeDrawer(GravityCompat.START)
     }
 
     private val SIGN_IN_PROMPT = "Sign in and continue."
@@ -606,12 +443,6 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
     }
 
-    private fun removePageFromFavListAction() =
-            changePageFavStatus(PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE)
-
-    private fun addPageToFavListAction() =
-            changePageFavStatus(PAGE_FAV_STATUS_CHANGE_ACTION.ADD)
-
     var actionAfterSuccessfulLogIn: (() -> Unit)? = null
 
     override fun launchSignInActivity(doOnSignIn: () -> Unit) {
@@ -623,17 +454,11 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
     }
 
     override fun loadWorkInProcessWindow() {
-        if (!mWaitWindowShown) {
-            showProgressBars()
-            mWaitWindowShown = true
-        }
+        showWaitScreen()
     }
 
     override fun removeWorkInProcessWindow() {
-        if (mWaitWindowShown) {
-            mWaitWindowShown = false
-            hideProgressBars()
-        }
+        hideWaitScreen()
     }
 
     private enum class PAGE_FAV_STATUS_CHANGE_ACTION {
@@ -641,3 +466,104 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
     }
 }
 
+class ArticlePreviewListAdapterForPage(val articleClickAction: (Article) -> Unit, val requestMoreArticle: () -> Unit) :
+        ListAdapter<Article, ArticlePreviewHolderForPage>(ArticleDiffCallback) {
+
+    override fun onBindViewHolder(holder: ArticlePreviewHolderForPage, position: Int) {
+        holder.itemView.setOnClickListener { articleClickAction(getItem(position)) }
+        if (position >= (itemCount - 2)) {
+            requestMoreArticle()
+        }
+        holder.bind(getItem(position))
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticlePreviewHolderForPage {
+        return ArticlePreviewHolderForPage(LayoutInflater.from(parent.context)
+                .inflate(R.layout.view_article_preview, parent, false))
+    }
+}
+
+
+class ArticlePreviewHolderForPage(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+    val pageTitle: TextView
+    val articlePreviewImage: ImageView
+    val articleTitle: TextView
+    val articlePublicationTime: TextView
+    val articleTextPreview: TextView
+
+    val articleTitlePlaceHolder: TextView
+    val articlePublicationTimePlaceHolder: TextView
+    val articleTextPreviewPlaceHolder: TextView
+
+    lateinit var mdisposable: Disposable
+
+
+    init {
+
+        pageTitle = itemView.findViewById(R.id.page_title)
+        articlePreviewImage = itemView.findViewById(R.id.article_preview_image)
+
+        articleTitle = itemView.findViewById(R.id.article_title)
+        articlePublicationTime = itemView.findViewById(R.id.article_time)
+        articleTextPreview = itemView.findViewById(R.id.article_text_preview)
+
+        articleTitlePlaceHolder = itemView.findViewById(R.id.article_title_ph)
+        articlePublicationTimePlaceHolder = itemView.findViewById(R.id.article_time_ph)
+        articleTextPreviewPlaceHolder = itemView.findViewById(R.id.article_text_preview_ph)
+
+        disableView()
+    }
+
+    private fun disableView() {
+        pageTitle.visibility = View.GONE
+        articleTitle.visibility = View.GONE
+        articlePublicationTime.visibility = View.GONE
+        articleTextPreview.visibility = View.GONE
+
+        articleTitlePlaceHolder.visibility = View.VISIBLE
+        articlePublicationTimePlaceHolder.visibility = View.VISIBLE
+        articleTextPreviewPlaceHolder.visibility = View.VISIBLE
+        ImageUtils.customLoader(imageView = articlePreviewImage,
+                defaultImageResourceId = R.drawable.pc_bg,
+                placeHolderImageResourceId = R.drawable.pc_bg)
+    }
+
+    private fun enableView() {
+
+        articleTitlePlaceHolder.visibility = View.GONE
+        articlePublicationTimePlaceHolder.visibility = View.GONE
+        articleTextPreviewPlaceHolder.visibility = View.GONE
+
+//        pageTitle.visibility = View.VISIBLE
+        articleTitle.visibility = View.VISIBLE
+        articlePublicationTime.visibility = View.VISIBLE
+        articleTextPreview.visibility = View.VISIBLE
+    }
+
+    @SuppressLint("CheckResult")
+    fun bind(article: Article) {
+        disableView()
+        val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
+        Observable.just(article)
+                .subscribeOn(Schedulers.io())
+                .map {
+                    val page = appSettingsRepository.findPageById(it.pageId!!)!!
+                    val newspaper = appSettingsRepository.getNewspaperByPage(page)
+                    val language = appSettingsRepository.getLanguageByNewspaper(newspaper)
+                    Triple(language, newspaper, page)
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+//                    pageTitle.text = it.third.name!!
+                    articleTitle.text = article.title
+                    articlePublicationTime.text = DisplayUtils.getArticlePublicationDateString(article, it.first, itemView.context)
+                    DisplayUtils.displayHtmlText(articleTextPreview, article.articleText ?: "")
+//                    debugLog(article.toString())
+                    enableView()
+
+                    ImageUtils.customLoader(articlePreviewImage, article.previewImageLink,
+                            R.drawable.pc_bg, R.drawable.app_big_logo)
+                }
+    }
+}

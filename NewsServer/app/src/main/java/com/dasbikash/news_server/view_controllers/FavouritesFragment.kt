@@ -265,7 +265,7 @@ class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: Compos
 
                                     articleImage.setOnClickListener {
                                         itemView.context.startActivity(
-                                                PageViewActivity.getIntentForPageDisplay(itemView.context, mPage))
+                                                PageViewActivity.getIntentForLatestArticleDisplay(itemView.context, mPage))
                                     }
                                 }
                             }

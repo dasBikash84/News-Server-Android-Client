@@ -263,7 +263,7 @@ class SearchResultEntryViewHolder(itemView: View): PageViewHolder(itemView){
 
         itemView.setOnClickListener {
             itemView.context
-                .startActivity(PageViewActivity.getIntentForPageDisplay(itemView.context,page))
+                .startActivity(PageViewActivity.getIntentForLatestArticleDisplay(itemView.context,page))
         }
     }
 }

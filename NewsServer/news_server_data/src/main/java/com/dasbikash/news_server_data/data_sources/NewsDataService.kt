@@ -21,7 +21,7 @@ import com.dasbikash.news_server_data.models.room_entity.Page
 internal abstract class NewsDataService {
 
     companion object {
-        const val DEFAULT_ARTICLE_REQUEST_SIZE = 5
+        const val DEFAULT_ARTICLE_REQUEST_SIZE = 10
         const val WAITING_MS_FOR_NET_RESPONSE = 30000L
     }
 

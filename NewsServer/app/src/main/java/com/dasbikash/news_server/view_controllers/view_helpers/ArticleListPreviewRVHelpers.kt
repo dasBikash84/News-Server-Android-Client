@@ -14,8 +14,6 @@
 package com.dasbikash.news_server.view_controllers.view_helpers
 
 import android.annotation.SuppressLint
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -231,7 +229,7 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName: Int = 0
         //Add click listner
         itemView.setOnClickListener(View.OnClickListener {
             itemView.context.startActivity(
-                    PageViewActivity.getIntentForPageDisplay(
+                    PageViewActivity.getIntentForLatestArticleDisplay(
                             itemView.context, page
                     )
             )

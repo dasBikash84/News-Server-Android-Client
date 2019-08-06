@@ -543,7 +543,7 @@ class LatestArticlePreviewHolder(itemView: View, val lifeCycleAwareCompositeDisp
                             //Add click listner
                             itemView.setOnClickListener(View.OnClickListener {
                                 itemView.context.startActivity(
-                                        PageViewActivity.getIntentForPageDisplay(
+                                        PageViewActivity.getIntentForLatestArticleDisplay(
                                                 itemView.context, page
                                         )
                                 )
