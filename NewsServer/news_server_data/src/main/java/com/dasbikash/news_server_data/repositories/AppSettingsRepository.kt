@@ -107,6 +107,8 @@ abstract class AppSettingsRepository {
         }
     }
 
+    abstract fun findNewsCategoryById(newsCategoryId: String): NewsCategory?
+
 
     companion object {
         @Volatile

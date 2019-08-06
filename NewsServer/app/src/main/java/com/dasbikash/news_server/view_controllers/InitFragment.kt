@@ -38,7 +38,6 @@ import com.dasbikash.news_server_data.exceptions.DataSourceNotFoundException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
-import com.dasbikash.news_server_data.page_request_server.PageRequestServerInitiator
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
@@ -183,7 +182,25 @@ class InitFragment : Fragment() {
     }
 
     private fun testRoutine() {
-        debugLog(RepositoryFactory.getAppSettingsRepository(context!!).getNewsCategories().toString())
+        /*val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
+        val newsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
+        val newsCategories = appSettingsRepository.getNewsCategories()
+        newsCategories.take(1).forEach {
+            debugLog(it.toString())
+            val latestArticles = newsDataRepository.getLatestArticlesByNewsCategory(it,context!!)
+            latestArticles.forEach {
+                debugLog(it.toString())
+            }
+            if (latestArticles.isNotEmpty()) {
+                debugLog(it.toString())
+                latestArticles.sortedBy { it.publicationTime!! }.first().apply {
+                    debugLog(this.toString())
+                    newsDataRepository.getArticlesByNewsCategoryBeforeLastArticle(it,this,context!!).forEach {
+                        debugLog(it.toString())
+                    }
+                }
+            }
+        }*/
     }
 
     private fun doOnError(throwable: Throwable) {

@@ -19,9 +19,13 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
-        <activity android:name=".view_controllers.AdminActivity"
+        <activity
+            android:name=".view_controllers.NewsCategoryArticleViewActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".view_controllers.AdminActivity"
             android:parentActivityName=".view_controllers.HomeActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".view_controllers.HomeActivity"
             android:screenOrientation="portrait">
@@ -44,11 +48,11 @@
         </activity>
         <activity
             android:name=".view_controllers.PageViewActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".view_controllers.SavedArticleViewActivity"
             android:parentActivityName=".view_controllers.HomeActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <uses-library
             android:name="android.test.runner"

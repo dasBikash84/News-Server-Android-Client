@@ -101,4 +101,7 @@ internal class AppSettingsRepositoryRoomImpl internal constructor(context: Conte
         return mDatabase.pageDao.findById(pageId)
     }
 
+    override fun findNewsCategoryById(newsCategoryId: String): NewsCategory? {
+        return mDatabase.newsCategoryDao.findById(newsCategoryId)
+    }
 }

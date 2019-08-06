@@ -19,6 +19,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.google.firebase.database.Exclude
 import com.google.gson.annotations.Expose
+import io.reactivex.internal.operators.flowable.FlowableDelaySubscriptionOther
 import java.io.Serializable
 import java.util.*
 
@@ -60,5 +61,8 @@ data class Article(
         return "Article(id='$id', pageId=$pageId, newspaperId=$newspaperId, title=$title, publicationTime=$publicationTime)"
     }
 
+    fun checkIfSameArticle(other: Article):Boolean{
+        return (id == other.id) || (id.substringBefore('_').equals(other.id.substringBefore('_')))
+    }
 
 }

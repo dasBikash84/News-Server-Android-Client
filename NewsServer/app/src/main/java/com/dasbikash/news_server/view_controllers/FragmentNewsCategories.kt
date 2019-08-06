@@ -91,6 +91,7 @@ class FragmentNewsCategories : Fragment() {
 
     private fun doOnNewsCategoryNameClick(newsCategory: NewsCategory) {
         debugLog(newsCategory.toString())
+        activity!!.startActivity(NewsCategoryArticleViewActivity.getIntentForNewsCategory(context!!,newsCategory))
     }
 
     companion object{

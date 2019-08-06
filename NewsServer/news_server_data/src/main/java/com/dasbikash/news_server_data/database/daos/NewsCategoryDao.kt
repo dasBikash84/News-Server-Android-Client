@@ -31,4 +31,7 @@ internal interface NewsCategoryDao {
 
     @Query("DELETE FROM Country")
     fun nukeTable()
+
+    @Query("SELECT * FROM NewsCategory WHERE id=:newsCategoryId limit 1")
+    fun findById(newsCategoryId: String): NewsCategory?
 }

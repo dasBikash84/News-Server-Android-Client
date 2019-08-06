@@ -97,15 +97,20 @@ abstract class NewsDataRepository {
         return newsDataService.findArticleById(articleId,pageId)
     }
 
-    fun getLatestArticlesByNewsCategory(newsCategory: NewsCategory, context: Context): List<Article>{
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        val rawArticles = newsDataService.getRawLatestArticlesByNewsCategory(newsCategory)
-        return processRawArticlesFoundForNewsCategory(rawArticles, context)
-    }
-    fun getArticlesByNewsCategoryBeforeLastArticle(newsCategory: NewsCategory, lastArticle: Article, context: Context)
+    fun getLatestArticlesByNewsCategory(newsCategory: NewsCategory, context: Context
+                                        ,loadChunkSize:Int= DEFAULT_ARTICLE_LOAD_CHUNK_SIZE_FOR_NEWS_CATEGORY)
             : List<Article>{
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        val rawArticles = newsDataService.getRawArticlesByNewsCategoryBeforeLastArticle(newsCategory,lastArticle)
+        val rawArticles = newsDataService.getRawLatestArticlesByNewsCategory(newsCategory,loadChunkSize)
+        return processRawArticlesFoundForNewsCategory(rawArticles, context)
+    }
+
+    fun getArticlesByNewsCategoryBeforeLastArticle(newsCategory: NewsCategory, lastArticle: Article, context: Context
+                                                   ,loadChunkSize:Int= DEFAULT_ARTICLE_LOAD_CHUNK_SIZE_FOR_NEWS_CATEGORY)
+            : List<Article>{
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        val rawArticles = newsDataService
+                                        .getRawArticlesByNewsCategoryBeforeLastArticle(newsCategory,lastArticle,loadChunkSize)
         return processRawArticlesFoundForNewsCategory(rawArticles, context)
     }
 
@@ -123,7 +128,7 @@ abstract class NewsDataRepository {
     abstract fun getArticleCountForPage(page: Page): Int
 
     companion object {
-
+        private const val DEFAULT_ARTICLE_LOAD_CHUNK_SIZE_FOR_NEWS_CATEGORY = 10
         @Volatile
         private lateinit var INSTANCE: NewsDataRepository
 
