@@ -53,6 +53,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
         SignInHandler, WorkInProcessWindowOperator {
 
     companion object {
+        private const val ARTICLE_LOAD_CHUNK_SIZE = 10
         const val LOG_IN_REQ_CODE = 7777
         const val EXTRA_FOR_PAGE = "com.dasbikash.news_server.views.PageViewActivity.EXTRA_FOR_PAGE"
         const val EXTRA_FOR_PURPOSE = "com.dasbikash.news_server.views.PageViewActivity.EXTRA_FOR_PURPOSE"
@@ -169,9 +170,14 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(this)
 
         hideWaitScreen()
-        mArticlePreviewHolderAdapter = ArticlePreviewListAdapterForPage({ doOnArticleClick(it) }, { loadMoreArticles() })
+        mArticlePreviewHolderAdapter = ArticlePreviewListAdapterForPage({ doOnArticleClick(it) }, { loadMoreArticles() }, { showLoadingIfRequired() }, ARTICLE_LOAD_CHUNK_SIZE)
         mArticlePreviewHolder.adapter = mArticlePreviewHolderAdapter
-//        mWaitScreen.setOnClickListener {  }
+    }
+
+    private fun showLoadingIfRequired() {
+        if (mArticleLoadRunning){
+            showWaitScreen()
+        }
     }
 
     private fun showWaitScreen() {
@@ -303,7 +309,9 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
         if (!mArticleLoadRunning && !mInvHaveMoreArticle.get()) {
 
-            showWaitScreen()
+            if (mArticleList.size<2) {
+                showWaitScreen()
+            }
             mArticleLoadRunning = true
             var amDisposed = false
             mDisposable.add(
@@ -321,7 +329,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
                                     if (it) {
                                         articles.add(mNewsDataRepository.getLatestArticleByPage(mPage))
                                     }
-                                    articles.addAll(mNewsDataRepository.downloadPreviousArticlesByPage(mPage))
+                                    articles.addAll(mNewsDataRepository.downloadPreviousArticlesByPage(mPage,ARTICLE_LOAD_CHUNK_SIZE))
                                 } catch (ex: Exception) {
                                     if (!amDisposed) {
                                         throw ex
@@ -466,13 +474,17 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
     }
 }
 
-class ArticlePreviewListAdapterForPage(val articleClickAction: (Article) -> Unit, val requestMoreArticle: () -> Unit) :
+class ArticlePreviewListAdapterForPage(val articleClickAction: (Article) -> Unit, val requestMoreArticle: () -> Unit,
+                                       val showLoadingIfRequired: () -> Unit, val articleLoadChunkSize: Int) :
         ListAdapter<Article, ArticlePreviewHolderForPage>(ArticleDiffCallback) {
 
     override fun onBindViewHolder(holder: ArticlePreviewHolderForPage, position: Int) {
         holder.itemView.setOnClickListener { articleClickAction(getItem(position)) }
-        if (position >= (itemCount - 2)) {
+        if (position >= (itemCount - articleLoadChunkSize / 2)) {
             requestMoreArticle()
+        }
+        if (position == (itemCount - 1)) {
+            showLoadingIfRequired()
         }
         holder.bind(getItem(position))
     }

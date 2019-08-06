@@ -88,29 +88,31 @@ class NewsCategoryArticleViewActivity : AppCompatActivity() {
 
     private fun init() {
 
-        hideWaitScreen()
-
-        mArticlePreviewHolderAdapter = ArticlePreviewListAdapter({ doOnArticleClick(it) }, { loadMoreArticles() })
+        mArticlePreviewHolderAdapter = ArticlePreviewListAdapter({ doOnArticleClick(it) }, { loadMoreArticles() }, { showLoadingIfRequired() }, ARTICLE_LOAD_CHUNK_SIZE)
         mArticlePreviewHolder.adapter = mArticlePreviewHolderAdapter
+    }
+
+    private fun showLoadingIfRequired() {
+        if (mNewArticleLoadInProgress) {
+            showWaitScreen()
+        }
     }
 
     override fun onResume() {
         super.onResume()
+        hideWaitScreen()
         mNewArticleLoadInProgress = false
         if (mArticleList.isEmpty()) {
             loadMoreArticles()
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        hideWaitScreen()
-    }
-
     private fun loadMoreArticles() {
         if (!mNewArticleLoadInProgress && !mEndReachedForArticles.get()) {
             mNewArticleLoadInProgress = true
-            showWaitScreen()
+            if (mArticleList.isEmpty()) {
+                showWaitScreen()
+            }
             var amDisposed = false
             mDisposable.add(
                     Observable.just(true)
@@ -227,13 +229,17 @@ class NewsCategoryArticleViewActivity : AppCompatActivity() {
 }
 
 
-class ArticlePreviewListAdapter(val articleClickAction: (Article) -> Unit, val requestMoreArticle: () -> Unit) :
+class ArticlePreviewListAdapter(val articleClickAction: (Article) -> Unit, val requestMoreArticle: () -> Unit,
+                                val showLoadingIfRequired: () -> Unit, val articleLoadChunkSize: Int) :
         ListAdapter<Article, ArticlePreviewHolder>(ArticleDiffCallback) {
 
     override fun onBindViewHolder(holder: ArticlePreviewHolder, position: Int) {
         holder.itemView.setOnClickListener { articleClickAction(getItem(position)) }
-        if (position >= (itemCount - 2)) {
+        if (position >= (itemCount - articleLoadChunkSize / 2)) {
             requestMoreArticle()
+        }
+        if (position == (itemCount - 1)) {
+            showLoadingIfRequired()
         }
         holder.bind(getItem(position))
     }

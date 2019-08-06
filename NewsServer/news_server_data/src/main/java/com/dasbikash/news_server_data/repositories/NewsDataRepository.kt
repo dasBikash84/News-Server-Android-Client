@@ -63,12 +63,12 @@ abstract class NewsDataRepository {
         return article
     }
 
-    fun downloadPreviousArticlesByPage(page: Page): List<Article> {
+    fun downloadPreviousArticlesByPage(page: Page,articleLoadChunkSize:Int): List<Article> {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val article = getOldestArticle(page)
         article?.let {
             try {
-                val articles = newsDataService.getArticlesBeforeLastArticle(page, it)
+                val articles = newsDataService.getArticlesBeforeLastArticle(page, it,articleLoadChunkSize)
                 insertArticles(articles)
                 return articles
             } catch (ex: DataNotFoundException) {
