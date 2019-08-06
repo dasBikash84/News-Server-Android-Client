@@ -191,14 +191,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     }
                     true
                 }
-                /*R.id.bottom_menu_item_eng -> {
-                    if (!(currentFragment is NewsPaperGroupFragment && currentFragment.isEngNpFragment())) {
-                        mAppBar.visibility = View.GONE
-                        loadEngNpFragment()
-                        mBottomNavigationView.visibility = View.VISIBLE
-                    }
-                    true
-                }*/
+
                 R.id.bottom_menu_item_news_categories -> {
                     if (!(currentFragment is FragmentNewsCategories)) {
                         mAppBar.visibility = View.VISIBLE
@@ -207,14 +200,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     }
                     true
                 }
-                /*R.id.bottom_menu_item_bn -> {
-                    if (!(currentFragment is NewsPaperGroupFragment && currentFragment.isBngNpFragment())) {
-                        mAppBar.visibility = View.GONE
-                        loadBngNpFragment()
-                        mBottomNavigationView.visibility = View.VISIBLE
-                    }
-                    true
-                }*/
+
                 R.id.bottom_menu_item_article_search -> {
                     if (!(currentFragment is FragmentArticleSearch)) {
                         mAppBar.visibility = View.VISIBLE
@@ -223,14 +209,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     }
                     true
                 }
-                /*R.id.bottom_menu_item_page_group -> {
-                    if (!(currentFragment is PageGroupFragment)) {
-                        mAppBar.visibility = View.VISIBLE
-                        loadPageGroupFragment()
-                        mBottomNavigationView.visibility = View.VISIBLE
-                    }
-                    true
-                }*/
+
                 R.id.bottom_menu_item_favourites -> {
                     if (!(currentFragment is FavouritesFragment)) {
                         mAppBar.visibility = View.VISIBLE
@@ -239,10 +218,10 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     }
                     true
                 }
-                R.id.bottom_menu_item_more -> {
+                R.id.bottom_menu_item_saved_articles -> {
                     if (!(currentFragment is SavedArticlesFragment)) {
                         mAppBar.visibility = View.VISIBLE
-                        loadMoreFragment()
+                        loadSavedArticlesFragment()
                         mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
