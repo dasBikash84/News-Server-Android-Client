@@ -18,7 +18,7 @@
     android:layout_height="match_parent"
     android:paddingTop="?attr/actionBarSize"
     android:paddingBottom="?attr/actionBarSize"
-    android:background="@color/colorPageBackground">
+    android:background="@color/snow_white2">
 
     <LinearLayout
         android:id="@+id/no_saved_article_found_message_holder"
@@ -50,14 +50,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:overScrollMode="never"
-        android:scrollbars="vertical">
+        android:scrollbars="vertical"
+        android:background="@android:color/transparent">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/saved_article_preview_holder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:background="@android:color/transparent"/>
     </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

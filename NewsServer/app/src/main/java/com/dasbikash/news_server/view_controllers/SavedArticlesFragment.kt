@@ -90,7 +90,7 @@ class SavedArticlesFragment : Fragment() {
 
     fun doOnArticleClick(savedArticle: SavedArticle) {
         LoggerUtils.debugLog("${savedArticle.title} clicked", this::class.java)
-        activity!!.startActivity(SavedArticleViewActivity.getIntent(savedArticle, context!!))
+//        activity!!.startActivity(SavedArticleViewActivity.getIntent(savedArticle, context!!))
     }
 
     fun savedArticleDeleteAction(savedArticle: SavedArticle) {
@@ -137,7 +137,7 @@ class SavedArticlePreviewListAdapter(val clickAction: (savedArticle: SavedArticl
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SavedArticlePreviewHolder {
         return SavedArticlePreviewHolder(
                 LayoutInflater.from(parent.context)
-                        .inflate(R.layout.view_saved_article_preview_holder, parent, false))
+                        .inflate(R.layout.view_saved_article_preview, parent, false))
     }
 }
 
