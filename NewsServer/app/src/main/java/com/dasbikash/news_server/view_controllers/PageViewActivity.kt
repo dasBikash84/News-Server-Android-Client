@@ -67,7 +67,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
             return intent
         }
 
-        fun getIntentForLatestPageBrowsing(context: Context, page: Page): Intent {
+        fun getIntentForPageBrowsing(context: Context, page: Page): Intent {
             val intent = Intent(context, PageViewActivity::class.java)
             intent.putExtra(EXTRA_FOR_PAGE, page)
             intent.putExtra(EXTRA_FOR_PURPOSE, EXTRA_VALUE_FOR_PAGE_BROWSING)
