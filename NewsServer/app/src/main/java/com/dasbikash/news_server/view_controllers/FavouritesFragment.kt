@@ -13,15 +13,12 @@
 
 package com.dasbikash.news_server.view_controllers
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.widget.NestedScrollView
@@ -35,23 +32,21 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
+import com.dasbikash.news_server.utils.debugLog
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.view_controllers.view_helpers.PageDiffCallback
 import com.dasbikash.news_server.view_models.HomeViewModel
-import com.dasbikash.news_server_data.exceptions.DataNotFoundException
-import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
-import com.dasbikash.news_server_data.models.room_entity.*
+import com.dasbikash.news_server_data.models.room_entity.Newspaper
+import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
-import com.dasbikash.news_server_data.utills.ImageLoadingDisposer
-import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
 import io.reactivex.observers.DisposableObserver
@@ -86,7 +81,7 @@ class FavouritesFragment : Fragment() {
         mNoFavPageMsgHolder = view.findViewById(R.id.no_fav_page_found_message_holder)
         mNoFavPageLogInButton = view.findViewById(R.id.no_fav_page_found_log_in_button)
 
-        mFavouritePagesListAdapter = FavouritePagesListAdapter(context!!)
+        mFavouritePagesListAdapter = FavouritePagesListAdapter()
 
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
 
@@ -114,19 +109,31 @@ class FavouritesFragment : Fragment() {
                             disposable.add(Observable.just(favouritePageIdList)
                                     .subscribeOn(Schedulers.io())
                                     .map {
-                                        it.asSequence().map { appSettingsRepository.findPageById(it) }.filter { it != null }.sortedBy { it!!.name!! }.toList()
+                                        it.asSequence()
+                                                .map {
+                                                    debugLog(it.toString())
+                                                    it
+                                                }.filter { appSettingsRepository.findPageById(it) !=null }
+                                                .map {
+                                                    val page = appSettingsRepository.findPageById(it)!!
+                                                    debugLog("$it : $page")
+                                                    page
+                                                }
+                                                .sortedBy { it.name }
+                                                .toList()
                                     }
                                     .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribeWith(object : DisposableObserver<List<Page?>>() {
+                                    .subscribeWith(object : DisposableObserver<List<Page>>() {
                                         override fun onComplete() {}
-                                        override fun onNext(pageList: List<Page?>) {
-                                            if (pageList.isNullOrEmpty()) {
+                                        override fun onNext(pageList: List<Page>) {
+                                            if (pageList.isEmpty()) {
                                                 mNoFavPageMsgHolder.visibility = View.VISIBLE
                                                 mScroller.visibility = View.GONE
                                             } else {
                                                 mNoFavPageMsgHolder.visibility = View.GONE
                                                 mScroller.visibility = View.VISIBLE
                                             }
+                                            pageList.asSequence().forEach { debugLog(it.toString()) }
                                             mFavouritePagesListAdapter.submitList(pageList)
                                         }
 
@@ -148,162 +155,62 @@ class FavouritesFragment : Fragment() {
     }
 }
 
-class FavouritePagesListAdapter(val context: Context) :
+class FavouritePagesListAdapter() :
         ListAdapter<Page, FavouritePagePreviewHolder>(PageDiffCallback) {
 
-    val disposable = CompositeDisposable()
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavouritePagePreviewHolder {
-        return FavouritePagePreviewHolder(LayoutInflater.from(context).inflate(
-                R.layout.view_article_perview_for_fav_page, parent, false), disposable)
+        return FavouritePagePreviewHolder(LayoutInflater.from(parent.context).inflate(
+                R.layout.view_article_perview_for_fav_page, parent, false))
     }
 
     override fun onBindViewHolder(holder: FavouritePagePreviewHolder, position: Int) {
-        disposable.add(
-                Observable.just(getItem(position))
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(holder.itemView.context)
-                            Pair(it, appSettingsRepository.getNewspaperByPage(it))
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(Consumer {
-                            it?.let { holder.bind(it.first, it.second) }
-                        })
-        )
-    }
-
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        super.onDetachedFromRecyclerView(recyclerView)
-        disposable.clear()
+        holder.itemView.setOnClickListener {
+            it.context.startActivity(
+                    PageViewActivity.getIntentForPageBrowsing(it.context, getItem(position)))
+        }
+        holder.bind(getItem(position))
     }
 }
 
-class FavouritePagePreviewHolder(itemview: View, val compositeDisposable: CompositeDisposable) : RecyclerView.ViewHolder(itemview) {
+class FavouritePagePreviewHolder(itemview: View) : RecyclerView.ViewHolder(itemview) {
 
-    val articlePreviewHolder: LinearLayout
     private val pageTitle: AppCompatTextView
     private val pageTitleHolder: MaterialCardView
-    private val articleTitle: AppCompatTextView
-    private val articlePublicationTime: AppCompatTextView
-    private val articleImage: AppCompatImageView
-
-    val articleTitlePlaceHolder: TextView
-    val articlePublicationTimePlaceHolder: TextView
 
     lateinit var mPage: Page
     lateinit var mNewspaper: Newspaper
-    private lateinit var mArticle: Article
+
+    lateinit var mDisposable: Disposable
 
     init {
         pageTitleHolder = itemview.findViewById(R.id.page_title_holder) as MaterialCardView
-        articlePreviewHolder = itemView.findViewById(R.id.article_preview_holder)
         pageTitle = itemview.findViewById(R.id.page_title)
-        articleTitle = itemview.findViewById(R.id.article_title)
-        articlePublicationTime = itemview.findViewById(R.id.article_time)
-        articleImage = itemview.findViewById(R.id.article_preview_image)
-
-        articleTitlePlaceHolder = itemView.findViewById(R.id.article_title_ph)
-        articlePublicationTimePlaceHolder = itemView.findViewById(R.id.article_time_ph)
     }
 
-    fun bind(page: Page?, newspaper: Newspaper) {
+    fun bind(page: Page) {
 
-        pageTitleHolder.visibility = View.GONE
-        hideChilds()
-
-        pageTitleHolder.setOnClickListener({})
-
-        if (page == null) return
-        mNewspaper = newspaper
         mPage = page
-        //Log.d("FavouritesFragment","Page: ${mPage.name}")
 
-        pageTitle.text = StringBuilder().append(mPage.name).append(" | ").append(mNewspaper.name).toString()
-        pageTitleHolder.visibility = View.VISIBLE
-
-        pageTitleHolder.setOnClickListener {
-            if (!::mArticle.isInitialized) {
-                showChilds()
-                val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
-                val newsDataRepository = RepositoryFactory.getNewsDataRepository(itemView.context)
-                var language: Language
-                Observable.just(mPage)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            val article = newsDataRepository.getLatestArticleByPage(it)
-                            article.let {
-                                language = appSettingsRepository.getLanguageByPage(mPage)
-                                return@map Pair(it, DisplayUtils.getArticlePublicationDateString(article, language, itemView.context, true))
-                            }
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Any>() {
-                            override fun onComplete() {
-                            }
-
-                            override fun onNext(data: Any) {
-                                if (data is Pair<*, *>) {
-//                                    showChilds()
-                                    @Suppress("UNCHECKED_CAST")
-                                    mArticle = (data as Pair<Article, String>).first
-
-                                    articleTitle.text = mArticle.title
-                                    articlePublicationTime.text = data.second
-
-                                    articleTitlePlaceHolder.visibility = View.GONE
-                                    articlePublicationTimePlaceHolder.visibility = View.GONE
-                                    articleTitle.visibility = View.VISIBLE
-                                    articlePublicationTime.visibility = View.VISIBLE
-
-                                    val imageLoadingDisposer: Disposable = ImageLoadingDisposer(articleImage)
-                                    compositeDisposable.add(imageLoadingDisposer)
-
-                                    ImageUtils.customLoader(articleImage, mArticle.previewImageLink,
-                                            R.drawable.pc_bg, R.drawable.app_big_logo,
-                                            { compositeDisposable.delete(imageLoadingDisposer) })
-
-                                    articleImage.setOnClickListener {
-                                        itemView.context.startActivity(
-                                                PageViewActivity.getIntentForLatestArticleDisplay(itemView.context, mPage))
-                                    }
-                                }
-                            }
-
-                            override fun onError(e: Throwable) {
-                                when (e) {
-                                    is NoInternertConnectionException -> {
-                                        NetConnectivityUtility.showNoInternetToastAnyWay(itemView.context)
-                                    }
-                                    is DataNotFoundException -> {
-
-                                    }
-                                    is DataServerException -> {
-
-                                    }
-                                    else -> {
-
-                                    }
-                                }
-                                hideChilds()
-                            }
-                        })
-            } else {
-                if (articlePreviewHolder.visibility == View.GONE) {
-                    showChilds()
-                } else {
-                    hideChilds()
-                }
-            }
+        if (::mDisposable.isInitialized){
+            debugLog("mDisposable.dispose()")
+            mDisposable.dispose()
         }
-    }
 
-    private fun hideChilds() {
-        articlePreviewHolder.visibility = View.GONE
-    }
-
-    private fun showChilds() {
-        articlePreviewHolder.visibility = View.VISIBLE
+        mDisposable = Observable.just(mPage)
+                            .subscribeOn(Schedulers.computation())
+                            .map {
+                                debugLog("On bind map: $it")
+                                val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
+                                Pair(it, appSettingsRepository.getNewspaperByPage(it))
+                            }
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(Consumer {
+                                debugLog("On bind subscribe: ${it.first}")
+                                debugLog("On bind subscribe: ${it.second}")
+                                mNewspaper = it.second
+                                pageTitle.text = StringBuilder().append(mPage.name).append(" | ").append(mNewspaper.name).toString()
+                                pageTitleHolder.visibility = View.VISIBLE
+                            })
     }
 
 }
