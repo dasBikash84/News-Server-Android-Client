@@ -95,7 +95,7 @@ class FragmentNewsCategories : Fragment() {
     }
 
     companion object{
-        private const val TITLE_TEXT = "News Categories"
+        private const val TITLE_TEXT = "Topics"
     }
 }
 

@@ -68,60 +68,12 @@
         </androidx.core.widget.NestedScrollView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
-        android:id="@+id/page_search_box_operators_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/page_search_text_box_layout">
-
-        <ImageView
-            android:id="@+id/show_page_search_box"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="@string/show_page_search_box_image_desc"
-            android:padding="0dp"
-            app:srcCompat="@drawable/ic_show_down" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:visibility="gone"
-        android:id="@+id/np_language_selection_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/page_search_box_operators_container"
-        android:weightSum="2">
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/bangla_text_view"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/bangla_in_bangla"
-            style="@style/np_selection_text"/>
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/english_text_view"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/english_in_english"
-            style="@style/np_selection_text"/>
-    </LinearLayout>
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/np_name_scroller_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/np_language_selection_container"
+        app:layout_constraintTop_toBottomOf="@+id/page_search_text_box_layout"
         app:layout_constraintBottom_toBottomOf="parent"
         android:background="@android:color/transparent">
 
@@ -148,26 +100,15 @@
 
         <ImageView
             android:id="@+id/show_np_name_menu"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:contentDescription="@string/show_np_name_menu_desc"
             app:srcCompat="@drawable/ic_menu"
             android:layout_gravity="start"
-            android:background="@android:color/white"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-        <ImageView
-            android:id="@+id/hide_np_name_menu"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="@string/hide_np_name_menu_desc"
-            app:srcCompat="@drawable/ic_hide_left"
-            android:background="@android:color/white"
-            android:layout_gravity="center"
-            app:layout_constraintStart_toEndOf="@+id/np_name_scroller"
-            app:layout_constraintTop_toTopOf="@+id/np_name_scroller"
-            app:layout_constraintBottom_toBottomOf="@+id/np_name_scroller"/>
+            android:background="@android:color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_margin="16dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -180,7 +121,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/np_language_selection_container"
+        app:layout_constraintTop_toBottomOf="@+id/page_search_text_box_layout"
         android:visibility="visible">
 
         <androidx.recyclerview.widget.RecyclerView

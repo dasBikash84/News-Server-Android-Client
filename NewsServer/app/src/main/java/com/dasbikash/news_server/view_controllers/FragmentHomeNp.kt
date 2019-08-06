@@ -67,15 +67,10 @@ class FragmentHomeNp : Fragment() {
     private lateinit var mPageSearchTextBox: EditText
     private lateinit var mPageSearchResultHolder: RecyclerView
     private lateinit var mPageSearchResultContainer: ViewGroup
-    private lateinit var mPageSearchBoxShowButton: ImageView
-
-    private lateinit var mSelectBanglaPapers: AppCompatTextView
-    private lateinit var mSelectEnglishPapers: AppCompatTextView
 
     private lateinit var mNewsPaperMenuHolder: RecyclerView
     private lateinit var mNewsPaperMenuContainer: ViewGroup
     private lateinit var mNewsPaperMenuShowButton: ImageView
-    private lateinit var mNewsPaperMenuHideButton: ImageView
     private lateinit var mNewsPaperListAdapter: NewsPaperListAdapter
     private lateinit var mNewsPaperScrollerContainer: ViewGroup
 
@@ -125,20 +120,15 @@ class FragmentHomeNp : Fragment() {
         mPageSearchTextBox = view.findViewById(R.id.page_search_box_edit_text)
         mPageSearchResultHolder = view.findViewById(R.id.page_search_result_holder)
         mPageSearchResultContainer = view.findViewById(R.id.page_search_result_container)
-        mPageSearchBoxShowButton = view.findViewById(R.id.show_page_search_box)
-        mSelectBanglaPapers = view.findViewById(R.id.bangla_text_view)
-        mSelectEnglishPapers = view.findViewById(R.id.english_text_view)
         mNewsPaperMenuHolder = view.findViewById(R.id.np_name_holder)
         mNewsPaperMenuContainer = view.findViewById(R.id.np_name_scroller)
         mNewsPaperMenuShowButton = view.findViewById(R.id.show_np_name_menu)
-        mNewsPaperMenuHideButton = view.findViewById(R.id.hide_np_name_menu)
         mNewsPaperScrollerContainer = view.findViewById(R.id.np_name_scroller_container)
         mPageArticlePreviewHolder = view.findViewById(R.id.page_article_preview_holder)
         mPageArticlePreviewScroller = view.findViewById(R.id.article_preview_scroller)
     }
 
     private fun setListnersForViewComponents() {
-        mPageSearchBoxShowButton.setOnClickListener { showPageSearchBox() }
 
         mPageSearchTextBox.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(text: Editable?) {
@@ -191,21 +181,19 @@ class FragmentHomeNp : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
-//        mNewsPaperScrollerContainer.setOnClickListener { hideNewsPaperMenu() }
         mNewsPaperMenuShowButton.setOnClickListener { showNewsPaperMenu() }
-        mNewsPaperMenuHideButton.setOnClickListener { hideNewsPaperMenu() }
         mPageArticlePreviewScroller.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
             override fun onScrollChange(v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
-                if (mPageSearchTextBox.visibility == View.VISIBLE) {
-                    if (scrollY >= mPageSearchTextBox.height) {
-                        mPageSearchTextBox.visibility = View.GONE
+                if (mPageSearchTextBoxContainer.visibility == View.VISIBLE) {
+                    if (scrollY >= mPageSearchTextBoxContainer.height * 2) {
+                        hidePageSearchBox()
                     }
                 } else {
                     if (scrollY == 0) {
-                        mPageSearchTextBox.visibility = View.VISIBLE
+                        showPageSearchBox()
                     }
                 }
-                if (mNewsPaperMenuHideButton.visibility == View.VISIBLE) {
+                if (mNewsPaperMenuContainer.visibility == View.VISIBLE) {
                     hideNewsPaperMenu()
                 }
                 mNewsPaperMenuShowButton.visibility = View.GONE
@@ -261,7 +249,6 @@ class FragmentHomeNp : Fragment() {
 
     private fun hideNewsPaperMenu() {
         hideNewsPaperMenuHolder()
-        mNewsPaperMenuHideButton.visibility = View.GONE
         mNewsPaperMenuShowButton.visibility = View.VISIBLE
         if (backPressTaskTagForNpMenu != null) {
             (activity as BackPressQueueManager).removeTaskFromQueue(backPressTaskTagForNpMenu!!)
@@ -276,7 +263,6 @@ class FragmentHomeNp : Fragment() {
 
     private fun showNewsPaperMenu() {
         showNewsPaperMenuHolder()
-        mNewsPaperMenuHideButton.visibility = View.VISIBLE
         mNewsPaperMenuShowButton.visibility = View.GONE
 
         if (backPressTaskTagForNpMenu != null) {
@@ -293,7 +279,7 @@ class FragmentHomeNp : Fragment() {
     }
 
     private fun determineMenuButtonOperationAction(): NP_MENU_BUTTON_OPERATION_ACTION {
-        if (mNewsPaperMenuHideButton.visibility == View.GONE &&
+        if (mNewsPaperMenuContainer.visibility == View.GONE &&
                 mNewsPaperMenuShowButton.visibility == View.GONE) {
             if (System.currentTimeMillis() - mLastArticlePreviewScrollTime > MENU_BUTTON_HIDE_TIME_MS) {
                 return NP_MENU_BUTTON_OPERATION_ACTION.SHOW
@@ -324,21 +310,11 @@ class FragmentHomeNp : Fragment() {
 
     private fun showPageSearchBox() {
         mPageSearchTextBoxContainer.visibility = View.VISIBLE
-        hidePageSearchBoxShowButton()
     }
 
     private fun hidePageSearchBox() {
         mPageSearchTextBoxContainer.visibility = View.GONE
         mPageSearchTextBox.setText("")
-        showPageSearchBoxShowButton()
-    }
-
-    private fun showPageSearchBoxShowButton() {
-        mPageSearchBoxShowButton.visibility = View.VISIBLE
-    }
-
-    private fun hidePageSearchBoxShowButton() {
-        mPageSearchBoxShowButton.visibility = View.GONE
     }
 
     private enum class NP_MENU_BUTTON_OPERATION_ACTION {

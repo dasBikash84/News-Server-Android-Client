@@ -32,7 +32,7 @@
     <string name="remove_from_favourites_menu_item_title">Remove page from favourites</string>
     <string name="add_to_favourites_menu_item_title">Add page to favourites</string>
     <string name="change_text_font_menu_item_title">Change font size</string>
-    <string name="bmi_home_title">Home</string>
+    <string name="bmi_home_title">Papers</string>
     <string name="bmi_more_title">More</string>
     <string name="bmi_saved_artiles_title">Saved</string>
     <string name="bmi_favourites_title">Favourites</string>
@@ -84,6 +84,6 @@
     <string name="english_in_english">English</string>
     <string name="hide_np_name_menu_desc">Hide Np name menu</string>
     <string name="show_np_name_menu_desc">Show Np name menu</string>
-    <string name="bmi_news_categories_title">Categories</string>
+    <string name="bmi_news_categories_title">Topics</string>
     <string name="bmi_article_search_title">Search Article</string>
 </resources>
