@@ -13,7 +13,6 @@
 
 package com.dasbikash.news_server.view_controllers
 
-import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.os.SystemClock
 import android.text.Editable
@@ -44,7 +43,6 @@ import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.Article
-import com.dasbikash.news_server_data.models.room_entity.Language
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
@@ -75,7 +73,7 @@ class FragmentHomeNp : Fragment() {
     private lateinit var mSelectEnglishPapers: AppCompatTextView
 
     private lateinit var mNewsPaperMenuHolder: RecyclerView
-    private lateinit var mNewsPaperNameListContainer: ViewGroup
+    private lateinit var mNewsPaperMenuContainer: ViewGroup
     private lateinit var mNewsPaperMenuShowButton: ImageView
     private lateinit var mNewsPaperMenuHideButton: ImageView
     private lateinit var mNewsPaperListAdapter: NewsPaperListAdapter
@@ -131,7 +129,7 @@ class FragmentHomeNp : Fragment() {
         mSelectBanglaPapers = view.findViewById(R.id.bangla_text_view)
         mSelectEnglishPapers = view.findViewById(R.id.english_text_view)
         mNewsPaperMenuHolder = view.findViewById(R.id.np_name_holder)
-        mNewsPaperNameListContainer = view.findViewById(R.id.np_name_scroller)
+        mNewsPaperMenuContainer = view.findViewById(R.id.np_name_scroller)
         mNewsPaperMenuShowButton = view.findViewById(R.id.show_np_name_menu)
         mNewsPaperMenuHideButton = view.findViewById(R.id.hide_np_name_menu)
         mNewsPaperScrollerContainer = view.findViewById(R.id.np_name_scroller_container)
@@ -271,9 +269,7 @@ class FragmentHomeNp : Fragment() {
     }
 
     private fun hideNewsPaperMenuHolder() {
-        mNewsPaperMenuHolder.visibility = View.GONE
-//        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleX",1f,0f).setDuration(100L).start()
-//        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleY",1f,0f).setDuration(100L).start()
+        mNewsPaperMenuContainer.visibility = View.GONE
     }
 
     var backPressTaskTagForNpMenu:String? = null
@@ -293,9 +289,7 @@ class FragmentHomeNp : Fragment() {
     }
 
     private fun showNewsPaperMenuHolder() {
-        mNewsPaperMenuHolder.visibility = View.VISIBLE
-//        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleX",0f,1f).setDuration(100L).start()
-//        ObjectAnimator.ofFloat(mNewsPaperMenuHolder,"scaleY",0f,1f).setDuration(100L).start()
+        mNewsPaperMenuContainer.visibility = View.VISIBLE
     }
 
     private fun determineMenuButtonOperationAction(): NP_MENU_BUTTON_OPERATION_ACTION {

@@ -128,15 +128,14 @@
         <androidx.core.widget.NestedScrollView
             android:id="@+id/np_name_scroller"
             android:layout_width="240dp"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:overScrollMode="never"
             android:scrollbars="none"
             android:visibility="visible"
             android:background="@android:color/transparent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:paddingTop="8dp"
-            android:paddingBottom="16dp">
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/np_name_holder"
