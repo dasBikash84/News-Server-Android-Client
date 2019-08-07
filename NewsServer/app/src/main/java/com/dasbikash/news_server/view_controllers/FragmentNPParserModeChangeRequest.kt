@@ -31,7 +31,6 @@ import com.dasbikash.news_server_data.models.ParserMode
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.repositories.AdminTaskRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
-import com.google.android.material.button.MaterialButton
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
@@ -85,7 +84,7 @@ class   FragmentNPParserModeChangeRequest : Fragment(),TokenGenerationRequestAdd
         mCancelButton.setOnClickListener {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                     message = DISCARD_CHANGES_AND_EXIT_MESSAGE,
-                    doOnPositivePress = { (activity as AdminActivity).onBackPressed() })).show()
+                    doOnPositivePress = { (activity as ActivityAdmin).onBackPressed() })).show()
         }
 
         mNewsPaperSelectorSpinner.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
@@ -181,7 +180,7 @@ class   FragmentNPParserModeChangeRequest : Fragment(),TokenGenerationRequestAdd
                             override fun onNext(result: Boolean) {
                                 if (result) {
                                     DisplayUtils.showShortSnack(this@FragmentNPParserModeChangeRequest.view!! as CoordinatorLayout, REQUEST_SUBMISSION_SUCCESS_MESSAGE)
-                                    (activity as AdminActivity).onBackPressed()
+                                    (activity as ActivityAdmin).onBackPressed()
                                 } else {
                                     DisplayUtils.showShortSnack(this@FragmentNPParserModeChangeRequest.view!! as CoordinatorLayout, REQUEST_SUBMISSION_FAILURE_MESSAGE)
                                 }

@@ -20,14 +20,14 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
         <activity
-            android:name=".view_controllers.ArticleViewActivity"
+            android:name=".view_controllers.ActivityArticleView"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".view_controllers.AdminActivity"
-            android:parentActivityName=".view_controllers.HomeActivity"
+            android:name=".view_controllers.ActivityAdmin"
+            android:parentActivityName=".view_controllers.ActivityHome"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".view_controllers.HomeActivity"
+            android:name=".view_controllers.ActivityHome"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

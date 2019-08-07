@@ -54,7 +54,7 @@ import io.reactivex.schedulers.Schedulers
 import java.io.File
 import java.util.*
 
-class HomeActivity : ActivityWithBackPressQueueManager(),
+class ActivityHome : ActivityWithBackPressQueueManager(),
         NavigationHost, HomeNavigator, SignInHandler, WorkInProcessWindowOperator {
     companion object {
         private const val EXIT_TOAST_MESSAGE = "Press back again to exit."
@@ -154,7 +154,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
     }
 
     private fun launchAdminActivity() {
-        startActivity(Intent(this,AdminActivity::class.java))
+        startActivity(Intent(this,ActivityAdmin::class.java))
     }
 
     private fun findViewItems() {
@@ -295,7 +295,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
     }
 
     fun loadInitFragment() {
-        navigateTo(InitFragment())
+        navigateTo(FragmentInit())
     }
 
     override fun loadHomeNpFragment() {
@@ -315,7 +315,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
     }
 
     override fun loadMoreFragment() {
-        navigateTo(MoreFragment())
+        navigateTo(FragmentMore())
     }
 
     override fun loadArticleSearchFragment() {
@@ -496,11 +496,11 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                                 if (e is CompositeException) {
                                     e.exceptions.asSequence().forEach {
                                         it.printStackTrace()
-                                        LoggerUtils.debugLog("Error class: ${it::class.java.canonicalName}", this@HomeActivity::class.java)
-                                        LoggerUtils.debugLog("Trace: ${it.stackTrace.asList()}", this@HomeActivity::class.java)
+                                        LoggerUtils.debugLog("Error class: ${it::class.java.canonicalName}", this@ActivityHome::class.java)
+                                        LoggerUtils.debugLog("Trace: ${it.stackTrace.asList()}", this@ActivityHome::class.java)
                                     }
                                     if (e.exceptions.filter { it is NoInternertConnectionException }.count() > 0) {
-                                        NetConnectivityUtility.showNoInternetToastAnyWay(this@HomeActivity)
+                                        NetConnectivityUtility.showNoInternetToastAnyWay(this@ActivityHome)
                                     } else {
                                         DisplayUtils.showShortSnack(mCoordinatorLayout, SIGN_OUT_ERROR_MSG)
                                     }
@@ -536,17 +536,17 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                             when (processingResult.first) {
                                 UserSettingsRepository.SignInResult.SUCCESS -> {
                                     LoggerUtils.debugLog("User settings data saved.", this::class.java)
-                                    DisplayUtils.showLogInWelcomeSnack(mCoordinatorLayout, this@HomeActivity)
+                                    DisplayUtils.showLogInWelcomeSnack(mCoordinatorLayout, this@ActivityHome)
                                     actionAfterSuccessfulLogIn?.let {
                                         it()
                                     }
                                 }
                                 UserSettingsRepository.SignInResult.USER_ABORT -> LoggerUtils.debugLog("Log in canceled by user",
-                                        this@HomeActivity::class.java)
+                                        this@ActivityHome::class.java)
                                 UserSettingsRepository.SignInResult.SERVER_ERROR -> LoggerUtils.debugLog("Log in error. Details:${processingResult.second}",
-                                        this@HomeActivity::class.java)
+                                        this@ActivityHome::class.java)
                                 UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> LoggerUtils.debugLog("Error while saving User settings data. Details:${processingResult.second}",
-                                        this@HomeActivity::class.java)
+                                        this@ActivityHome::class.java)
                             }
                             removeWorkInProcessWindow()
                         }

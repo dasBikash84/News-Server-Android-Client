@@ -25,21 +25,21 @@ import com.google.android.material.appbar.AppBarLayout
 import java.io.Serializable
 import java.lang.IllegalArgumentException
 
-class ArticleViewActivity : AppCompatActivity() {
+class ActivityArticleView : AppCompatActivity() {
 
     companion object {
 
-        const val EXTRA_FOR_ARTICLE = "com.dasbikash.news_server.views.ArticleViewActivity.EXTRA_FOR_ARTICLE"
-        const val EXTRA_FOR_SAVED_ARTICLE_ID = "com.dasbikash.news_server.views.ArticleViewActivity.EXTRA_FOR_SAVED_ARTICLE_ID"
+        const val EXTRA_FOR_ARTICLE = "com.dasbikash.news_server.views.ActivityArticleView.EXTRA_FOR_ARTICLE"
+        const val EXTRA_FOR_SAVED_ARTICLE_ID = "com.dasbikash.news_server.views.ActivityArticleView.EXTRA_FOR_SAVED_ARTICLE_ID"
 
         fun getIntentForArticleView(context: Context, article: Article): Intent {
-            val intent = Intent(context, ArticleViewActivity::class.java)
+            val intent = Intent(context, ActivityArticleView::class.java)
             intent.putExtra(EXTRA_FOR_ARTICLE, article as Serializable)
             return intent
         }
 
         fun getIntentForSavedArticleView(context: Context, savedArticleId:String): Intent {
-            val intent = Intent(context, ArticleViewActivity::class.java)
+            val intent = Intent(context, ActivityArticleView::class.java)
             intent.putExtra(EXTRA_FOR_SAVED_ARTICLE_ID, savedArticleId)
             return intent
         }

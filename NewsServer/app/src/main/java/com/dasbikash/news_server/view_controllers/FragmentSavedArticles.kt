@@ -90,7 +90,7 @@ class FragmentSavedArticles : Fragment() {
 
     fun doOnArticleClick(savedArticle: SavedArticle) {
         LoggerUtils.debugLog("${savedArticle.title} clicked", this::class.java)
-        activity!!.startActivity(ArticleViewActivity.getIntentForSavedArticleView(context!!,savedArticle.id))
+        activity!!.startActivity(ActivityArticleView.getIntentForSavedArticleView(context!!,savedArticle.id))
     }
 
     fun savedArticleDeleteAction(savedArticle: SavedArticle) {

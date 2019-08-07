@@ -30,7 +30,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.dasbikash.news_server.BuildConfig
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
-import com.dasbikash.news_server.utils.debugLog
 import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.exceptions.AuthServerException
@@ -46,7 +45,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class InitFragment : Fragment() {
+class FragmentInit : Fragment() {
 
     private lateinit var mProgressBar: ProgressBar
     private lateinit var mNoInternetMessage: TextView
@@ -248,7 +247,7 @@ class InitFragment : Fragment() {
                                     override fun onError(e: Throwable) {
                                         when (e) {
                                             is NoInternertConnectionException -> {
-                                                NetConnectivityUtility.showNoInternetToast(this@InitFragment.context!!)
+                                                NetConnectivityUtility.showNoInternetToast(this@FragmentInit.context!!)
                                                 mProgressBar.isIndeterminate = true
                                                 mNoInternetMessage.visibility = View.VISIBLE
                                                 registerBrodcastReceivers()

@@ -88,7 +88,7 @@ class FragmentArticleSearch : Fragment() {
 
     private fun doOnSearchResultClick(article: Article) {
         debugLog(article.toString())
-        startActivity(ArticleViewActivity.getIntentForArticleView(context!!,article))
+        startActivity(ActivityArticleView.getIntentForArticleView(context!!,article))
     }
 
     private fun findViewItems() {

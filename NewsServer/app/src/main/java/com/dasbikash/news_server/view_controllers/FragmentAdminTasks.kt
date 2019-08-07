@@ -17,18 +17,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.utils.DialogUtils
-import com.dasbikash.news_server.utils.DisplayUtils
-import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
-import com.dasbikash.news_server_data.repositories.AdminTaskRepository
 import com.google.android.material.button.MaterialButton
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.observers.DisposableObserver
-import io.reactivex.schedulers.Schedulers
 
 class   FragmentAdminTasks : Fragment() {
 
@@ -47,15 +38,15 @@ class   FragmentAdminTasks : Fragment() {
         mArticleUploaderStatusChangeRequestButton = view.findViewById(R.id.article_uploader_status_change_request_button)
 
         mNewsPaperStatusChangeRequestButton.setOnClickListener {
-            (activity!! as AdminActivity).loadNPStatusChangeRequestFragment()
+            (activity!! as ActivityAdmin).loadNPStatusChangeRequestFragment()
         }
 
         mNewsPaperParserModeChangeRequestButton.setOnClickListener {
-            (activity!! as AdminActivity).loadNPParserModeChangeRequestFragment()
+            (activity!! as ActivityAdmin).loadNPParserModeChangeRequestFragment()
         }
 
         mArticleUploaderStatusChangeRequestButton.setOnClickListener {
-            (activity!! as AdminActivity).loadArticleUploaderModeChangeRequestFragment()
+            (activity!! as ActivityAdmin).loadArticleUploaderModeChangeRequestFragment()
         }
     }
 }

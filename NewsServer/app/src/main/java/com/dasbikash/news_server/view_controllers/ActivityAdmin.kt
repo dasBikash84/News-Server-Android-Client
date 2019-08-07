@@ -18,7 +18,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.Toolbar
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
@@ -32,7 +31,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class AdminActivity : ActivityWithBackPressQueueManager(), NavigationHost {
+class ActivityAdmin : ActivityWithBackPressQueueManager(), NavigationHost {
 
     private lateinit var mToolbar: Toolbar
     private lateinit var mAppBar: AppBarLayout
@@ -161,14 +160,14 @@ class AdminActivity : ActivityWithBackPressQueueManager(), NavigationHost {
 
                             override fun onNext(result: Boolean) {
                                 if (result) {
-                                    DisplayUtils.showShortToast(this@AdminActivity, TOKEN_GENERATION_SUCCESS_MESSAGE)
+                                    DisplayUtils.showShortToast(this@ActivityAdmin, TOKEN_GENERATION_SUCCESS_MESSAGE)
                                 } else {
-                                    DisplayUtils.showShortToast(this@AdminActivity, TOKEN_GENERATION_FAILURE_MESSAGE)
+                                    DisplayUtils.showShortToast(this@ActivityAdmin, TOKEN_GENERATION_FAILURE_MESSAGE)
                                 }
                             }
 
                             override fun onError(e: Throwable) {
-                                DisplayUtils.showShortToast(this@AdminActivity, TOKEN_GENERATION_ERROR_MESSAGE)
+                                DisplayUtils.showShortToast(this@ActivityAdmin, TOKEN_GENERATION_ERROR_MESSAGE)
                                 tokenGenerationRequestAdder.hideWaitScreen()
                             }
                         })

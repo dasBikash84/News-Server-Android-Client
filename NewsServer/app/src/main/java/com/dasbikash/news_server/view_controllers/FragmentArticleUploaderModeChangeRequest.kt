@@ -30,7 +30,6 @@ import com.dasbikash.news_server_data.models.ArticleUploadTarget
 import com.dasbikash.news_server_data.models.ArticleUploaderStatusChangeRequest
 import com.dasbikash.news_server_data.models.TwoStateStatus
 import com.dasbikash.news_server_data.repositories.AdminTaskRepository
-import com.google.android.material.button.MaterialButton
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
@@ -81,7 +80,7 @@ class   FragmentArticleUploaderModeChangeRequest : Fragment(),TokenGenerationReq
         mCancelButton.setOnClickListener {
             DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
                     message = DISCARD_CHANGES_AND_EXIT_MESSAGE,
-                    doOnPositivePress = { (activity as AdminActivity).onBackPressed() })).show()
+                    doOnPositivePress = { (activity as ActivityAdmin).onBackPressed() })).show()
         }
 
         mArticleUploaderSelectorSpinner.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
@@ -149,7 +148,7 @@ class   FragmentArticleUploaderModeChangeRequest : Fragment(),TokenGenerationReq
                             override fun onNext(result: Boolean) {
                                 if (result) {
                                     DisplayUtils.showShortSnack(this@FragmentArticleUploaderModeChangeRequest.view!! as CoordinatorLayout, REQUEST_SUBMISSION_SUCCESS_MESSAGE)
-                                    (activity as AdminActivity).onBackPressed()
+                                    (activity as ActivityAdmin).onBackPressed()
                                 } else {
                                     DisplayUtils.showShortSnack(this@FragmentArticleUploaderModeChangeRequest.view!! as CoordinatorLayout, REQUEST_SUBMISSION_FAILURE_MESSAGE)
                                 }

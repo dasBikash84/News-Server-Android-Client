@@ -189,7 +189,7 @@ class FragmentArticlePreviewForPage : Fragment(),SignInHandler, WorkInProcessWin
 
     private fun doOnArticleClick(article: Article) {
         debugLog(article.toString())
-        startActivity(ArticleViewActivity.getIntentForArticleView(context!!,article))
+        startActivity(ActivityArticleView.getIntentForArticleView(context!!,article))
     }
 
     private fun activityForPageBrowsing() =
