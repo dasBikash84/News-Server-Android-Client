@@ -20,7 +20,6 @@ import android.os.Bundle
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.utils.debugLog
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.SavedArticle
 import com.google.android.material.appbar.AppBarLayout
@@ -58,7 +57,7 @@ class ArticleViewActivity : AppCompatActivity() {
 
         if (intent.hasExtra(EXTRA_FOR_ARTICLE)) {
             mArticle = (intent!!.getSerializableExtra(EXTRA_FOR_ARTICLE)) as Article
-            navigateTo(ArticleViewFragment2.getInstance(mArticle))
+            navigateTo(FragmentArticleView.getInstance(mArticle))
         } else if (intent.hasExtra(EXTRA_FOR_SAVED_ARTICLE)) {
             mSavedArticle = (intent!!.getSerializableExtra(EXTRA_FOR_SAVED_ARTICLE)) as SavedArticle
             TODO()

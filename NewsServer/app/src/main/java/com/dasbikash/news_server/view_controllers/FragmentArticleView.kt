@@ -38,7 +38,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class ArticleViewFragment2 : Fragment() {
+class FragmentArticleView : Fragment() {
 
     private lateinit var mLanguage: Language
     private lateinit var mNewspaper: Newspaper
@@ -198,9 +198,9 @@ class ArticleViewFragment2 : Fragment() {
                             val newsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
 
                             if (!newsDataRepository.checkIfAlreadySaved(it)) {
-                                LoggerUtils.debugLog("Going to save article", this@ArticleViewFragment2::class.java)
+                                LoggerUtils.debugLog("Going to save article", this@FragmentArticleView::class.java)
                                 val savedArticleImage = newsDataRepository.saveArticleToLocalDisk(it, context!!)
-                                LoggerUtils.debugLog(savedArticleImage.toString(), this@ArticleViewFragment2::class.java)
+                                LoggerUtils.debugLog(savedArticleImage.toString(), this@FragmentArticleView::class.java)
                                 return@map true
                             }
                             false
@@ -226,12 +226,12 @@ class ArticleViewFragment2 : Fragment() {
 
     companion object {
 
-        val ARG_ARTICLE = "com.dasbikash.news_server.views.ArticleViewFragment2.ARG_ARTICLE"
+        val ARG_ARTICLE = "com.dasbikash.news_server.views.FragmentArticleView.ARG_ARTICLE"
 
-        fun getInstance(article: Article): ArticleViewFragment2 {
+        fun getInstance(article: Article): FragmentArticleView {
             val args = Bundle()
             args.putSerializable(ARG_ARTICLE, article)
-            val fragment = ArticleViewFragment2()
+            val fragment = FragmentArticleView()
             fragment.setArguments(args)
             return fragment
         }
