@@ -23,9 +23,6 @@
             android:name=".view_controllers.ArticleViewActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".view_controllers.NewsCategoryArticleViewActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".view_controllers.AdminActivity"
             android:parentActivityName=".view_controllers.HomeActivity"
             android:screenOrientation="portrait" />
