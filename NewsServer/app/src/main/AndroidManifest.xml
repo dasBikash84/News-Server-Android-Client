@@ -49,11 +49,6 @@
         <activity
             android:name=".view_controllers.ActivityArticlePreview"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".view_controllers.SavedArticleViewActivity"
-            android:parentActivityName=".view_controllers.HomeActivity"
-            android:screenOrientation="portrait" />
-
         <uses-library
             android:name="android.test.runner"
             android:required="false" />

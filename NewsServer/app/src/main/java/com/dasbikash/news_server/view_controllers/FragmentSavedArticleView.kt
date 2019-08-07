@@ -127,7 +127,6 @@ class FragmentSavedArticleView : Fragment() {
             args.putString(ARG_ARTICLE_ID, articleId)
             val fragment = FragmentSavedArticleView()
             fragment.setArguments(args)
-            LoggerUtils.debugLog(articleId, SavedArticleViewActivity::class.java)
             return fragment
         }
     }
