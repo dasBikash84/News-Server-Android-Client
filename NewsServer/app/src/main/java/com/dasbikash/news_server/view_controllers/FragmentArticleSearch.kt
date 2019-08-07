@@ -30,12 +30,14 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.view_helpers.TextListAdapter
+import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.ArticleSearchReasultEntry
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.repositories.ArticleSearchRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
+import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -79,9 +81,9 @@ class FragmentArticleSearch : Fragment() {
         mSearchKeywordHintsHolder.adapter = mKeyWordHintListAdapter
         mSearchResultsHolder.adapter = mSearchResultsHolderAdapter
 
-        mDisposable.add(RxJavaUtils.launchBackGroundTask {
+        mDisposable.add(RxJavaUtils.launchBackGroundTask (task = {
             ArticleSearchRepository.updateSerachKeyWordsIfRequired(context!!)
-        })
+        }))
     }
 
     private fun doOnSearchResultClick(article: Article) {
@@ -204,13 +206,17 @@ class FragmentArticleSearch : Fragment() {
                             }
 
                             override fun onError(e: Throwable) {
-                                debugLog(e::class.java.canonicalName)
                                 if (e is CompositeException) {
                                     e.exceptions.asSequence().forEach {
                                         LoggerUtils.printStackTrace(it)
+                                        LoggerUtils.debugLog("Error class: ${it::class.java.canonicalName}", this@FragmentArticleSearch::class.java)
+                                        LoggerUtils.debugLog("Trace: ${it.stackTrace.asList()}", this@FragmentArticleSearch::class.java)
                                     }
-                                } else {
-                                    LoggerUtils.printStackTrace(e)
+                                    if (e.exceptions.filter { it is NoInternertConnectionException }.count() > 0) {
+                                        NetConnectivityUtility.showNoInternetToastAnyWay(this@FragmentArticleSearch.context!!)
+                                    }
+                                }else if (e is NoInternertConnectionException) {
+                                    NetConnectivityUtility.showNoInternetToastAnyWay(this@FragmentArticleSearch.context!!)
                                 }
                                 hideWaitScreen()
                                 removeBackPressTask()
@@ -328,6 +334,18 @@ class FragmentArticleSearch : Fragment() {
                             }
 
                             override fun onError(e: Throwable) {
+                                if (e is CompositeException) {
+                                    e.exceptions.asSequence().forEach {
+                                        LoggerUtils.printStackTrace(it)
+                                        LoggerUtils.debugLog("Error class: ${it::class.java.canonicalName}", this@FragmentArticleSearch::class.java)
+                                        LoggerUtils.debugLog("Trace: ${it.stackTrace.asList()}", this@FragmentArticleSearch::class.java)
+                                    }
+                                    if (e.exceptions.filter { it is NoInternertConnectionException }.count() > 0) {
+                                        NetConnectivityUtility.showNoInternetToastAnyWay(this@FragmentArticleSearch.context!!)
+                                    }
+                                }else if (e is NoInternertConnectionException) {
+                                    NetConnectivityUtility.showNoInternetToastAnyWay(this@FragmentArticleSearch.context!!)
+                                }
                                 mSearchResultProcessingOnGoing = false
                                 hideWaitScreen()
                                 removeBackPressTask()

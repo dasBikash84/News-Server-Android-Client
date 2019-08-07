@@ -15,12 +15,21 @@ package com.dasbikash.news_server.utils
 
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
 object RxJavaUtils {
 
-    fun launchBackGroundTask(task:()->Unit):Disposable{
+    fun launchBackGroundTask(task: () -> Unit,doOnComplete:(()->Unit)?=null,doOnError:(()->Unit)?=null): Disposable {
         return Observable.just(task).subscribeOn(Schedulers.io())
-                        .map {it()}.subscribe()
+                .map { it() }.subscribeWith(object : DisposableObserver<Unit>() {
+                    override fun onComplete() {
+                        doOnComplete?.let { it() }
+                    }
+                    override fun onNext(t: Unit) {}
+                    override fun onError(e: Throwable) {
+                        doOnError?.let { it() }
+                    }
+                })
     }
 }

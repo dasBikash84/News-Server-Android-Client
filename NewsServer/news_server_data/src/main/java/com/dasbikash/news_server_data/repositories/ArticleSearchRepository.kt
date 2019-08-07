@@ -69,13 +69,8 @@ object ArticleSearchRepository {
                 .getMatchingSerachKeyWords("${userInput.trim()}%")
     }
 
-    private fun getMatchingAll(userInput: String, context: Context): List<ArticleSearchKeyWord> {
-        val newsServerDatabase = NewsServerDatabase.getDatabase(context)
-        return newsServerDatabase.articleSearchKeyWordDao
-                .getMatchingSerachKeyWords("%${userInput.trim()}%")
-    }
-
     fun getArticleSearchResultForKeyWords(context: Context, inputKeyWords: List<String>):List<ArticleSearchReasultEntry> {
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
         val searchKeyWords = mutableSetOf<String>()
 
         val keyWords = inputKeyWords.map { it.toLowerCase() }
@@ -123,33 +118,4 @@ object ArticleSearchRepository {
         return RealTimeDbArticleSearchService.getKeyWordSerachResult(keyWord)
     }
 
-    fun processArticleSearchReasultForArticleAndPage(articleSearchReasultEntry:ArticleSearchReasultEntry, context: Context)
-            :ArticleSearchReasultEntry/*: Pair<Article?, Page?>*/ {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-
-        articleSearchReasultEntry.apply {
-            val newsDataRepository = RepositoryFactory.getNewsDataRepository(context)
-            newsDataRepository.findArticleByIdFromLocalDb(articleId)?.let {
-                article = it
-                page = findPageById(pageId, context)
-//                return Pair(it, findPageById(pageId, context))
-                return this
-            }
-            val article = newsDataRepository.findArticleByIdFromRemoteDb(articleId, pageId)
-            article?.let {
-                this.article = it
-                findPageById(pageId, context)?.let {
-                    page = it
-                    NewsDataServiceUtils.processFetchedArticleData(this.article!!, this.page!!)
-                }
-            }
-//            return Pair(article, findPageById(pageId, context))
-            return this
-        }
-    }
-
-    private fun findPageById(pageId: String, context: Context): Page? {
-        val newsServerDatabase = NewsServerDatabase.getDatabase(context)
-        return newsServerDatabase.pageDao.findById(pageId)
-    }
 }
