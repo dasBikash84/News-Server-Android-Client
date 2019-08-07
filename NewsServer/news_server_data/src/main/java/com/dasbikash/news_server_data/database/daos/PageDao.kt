@@ -46,4 +46,7 @@ internal interface PageDao {
 
     @Update
     fun save(page: Page)
+
+    @Query("SELECT * FROM Page WHERE newspaperId=:newspaperId")
+    fun getPagesByNewsPaperId(newspaperId: String): List<Page>
 }

@@ -184,7 +184,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
             val currentFragment = supportFragmentManager.findFragmentById(R.id.main_frame)
             when (menuItem.itemId) {
                 R.id.bottom_menu_item_home -> {
-                    if (!(currentFragment is FragmentHomeNp)) {
+                    if (!(currentFragment is FragmentHome)) {
                         mAppBar.visibility = View.GONE
                         loadHomeNpFragment()
                         mBottomNavigationView.visibility = View.VISIBLE
@@ -307,7 +307,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
     }
 
     override fun loadHomeNpFragment() {
-        navigateTo(FragmentHomeNp())
+        navigateTo(FragmentHome())
     }
 
     override fun loadNewsCategoriesViewFragment() {
