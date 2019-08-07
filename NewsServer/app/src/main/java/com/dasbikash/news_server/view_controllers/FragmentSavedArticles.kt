@@ -45,7 +45,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class SavedArticlesFragment : Fragment() {
+class FragmentSavedArticles : Fragment() {
 
     private lateinit var mSavedArticlePreviewHolder: RecyclerView
     private lateinit var mListAdapter: SavedArticlePreviewListAdapter
@@ -90,7 +90,7 @@ class SavedArticlesFragment : Fragment() {
 
     fun doOnArticleClick(savedArticle: SavedArticle) {
         LoggerUtils.debugLog("${savedArticle.title} clicked", this::class.java)
-//        activity!!.startActivity(SavedArticleViewActivity.getIntent(savedArticle, context!!))
+        activity!!.startActivity(ArticleViewActivity.getIntentForSavedArticleView(context!!,savedArticle.id))
     }
 
     fun savedArticleDeleteAction(savedArticle: SavedArticle) {
@@ -145,6 +145,7 @@ class SavedArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemVi
 
     private val pageTitle: AppCompatTextView
     private val articleTitle: AppCompatTextView
+    private val articleTextPreview: AppCompatTextView
     private val articlePublicationTime: AppCompatTextView
     private val articleImage: AppCompatImageView
 
@@ -153,6 +154,7 @@ class SavedArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemVi
     init {
         pageTitle = itemView.findViewById(R.id.page_title)
         articleTitle = itemView.findViewById(R.id.article_title)
+        articleTextPreview = itemView.findViewById(R.id.article_text_preview)
         articlePublicationTime = itemView.findViewById(R.id.article_time)
         articleImage = itemView.findViewById(R.id.article_preview_image)
     }
@@ -163,6 +165,7 @@ class SavedArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemVi
         savedArticle = currentSavedArticle
         pageTitle.text = StringBuilder(savedArticle.pageName).append(" | ").append(savedArticle.newspaperName).toString()
         articleTitle.text = savedArticle.title
+        DisplayUtils.displayHtmlText(articleTextPreview,currentSavedArticle.articleText!!)
         ImageUtils.customLoader(articleImage, savedArticle.previewImageLink,
                                     R.drawable.pc_bg, R.drawable.app_big_logo)
         Observable.just(savedArticle.publicationTime)

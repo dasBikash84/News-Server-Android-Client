@@ -219,7 +219,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
                     true
                 }
                 R.id.bottom_menu_item_saved_articles -> {
-                    if (!(currentFragment is SavedArticlesFragment)) {
+                    if (!(currentFragment is FragmentSavedArticles)) {
                         mAppBar.visibility = View.VISIBLE
                         loadSavedArticlesFragment()
                         mBottomNavigationView.visibility = View.VISIBLE
@@ -323,7 +323,7 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
     }
 
     override fun loadSavedArticlesFragment() {
-        navigateTo(SavedArticlesFragment())
+        navigateTo(FragmentSavedArticles())
     }
 
     override fun loadMoreFragment() {

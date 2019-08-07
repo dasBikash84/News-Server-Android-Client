@@ -21,7 +21,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server_data.models.room_entity.Article
-import com.dasbikash.news_server_data.models.room_entity.SavedArticle
 import com.google.android.material.appbar.AppBarLayout
 import java.io.Serializable
 
@@ -31,11 +30,17 @@ class ArticleViewActivity : AppCompatActivity() {
 
         const val LOG_IN_REQ_CODE = 7777
         const val EXTRA_FOR_ARTICLE = "com.dasbikash.news_server.views.ArticleViewActivity.EXTRA_FOR_ARTICLE"
-        const val EXTRA_FOR_SAVED_ARTICLE = "com.dasbikash.news_server.views.ArticleViewActivity.EXTRA_FOR_SAVED_ARTICLE"
+        const val EXTRA_FOR_SAVED_ARTICLE_ID = "com.dasbikash.news_server.views.ArticleViewActivity.EXTRA_FOR_SAVED_ARTICLE_ID"
 
         fun getIntentForArticleView(context: Context, article: Article): Intent {
             val intent = Intent(context, ArticleViewActivity::class.java)
             intent.putExtra(EXTRA_FOR_ARTICLE, article as Serializable)
+            return intent
+        }
+
+        fun getIntentForSavedArticleView(context: Context, savedArticleId:String): Intent {
+            val intent = Intent(context, ArticleViewActivity::class.java)
+            intent.putExtra(EXTRA_FOR_SAVED_ARTICLE_ID, savedArticleId)
             return intent
         }
     }
@@ -44,7 +49,7 @@ class ArticleViewActivity : AppCompatActivity() {
     private lateinit var mAppBar: AppBarLayout
 
     private lateinit var mArticle: Article
-    private lateinit var mSavedArticle: SavedArticle
+    private lateinit var mSavedArticleId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,9 +63,9 @@ class ArticleViewActivity : AppCompatActivity() {
         if (intent.hasExtra(EXTRA_FOR_ARTICLE)) {
             mArticle = (intent!!.getSerializableExtra(EXTRA_FOR_ARTICLE)) as Article
             navigateTo(FragmentArticleView.getInstance(mArticle))
-        } else if (intent.hasExtra(EXTRA_FOR_SAVED_ARTICLE)) {
-            mSavedArticle = (intent!!.getSerializableExtra(EXTRA_FOR_SAVED_ARTICLE)) as SavedArticle
-            TODO()
+        } else if (intent.hasExtra(EXTRA_FOR_SAVED_ARTICLE_ID)) {
+            mSavedArticleId = intent!!.getStringExtra(EXTRA_FOR_SAVED_ARTICLE_ID)
+            navigateTo(FragmentSavedArticleView.getInstance(mSavedArticleId))
         } else {
             finish()
         }

@@ -70,7 +70,7 @@ class SavedArticleViewActivity : AppCompatActivity() {
 
             override fun getItemPosition(fragment: Any) = PagerAdapter.POSITION_NONE
             override fun getItem(position: Int): Fragment {
-                return SavedArticleViewFragment.getInstance(mSavedArticleList.get(position).id)
+                return FragmentSavedArticleView.getInstance(mSavedArticleList.get(position).id)
             }
 
             override fun getCount(): Int {
