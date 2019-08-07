@@ -13,13 +13,14 @@
 
 package com.dasbikash.news_server_data.models.room_entity
 
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.google.firebase.database.Exclude
 import com.google.gson.annotations.Expose
-import io.reactivex.internal.operators.flowable.FlowableDelaySubscriptionOther
 import java.io.Serializable
 import java.util.*
 
@@ -51,7 +52,20 @@ data class Article(
         @com.google.firebase.firestore.Exclude
         @Expose(serialize = false, deserialize = false)
         var created:Long = System.currentTimeMillis()
-) : Serializable {
+) : Serializable, Parcelable {
+
+    constructor(parcel: Parcel) : this(
+            parcel.readString()!!,
+            parcel.readString(),
+            parcel.readString(),
+            parcel.readString(),
+            parcel.readString(),
+            null,
+            Date().setTs(parcel.readLong()),
+            parcel.createTypedArrayList(ArticleImage),
+            parcel.readString(),
+            parcel.readLong()) {
+    }
 
     fun resetCreated(){
         created = System.currentTimeMillis()
@@ -66,7 +80,24 @@ data class Article(
                 || (title!!.trim() == other.title!!.trim())
     }
 
-    companion object{
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(id)
+        parcel.writeString(pageId)
+        parcel.writeString(newspaperId)
+        parcel.writeString(title)
+        parcel.writeString(articleText)
+        parcel.writeLong(publicationTime?.time ?: 0L)
+        parcel.writeTypedList(imageLinkList)
+        parcel.writeString(previewImageLink)
+        parcel.writeLong(created)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<Article> {
+
         fun removeDuplicates(articles:List<Article>):
                 List<Article>{
             val output = mutableListOf<Article>()
@@ -77,5 +108,17 @@ data class Article(
                     }.forEach { output.add(it) }
             return output
         }
+        override fun createFromParcel(parcel: Parcel): Article {
+            return Article(parcel)
+        }
+
+        override fun newArray(size: Int): Array<Article?> {
+            return arrayOfNulls(size)
+        }
     }
+}
+
+fun Date.setTs(time:Long):Date{
+    this.time = time
+    return this
 }

@@ -13,6 +13,8 @@
 
 package com.dasbikash.news_server_data.models.room_entity
 
+import android.os.Parcel
+import android.os.Parcelable
 import com.google.gson.annotations.Expose
 
 class ArticleImage(
@@ -20,8 +22,32 @@ class ArticleImage(
         var link: String?=null,
         @Expose(deserialize = true,serialize = true)
         var caption:String?=null
-){
+) : Parcelable {
+        constructor(parcel: Parcel) : this(
+                parcel.readString(),
+                parcel.readString()) {
+        }
+
         override fun toString(): String {
                 return "ArticleImage(link=$link, caption=$caption)"
+        }
+
+        override fun writeToParcel(parcel: Parcel, flags: Int) {
+                parcel.writeString(link)
+                parcel.writeString(caption)
+        }
+
+        override fun describeContents(): Int {
+                return 0
+        }
+
+        companion object CREATOR : Parcelable.Creator<ArticleImage> {
+                override fun createFromParcel(parcel: Parcel): ArticleImage {
+                        return ArticleImage(parcel)
+                }
+
+                override fun newArray(size: Int): Array<ArticleImage?> {
+                        return arrayOfNulls(size)
+                }
         }
 }
