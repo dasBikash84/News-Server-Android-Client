@@ -298,14 +298,6 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
         navigateTo(InitFragment())
     }
 
-    override fun loadBngNpFragment() {
-        navigateTo(NewsPaperGroupFragment.getInstanceForBanglaNps())
-    }
-
-    override fun loadEngNpFragment() {
-        navigateTo(NewsPaperGroupFragment.getInstanceForEnglishNps())
-    }
-
     override fun loadHomeNpFragment() {
         navigateTo(FragmentHome())
     }

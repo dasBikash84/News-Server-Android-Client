@@ -15,8 +15,6 @@ package com.dasbikash.news_server.view_controllers.interfaces
 
 interface HomeNavigator {
 
-    fun loadBngNpFragment()
-    fun loadEngNpFragment()
     fun loadHomeNpFragment()
     fun loadNewsCategoriesViewFragment()
     fun loadFavouritesFragment()
