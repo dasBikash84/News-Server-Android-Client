@@ -191,6 +191,7 @@ class PageViewActivity : ActivityWithBackPressQueueManager(),
 
     private fun doOnArticleClick(article: Article) {
         debugLog(article.toString())
+        startActivity(ArticleViewActivity.getIntentForArticleView(this,article))
     }
 
     private fun activityForPageBrowsing() =
