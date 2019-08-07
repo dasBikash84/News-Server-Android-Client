@@ -49,10 +49,10 @@ class FragmentArticlePreviewForPage : Fragment(),SignInHandler, WorkInProcessWin
     companion object {
         private const val ARTICLE_LOAD_CHUNK_SIZE = 10
         const val LOG_IN_REQ_CODE = 7777
-        const val ARG_FOR_PAGE = "com.dasbikash.news_server.views.PageViewActivity.ARG_FOR_PAGE"
-        const val ARG_FOR_PURPOSE = "com.dasbikash.news_server.views.PageViewActivity.ARG_FOR_PURPOSE"
-        const val ARG_VALUE_FOR_LATEST_ARTICLE_DISPLAY = "com.dasbikash.news_server.views.PageViewActivity.LATEST_ARTICLE_DISPLAY"
-        const val ARG_VALUE_FOR_PAGE_BROWSING = "com.dasbikash.news_server.views.PageViewActivity.PAGE_BROWSING"
+        const val ARG_FOR_PAGE = "com.dasbikash.news_server.views.FragmentArticlePreviewForPage.ARG_FOR_PAGE"
+        const val ARG_FOR_PURPOSE = "com.dasbikash.news_server.views.FragmentArticlePreviewForPage.ARG_FOR_PURPOSE"
+        const val ARG_VALUE_FOR_LATEST_ARTICLE_DISPLAY = "com.dasbikash.news_server.views.FragmentArticlePreviewForPage.LATEST_ARTICLE_DISPLAY"
+        const val ARG_VALUE_FOR_PAGE_BROWSING = "com.dasbikash.news_server.views.FragmentArticlePreviewForPage.PAGE_BROWSING"
 
         fun getInstanceForLatestArticleDisplay(page: Page): FragmentArticlePreviewForPage {
             val args = Bundle()
