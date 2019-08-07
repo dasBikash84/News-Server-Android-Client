@@ -27,6 +27,7 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.utils.OnceSettableBoolean
 import com.dasbikash.news_server.utils.debugLog
+import com.dasbikash.news_server.view_controllers.view_helpers.ArticlePreviewListAdapter
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.Article
@@ -74,7 +75,9 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
 
     private fun init() {
         (activity!! as AppCompatActivity).supportActionBar!!.title = mNewsCategory.name
-        mArticlePreviewHolderAdapter = ArticlePreviewListAdapter({ doOnArticleClick(it) }, { loadMoreArticles() }, { showLoadingIfRequired() }, ARTICLE_LOAD_CHUNK_SIZE)
+        mArticlePreviewHolderAdapter = ArticlePreviewListAdapter({ doOnArticleClick(it) }, { loadMoreArticles() },
+                                                                    { showLoadingIfRequired() }, ARTICLE_LOAD_CHUNK_SIZE,
+                                                    true)
         mArticlePreviewHolder.adapter = mArticlePreviewHolderAdapter
     }
 

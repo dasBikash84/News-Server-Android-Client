@@ -18,7 +18,6 @@ import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.LinearLayoutCompat
-import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -26,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
+import com.dasbikash.news_server.view_controllers.view_helpers.ArticlePreviewListAdapter
 import com.dasbikash.news_server.view_models.PageViewViewModel
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
@@ -36,7 +36,6 @@ import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
-import com.google.android.material.appbar.AppBarLayout
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -81,7 +80,7 @@ class FragmentArticlePreviewForPage : Fragment(),SignInHandler, WorkInProcessWin
 
     private lateinit var mWaitScreen: LinearLayoutCompat
     private lateinit var mArticlePreviewHolder: RecyclerView
-    private lateinit var mArticlePreviewHolderAdapter: ArticlePreviewListAdapterForPage
+    private lateinit var mArticlePreviewHolderAdapter: ArticlePreviewListAdapter
 
     private lateinit var mPageViewContainer: CoordinatorLayout
 
@@ -169,7 +168,7 @@ class FragmentArticlePreviewForPage : Fragment(),SignInHandler, WorkInProcessWin
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
 
         hideWaitScreen()
-        mArticlePreviewHolderAdapter = ArticlePreviewListAdapterForPage({ doOnArticleClick(it) }, { loadMoreArticles() }, { showLoadingIfRequired() }, ARTICLE_LOAD_CHUNK_SIZE)
+        mArticlePreviewHolderAdapter = ArticlePreviewListAdapter({ doOnArticleClick(it) }, { loadMoreArticles() }, { showLoadingIfRequired() }, ARTICLE_LOAD_CHUNK_SIZE)
         mArticlePreviewHolder.adapter = mArticlePreviewHolderAdapter
     }
 
