@@ -51,6 +51,7 @@ import com.google.android.material.textfield.TextInputLayout
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.exceptions.CompositeException
 import io.reactivex.observers.DisposableObserver
@@ -557,3 +558,75 @@ class LatestArticlePreviewHolder(itemView: View, val lifeCycleAwareCompositeDisp
         lifeCycleAwareCompositeDisposable.add(mdisposable)
     }
 }
+
+class SearchResultListAdapter(): PageListAdapter2<SearchResultEntryViewHolder>(){
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchResultEntryViewHolder {
+        return SearchResultEntryViewHolder(
+                LayoutInflater.from(parent.context).inflate(R.layout.view_page_label,parent,false)
+        )
+    }
+}
+
+class SearchResultEntryViewHolder(itemView: View): PageViewHolder(itemView){
+
+    private val textView: TextView
+    private val bottomBar: View
+
+    init {
+        textView = itemView.findViewById(R.id.title_text_view)
+        bottomBar = itemView.findViewById(R.id.bottom_bar)
+        bottomBar.visibility=View.GONE
+    }
+
+    override fun bind(page: Page, parentPage: Page?, newspaper: Newspaper) {
+        val pageLabelBuilder = StringBuilder(page.name!!).append(" | ")
+        parentPage?.let { pageLabelBuilder.append(it.name).append(" | ") }
+        pageLabelBuilder.append(newspaper.name)
+        textView.setText(pageLabelBuilder.toString())
+
+        itemView.setOnClickListener {
+            itemView.context
+                    .startActivity(ActivityArticlePreview.getIntentForLatestArticleDisplay(itemView.context,page))
+        }
+    }
+}
+
+abstract class PageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    abstract fun bind(page: Page, parentPage: Page?, newspaper: Newspaper)
+}
+
+abstract class PageListAdapter2<VH:PageViewHolder>() : ListAdapter<Page, VH>(PageDiffCallback) {
+
+    val mDisposable = CompositeDisposable()
+
+    override fun onBindViewHolder(holder: VH, position: Int) {
+        mDisposable.add(
+                Observable.just(getItem(position))
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(holder.itemView.context)
+                            val parentPage = appSettingsRepository.findPageById(it.parentPageId!!)
+                            val newspaper = appSettingsRepository.getNewspaperByPage(it)
+                            Triple(it, parentPage, newspaper)
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<Triple<Page, Page?, Newspaper>>() {
+                            override fun onComplete() {}
+                            override fun onNext(triple: Triple<Page, Page?, Newspaper>) {
+                                holder.bind(triple.first, triple.second, triple.third)
+                            }
+                            override fun onError(e: Throwable) {
+                                holder.itemView.visibility = View.GONE
+                            }
+
+                        })
+        )
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        mDisposable.clear()
+    }
+
+}
+

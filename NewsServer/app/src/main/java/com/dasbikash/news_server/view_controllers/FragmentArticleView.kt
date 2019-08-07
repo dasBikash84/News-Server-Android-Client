@@ -17,24 +17,31 @@ import android.os.Bundle
 import android.util.TypedValue
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.utils.debugLog
-import com.dasbikash.news_server_data.models.room_entity.Article
-import com.dasbikash.news_server_data.models.room_entity.Language
-import com.dasbikash.news_server_data.models.room_entity.Newspaper
-import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.FileDownloaderUtils
+import com.dasbikash.news_server_data.utills.ImageLoadingDisposer
+import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
@@ -235,5 +242,125 @@ class FragmentArticleView : Fragment() {
             fragment.setArguments(args)
             return fragment
         }
+    }
+}
+
+object ArticleImageDiffCallback : DiffUtil.ItemCallback<ArticleImage>() {
+    override fun areItemsTheSame(oldItem: ArticleImage, newItem: ArticleImage): Boolean {
+        return oldItem.link == newItem.link
+    }
+
+    override fun areContentsTheSame(oldItem: ArticleImage, newItem: ArticleImage): Boolean {
+        return oldItem.link == newItem.link
+    }
+}
+
+class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner, val mArticleTextSize:Float, val enableImageDownload:Boolean=false) :
+        ListAdapter<ArticleImage, ArticleImageHolder>(ArticleImageDiffCallback), DefaultLifecycleObserver {
+
+    init {
+        lifecycleOwner.lifecycle.addObserver(this)
+    }
+
+    val mDisposable = CompositeDisposable()
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleImageHolder {
+        return ArticleImageHolder(
+                LayoutInflater.from(parent.context)
+                        .inflate(R.layout.view_article_image, parent, false),
+                mDisposable,mArticleTextSize,enableImageDownload
+        )
+    }
+
+    override fun onBindViewHolder(holder: ArticleImageHolder, position: Int) {
+        holder.bind(getItem(position),position+1,itemCount)
+    }
+
+    override fun onViewRecycled(holder: ArticleImageHolder) {
+        super.onViewRecycled(holder)
+        holder.disposeImageLoader()
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        LoggerUtils.debugLog("Disposing", this::class.java)
+        mDisposable.clear()
+    }
+
+    override fun onResume(owner: LifecycleOwner) {
+        LoggerUtils.debugLog("onResume", this::class.java)
+        notifyDataSetChanged()
+    }
+
+    override fun onPause(owner: LifecycleOwner) {
+        LoggerUtils.debugLog("Disposing", this::class.java)
+        mDisposable.clear()
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        LoggerUtils.debugLog("Disposing", this::class.java)
+        mDisposable.clear()
+    }
+}
+
+class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDisposable, textFontSize:Float,
+                         val enableImageDownload:Boolean=false)
+    : RecyclerView.ViewHolder(itemView) {
+
+    val mArticleImage: AppCompatImageView
+    val mImageCaption: AppCompatTextView
+    val mCurrentImagePositionText: AppCompatTextView
+    var imageLoadingDisposer: Disposable? = null
+
+    init {
+        mArticleImage = itemView.findViewById(R.id.article_image)
+        mImageCaption = itemView.findViewById(R.id.article_image_caption)
+        mCurrentImagePositionText = itemView.findViewById(R.id.current_image_position)
+
+        mImageCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize)
+        mCurrentImagePositionText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize)
+    }
+
+    fun disposeImageLoader() {
+        imageLoadingDisposer?.dispose()
+    }
+
+    fun bind(articleImage: ArticleImage,currentImagePosition:Int,totalImageCount:Int) {
+        if (articleImage.link != null) {
+            itemView.visibility = View.VISIBLE
+
+            mCurrentImagePositionText.text = StringBuilder("${currentImagePosition}")
+                    .append("/")
+                    .append("${totalImageCount}")
+                    .toString()
+            mCurrentImagePositionText.bringToFront()
+            imageLoadingDisposer = ImageLoadingDisposer(mArticleImage)
+            compositeDisposable.add(imageLoadingDisposer!!)
+
+            ImageUtils.customLoader(mArticleImage, articleImage.link,
+                    R.drawable.pc_bg, R.drawable.app_big_logo,
+                    {
+                        compositeDisposable.delete(imageLoadingDisposer!!)
+                        imageLoadingDisposer = null
+                        if (enableImageDownload) {
+                            mArticleImage.setOnLongClickListener {
+                                DialogUtils.createAlertDialog(itemView.context, DialogUtils.AlertDialogDetails(
+                                        message = "Download Image?", doOnPositivePress = { downloadImageAction(articleImage.link!!) }
+                                )).show()
+                                true
+                            }
+                        }
+                    })
+
+            if (articleImage.caption != null) {
+                mImageCaption.text = articleImage.caption
+            } else {
+                mImageCaption.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun downloadImageAction(link:String) {
+        FileDownloaderUtils.downloadImageInExternalFilesDir(itemView.context,link)
     }
 }

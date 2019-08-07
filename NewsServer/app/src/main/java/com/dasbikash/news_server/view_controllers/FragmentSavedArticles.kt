@@ -19,6 +19,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -88,6 +89,11 @@ class FragmentSavedArticles : Fragment() {
                 })
     }
 
+    override fun onResume() {
+        super.onResume()
+        (activity!! as AppCompatActivity).supportActionBar!!.title = FRAGMENT_TITLE
+    }
+
     fun doOnArticleClick(savedArticle: SavedArticle) {
         LoggerUtils.debugLog("${savedArticle.title} clicked", this::class.java)
         activity!!.startActivity(ActivityArticleView.getIntentForSavedArticleView(context!!,savedArticle.id))
@@ -110,6 +116,10 @@ class FragmentSavedArticles : Fragment() {
                                 mListAdapter.notifyDataSetChanged()
                             }
                         }))
+    }
+
+    companion object{
+        private const val FRAGMENT_TITLE="Saved Articles"
     }
 }
 
