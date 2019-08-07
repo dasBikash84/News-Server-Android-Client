@@ -314,10 +314,6 @@ class HomeActivity : ActivityWithBackPressQueueManager(),
         navigateTo(FragmentNewsCategories())
     }
 
-    override fun loadPageGroupFragment() {
-        navigateTo(PageGroupFragment())
-    }
-
     override fun loadFavouritesFragment() {
         navigateTo(FavouritesFragment())
     }

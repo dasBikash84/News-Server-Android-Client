@@ -19,7 +19,6 @@ interface HomeNavigator {
     fun loadEngNpFragment()
     fun loadHomeNpFragment()
     fun loadNewsCategoriesViewFragment()
-    fun loadPageGroupFragment()
     fun loadFavouritesFragment()
     fun loadSavedArticlesFragment()
     fun loadMoreFragment()
