@@ -75,9 +75,10 @@ object ArticleSearchRepository {
                 .getMatchingSerachKeyWords("%${userInput.trim()}%")
     }
 
-    fun getArticleSearchResultForKeyWords(context: Context, keyWords: List<String>):List<ArticleSearchReasultEntry> {
+    fun getArticleSearchResultForKeyWords(context: Context, inputKeyWords: List<String>):List<ArticleSearchReasultEntry> {
         val searchKeyWords = mutableSetOf<String>()
 
+        val keyWords = inputKeyWords.map { it.toLowerCase() }
         keyWords.filter { it.length >= MINIMUM_KEYWORD_LENGTH }.asSequence().forEach {
             searchKeyWords.addAll(getMatchingOnlyFromBeginning(it, context).map { it.id })
         }
@@ -97,13 +98,15 @@ object ArticleSearchRepository {
             val key = it
 //            LoggerUtils.debugLog("key: ${key}",this::class.java)
             val keyWordSet = keyWords.filter { key.contains(it) }.toSet()
-//            LoggerUtils.debugLog("keyWord: ${keyWordSet}",this::class.java)
+            LoggerUtils.debugLog("keyWord: ${keyWordSet}",this::class.java)
             searchResultMap.keys.asSequence().forEach {
                 val articleId = it
+                LoggerUtils.debugLog("articleId:$articleId",this::class.java,context)
                 val articleSearchReasultEntry = articleSearchReasultEntries.find { it.articleId == articleId }
 
                 if (articleSearchReasultEntry == null) {
                     ArticleSearchReasultEntry.getInstance(articleId, searchResultMap.get(articleId)!!, keyWordSet)?.let {
+                        LoggerUtils.debugLog("articleSearchReasultEntry:$it",this::class.java,context)
                         articleSearchReasultEntries.add(it)
                     }
                 } else {

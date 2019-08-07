@@ -13,29 +13,28 @@
 
 package com.dasbikash.news_server.view_controllers
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.LinearLayout
+import android.widget.*
 import androidx.annotation.Keep
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
-import com.dasbikash.news_server.utils.RxJavaUtils
-import com.dasbikash.news_server.utils.debugLog
-import com.dasbikash.news_server.utils.showShortSnack
+import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.view_helpers.TextListAdapter
 import com.dasbikash.news_server_data.models.ArticleSearchReasultEntry
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.repositories.ArticleSearchRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -52,6 +51,7 @@ class FragmentArticleSearch : Fragment() {
     private lateinit var mSearchButton: ImageButton
     //    private lateinit var mClearButton: Button
     private lateinit var mSearchResultsHolder: RecyclerView
+    private lateinit var mSearchResultsHolderAdapter: ArticleSearchResultListAdapter
 
     private var backPressTaskTag: String? = null
 
@@ -75,12 +75,17 @@ class FragmentArticleSearch : Fragment() {
     private fun init() {
         hideWaitScreen()
         mSearchKeywordHintsHolder.visibility = View.GONE
-
+        mSearchResultsHolderAdapter = ArticleSearchResultListAdapter({ doOnSearchResultClick(it) }, { loadMoreSearchResult() })
         mSearchKeywordHintsHolder.adapter = mKeyWordHintListAdapter
+        mSearchResultsHolder.adapter = mSearchResultsHolderAdapter
 
         mDisposable.add(RxJavaUtils.launchBackGroundTask {
             ArticleSearchRepository.updateSerachKeyWordsIfRequired(context!!)
         })
+    }
+
+    private fun doOnSearchResultClick(article: Article) {
+        debugLog(article.toString())
     }
 
     private fun findViewItems() {
@@ -93,7 +98,7 @@ class FragmentArticleSearch : Fragment() {
     }
 
     private fun initViewListners() {
-        mWaitWindow.setOnClickListener { }
+//        mWaitWindow.setOnClickListener { }
         mSearchButton.setOnClickListener { searchButtonClickAction() }
 //        mClearButton.setOnClickListener { clearButtonClickAction() }
 
@@ -170,6 +175,8 @@ class FragmentArticleSearch : Fragment() {
         debugLog("Starting article search")
         mCurrentSearchResultList.clear()
         mCurrentArticleSearchReasultEntries.clear()
+        mSearchResultsHolderAdapter.submitList(emptyList())
+        mSearchKeywordHintsHolder.visibility = View.GONE
         showWaitScreen()
         mArticleSearchTaskDisposable =
                 Observable.just(mSearchKeywordEditText.text.trim().split(Regex(PATTERN_FOR_KEYWORD_SPLIT)))
@@ -179,18 +186,20 @@ class FragmentArticleSearch : Fragment() {
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<List<ArticleSearchReasultEntry>>() {
-                            override fun onComplete() {
-                                hideWaitScreen()
-                                removeBackPressTask()
-                            }
+                            override fun onComplete() {}
 
                             override fun onNext(articleSearchResultEntries: List<ArticleSearchReasultEntry>) {
-                                articleSearchResultEntries.asSequence().forEach {
-                                    debugLog(it.toString())
+                                if (articleSearchResultEntries.isNotEmpty()) {
+                                    articleSearchResultEntries.asSequence().forEach {
+                                        debugLog(it.toString())
+                                    }
+                                    mCurrentArticleSearchReasultEntries.addAll(articleSearchResultEntries)
+                                    displayArticleSearchResult()
+                                } else {
+                                    showShortSnack(EMPTY_SEARCH_RESULT_MESSAGE)
+                                    hideWaitScreen()
                                 }
-                                mCurrentArticleSearchReasultEntries.clear()
-                                mCurrentArticleSearchReasultEntries.addAll(articleSearchResultEntries)
-                                displayArticleSearchResult()
+                                removeBackPressTask()
                             }
 
                             override fun onError(e: Throwable) {
@@ -225,21 +234,21 @@ class FragmentArticleSearch : Fragment() {
     private val SEARCH_RESULT_DOWNLOAD_CHUNK_SIZE = 5
     private var mSearchResultProcessingOnGoing = false
 
-    fun showWaitScreenIfApplicable(){
-        if (mSearchResultProcessingOnGoing){
+    fun showWaitScreenIfApplicable() {
+        if (mSearchResultProcessingOnGoing) {
             showWaitScreen()
         }
     }
 
     private fun loadMoreSearchResult(): Boolean {
-        if (mSearchResultProcessingOnGoing){
+        if (mSearchResultProcessingOnGoing) {
             return true
         }
         if (mCurrentArticleSearchReasultEntries.isEmpty()) {
             return false
         }
 
-        mSearchResultProcessingOnGoing =  true
+        mSearchResultProcessingOnGoing = true
 
         val availableEntryCount = when {
             mCurrentArticleSearchReasultEntries.size >= SEARCH_RESULT_DOWNLOAD_CHUNK_SIZE -> SEARCH_RESULT_DOWNLOAD_CHUNK_SIZE
@@ -248,40 +257,42 @@ class FragmentArticleSearch : Fragment() {
 
         val articleSearchReasultEntriesForProcessing =
                 mCurrentArticleSearchReasultEntries.take(availableEntryCount)
-
+        showWaitScreen()
         val newsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
         var amDisposed = false
-        mDisposable.add(
+//        mDisposable.add(
+        mArticleSearchTaskDisposable =
                 Observable.just(articleSearchReasultEntriesForProcessing)
                         .subscribeOn(Schedulers.io())
                         .map {
                             val resultList = mutableListOf<ArticleSearchResult>()
                             try {
-                                var currentResult:ArticleSearchReasultEntry?=null
+                                var currentResult: ArticleSearchReasultEntry? = null
                                 it.asSequence()
                                         .filter { appSettingsRepository.findPageById(it.pageId) != null }
                                         .map {
                                             currentResult = it
                                             newsDataRepository.findArticleByIdFromRemoteDb(it.articleId, it.pageId)
                                         }
-                                        .filter { it!=null }
+                                        .filter { it != null }
                                         .map {
                                             it!!.newspaperId = appSettingsRepository.getNewspaperByPage(
                                                     appSettingsRepository.findPageById(it.pageId!!)!!).id
-                                            ArticleSearchResult(it,currentResult!!)
+                                            ArticleSearchResult(it, currentResult!!)
                                         }
                                         .toCollection(resultList)
-                            }catch (ex:Throwable){
-                                if (!amDisposed){
+                            } catch (ex: Throwable) {
+                                if (!amDisposed) {
                                     throw ex
                                 }
                             }
                             resultList.toList()
                         }
+                        .observeOn(AndroidSchedulers.mainThread())
                         .doOnDispose {
                             amDisposed = true
-                            mSearchResultProcessingOnGoing =  false
+                            mSearchResultProcessingOnGoing = false
                             hideWaitScreen()
                         }
                         .observeOn(AndroidSchedulers.mainThread())
@@ -289,12 +300,15 @@ class FragmentArticleSearch : Fragment() {
                             override fun onComplete() {
                                 articleSearchReasultEntriesForProcessing
                                         .forEach { mCurrentArticleSearchReasultEntries.remove(it) }
-                                mSearchResultProcessingOnGoing =  false
+                                mSearchResultProcessingOnGoing = false
                                 hideWaitScreen()
+                                removeBackPressTask()
                             }
-                            override fun onNext(articles: List<ArticleSearchResult>) {
+
+                            override fun onNext(articleSearchResults: List<ArticleSearchResult>) {
                                 var newsArticleCount = 0
-                                articles.filter {
+                                ArticleSearchResult.removeDuplicates(articleSearchResults)
+                                        .filter {
                                             val articleSearchResult = it
                                             mCurrentSearchResultList
                                                     .count { it.article.checkIfSameArticle(articleSearchResult.article) } == 0
@@ -306,18 +320,21 @@ class FragmentArticleSearch : Fragment() {
                                         .forEach { mCurrentSearchResultList.add(it) }
                                 if (newsArticleCount > 0) {
                                     mCurrentSearchResultList.map { it.article }.forEach { debugLog(it.toString()) }
-//                                    TODO()
+                                    mSearchResultsHolderAdapter.submitList(mCurrentSearchResultList.toList())
                                 } else {
                                     loadMoreSearchResult()
                                 }
                             }
 
                             override fun onError(e: Throwable) {
-                                mSearchResultProcessingOnGoing =  false
+                                mSearchResultProcessingOnGoing = false
                                 hideWaitScreen()
+                                removeBackPressTask()
                             }
                         })
-        )
+//        )
+        addBackPressTask()
+        mDisposable.add(mArticleSearchTaskDisposable)
         return true
     }
 
@@ -358,9 +375,8 @@ class FragmentArticleSearch : Fragment() {
     }
 
     companion object {
-        private const val CLEAR_SEARCH_BOX_MESSAGE = "Clear Search box?"
-        private const val SEARCH_BOX_CLEARED_MESSAGE = "Search box cleared."
         private const val SEARCH_BOX_EMPTY_MESSAGE = "Please input keyword(s) & then press search."
+        private const val EMPTY_SEARCH_RESULT_MESSAGE = "No matching article found."
         private const val PATTERN_FOR_KEYWORD_SPLIT = "[\\s+,;-]+"
     }
 }
@@ -369,4 +385,116 @@ class FragmentArticleSearch : Fragment() {
 data class ArticleSearchResult(
         val article: Article,
         val articleSearchReasultEntry: ArticleSearchReasultEntry
-)
+) {
+    companion object {
+        fun removeDuplicates(articles: List<ArticleSearchResult>):
+                List<ArticleSearchResult> {
+            val output = mutableListOf<ArticleSearchResult>()
+            articles.asSequence()
+                    .filter {
+                        val articleSearchResult = it
+                        output.count { it.article.checkIfSameArticle(articleSearchResult.article) } == 0
+                    }.forEach { output.add(it) }
+            return output
+        }
+    }
+}
+
+object ArticleSearchResultDiffCallback : DiffUtil.ItemCallback<ArticleSearchResult>() {
+    override fun areItemsTheSame(oldItem: ArticleSearchResult, newItem: ArticleSearchResult): Boolean {
+        return oldItem.article.checkIfSameArticle(newItem.article)
+    }
+
+    override fun areContentsTheSame(oldItem: ArticleSearchResult, newItem: ArticleSearchResult): Boolean {
+        return oldItem.article.checkIfSameArticle(newItem.article)
+    }
+}
+
+class ArticleSearchResultListAdapter(val clickAction: (Article) -> Unit, val loadMoreResult: () -> Unit) :
+        ListAdapter<ArticleSearchResult, ArticleSearchResultHolder>(ArticleSearchResultDiffCallback) {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleSearchResultHolder {
+        return ArticleSearchResultHolder(
+                LayoutInflater.from(parent.context)
+                        .inflate(R.layout.view_article_search_result_preview, parent, false))
+    }
+
+    override fun onBindViewHolder(holder: ArticleSearchResultHolder, position: Int) {
+        holder.itemView.setOnClickListener { clickAction(getItem(position).article) }
+        holder.bind(getItem(position))
+        if (position >= itemCount - 2) {
+            loadMoreResult()
+        }
+    }
+}
+
+class ArticleSearchResultHolder(itemView: View)
+    : RecyclerView.ViewHolder(itemView) {
+
+    val pageTitle: TextView
+    val articlePreviewImage: ImageView
+    val articleTitle: TextView
+    val articlePublicationTime: TextView
+    val articleTextPreview: TextView
+    val matchingKeywordsView: TextView
+
+    init {
+
+        pageTitle = itemView.findViewById(R.id.page_title)
+        articlePreviewImage = itemView.findViewById(R.id.article_preview_image)
+
+        articleTitle = itemView.findViewById(R.id.article_title)
+        articlePublicationTime = itemView.findViewById(R.id.article_time)
+        articleTextPreview = itemView.findViewById(R.id.article_text_preview)
+        matchingKeywordsView = itemView.findViewById(R.id.matching_keywords)
+
+        disableView()
+    }
+
+    private fun disableView() {
+        pageTitle.visibility = View.GONE
+        articleTitle.visibility = View.GONE
+        articlePublicationTime.visibility = View.GONE
+        articleTextPreview.visibility = View.GONE
+
+        ImageUtils.customLoader(imageView = articlePreviewImage,
+                defaultImageResourceId = R.drawable.pc_bg,
+                placeHolderImageResourceId = R.drawable.pc_bg)
+    }
+
+    private fun enableView() {
+        pageTitle.visibility = View.VISIBLE
+        articleTitle.visibility = View.VISIBLE
+        articlePublicationTime.visibility = View.VISIBLE
+        articleTextPreview.visibility = View.VISIBLE
+    }
+
+    @SuppressLint("CheckResult")
+    fun bind(articleSearchResult: ArticleSearchResult) {
+        disableView()
+        val article = articleSearchResult.article
+        val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
+        Observable.just(article)
+                .subscribeOn(Schedulers.io())
+                .map {
+                    val page = appSettingsRepository.findPageById(it.pageId!!)!!
+                    val newspaper = appSettingsRepository.getNewspaperByPage(page)
+                    val language = appSettingsRepository.getLanguageByNewspaper(newspaper)
+                    Triple(language, newspaper, page)
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    pageTitle.text = it.third.name!! + " | " + it.second.name
+                    articleTitle.text = article.title
+                    articlePublicationTime.text = DisplayUtils.getArticlePublicationDateString(article, it.first, itemView.context)
+                    DisplayUtils.displayHtmlText(articleTextPreview, article.articleText ?: "")
+                    matchingKeywordsView.text = StringBuilder("Match found: ")
+                            .append(articleSearchResult.articleSearchReasultEntry.getMatchingKeyWords()
+                                    .joinToString(separator = ", ", prefix = "", postfix = "")).toString()
+                    enableView()
+
+                    ImageUtils.customLoader(articlePreviewImage, article.previewImageLink,
+                            R.drawable.pc_bg, R.drawable.app_big_logo)
+                }
+    }
+}

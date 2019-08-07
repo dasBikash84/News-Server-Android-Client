@@ -65,4 +65,17 @@ data class Article(
         return (id == other.id) || (id.substringBefore('_') == other.id.substringBefore('_'))
                 || (title!!.trim() == other.title!!.trim())
     }
+
+    companion object{
+        fun removeDuplicates(articles:List<Article>):
+                List<Article>{
+            val output = mutableListOf<Article>()
+            articles.asSequence()
+                    .filter {
+                        val article = it
+                        output.count { it.checkIfSameArticle(article) } == 0
+                    }.forEach { output.add(it) }
+            return output
+        }
+    }
 }

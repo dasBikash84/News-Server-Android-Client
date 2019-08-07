@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2019 das.bikash.dev@gmail.com. All rights reserved.
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="12dp"
+    android:layout_marginTop="6dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginBottom="6dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/page_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimaryLight"
+            android:gravity="center"
+            android:maxLines="2"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:textStyle="italic"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Page Title" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/article_preview_image"
+            android:layout_width="160dp"
+            android:layout_height="90dp"
+            android:background="@android:color/white"
+            android:gravity="center"
+            android:padding="2dp"
+            android:src="@drawable/pc_bg"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/page_title" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/article_title"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:background="@android:color/white"
+            android:gravity="start"
+            android:maxLines="2"
+            android:padding="4dp"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/article_preview_image"
+            app:layout_constraintTop_toBottomOf="@id/page_title"
+            tools:text="article_title" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/article_time"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:background="@android:color/white"
+            android:gravity="center"
+            android:lines="1"
+            android:padding="4dp"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/article_preview_image"
+            app:layout_constraintTop_toBottomOf="@id/article_title"
+            tools:text="article_time" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/article_text_preview"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:background="@android:color/white"
+            android:gravity="start|center_vertical"
+            android:maxLines="5"
+            android:padding="6dp"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/article_preview_image"
+            tools:text="পুলিশ জানায়, সদর উপজেলার চরপুলিয়ামারী এলাকায় কতিপয় মাদক ব্যবসায়ী অবস্থান করছে-এমন খবরের ভিত্তিতে ডিবি পুলিশের একটি টহল দল রবিবার রাত পৌনে ১টার সেখানে অভিযান চালায়। মাদক ব্যবসায়ীরা পুলিশের উপস্থিতি টের পেয়ে গুলি ও ইট ছোঁড়ে। আত্মরক্ষার্থে পুলিশও ফাঁকা গুলি চালায়। এক পর্যায়ে মাদক ব্যবসায়ীরা পালিয়ে যায়। গোলাগুলির সময় দুই পুলিশ সদস্য আহত হন। পরে ঘটনাস্থলে মাদক ব্যবসায়ী জনিকে গুলিবিদ্ধ অবস্থায় পাওয়া যায়। তাকে উদ্ধার করে ময়মনসিংহ মেডিকেল কলেজ হাসপাতালে চিকিৎসার জন্য নিয়ে গেলে চিকিৎসক মৃত ঘোষণা করেন।" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/matching_keywords"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:gravity="start"
+            android:padding="6dp"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/article_text_preview"
+            tools:text="matching_keywords" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</com.google.android.material.card.MaterialCardView>
