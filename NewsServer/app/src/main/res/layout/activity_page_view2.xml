@@ -16,22 +16,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/page_view_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".view_controllers.PageViewActivity">
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/app_bar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimary"
-            app:title="@string/app_name"
-            app:titleTextColor="@android:color/white"/>
-    </com.google.android.material.appbar.AppBarLayout>
+    android:layout_height="match_parent">
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/wait_screen"

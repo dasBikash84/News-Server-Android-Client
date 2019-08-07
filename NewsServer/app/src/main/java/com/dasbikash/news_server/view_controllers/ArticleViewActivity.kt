@@ -23,12 +23,12 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.google.android.material.appbar.AppBarLayout
 import java.io.Serializable
+import java.lang.IllegalArgumentException
 
 class ArticleViewActivity : AppCompatActivity() {
 
     companion object {
 
-        const val LOG_IN_REQ_CODE = 7777
         const val EXTRA_FOR_ARTICLE = "com.dasbikash.news_server.views.ArticleViewActivity.EXTRA_FOR_ARTICLE"
         const val EXTRA_FOR_SAVED_ARTICLE_ID = "com.dasbikash.news_server.views.ArticleViewActivity.EXTRA_FOR_SAVED_ARTICLE_ID"
 
@@ -67,7 +67,7 @@ class ArticleViewActivity : AppCompatActivity() {
             mSavedArticleId = intent!!.getStringExtra(EXTRA_FOR_SAVED_ARTICLE_ID)
             navigateTo(FragmentSavedArticleView.getInstance(mSavedArticleId))
         } else {
-            finish()
+            throw IllegalArgumentException()
         }
     }
 

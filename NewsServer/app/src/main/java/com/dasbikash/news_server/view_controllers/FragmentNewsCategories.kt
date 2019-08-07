@@ -89,7 +89,7 @@ class FragmentNewsCategories : Fragment() {
 
     private fun doOnNewsCategoryNameClick(newsCategory: NewsCategory) {
         debugLog(newsCategory.toString())
-        activity!!.startActivity(NewsCategoryArticleViewActivity.getIntentForNewsCategory(context!!, newsCategory))
+        activity!!.startActivity(ActivityArticlePreview.getIntentForNewsCategory(context!!, newsCategory))
     }
 
     companion object {

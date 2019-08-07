@@ -166,7 +166,7 @@ class FavouritePagesListAdapter() :
     override fun onBindViewHolder(holder: FavouritePagePreviewHolder, position: Int) {
         holder.itemView.setOnClickListener {
             it.context.startActivity(
-                    PageViewActivity.getIntentForPageBrowsing(it.context, getItem(position)))
+                    ActivityArticlePreview.getIntentForPageBrowsing(it.context, getItem(position)))
         }
         holder.bind(getItem(position))
     }

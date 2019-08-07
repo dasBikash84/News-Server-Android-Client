@@ -17,7 +17,7 @@
     android:layout_height="match_parent"
     android:layout_gravity="center"
     android:padding="1dp"
-    tools:context=".view_controllers.PageViewActivity"
+    tools:context=".view_controllers.ActivityArticlePreview"
     tools:showIn="@layout/app_bar_page_view">
 
 

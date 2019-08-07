@@ -26,7 +26,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DisplayUtils
-import com.dasbikash.news_server.view_controllers.PageViewActivity
+import com.dasbikash.news_server.view_controllers.ActivityArticlePreview
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
@@ -229,7 +229,7 @@ class LatestArticlePreviewHolder(itemView: View, val showNewsPaperName: Int = 0
         //Add click listner
         itemView.setOnClickListener(View.OnClickListener {
             itemView.context.startActivity(
-                    PageViewActivity.getIntentForLatestArticleDisplay(
+                    ActivityArticlePreview.getIntentForLatestArticleDisplay(
                             itemView.context, page
                     )
             )

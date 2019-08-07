@@ -50,7 +50,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".view_controllers.PageViewActivity"
+            android:name=".view_controllers.ActivityArticlePreview"
             android:screenOrientation="portrait" />
         <activity
             android:name=".view_controllers.SavedArticleViewActivity"
