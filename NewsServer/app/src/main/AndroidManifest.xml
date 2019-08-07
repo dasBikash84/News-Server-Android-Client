@@ -20,6 +20,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
         <activity
+            android:name=".view_controllers.ArticleViewActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".view_controllers.NewsCategoryArticleViewActivity"
             android:screenOrientation="portrait" />
         <activity
