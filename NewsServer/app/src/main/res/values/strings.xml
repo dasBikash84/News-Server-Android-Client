@@ -75,8 +75,8 @@
     <string name="newspaper_id_text_box_hint">News paper Id</string>
     <string name="auth_token_text_box_hint">Auth token</string>
     <string name="add_token_generation_request_menu_item_title">Add token gen req</string>
-    <string name="search_key_input_text_box_hint">Search Article by Keywords</string>
-    <string name="search_article">Search</string>
+    <string name="search_key_input_text_box_hint">Article Search</string>
+    <string name="search_article">Search Article</string>
     <string name="clear_article_keywords">Clear</string>
     <string name="show_page_search_box_image_desc">Show page search box</string>
     <string name="hide_page_search_box_image_desc">Hide page search box</string>

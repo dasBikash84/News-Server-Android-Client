@@ -63,7 +63,6 @@ data class Article(
 
     fun checkIfSameArticle(other: Article):Boolean{
         return (id == other.id) || (id.substringBefore('_') == other.id.substringBefore('_'))
-                || (title!! == other.title!!)
+                || (title!!.trim() == other.title!!.trim())
     }
-
 }
