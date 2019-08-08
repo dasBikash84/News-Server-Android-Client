@@ -19,6 +19,7 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.fragment.app.Fragment
@@ -37,13 +38,13 @@ import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
 class FragmentArticlePreviewForNewsCategory : Fragment() {
 
-    private lateinit var mWaitScreen: LinearLayoutCompat
+    private lateinit var mCenterLoadingScreen: LinearLayoutCompat
+    private lateinit var mBottomLoadingScreen: ProgressBar
     private lateinit var mArticlePreviewHolder: RecyclerView
     private lateinit var mArticlePreviewHolderAdapter: ArticlePreviewListAdapter
     private lateinit var mNewsCategory: NewsCategory
@@ -59,7 +60,7 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         LoggerUtils.debugLog("onCreateView", this::class.java)
-        return inflater.inflate(R.layout.fragment_article_preview_for_news_category, container, false)
+        return inflater.inflate(R.layout.fragment_article_preview, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -83,15 +84,16 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
 
     private fun showLoadingIfRequired() {
         if (mNewArticleLoadInProgress) {
-            showWaitScreen()
+            showLoadingScreen()
         }
     }
 
     override fun onResume() {
         super.onResume()
-        hideWaitScreen()
+        hideLoadingScreens()
         mNewArticleLoadInProgress = false
         if (mArticleList.isEmpty()) {
+            showLoadingScreen()
             loadMoreArticles()
         }
     }
@@ -99,7 +101,7 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
     private fun loadMoreArticles() {
         if (!mNewArticleLoadInProgress && !mEndReachedForArticles.get()) {
             mNewArticleLoadInProgress = true
-            showWaitScreen()
+//            showLoadingScreen()
             var amDisposed = false
             Schedulers.shutdown()
             Schedulers.start()
@@ -137,7 +139,7 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
                             .subscribeWith(object : DisposableObserver<Pair<List<Article>,List<ArticleWithParents>>>() {
                                 override fun onComplete() {
                                     mNewArticleLoadInProgress = false
-                                    hideWaitScreen()
+                                    hideLoadingScreens()
                                 }
 
                                 override fun onNext(data: Pair<List<Article>,List<ArticleWithParents>>) {
@@ -157,7 +159,7 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
 
                                 override fun onError(e: Throwable) {
                                     mNewArticleLoadInProgress = false
-                                    hideWaitScreen()
+                                    hideLoadingScreens()
                                     LoggerUtils.printStackTrace(e)
                                     when (e) {
                                         is NoInternertConnectionException -> {
@@ -181,23 +183,43 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
     }
 
     private fun setListners() {
+        mCenterLoadingScreen.setOnClickListener {  }
     }
 
     private fun findViewItems(view: View) {
         mArticlePreviewHolder = view.findViewById(R.id.article_preview_holder)
-        mWaitScreen = view.findViewById(R.id.wait_screen_for_settings_change)
+        mCenterLoadingScreen = view.findViewById(R.id.center_loading_screen)
+        mBottomLoadingScreen = view.findViewById(R.id.bottom_loading_screen)
     }
 
-    private fun showWaitScreen() {
-        mWaitScreen.visibility = View.VISIBLE
-        mWaitScreen.bringToFront()
+
+    private fun showLoadingScreen() {
+        if (mArticleList.size > BOTTOM_LOADING_SCREEN_ENABLER_COUNT){
+            showBottomLoadingScreen()
+        }else{
+            showCenterLoadingScreen()
+        }
     }
 
-    private fun hideWaitScreen() {
-        mWaitScreen.visibility = View.GONE
+    private fun showCenterLoadingScreen() {
+        mBottomLoadingScreen.visibility = View.GONE
+        mCenterLoadingScreen.visibility = View.VISIBLE
+        mCenterLoadingScreen.bringToFront()
+    }
+
+    private fun showBottomLoadingScreen() {
+        mCenterLoadingScreen.visibility = View.GONE
+        mBottomLoadingScreen.visibility = View.VISIBLE
+        mBottomLoadingScreen.bringToFront()
+    }
+
+    private fun hideLoadingScreens() {
+        mCenterLoadingScreen.visibility = View.GONE
+        mBottomLoadingScreen.visibility = View.GONE
     }
 
     companion object {
+        private val BOTTOM_LOADING_SCREEN_ENABLER_COUNT = 3
         private const val ARTICLE_LOAD_CHUNK_SIZE = 10
         private const val ARG_NEWS_CATEGORY =
                 "com.dasbikash.news_server.view_controllers.FragmentArticlePreviewForNewsCategory.ARG_NEWS_CATEGORY"

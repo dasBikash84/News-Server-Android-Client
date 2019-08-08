@@ -18,6 +18,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.*
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -49,6 +50,7 @@ import io.reactivex.schedulers.Schedulers
 class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWindowOperator {
 
     companion object {
+        private val BOTTOM_LOADING_SCREEN_ENABLER_COUNT = 3
         private const val ARTICLE_LOAD_CHUNK_SIZE = 10
         const val LOG_IN_REQ_CODE = 7777
         const val ARG_FOR_PAGE = "com.dasbikash.news_server.views.FragmentArticlePreviewForPage.ARG_FOR_PAGE"
@@ -81,7 +83,8 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
     private lateinit var mLanguage: Language
     private lateinit var mNewspaper: Newspaper
 
-    private lateinit var mWaitScreen: LinearLayoutCompat
+    private lateinit var mCenterLoadingScreen: LinearLayoutCompat
+    private lateinit var mBottomLoadingScreen: ProgressBar
     private lateinit var mArticlePreviewHolder: RecyclerView
     private lateinit var mArticlePreviewHolderAdapter: ArticlePreviewListAdapter
 
@@ -112,7 +115,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         LoggerUtils.debugLog("onCreateView", this::class.java)
-        return inflater.inflate(R.layout.fragment_article_preview_for_page, container, false)
+        return inflater.inflate(R.layout.fragment_article_preview, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -122,6 +125,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
         mPurposeString = arguments!!.getString(ARG_FOR_PURPOSE)!!
 
         findViewItems(view)
+        setListners()
         init()
 
         ViewModelProviders.of(activity!!).get(PageViewViewModel::class.java)
@@ -144,8 +148,9 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
 
     private fun findViewItems(view: View) {
         mArticlePreviewHolder = view.findViewById(R.id.article_preview_holder)
-        mWaitScreen = view.findViewById(R.id.wait_screen)
+        mCenterLoadingScreen = view.findViewById(R.id.center_loading_screen)
         mPageViewContainer = view.findViewById(R.id.page_view_container)
+        mBottomLoadingScreen = view.findViewById(R.id.bottom_loading_screen)
     }
 
     private fun init() {
@@ -154,24 +159,44 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
         mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
 
-        hideWaitScreen()
+        hideLoadingScreens()
         mArticlePreviewHolderAdapter = ArticlePreviewListAdapter({ doOnArticleClick(it) }, { loadMoreArticles() }, { showLoadingIfRequired() }, ARTICLE_LOAD_CHUNK_SIZE)
         mArticlePreviewHolder.adapter = mArticlePreviewHolderAdapter
     }
 
+    private fun setListners() {
+        mCenterLoadingScreen.setOnClickListener {  }
+    }
+
     private fun showLoadingIfRequired() {
         if (mArticleLoadRunning) {
-            showWaitScreen()
+            showLoadingScreen()
         }
     }
 
-    private fun showWaitScreen() {
-        mWaitScreen.visibility = View.VISIBLE
-        mWaitScreen.bringToFront()
+    private fun showLoadingScreen() {
+        if (mArticleList.size > BOTTOM_LOADING_SCREEN_ENABLER_COUNT){
+            showBottomLoadingScreen()
+        }else{
+            showCenterLoadingScreen()
+        }
     }
 
-    private fun hideWaitScreen() {
-        mWaitScreen.visibility = View.GONE
+    private fun showCenterLoadingScreen() {
+        mBottomLoadingScreen.visibility = View.GONE
+        mCenterLoadingScreen.visibility = View.VISIBLE
+        mCenterLoadingScreen.bringToFront()
+    }
+
+    private fun showBottomLoadingScreen() {
+        mCenterLoadingScreen.visibility = View.GONE
+        mBottomLoadingScreen.visibility = View.VISIBLE
+        mBottomLoadingScreen.bringToFront()
+    }
+
+    private fun hideLoadingScreens() {
+        mCenterLoadingScreen.visibility = View.GONE
+        mBottomLoadingScreen.visibility = View.GONE
     }
 
     private fun doOnArticleClick(article: Article) {
@@ -241,7 +266,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
 
     override fun onPause() {
         super.onPause()
-        hideWaitScreen()
+        hideLoadingScreens()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -253,7 +278,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (mWaitScreen.visibility != View.VISIBLE) {
+        if (mCenterLoadingScreen.visibility != View.VISIBLE) {
             return when (item.itemId) {
                 R.id.add_to_favourites_menu_item -> {
                     addPageToFavListAction()
@@ -316,7 +341,11 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
         debugLog("loadMoreArticles()")
         if (!mArticleLoadRunning && !mInvHaveMoreArticle.get()) {
             mArticleLoadRunning = true
-            showWaitScreen()
+
+            if (mArticleList.size <= BOTTOM_LOADING_SCREEN_ENABLER_COUNT){
+                showLoadingScreen()
+            }
+
             var amDisposed = false
 
             Schedulers.shutdown()
@@ -357,7 +386,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
                             .subscribeWith(object : DisposableObserver<Pair<List<Article>, List<ArticleWithParents>>>() {
                                 override fun onComplete() {
                                     mArticleLoadRunning = false
-                                    hideWaitScreen()
+                                    hideLoadingScreens()
                                 }
 
                                 override fun onNext(data: Pair<List<Article>, List<ArticleWithParents>>) {
@@ -367,7 +396,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
 
                                 override fun onError(throwable: Throwable) {
                                     mArticleLoadRunning = false
-                                    hideWaitScreen()
+                                    hideLoadingScreens()
                                     when (throwable) {
                                         is DataNotFoundException -> {
                                             mInvHaveMoreArticle.set()
@@ -422,7 +451,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
 
         val positiveAction: () -> Unit = {
             //            loadWorkInProcessWindow()
-            showWaitScreen()
+            showLoadingScreen()
             mDisposable.add(
                     Observable.just(mPage)
                             .subscribeOn(Schedulers.io())
@@ -435,7 +464,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribeWith(object : DisposableObserver<Boolean>() {
                                 override fun onComplete() {
-                                    hideWaitScreen()
+                                    hideLoadingScreens()
                                 }
 
                                 override fun onNext(result: Boolean) {
@@ -457,7 +486,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
                                     } else {
                                         DisplayUtils.showShortSnack(mPageViewContainer, "Error!! Please retry.")
                                     }
-                                    hideWaitScreen()
+                                    hideLoadingScreens()
                                 }
                             })
             )
@@ -500,11 +529,11 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
     }
 
     override fun loadWorkInProcessWindow() {
-        showWaitScreen()
+        showLoadingScreen()
     }
 
     override fun removeWorkInProcessWindow() {
-        hideWaitScreen()
+        hideLoadingScreens()
     }
 
     private enum class PAGE_FAV_STATUS_CHANGE_ACTION {
