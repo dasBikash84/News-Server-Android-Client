@@ -37,6 +37,7 @@ import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
@@ -48,7 +49,9 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
     private lateinit var mNewsCategory: NewsCategory
 
     private val mArticleList = mutableListOf<Article>()
+    private val mArticleWithParentsList = mutableListOf<ArticleWithParents>()
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
+    private lateinit var disposable: Disposable
 
     private var mNewArticleLoadInProgress = false
     private var mEndReachedForArticles = OnceSettableBoolean()
@@ -103,7 +106,13 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
                 showWaitScreen()
             }
             var amDisposed = false
-            mDisposable.add(
+            if (::disposable.isInitialized){
+                disposable.dispose()
+                mDisposable.remove(disposable)
+                Schedulers.shutdown()
+                Schedulers.start()
+            }
+            disposable =
                     Observable.just(mNewsCategory)
                             .subscribeOn(Schedulers.io())
                             .map {
@@ -123,7 +132,10 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
                                         throw ex
                                     }
                                 }
-                                articles.toList()
+                                val filteredArticles = Article.removeDuplicates(articles).filter {
+                                                                    val article = it
+                                                                    mArticleList.count { it.checkIfSameArticle(article) } == 0}.toList()
+                                Pair(filteredArticles,ArticleWithParents.getFromArticles(filteredArticles,context!!))
                             }
                             .doOnDispose {
                                 mNewArticleLoadInProgress = false
@@ -131,24 +143,20 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
 //                                debugLog("amDisposed = true")
                             }
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribeWith(object : DisposableObserver<List<Article>>() {
+                            .subscribeWith(object : DisposableObserver<Pair<List<Article>,List<ArticleWithParents>>>() {
                                 override fun onComplete() {
                                     mNewArticleLoadInProgress = false
                                     hideWaitScreen()
                                 }
 
-                                override fun onNext(newArticleList: List<Article>) {
-                                    var articleAdditionCount = 0
-                                    newArticleList.asSequence().forEach {
-                                        val article = it
-                                        if (mArticleList.count { it.checkIfSameArticle(article) } == 0) {
-                                            articleAdditionCount++
-                                            mArticleList.add(article)
-                                        }
-                                    }
-                                    if (articleAdditionCount > 0) {
+                                override fun onNext(data: Pair<List<Article>,List<ArticleWithParents>>) {
+                                    val newArticleList = data.first
+
+                                    if (newArticleList.isNotEmpty()) {
                                         mArticleRequestChunkSize = ARTICLE_LOAD_CHUNK_SIZE
-                                        mArticlePreviewHolderAdapter.submitList(mArticleList.toList())
+                                        mArticleList.addAll(newArticleList)
+                                        mArticleWithParentsList.addAll(data.second)
+                                        mArticlePreviewHolderAdapter.submitList(mArticleWithParentsList.toList())
                                     } else {
                                         mNewArticleLoadInProgress = false
                                         mArticleRequestChunkSize += ARTICLE_LOAD_CHUNK_SIZE
@@ -172,7 +180,8 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
                                         }
                                     }
                                 }
-                            }))
+                            })
+            mDisposable.add(disposable)
         }
     }
 

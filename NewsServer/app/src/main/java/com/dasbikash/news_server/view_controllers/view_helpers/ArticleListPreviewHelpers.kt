@@ -24,7 +24,12 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DisplayUtils
+import com.dasbikash.news_server.utils.debugLog
+import com.dasbikash.news_server.view_controllers.ArticleWithParents
 import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.Language
+import com.dasbikash.news_server_data.models.room_entity.Newspaper
+import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.ImageUtils
 import io.reactivex.Observable
@@ -32,10 +37,21 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
-object ArticleDiffCallback: DiffUtil.ItemCallback<Article>(){
+object ArticleWithParentsDiffCallback : DiffUtil.ItemCallback<ArticleWithParents>() {
+    override fun areItemsTheSame(oldItem: ArticleWithParents, newItem: ArticleWithParents): Boolean {
+        return oldItem.article.checkIfSameArticle(newItem.article)
+    }
+
+    override fun areContentsTheSame(oldItem: ArticleWithParents, newItem: ArticleWithParents): Boolean {
+        return oldItem.article.checkIfSameArticle(newItem.article)
+    }
+}
+
+object ArticleDiffCallback : DiffUtil.ItemCallback<Article>() {
     override fun areItemsTheSame(oldItem: Article, newItem: Article): Boolean {
         return oldItem.id == newItem.id
     }
+
     override fun areContentsTheSame(oldItem: Article, newItem: Article): Boolean {
         return oldItem == newItem
     }
@@ -43,28 +59,28 @@ object ArticleDiffCallback: DiffUtil.ItemCallback<Article>(){
 
 class ArticlePreviewListAdapter(val articleClickAction: (Article) -> Unit, val requestMoreArticle: () -> Unit,
                                 val showLoadingIfRequired: () -> Unit, val articleLoadChunkSize: Int,
-                                val mShowPageTitle:Boolean=false) :
-        ListAdapter<Article, ArticlePreviewHolder>(ArticleDiffCallback) {
+                                val mShowPageTitle: Boolean = false) :
+        ListAdapter<ArticleWithParents, ArticlePreviewHolder>(ArticleWithParentsDiffCallback) {
 
     override fun onBindViewHolder(holder: ArticlePreviewHolder, position: Int) {
-        holder.itemView.setOnClickListener { articleClickAction(getItem(position)) }
+        holder.itemView.setOnClickListener { articleClickAction((getItem(position) as ArticleWithParents).article) }
+        holder.bind(getItem(position))
         if (position >= (itemCount - articleLoadChunkSize / 2)) {
             requestMoreArticle()
         }
         if (position == (itemCount - 1)) {
             showLoadingIfRequired()
         }
-        holder.bind(getItem(position))
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticlePreviewHolder {
         return ArticlePreviewHolder(LayoutInflater.from(parent.context)
-                .inflate(R.layout.view_article_preview, parent, false),mShowPageTitle)
+                .inflate(R.layout.view_article_preview, parent, false), mShowPageTitle)
     }
 }
 
 
-class ArticlePreviewHolder(itemView: View, val mShowPageTitle:Boolean=false) : RecyclerView.ViewHolder(itemView) {
+class ArticlePreviewHolder(itemView: View, val mShowPageTitle: Boolean = false) : RecyclerView.ViewHolder(itemView) {
 
     val pageTitle: TextView
     val articlePreviewImage: ImageView
@@ -76,7 +92,7 @@ class ArticlePreviewHolder(itemView: View, val mShowPageTitle:Boolean=false) : R
     val articlePublicationTimePlaceHolder: TextView
     val articleTextPreviewPlaceHolder: TextView
 
-    lateinit var mdisposable: Disposable
+    lateinit var mDisposable: Disposable
 
 
     init {
@@ -107,6 +123,9 @@ class ArticlePreviewHolder(itemView: View, val mShowPageTitle:Boolean=false) : R
         ImageUtils.customLoader(imageView = articlePreviewImage,
                 defaultImageResourceId = R.drawable.pc_bg,
                 placeHolderImageResourceId = R.drawable.pc_bg)
+        if (::mDisposable.isInitialized){
+            mDisposable.dispose()
+        }
     }
 
     private fun enableView() {
@@ -115,7 +134,7 @@ class ArticlePreviewHolder(itemView: View, val mShowPageTitle:Boolean=false) : R
         articlePublicationTimePlaceHolder.visibility = View.GONE
         articleTextPreviewPlaceHolder.visibility = View.GONE
 
-        if (mShowPageTitle){
+        if (mShowPageTitle) {
             pageTitle.visibility = View.VISIBLE
         }
         articleTitle.visibility = View.VISIBLE
@@ -124,28 +143,25 @@ class ArticlePreviewHolder(itemView: View, val mShowPageTitle:Boolean=false) : R
     }
 
     @SuppressLint("CheckResult")
-    fun bind(article: Article) {
+    fun bind(articleWithParents: ArticleWithParents) {
         disableView()
-        val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
-        Observable.just(article)
-                .subscribeOn(Schedulers.io())
-                .map {
-                    val page = appSettingsRepository.findPageById(it.pageId!!)!!
-                    val newspaper = appSettingsRepository.getNewspaperByPage(page)
-                    val language = appSettingsRepository.getLanguageByNewspaper(newspaper)
-                    Triple(language, newspaper, page)
-                }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    pageTitle.text = StringBuilder(it.third.name!!).append(" | ").append(it.second.name!!).toString()
-                    articleTitle.text = article.title
-                    articlePublicationTime.text = DisplayUtils.getArticlePublicationDateString(article, it.first, itemView.context)
-                    DisplayUtils.displayHtmlText(articleTextPreview, article.articleText ?: "")
-//                    debugLog(article.toString())
-                    enableView()
 
-                    ImageUtils.customLoader(articlePreviewImage, article.previewImageLink,
-                            R.drawable.pc_bg, R.drawable.app_big_logo)
-                }
+        articleWithParents.apply {
+            loadData(article, language, newspaper, page)
+        }
+    }
+
+    private fun loadData(article: Article, language: Language, newspaper: Newspaper, page: Page) {
+        debugLog("loadData for: ${article.toString()}")
+
+        pageTitle.text = StringBuilder(page.name!!).append(" | ").append(newspaper.name!!).toString()
+        articleTitle.text = article.title
+        articlePublicationTime.text = DisplayUtils.getArticlePublicationDateString(article, language, itemView.context)
+        DisplayUtils.displayHtmlText(articleTextPreview, article.articleText ?: "")
+        enableView()
+
+        ImageUtils.customLoader(articlePreviewImage, article.previewImageLink,
+                R.drawable.pc_bg, R.drawable.app_big_logo)
+
     }
 }
