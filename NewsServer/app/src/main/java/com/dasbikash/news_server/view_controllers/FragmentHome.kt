@@ -15,7 +15,6 @@ package com.dasbikash.news_server.view_controllers
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.os.SystemClock
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -26,6 +25,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -235,7 +235,7 @@ class FragmentHome : Fragment() {
         mPageSearchResultHolder.adapter = mSearchResultListAdapter
         mNewsPaperListAdapter = NewsPaperListAdapter { doOnNewsPaperNameClick(it) }
         mNewsPaperMenuHolder.adapter = mNewsPaperListAdapter
-        mPageArticlePreviewHolderAdapter = PageListAdapter(mDisposable, ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
+        mPageArticlePreviewHolderAdapter = PageListAdapter(this, ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
         mPageArticlePreviewHolder.adapter = mPageArticlePreviewHolderAdapter
         mPageSearchResultContainer.visibility = View.GONE
 
@@ -424,14 +424,14 @@ class NewsPaperNameHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     fun getNewsPaper() = mNewspaper
 }
 
-class PageListAdapter(val lifeCycleAwareCompositeDisposable: LifeCycleAwareCompositeDisposable,
+class PageListAdapter(val lifeCycleOwner: LifecycleOwner,
                       val homeViewModel: HomeViewModel) :
         ListAdapter<Page, LatestArticlePreviewHolder>(PageDiffCallback), DefaultLifecycleObserver {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LatestArticlePreviewHolder {
         return LatestArticlePreviewHolder(
                 LayoutInflater.from(parent.context)
-                        .inflate(R.layout.view_article_preview, parent, false), lifeCycleAwareCompositeDisposable, homeViewModel)
+                        .inflate(R.layout.view_article_preview, parent, false), lifeCycleOwner, homeViewModel)
     }
 
     override fun onBindViewHolder(holder: LatestArticlePreviewHolder, position: Int) {
@@ -439,9 +439,9 @@ class PageListAdapter(val lifeCycleAwareCompositeDisposable: LifeCycleAwareCompo
     }
 }
 
-class LatestArticlePreviewHolder(itemView: View, val lifeCycleAwareCompositeDisposable: LifeCycleAwareCompositeDisposable,
+class LatestArticlePreviewHolder(itemView: View, lifeCycleOwner: LifecycleOwner,
                                  val homeViewModel: HomeViewModel)
-    : RecyclerView.ViewHolder(itemView) {
+    : RecyclerView.ViewHolder(itemView),DefaultLifecycleObserver {
 
     val pageTitle: TextView
     val articlePreviewImage: ImageView
@@ -456,7 +456,6 @@ class LatestArticlePreviewHolder(itemView: View, val lifeCycleAwareCompositeDisp
     lateinit var mdisposable: Disposable
     lateinit var mPage: Page
 
-
     init {
 
         pageTitle = itemView.findViewById(R.id.page_title)
@@ -470,7 +469,24 @@ class LatestArticlePreviewHolder(itemView: View, val lifeCycleAwareCompositeDisp
         articlePublicationTimePlaceHolder = itemView.findViewById(R.id.article_time_ph)
         articleTextPreviewPlaceHolder = itemView.findViewById(R.id.article_text_preview_ph)
 
+        articleTitlePlaceHolder.setOnClickListener {  }
+        articlePublicationTimePlaceHolder.setOnClickListener {  }
+        articleTextPreviewPlaceHolder.setOnClickListener {  }
+
+        lifeCycleOwner.lifecycle.addObserver(this)
         disableView()
+    }
+
+    override fun onPause(owner: LifecycleOwner) {
+        if (::mdisposable.isInitialized) {
+            mdisposable.dispose()
+        }
+    }
+
+    override fun onResume(owner: LifecycleOwner) {
+        if (::mPage.isInitialized) {
+            bind(mPage)
+        }
     }
 
     private fun disableView() {
@@ -568,7 +584,6 @@ class LatestArticlePreviewHolder(itemView: View, val lifeCycleAwareCompositeDisp
                         LoggerUtils.debugLog(e.message + "${e::class.java.simpleName} for page Np: ${mPage.newspaperId} ${mPage.name} L2", this::class.java)
                     }
                 })
-        lifeCycleAwareCompositeDisposable.add(mdisposable)
     }
 }
 
