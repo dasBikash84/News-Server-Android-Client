@@ -51,14 +51,11 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
     private val mArticleList = mutableListOf<Article>()
     private val mArticleWithParentsList = mutableListOf<ArticleWithParents>()
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
-    private lateinit var disposable: Disposable
 
     private var mNewArticleLoadInProgress = false
     private var mEndReachedForArticles = OnceSettableBoolean()
 
     var mArticleRequestChunkSize = ARTICLE_LOAD_CHUNK_SIZE
-
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         LoggerUtils.debugLog("onCreateView", this::class.java)
@@ -102,17 +99,11 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
     private fun loadMoreArticles() {
         if (!mNewArticleLoadInProgress && !mEndReachedForArticles.get()) {
             mNewArticleLoadInProgress = true
-            if (mArticleList.isEmpty()) {
-                showWaitScreen()
-            }
+            showWaitScreen()
             var amDisposed = false
-            if (::disposable.isInitialized){
-                disposable.dispose()
-                mDisposable.remove(disposable)
-                Schedulers.shutdown()
-                Schedulers.start()
-            }
-            disposable =
+            Schedulers.shutdown()
+            Schedulers.start()
+            mDisposable.add(
                     Observable.just(mNewsCategory)
                             .subscribeOn(Schedulers.io())
                             .map {
@@ -180,8 +171,7 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
                                         }
                                     }
                                 }
-                            })
-            mDisposable.add(disposable)
+                            }))
         }
     }
 
