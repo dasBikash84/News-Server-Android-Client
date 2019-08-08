@@ -179,7 +179,7 @@ class SavedArticlePreviewHolder(itemView: View) : RecyclerView.ViewHolder(itemVi
         ImageUtils.customLoader(articleImage, savedArticle.previewImageLink,
                                     R.drawable.pc_bg, R.drawable.app_big_logo)
         Observable.just(savedArticle.publicationTime)
-                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
                 .map {
                     val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
                     val language = appSettingsRepository.getLanguageByPage(appSettingsRepository.findPageById(savedArticle.pageId)!!)
