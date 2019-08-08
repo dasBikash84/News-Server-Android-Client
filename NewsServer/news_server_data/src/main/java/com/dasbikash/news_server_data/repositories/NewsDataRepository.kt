@@ -125,6 +125,7 @@ abstract class NewsDataRepository {
 
 
     abstract fun getArticleLiveDataForPage(page: Page): LiveData<List<Article>>
+    abstract fun getArticlesForPage(page: Page): List<Article>
     abstract fun getArticleCountForPage(page: Page): Int
 
     companion object {

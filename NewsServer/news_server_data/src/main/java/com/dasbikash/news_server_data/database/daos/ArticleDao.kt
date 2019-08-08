@@ -41,6 +41,9 @@ internal interface ArticleDao {
     @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationTime DESC")
     fun getArticleLiveDataForPage(pageId:String): LiveData<List<Article>>
 
+    @Query("SELECT * FROM Article WHERE pageId=:pageId ORDER BY publicationTime DESC")
+    fun getArticlesForPage(pageId:String): List<Article>
+
     @Query("SELECT COUNT(*) FROM Article WHERE pageId=:pageId")
     fun getArticleCountForPage(pageId:String): Int
 }

@@ -48,6 +48,10 @@ internal class NewsDataRepositoryRoomImpl internal constructor(context: Context)
         return newsServerDatabase.articleDao.getArticleLiveDataForPage(page.id)
     }
 
+    override fun getArticlesForPage(page: Page): List<Article> {
+        return newsServerDatabase.articleDao.getArticlesForPage(page.id)
+    }
+
     override fun getArticleCountForPage(page: Page): Int {
         return newsServerDatabase.articleDao.getArticleCountForPage(page.id)
     }

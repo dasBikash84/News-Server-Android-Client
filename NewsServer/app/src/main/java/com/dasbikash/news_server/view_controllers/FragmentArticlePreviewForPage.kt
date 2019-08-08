@@ -15,6 +15,8 @@ package com.dasbikash.news_server.view_controllers
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.LinearLayoutCompat
@@ -34,6 +36,7 @@ import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
+import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.Observable
@@ -43,7 +46,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class FragmentArticlePreviewForPage : Fragment(),SignInHandler, WorkInProcessWindowOperator {
+class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWindowOperator {
 
     companion object {
         private const val ARTICLE_LOAD_CHUNK_SIZE = 10
@@ -94,9 +97,12 @@ class FragmentArticlePreviewForPage : Fragment(),SignInHandler, WorkInProcessWin
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
     private val mArticleList = mutableListOf<Article>()
+    private val mArticleWithParentsList = mutableListOf<ArticleWithParents>()
 
     private val mInvHaveMoreArticle = OnceSettableBoolean()
     private var mArticleLoadRunning = false
+
+    var mArticleRequestChunkSize = ARTICLE_LOAD_CHUNK_SIZE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -117,25 +123,6 @@ class FragmentArticlePreviewForPage : Fragment(),SignInHandler, WorkInProcessWin
 
         findViewItems(view)
         init()
-
-        ViewModelProviders.of(activity!!).get(PageViewViewModel::class.java)
-                .getArticleLiveDataForPage(mPage)
-                .observe(this, object : androidx.lifecycle.Observer<List<Article>> {
-                    override fun onChanged(articleList: List<Article>?) {
-                        articleList?.let {
-                            mArticleList.clear()
-                            if (it.isNotEmpty()) {
-                                it.asSequence().forEach {
-                                    val article = it
-                                    if (mArticleList.count { it.checkIfSameArticle(article) } == 0){
-                                        mArticleList.add(article)
-                                    }
-                                }
-                            }
-                            mArticlePreviewHolderAdapter.submitList(mArticleList.toList())
-                        }
-                    }
-                })
 
         ViewModelProviders.of(activity!!).get(PageViewViewModel::class.java)
                 .getUserPreferenceLiveData()
@@ -173,7 +160,7 @@ class FragmentArticlePreviewForPage : Fragment(),SignInHandler, WorkInProcessWin
     }
 
     private fun showLoadingIfRequired() {
-        if (mArticleLoadRunning){
+        if (mArticleLoadRunning) {
             showWaitScreen()
         }
     }
@@ -189,45 +176,67 @@ class FragmentArticlePreviewForPage : Fragment(),SignInHandler, WorkInProcessWin
 
     private fun doOnArticleClick(article: Article) {
         debugLog(article.toString())
-        startActivity(ActivityArticleView.getIntentForArticleView(context!!,article))
+        startActivity(ActivityArticleView.getIntentForArticleView(context!!, article))
     }
 
-    private fun activityForPageBrowsing() =
+    private fun fragmentForPageBrowsing() =
             mPurposeString.equals(ARG_VALUE_FOR_PAGE_BROWSING)
 
     override fun onResume() {
         super.onResume()
+        debugLog("onResume()")
+        Schedulers.shutdown()
+        Schedulers.start()
         mDisposable.add(
                 Observable.just(mPage)
-                        .observeOn(Schedulers.io())
+                        .subscribeOn(Schedulers.io())
                         .map {
-                            if (!::mNewspaper.isInitialized){
+                            debugLog("inside map")
+                            if (!::mNewspaper.isInitialized) {
                                 mNewspaper = mAppSettingsRepository.getNewspaperByPage(it)
                             }
-                            if (!::mLanguage.isInitialized){
+                            if (!::mLanguage.isInitialized) {
                                 mLanguage = mAppSettingsRepository.getLanguageByNewspaper(mNewspaper)
                             }
-                            mNewsDataRepository.getLatestArticleByPageFromLocalDb(mPage)?.let {
-                                return@map it
-                            }
-                            mPage
+//                                mNewsDataRepository.getLatestArticleByPageFromLocalDb(mPage)!!
+                            getNewArticlesForDisplay()
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Any>() {
+                        .subscribeWith(object : DisposableObserver<Pair<List<Article>, List<ArticleWithParents>>>() {
                             override fun onComplete() {}
-                            override fun onNext(data:Any) {
-                                (activity!! as AppCompatActivity).supportActionBar!!.setTitle("${mPage.name} | ${mNewspaper.name}")
-                                if (!mHasJumpedToLatestArticle.get() && (data is Article) && !activityForPageBrowsing()){
+                            override fun onNext(data: Pair<List<Article>, List<ArticleWithParents>>) {
+                                setAppBarTitle()
+                                if (!fragmentForPageBrowsing() && !mHasJumpedToLatestArticle.get() && data.first.isNotEmpty()) {
                                     mHasJumpedToLatestArticle.set()
-                                    doOnArticleClick(data)
-                                }else{
-                                    loadMoreArticles()
+                                    Handler(Looper.getMainLooper()).postDelayed(
+                                            { doOnArticleClick(data.first.get(0)) }, 50L
+                                    )
+                                } else {
+                                    if (data.first.isNotEmpty()) {
+                                        displayNewArticles(data)
+                                    } else {
+                                        loadMoreArticles()
+                                    }
                                 }
                             }
 
-                            override fun onError(e: Throwable) {}
-                        })
-        )
+                            override fun onError(e: Throwable) {
+                                activity!!.finish()
+                            }
+                        }))
+    }
+
+    private fun setAppBarTitle() {
+        getAppBarTitle()?.let {
+            (activity!! as AppCompatActivity).supportActionBar!!.title = it
+        }
+    }
+
+    private fun getAppBarTitle(): String? {
+        if (::mPage.isInitialized && ::mNewspaper.isInitialized) {
+            return "${mPage.name} | ${mNewspaper.name}"
+        }
+        return null
     }
 
     override fun onPause() {
@@ -304,20 +313,25 @@ class FragmentArticlePreviewForPage : Fragment(),SignInHandler, WorkInProcessWin
     }
 
     private fun loadMoreArticles() {
-
+        debugLog("loadMoreArticles()")
         if (!mArticleLoadRunning && !mInvHaveMoreArticle.get()) {
-
-            if (mArticleList.size<2) {
-                showWaitScreen()
-            }
             mArticleLoadRunning = true
+            showWaitScreen()
             var amDisposed = false
+
+            Schedulers.shutdown()
+            Schedulers.start()
+
             mDisposable.add(
                     Observable.just(mPage)
-                            .observeOn(Schedulers.io())
+                            .subscribeOn(Schedulers.io())
                             .map {
+
+                                if (!::mNewspaper.isInitialized) {
+                                    mNewspaper = mAppSettingsRepository.getNewspaperByPage(it)
+                                }
                                 if (!::mLanguage.isInitialized) {
-                                    mLanguage = mAppSettingsRepository.getLanguageByPage(mPage)
+                                    mLanguage = mAppSettingsRepository.getLanguageByNewspaper(mNewspaper)
                                 }
                                 mNewsDataRepository.getArticleCountForPage(mPage) == 0
                             }
@@ -325,32 +339,34 @@ class FragmentArticlePreviewForPage : Fragment(),SignInHandler, WorkInProcessWin
                                 val articles = mutableListOf<Article>()
                                 try {
                                     if (it) {
-                                        articles.add(mNewsDataRepository.getLatestArticleByPage(mPage))
+                                        mNewsDataRepository.getLatestArticleByPage(mPage)
                                     }
-                                    articles.addAll(mNewsDataRepository.downloadPreviousArticlesByPage(mPage,ARTICLE_LOAD_CHUNK_SIZE))
+                                    mNewsDataRepository.downloadPreviousArticlesByPage(mPage, mArticleRequestChunkSize)
                                 } catch (ex: Exception) {
                                     if (!amDisposed) {
                                         throw ex
                                     }
                                 }
-                                articles.toList()
+                                getNewArticlesForDisplay()
                             }
                             .doOnDispose {
                                 mArticleLoadRunning = false
                                 amDisposed = true
                             }
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribeWith(object : DisposableObserver<List<Article>>() {
+                            .subscribeWith(object : DisposableObserver<Pair<List<Article>, List<ArticleWithParents>>>() {
                                 override fun onComplete() {
                                     mArticleLoadRunning = false
-//                                    removeWorkInProcessWindow()
                                     hideWaitScreen()
                                 }
 
-                                override fun onNext(articleList: List<Article>) {}
+                                override fun onNext(data: Pair<List<Article>, List<ArticleWithParents>>) {
+                                    setAppBarTitle()
+                                    displayNewArticles(data)
+                                }
+
                                 override fun onError(throwable: Throwable) {
                                     mArticleLoadRunning = false
-//                                    removeWorkInProcessWindow()
                                     hideWaitScreen()
                                     when (throwable) {
                                         is DataNotFoundException -> {
@@ -366,6 +382,30 @@ class FragmentArticlePreviewForPage : Fragment(),SignInHandler, WorkInProcessWin
                                 }
                             })
             )
+        }
+    }
+
+    private fun getNewArticlesForDisplay(): Pair<List<Article>, List<ArticleWithParents>> {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        val newArticles = Article.removeDuplicates(mNewsDataRepository.getArticlesForPage(mPage).filter {
+            val article = it
+            mArticleList.count { it.checkIfSameArticle(article) } == 0
+        })
+        return Pair(newArticles, ArticleWithParents.getFromArticles(newArticles, context!!))
+    }
+
+    private fun displayNewArticles(data: Pair<List<Article>, List<ArticleWithParents>>) {
+        val newArticleList = data.first
+
+        if (newArticleList.isNotEmpty()) {
+            mArticleRequestChunkSize = ARTICLE_LOAD_CHUNK_SIZE
+            mArticleList.addAll(newArticleList)
+            mArticleWithParentsList.addAll(data.second)
+            mArticlePreviewHolderAdapter.submitList(mArticleWithParentsList.toList())
+        } else {
+            mArticleLoadRunning = false
+            mArticleRequestChunkSize += ARTICLE_LOAD_CHUNK_SIZE
+            Handler(Looper.getMainLooper()).postAtTime({ loadMoreArticles() }, 1000L)
         }
     }
 
