@@ -211,7 +211,7 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
                 }
 
                 R.id.bottom_menu_item_favourites -> {
-                    if (!(currentFragment is FavouritesFragment)) {
+                    if (!(currentFragment is FragmentFavourites)) {
                         mAppBar.visibility = View.VISIBLE
                         loadFavouritesFragment()
                         mBottomNavigationView.visibility = View.VISIBLE
@@ -307,7 +307,7 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
     }
 
     override fun loadFavouritesFragment() {
-        navigateTo(FavouritesFragment())
+        navigateTo(FragmentFavourites())
     }
 
     override fun loadSavedArticlesFragment() {

@@ -52,7 +52,7 @@ import io.reactivex.functions.Consumer
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class FavouritesFragment : Fragment() {
+class FragmentFavourites : Fragment() {
 
     private lateinit var mCoordinatorLayout: CoordinatorLayout
     private lateinit var mScroller: NestedScrollView
@@ -147,6 +147,8 @@ class FavouritesFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        Schedulers.shutdown()
+        Schedulers.start()
         (activity as AppCompatActivity).supportActionBar?.title = TITLE_TEXT
     }
 

@@ -36,6 +36,7 @@
     <FrameLayout
         android:id="@+id/main_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:padding="2dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
