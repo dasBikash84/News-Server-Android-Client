@@ -37,8 +37,8 @@ internal object ArticleImageConverter {
                 }
                 ?.filter { entry.indexOf(it) == entry.size-1 }
                 ?.forEach { stringBuilder.append(DATA_BRIDGE) }
-        LoggerUtils.debugLog("stringBuilder: ${stringBuilder.toString()}",this::class.java)
-        LoggerUtils.debugLog("entry: ${entry.toString()}",this::class.java)
+//        LoggerUtils.debugLog("stringBuilder: ${stringBuilder.toString()}",this::class.java)
+//        LoggerUtils.debugLog("entry: ${entry.toString()}",this::class.java)
         return stringBuilder.toString()
     }
 
@@ -62,8 +62,8 @@ internal object ArticleImageConverter {
             }
             entryList.add(articleImage)
         }
-        LoggerUtils.debugLog("entryCatString: ${entryCatString.toString()}",this::class.java)
-        LoggerUtils.debugLog("entryList: ${entryList}",this::class.java)
+//        LoggerUtils.debugLog("entryCatString: ${entryCatString.toString()}",this::class.java)
+//        LoggerUtils.debugLog("entryList: ${entryList}",this::class.java)
 
         return entryList
     }
