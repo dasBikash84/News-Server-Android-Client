@@ -106,6 +106,18 @@ class FragmentHome : Fragment() {
     override fun onResume() {
         super.onResume()
         initMenuButtonOperator()
+        if (mNewsPaperMenuContainer.visibility == View.VISIBLE){
+            addBackPressTaskForForNpMenu()
+        }
+        if (mPageSearchResultContainer.visibility == View.VISIBLE){
+            addBackPressTaskForPageSrearchResults()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        removeBackPressTaskForNpMenu()
+        removeBackPressTaskForPageSrearchResults()
     }
 
     private fun findViewComponents(view: View) {

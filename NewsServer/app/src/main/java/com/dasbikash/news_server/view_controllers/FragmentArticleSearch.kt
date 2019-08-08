@@ -47,7 +47,8 @@ import io.reactivex.schedulers.Schedulers
 
 class FragmentArticleSearch : Fragment() {
 
-    private lateinit var mWaitWindow: LinearLayout
+    private lateinit var mCenterLoadingScreen: LinearLayout
+    private lateinit var mBottomLoadingScreen: ProgressBar
     private lateinit var mSearchKeywordEditText: EditText
     private lateinit var mSearchKeywordHintsHolder: RecyclerView
     private lateinit var mSearchButton: ImageButton
@@ -92,7 +93,8 @@ class FragmentArticleSearch : Fragment() {
     }
 
     private fun findViewItems() {
-        mWaitWindow = view!!.findViewById(R.id.wait_window)
+        mCenterLoadingScreen = view!!.findViewById(R.id.center_wait_window)
+        mBottomLoadingScreen = view!!.findViewById(R.id.bottom_wait_window)
         mSearchKeywordEditText = view!!.findViewById(R.id.search_key_input_box_edit_text)
         mSearchKeywordHintsHolder = view!!.findViewById(R.id.search_keyword_hints_holder)
         mSearchButton = view!!.findViewById(R.id.search_button)
@@ -101,9 +103,7 @@ class FragmentArticleSearch : Fragment() {
     }
 
     private fun initViewListners() {
-//        mWaitWindow.setOnClickListener { }
         mSearchButton.setOnClickListener { searchButtonClickAction() }
-//        mClearButton.setOnClickListener { clearButtonClickAction() }
 
         mSearchKeywordEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(editableText: Editable?) {
@@ -126,8 +126,8 @@ class FragmentArticleSearch : Fragment() {
 
                                                 override fun onNext(keywordHintList: List<String>) {
                                                     debugLog(keywordHintList.toString())
+                                                    mKeyWordHintListAdapter.submitList(keywordHintList)
                                                     if (keywordHintList.isNotEmpty()) {
-                                                        mKeyWordHintListAdapter.submitList(keywordHintList)
                                                         mSearchKeywordHintsHolder.visibility = View.VISIBLE
                                                     } else {
                                                         mSearchKeywordHintsHolder.visibility = View.GONE
@@ -380,12 +380,20 @@ class FragmentArticleSearch : Fragment() {
     }
 
     private fun showWaitScreen() {
-        mWaitWindow.visibility = View.VISIBLE
-        mWaitWindow.bringToFront()
+        if (mCurrentSearchResultList.isEmpty()) {
+            mCenterLoadingScreen.visibility = View.VISIBLE
+            mCenterLoadingScreen.bringToFront()
+            mBottomLoadingScreen.visibility = View.GONE
+        }else{
+            mBottomLoadingScreen.visibility = View.VISIBLE
+            mBottomLoadingScreen.bringToFront()
+            mCenterLoadingScreen.visibility = View.GONE
+        }
     }
 
     private fun hideWaitScreen() {
-        mWaitWindow.visibility = View.GONE
+        mCenterLoadingScreen.visibility = View.GONE
+        mBottomLoadingScreen.visibility = View.GONE
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
