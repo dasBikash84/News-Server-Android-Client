@@ -210,8 +210,6 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
     override fun onResume() {
         super.onResume()
         debugLog("onResume()")
-        Schedulers.shutdown()
-        Schedulers.start()
         mDisposable.add(
                 Observable.just(mPage)
                         .subscribeOn(Schedulers.io())
@@ -347,9 +345,6 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
             }
 
             var amDisposed = false
-
-            Schedulers.shutdown()
-            Schedulers.start()
 
             mDisposable.add(
                     Observable.just(mPage)

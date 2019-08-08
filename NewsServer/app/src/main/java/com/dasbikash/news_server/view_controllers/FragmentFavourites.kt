@@ -147,8 +147,6 @@ class FragmentFavourites : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        Schedulers.shutdown()
-        Schedulers.start()
         (activity as AppCompatActivity).supportActionBar?.title = TITLE_TEXT
     }
 

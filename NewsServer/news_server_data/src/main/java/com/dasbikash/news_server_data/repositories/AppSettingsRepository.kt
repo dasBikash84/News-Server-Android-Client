@@ -14,7 +14,6 @@
 package com.dasbikash.news_server_data.repositories
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.data_sources.AppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
@@ -39,9 +38,9 @@ abstract class AppSettingsRepository {
 
     abstract protected fun getCountryCount(): Int
     abstract protected fun getLanguageCount(): Int
-    abstract protected fun getNewsPaperCount(): Int
     abstract protected fun getPageCount(): Int
 
+    abstract fun getNewsPapers(): List<Newspaper>
     abstract fun getNewsPapersLiveData(): LiveData<List<Newspaper>>
     abstract fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page>
     abstract fun getPagesForNewspaper(newspaper: Newspaper): List<Page>
@@ -58,7 +57,7 @@ abstract class AppSettingsRepository {
     private fun isAppSettingsDataLoaded(): Boolean {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         return getLanguageCount() > 0 && getCountryCount() > 0 &&
-                getNewsPaperCount() > 0 && getPageCount() > 0
+                getNewsPapers().isNotEmpty() && getPageCount() > 0
     }
 
     private fun isAppSettingsUpdated(context: Context): Boolean {

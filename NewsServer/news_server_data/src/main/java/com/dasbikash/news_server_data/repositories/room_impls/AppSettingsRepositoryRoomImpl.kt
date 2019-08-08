@@ -29,8 +29,8 @@ internal class AppSettingsRepositoryRoomImpl internal constructor(context: Conte
     override fun getLanguageCount(): Int {
         return mDatabase.languageDao.findAll().size
     }
-    override fun getNewsPaperCount(): Int {
-        return mDatabase.newsPaperDao.findAll().size
+    override fun getNewsPapers(): List<Newspaper> {
+        return mDatabase.newsPaperDao.findAll()
     }
     override fun getPageCount(): Int {
         return mDatabase.pageDao.findAll().size

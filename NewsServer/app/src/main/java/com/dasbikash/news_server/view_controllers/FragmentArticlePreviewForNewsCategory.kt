@@ -101,10 +101,7 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
     private fun loadMoreArticles() {
         if (!mNewArticleLoadInProgress && !mEndReachedForArticles.get()) {
             mNewArticleLoadInProgress = true
-//            showLoadingScreen()
             var amDisposed = false
-            Schedulers.shutdown()
-            Schedulers.start()
             mDisposable.add(
                     Observable.just(mNewsCategory)
                             .subscribeOn(Schedulers.io())
