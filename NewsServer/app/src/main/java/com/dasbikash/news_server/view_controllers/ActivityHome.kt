@@ -442,7 +442,10 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
                 removeTaskFromQueue(backPressActionTagForLogInMenuHolder!!)
             }
             backPressActionTagForLogInMenuHolder =
-                    addToBackPressTaskQueue { mLogInMenuHolder.visibility = View.GONE }
+                    addToBackPressTaskQueue {
+                        mLogInMenuHolder.visibility = View.GONE
+                        backPressActionTagForLogInMenuHolder = null
+                    }
         } else {
             hideLogInMenuHolder()
         }

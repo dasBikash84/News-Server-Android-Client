@@ -180,7 +180,10 @@ class FragmentHome : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        mPageSearchResultContainer.setOnClickListener { mPageSearchResultContainer.visibility = View.GONE }
+        mPageSearchResultContainer.setOnClickListener {
+            mPageSearchResultContainer.visibility = View.GONE
+            removeBackPressTaskForPageSrearchResults()
+        }
         mNewsPaperMenuShowButtonContainer.setOnClickListener { showNewsPaperMenu() }
 
         mPageArticlePreviewHolder.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -216,6 +219,7 @@ class FragmentHome : Fragment() {
                 (activity as BackPressQueueManager).addToBackPressTaskQueue {
                     mSearchResultListAdapter.submitList(emptyList())
                     mPageSearchResultContainer.visibility = View.GONE
+                    backPressTaskTagForPageSearchResults = null
                 }
     }
 
@@ -229,6 +233,7 @@ class FragmentHome : Fragment() {
         backPressTaskTagForNpMenu =
                 (activity as BackPressQueueManager).addToBackPressTaskQueue {
                     hideNewsPaperMenu()
+                    backPressTaskTagForNpMenu = null
                 }
     }
 

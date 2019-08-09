@@ -375,7 +375,7 @@ class FragmentArticleSearch : Fragment() {
                 (activity as BackPressQueueManager).addToBackPressTaskQueue {
                     mArticleSearchTaskDisposable?.dispose()
                     hideWaitScreen()
-                    removeBackPressTask()
+                    backPressTaskTag = null
                 }
     }
 
