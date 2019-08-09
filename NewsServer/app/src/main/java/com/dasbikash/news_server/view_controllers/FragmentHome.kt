@@ -216,7 +216,7 @@ class FragmentHome : Fragment() {
 
     fun addBackPressTaskForPageSrearchResults() {
         backPressTaskTagForPageSearchResults =
-                (activity as BackPressQueueManager).addToBackPressTaskQueue {
+                (activity!! as BackPressQueueManager).addToBackPressTaskQueue {
                     mSearchResultListAdapter.submitList(emptyList())
                     mPageSearchResultContainer.visibility = View.GONE
                     backPressTaskTagForPageSearchResults = null
@@ -225,13 +225,13 @@ class FragmentHome : Fragment() {
 
     fun removeBackPressTaskForPageSrearchResults() {
         if (backPressTaskTagForPageSearchResults != null) {
-            (activity as BackPressQueueManager).removeTaskFromQueue(backPressTaskTagForPageSearchResults!!)
+            (activity!! as BackPressQueueManager).removeTaskFromQueue(backPressTaskTagForPageSearchResults!!)
         }
     }
 
     fun addBackPressTaskForForNpMenu() {
         backPressTaskTagForNpMenu =
-                (activity as BackPressQueueManager).addToBackPressTaskQueue {
+                (activity!! as BackPressQueueManager).addToBackPressTaskQueue {
                     hideNewsPaperMenu()
                     backPressTaskTagForNpMenu = null
                 }
@@ -239,7 +239,7 @@ class FragmentHome : Fragment() {
 
     fun removeBackPressTaskForNpMenu() {
         if (backPressTaskTagForNpMenu != null) {
-            (activity as BackPressQueueManager).removeTaskFromQueue(backPressTaskTagForNpMenu!!)
+            (activity!! as BackPressQueueManager).removeTaskFromQueue(backPressTaskTagForNpMenu!!)
         }
     }
 

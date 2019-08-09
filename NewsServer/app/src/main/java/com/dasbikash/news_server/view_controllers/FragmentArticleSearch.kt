@@ -365,14 +365,14 @@ class FragmentArticleSearch : Fragment() {
 
     private fun removeBackPressTask() {
         backPressTaskTag?.let {
-            (activity as BackPressQueueManager).removeTaskFromQueue(it)
+            (activity!! as BackPressQueueManager).removeTaskFromQueue(it)
         }
         backPressTaskTag = null
     }
 
     private fun addBackPressTask() {
         backPressTaskTag =
-                (activity as BackPressQueueManager).addToBackPressTaskQueue {
+                (activity!! as BackPressQueueManager).addToBackPressTaskQueue {
                     mArticleSearchTaskDisposable?.dispose()
                     hideWaitScreen()
                     backPressTaskTag = null
