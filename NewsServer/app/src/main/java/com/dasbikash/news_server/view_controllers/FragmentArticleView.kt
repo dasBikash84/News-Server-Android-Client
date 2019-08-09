@@ -45,7 +45,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class FragmentArticleView : Fragment() {
+class FragmentArticleView : Fragment(),TextSizeChangeableArticleViewFragment {
 
     private lateinit var mLanguage: Language
     private lateinit var mNewspaper: Newspaper
@@ -152,7 +152,7 @@ class FragmentArticleView : Fragment() {
         DisplayUtils.displayHtmlText(mArticleText, mArticle.articleText!!)
 
         if (mArticle.imageLinkList != null && mArticle.imageLinkList!!.size > 0) {
-            mArticleImageListAdapter = ArticleImageListAdapter(this, mArticleTextSize!!.toFloat(), true)
+            mArticleImageListAdapter = ArticleImageListAdapter(this, DisplayUtils.DEFAULT_ARTICLE_TEXT_SIZE.toFloat(), true)
             mArticleImageHolder.adapter = mArticleImageListAdapter
             mArticleImageListAdapter.submitList(mArticle.imageLinkList)
             mArticleImageHolder.visibility = View.VISIBLE
@@ -229,6 +229,10 @@ class FragmentArticleView : Fragment() {
                             }
                         })
         )
+    }
+
+    override fun setArticleTextSpSizeTo(fontSize: Int) {
+        mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize.toFloat())
     }
 
     companion object {

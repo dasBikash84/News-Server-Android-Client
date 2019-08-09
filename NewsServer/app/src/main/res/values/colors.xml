@@ -44,4 +44,5 @@
     <color name="white_smoke">#f5f5f5</color>
     <color name="article_title_block_bg">#faf0e6</color>
     <color name="ninty_five_transparent">#F2FFFFFF</color>
+    <color name="ninty_transparent">#E6FFFFFF</color>
 </resources>

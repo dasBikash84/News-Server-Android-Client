@@ -17,15 +17,22 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.utils.DisplayUtils
+import com.dasbikash.news_server.utils.debugLog
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.google.android.material.appbar.AppBarLayout
 import java.io.Serializable
 import java.lang.IllegalArgumentException
 
-class ActivityArticleView : AppCompatActivity() {
+class ActivityArticleView : ActivityWithBackPressQueueManager() {
 
     companion object {
 
@@ -48,17 +55,23 @@ class ActivityArticleView : AppCompatActivity() {
     private lateinit var mToolbar: Toolbar
     private lateinit var mAppBar: AppBarLayout
 
+    private lateinit var mTextSizeChangeWindow:ViewGroup
+    private lateinit var mTextSizeIncButton:Button
+    private lateinit var mTextSizeDecButton:Button
+    private lateinit var mOkButton:Button
+
     private lateinit var mArticle: Article
     private lateinit var mSavedArticleId: String
+
+    private var mBackPressTaskTag:String?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_article_view)
 
-        mAppBar = findViewById(R.id.app_bar_layout)
-        mToolbar = findViewById(R.id.app_bar)
-
-        setSupportActionBar(mToolbar)
+        findViewComponents()
+        initView()
+        setListners()
 
         if (intent.hasExtra(EXTRA_FOR_ARTICLE)) {
             mArticle = (intent!!.getSerializableExtra(EXTRA_FOR_ARTICLE)) as Article
@@ -69,6 +82,46 @@ class ActivityArticleView : AppCompatActivity() {
         } else {
             throw IllegalArgumentException()
         }
+    }
+
+    private fun setListners() {
+        mTextSizeIncButton.setOnClickListener { textSizeIncAction() }
+        mTextSizeDecButton.setOnClickListener { textSizeDecAction() }
+        mOkButton.setOnClickListener { okButtonAction() }
+    }
+
+    private fun okButtonAction() {
+        mTextSizeChangeWindow.visibility = View.GONE
+        removeBackPressTask()
+    }
+
+    private fun textSizeDecAction() {
+        val newTextSize = DisplayUtils.decrementArticleTextSize(this)
+        setArticleTextSize(newTextSize)
+    }
+
+    private fun textSizeIncAction() {
+        val newTextSize = DisplayUtils.incrementArticleTextSize(this)
+        setArticleTextSize(newTextSize)
+    }
+
+    private fun setArticleTextSize(newTextSize: Int) {
+        (supportFragmentManager.findFragmentById(R.id.main_frame) as TextSizeChangeableArticleViewFragment)
+                .setArticleTextSpSizeTo(newTextSize)
+    }
+
+    private fun initView() {
+        setSupportActionBar(mToolbar)
+        mTextSizeChangeWindow.visibility = View.GONE
+    }
+
+    private fun findViewComponents() {
+        mAppBar = findViewById(R.id.app_bar_layout)
+        mToolbar = findViewById(R.id.app_bar)
+        mTextSizeChangeWindow = findViewById(R.id.text_size_change_frame)
+        mTextSizeIncButton = findViewById(R.id.plus_text_size_change)
+        mTextSizeDecButton = findViewById(R.id.minus_text_size_change)
+        mOkButton = findViewById(R.id.ok_text_size_change)
     }
 
     fun navigateTo(fragment: Fragment, addToBackstack: Boolean=false) {
@@ -82,4 +135,44 @@ class ActivityArticleView : AppCompatActivity() {
 
         transaction.commit()
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_activity_article_view, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.change_text_font_menu_item -> {
+                changeFontSizeAction()
+                return true
+            }
+            else -> {
+                return false
+            }
+        }
+    }
+
+    private fun changeFontSizeAction() {
+        if (mTextSizeChangeWindow.visibility == View.GONE){
+            mTextSizeChangeWindow.visibility = View.VISIBLE
+            mTextSizeChangeWindow.bringToFront()
+            addBackPressTask()
+        }
+    }
+
+    private fun addBackPressTask(){
+        mBackPressTaskTag = addToBackPressTaskQueue {
+            mTextSizeChangeWindow.visibility = View.GONE
+            mBackPressTaskTag = null
+        }
+    }
+    private fun removeBackPressTask(){
+        mBackPressTaskTag?.let { removeTaskFromQueue(it)}
+        mBackPressTaskTag = null
+    }
+}
+
+interface TextSizeChangeableArticleViewFragment{
+    fun setArticleTextSpSizeTo(fontSize:Int)
 }

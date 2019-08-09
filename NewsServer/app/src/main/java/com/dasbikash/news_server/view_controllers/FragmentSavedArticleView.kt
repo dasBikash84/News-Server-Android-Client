@@ -31,7 +31,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class FragmentSavedArticleView : Fragment() {
+class FragmentSavedArticleView : Fragment(),TextSizeChangeableArticleViewFragment {
 
 //    private lateinit var mArticlePageDetails: AppCompatTextView
     private lateinit var mArticleTitle: AppCompatTextView
@@ -103,7 +103,7 @@ class FragmentSavedArticleView : Fragment() {
                                 mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, mArticleTextSize!!.toFloat())
                                 mArticlePublicationText.text = mArticleDateString
                                 DisplayUtils.displayHtmlText(mArticleText, mSavedArticle.articleText!!)
-                                mArticleImageListAdapter = ArticleImageListAdapter(this@FragmentSavedArticleView,mArticleTextSize!!.toFloat())
+                                mArticleImageListAdapter = ArticleImageListAdapter(this@FragmentSavedArticleView,DisplayUtils.DEFAULT_ARTICLE_TEXT_SIZE.toFloat())
                                 mArticleImageHolder.adapter = mArticleImageListAdapter
                                 mSavedArticle.imageLinkList?.let {
                                     mArticleImageListAdapter.submitList(it.asSequence().filter { !it.link.isNullOrEmpty() }.map {
@@ -116,6 +116,10 @@ class FragmentSavedArticleView : Fragment() {
                             override fun onError(e: Throwable) {}
                         })
         )
+    }
+
+    override fun setArticleTextSpSizeTo(fontSize: Int) {
+        mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize.toFloat())
     }
 
     companion object {

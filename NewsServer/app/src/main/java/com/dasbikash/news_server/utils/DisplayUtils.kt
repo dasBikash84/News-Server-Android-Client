@@ -36,6 +36,7 @@ object DisplayUtils {
     val MIN_ARTICLE_TEXT_SIZE = 10
     val MAX_ARTICLE_TEXT_SIZE = 26
     val DEFAULT_ARTICLE_TEXT_SIZE = 16
+    val ARTICLE_TEXT_SIZE_CHANGE_STEP = 1
 
     private val TWO_DAYS_IN_MS = (2 * 24 * 60 * 60 * 1000).toLong()
     private val DAY_IN_MS = (24 * 60 * 60 * 1000).toLong()
@@ -59,17 +60,17 @@ object DisplayUtils {
 
     private var generatedViewId = AtomicInteger(0)
 
-    fun getNextViewId(context: Context):Int{
+    fun getNextViewId(context: Context): Int {
         var nextId: Int
 
         do {
             nextId = generatedViewId.incrementAndGet()
             try {
                 context.resources.getResourceName(nextId)
-            }catch (ex:Exception){
+            } catch (ex: Exception) {
                 return nextId
             }
-        }while (true)
+        } while (true)
     }
 
 
@@ -78,66 +79,66 @@ object DisplayUtils {
     private val ENGLISH_UNICODE_ZERO: Char = 0x0030.toChar()
     private val ENGLISH_UNICODE_NINE: Char = 0x0039.toChar()
 
-    private val MONTH_NAME_TABLE =  arrayOf(
-                                        arrayOf("জানুয়ারী", "Jan"),
-                                        arrayOf("জানুয়ারি", "Jan"),
-                                        arrayOf("ফেব্রুয়ারী", "Feb"),
-                                        arrayOf("ফেব্রুয়ারি", "Feb"),
-                                        arrayOf("মার্চ", "Mar"),
-                                        arrayOf("এপ্রিল", "Apr"),
-                                        arrayOf("মে", "May"),
-                                        arrayOf("জুন", "Jun"),
-                                        arrayOf("জুলাই", "Jul"),
-                                        arrayOf("আগস্ট", "Aug"),
-                                        arrayOf("আগষ্ট", "Aug"),
-                                        arrayOf("অগস্ট", "Aug"),
-                                        arrayOf("সেপ্টেম্বর", "Sep"),
-                                        arrayOf("অক্টোবর", "Oct"),
-                                        arrayOf("নভেম্বর", "Nov"),
-                                        arrayOf("ডিসেম্বর", "Dec")
-                                    )
+    private val MONTH_NAME_TABLE = arrayOf(
+            arrayOf("জানুয়ারী", "Jan"),
+            arrayOf("জানুয়ারি", "Jan"),
+            arrayOf("ফেব্রুয়ারী", "Feb"),
+            arrayOf("ফেব্রুয়ারি", "Feb"),
+            arrayOf("মার্চ", "Mar"),
+            arrayOf("এপ্রিল", "Apr"),
+            arrayOf("মে", "May"),
+            arrayOf("জুন", "Jun"),
+            arrayOf("জুলাই", "Jul"),
+            arrayOf("আগস্ট", "Aug"),
+            arrayOf("আগষ্ট", "Aug"),
+            arrayOf("অগস্ট", "Aug"),
+            arrayOf("সেপ্টেম্বর", "Sep"),
+            arrayOf("অক্টোবর", "Oct"),
+            arrayOf("নভেম্বর", "Nov"),
+            arrayOf("ডিসেম্বর", "Dec")
+    )
     private val DAY_NAME_TABLE = arrayOf(
-                                        arrayOf("শনিবার", "Sat"),
-                                        arrayOf("রবিবার", "Sun"),
-                                        arrayOf("সোমবার", "Mon"),
-                                        arrayOf("মঙ্গলবার", "Tue"),
-                                        arrayOf("বুধবার", "Wed"),
-                                        arrayOf("বৃহস্পতিবার", "Thu"),
-                                        arrayOf("শুক্রবার", "Fri")
-                                    )
+            arrayOf("শনিবার", "Sat"),
+            arrayOf("রবিবার", "Sun"),
+            arrayOf("সোমবার", "Mon"),
+            arrayOf("মঙ্গলবার", "Tue"),
+            arrayOf("বুধবার", "Wed"),
+            arrayOf("বৃহস্পতিবার", "Thu"),
+            arrayOf("শুক্রবার", "Fri")
+    )
 
     private val AM_PM_MARKER_TABLE = arrayOf(
-                                        arrayOf("পূর্বাহ্ণ", "AM"),
-                                        arrayOf("অপরাহ্ণ", "PM"),
-                                        arrayOf("পূর্বাহ্ণ", "am"),
-                                        arrayOf("অপরাহ্ণ", "pm")
-                                    )
+            arrayOf("পূর্বাহ্ণ", "AM"),
+            arrayOf("অপরাহ্ণ", "PM"),
+            arrayOf("পূর্বাহ্ণ", "am"),
+            arrayOf("অপরাহ্ণ", "pm")
+    )
 
-    fun dpToPx(dp: Int,context: Context): Float =
-        (dp * context.getResources().getDisplayMetrics().density)
+    fun dpToPx(dp: Int, context: Context): Float =
+            (dp * context.getResources().getDisplayMetrics().density)
 
-    fun pxToDp(px: Int,context: Context): Float =
-        (px / context.getResources().getDisplayMetrics().density)
+    fun pxToDp(px: Int, context: Context): Float =
+            (px / context.getResources().getDisplayMetrics().density)
 
-    fun getArticlePositionString(positionString:String, language: Language):String{
+    fun getArticlePositionString(positionString: String, language: Language): String {
 
-        if (!language.name!!.contains("English") && !language.name!!.contains("english")){
+        if (!language.name!!.contains("English") && !language.name!!.contains("english")) {
             return replaceEnglishDigits(positionString)
         }
         return positionString
     }
 
-    fun getSavedArticlePublicationDateString(savedArticle: SavedArticle, language: Language, context: Context,getFullDate:Boolean=false): String? {
-        return getArticlePublicationDateStringFromPublicationTime(savedArticle.publicationTime,language,context,getFullDate)
+    fun getSavedArticlePublicationDateString(savedArticle: SavedArticle, language: Language, context: Context, getFullDate: Boolean = false): String? {
+        return getArticlePublicationDateStringFromPublicationTime(savedArticle.publicationTime, language, context, getFullDate)
     }
 
 
-    fun getArticlePublicationDateString(article: Article, language: Language, context: Context,getFullDate:Boolean=false): String? {
-        return getArticlePublicationDateStringFromPublicationTime(article.publicationTime,language,context,getFullDate)
+    fun getArticlePublicationDateString(article: Article, language: Language, context: Context, getFullDate: Boolean = false): String? {
+        return getArticlePublicationDateStringFromPublicationTime(article.publicationTime, language, context, getFullDate)
     }
 
-    private fun getArticlePublicationDateStringFromPublicationTime(publicationTime:Date?,language: Language,
-                                                                   context: Context,getFullDate:Boolean):String?{
+    private fun getArticlePublicationDateStringFromPublicationTime(publicationTime: Date?, language: Language,
+                                                                   context: Context, getFullDate: Boolean): String? {
 
         val simpleDateFormat = SimpleDateFormat(context.getResources().getString(R.string.display_date_format_long))
 
@@ -165,11 +166,11 @@ object DisplayUtils {
                     publicationTimeString = simpleDateFormat.format(publicationTime.time)
                 }
             }
-        }else{
-            publicationTime?.let {publicationTimeString = simpleDateFormat.format(publicationTime.time)}
+        } else {
+            publicationTime?.let { publicationTimeString = simpleDateFormat.format(publicationTime.time) }
         }
 
-        if (!language.name!!.contains("English") && !language.name!!.contains("english")){
+        if (!language.name!!.contains("English") && !language.name!!.contains("english")) {
             return convertToBanglaTimeString(publicationTimeString!!)
         }
 
@@ -254,7 +255,7 @@ object DisplayUtils {
 
     @Suppress("DEPRECATION")
     fun displayHtmlText(textView: TextView, text: String) {
-        val textForDisplay = text.replace(Regex("(<br>\\s?){3,}"),"<br><br>")
+        val textForDisplay = text.replace(Regex("(<br>\\s?){3,}"), "<br><br>")
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             textView.text = Html.fromHtml(textForDisplay, Html.FROM_HTML_MODE_LEGACY)
         } else {
@@ -262,48 +263,53 @@ object DisplayUtils {
         }
     }
 
-    fun getArticleTextSize(context: Context):Int{
+    fun getArticleTextSize(context: Context): Int {
         val textSize = SharedPreferenceUtils
-                            .getData(context,SharedPreferenceUtils.DefaultValues.DEFAULT_INT, ARTCILE_TEXT_SIZE_SP_KEY)
-                                as Int
-        if (textSize == 0){
-            setArticleTextSize(context,DEFAULT_ARTICLE_TEXT_SIZE)
+                .getData(context, SharedPreferenceUtils.DefaultValues.DEFAULT_INT, ARTCILE_TEXT_SIZE_SP_KEY)
+                as Int
+        if (textSize == 0) {
+            setArticleTextSize(context, DEFAULT_ARTICLE_TEXT_SIZE)
             return DEFAULT_ARTICLE_TEXT_SIZE
         }
         return textSize
     }
 
-    fun setArticleTextSize(context: Context,textSize:Int){
-        var effectiveTextSize:Int
-        when{
-            textSize> MAX_ARTICLE_TEXT_SIZE -> effectiveTextSize = MAX_ARTICLE_TEXT_SIZE
-            textSize < MIN_ARTICLE_TEXT_SIZE -> effectiveTextSize = MIN_ARTICLE_TEXT_SIZE
-            else ->{
-                effectiveTextSize = textSize
-            }
-        }
-        SharedPreferenceUtils.saveData(context,effectiveTextSize, ARTCILE_TEXT_SIZE_SP_KEY)
+    private fun setArticleTextSize(context: Context, textSize: Int):Int {
+        val effectiveTextSize =
+                when {
+                    textSize > MAX_ARTICLE_TEXT_SIZE -> MAX_ARTICLE_TEXT_SIZE
+                    textSize < MIN_ARTICLE_TEXT_SIZE -> MIN_ARTICLE_TEXT_SIZE
+                    else -> textSize
+                }
+        SharedPreferenceUtils.saveData(context, effectiveTextSize, ARTCILE_TEXT_SIZE_SP_KEY)
+        return effectiveTextSize
     }
 
-    fun showLogInWelcomeSnack(coordinatorLayout: CoordinatorLayout,context: Context){
+    fun incrementArticleTextSize(context: Context) =
+            setArticleTextSize(context, getArticleTextSize(context)+ ARTICLE_TEXT_SIZE_CHANGE_STEP)
+
+    fun decrementArticleTextSize(context: Context) =
+            setArticleTextSize(context, getArticleTextSize(context)- ARTICLE_TEXT_SIZE_CHANGE_STEP)
+
+    fun showLogInWelcomeSnack(coordinatorLayout: CoordinatorLayout, context: Context) {
         val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context)
         showShortSnack(coordinatorLayout,
-                "Welcome ${userSettingsRepository.getCurrentUserName()?.replace("<br>","") ?: ""}")
+                "Welcome ${userSettingsRepository.getCurrentUserName()?.replace("<br>", "") ?: ""}")
     }
 
-    fun showShortSnack(coordinatorLayout: CoordinatorLayout,message: String) =
-        Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_SHORT).show()
+    fun showShortSnack(coordinatorLayout: CoordinatorLayout, message: String) =
+            Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_SHORT).show()
 
-    fun showLongSnack(coordinatorLayout: CoordinatorLayout,message: String) =
-        Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_LONG).show()
+    fun showLongSnack(coordinatorLayout: CoordinatorLayout, message: String) =
+            Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_LONG).show()
 
-    fun showShortToast(context: Context,message: String) =
-        Toast.makeText(context,message, Toast.LENGTH_SHORT).show()
+    fun showShortToast(context: Context, message: String) =
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 
     fun showErrorRetryToast(context: Context) =
-        Toast.makeText(context,context.resources.getString(R.string.error_retry_message), Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.resources.getString(R.string.error_retry_message), Toast.LENGTH_SHORT).show()
 
-    fun showLongToast(context: Context,message: String)=
-        Toast.makeText(context,message, Toast.LENGTH_LONG).show()
+    fun showLongToast(context: Context, message: String) =
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
 
 }
