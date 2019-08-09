@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
+import androidx.annotation.Keep
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.google.firebase.database.DataSnapshot
@@ -48,9 +49,9 @@ internal object RealtimeDBArticleSearchUtils {
         return serachKeyWords.toList()
     }
 
-    fun getKeyWordSerachResult(keyWord:String):Map<String,String>{
+    fun getKeyWordSerachResult(keyWord:String):Map<String,ArticleSearchResultDbEntry?>{
 
-        val keyWordSerachResult = mutableMapOf<String,String>()
+        val keyWordSerachResult = mutableMapOf<String,ArticleSearchResultDbEntry?>()
         val lock = Object()
 
         RealtimeDBUtils.mKeyWordSerachResultNode
@@ -62,7 +63,7 @@ internal object RealtimeDBArticleSearchUtils {
 
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         dataSnapshot.children.asSequence().forEach {
-                            keyWordSerachResult.put(it.key!!,it.value!! as String)
+                            keyWordSerachResult.put(it.key!!,it.getValue(ArticleSearchResultDbEntry::class.java))
                         }
                         synchronized(lock){lock.notify()}
                     }
@@ -76,3 +77,8 @@ internal object RealtimeDBArticleSearchUtils {
         return keyWordSerachResult.toMap()
     }
 }
+@Keep
+data class ArticleSearchResultDbEntry(
+        var pageId:String?=null,
+        var publicationTs:Long?=null
+)

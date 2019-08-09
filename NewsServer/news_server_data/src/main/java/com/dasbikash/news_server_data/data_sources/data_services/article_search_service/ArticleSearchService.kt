@@ -13,7 +13,9 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.article_search_service
 
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.ArticleSearchResultDbEntry
+
 interface ArticleSearchService {
     fun getSerachKeyWords():List<String>
-    fun getKeyWordSerachResult(keyWord:String):Map<String,String>
+    fun getKeyWordSerachResult(keyWord:String):Map<String, ArticleSearchResultDbEntry?>
 }

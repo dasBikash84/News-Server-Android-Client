@@ -19,6 +19,7 @@ import com.dasbikash.news_server_data.models.room_entity.Page
 data class ArticleSearchReasultEntry(
         val articleId:String,
         val pageId:String,
+        val publicationTime:Long,
         private val matchingKeyWords:MutableSet<String> = mutableSetOf()
 ){
     var article:Article?=null
@@ -38,11 +39,12 @@ data class ArticleSearchReasultEntry(
 
     companion object{
 
-        fun getInstance(articleId:String,pageId:String, matchingKeyWords:Collection<String>):
+        fun getInstance(articleId:String,pageId:String, publicationTime:Long,matchingKeyWords:Collection<String>):
                 ArticleSearchReasultEntry?{
             if (articleId.isNotBlank() && pageId.isNotBlank() && matchingKeyWords.isNotEmpty() &&
+                    publicationTime >0 &&
                     (matchingKeyWords.filter { it.isNotBlank() }.count() == matchingKeyWords.size)) {
-                val articleSearchReasultEntry = ArticleSearchReasultEntry(articleId, pageId)
+                val articleSearchReasultEntry = ArticleSearchReasultEntry(articleId, pageId,publicationTime)
                 matchingKeyWords.forEach { articleSearchReasultEntry.addMatchingKeyWord(it) }
                 return articleSearchReasultEntry
             }

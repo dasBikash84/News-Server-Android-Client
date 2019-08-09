@@ -16,6 +16,7 @@ package com.dasbikash.news_server_data.repositories
 import android.content.Context
 import com.dasbikash.news_server_data.data_sources.data_services.article_search_service.RealTimeDbArticleSearchService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.NewsDataServiceUtils
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.ArticleSearchResultDbEntry
 import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.models.ArticleSearchReasultEntry
 import com.dasbikash.news_server_data.models.room_entity.Article
@@ -78,10 +79,6 @@ object ArticleSearchRepository {
             searchKeyWords.addAll(getMatchingOnlyFromBeginning(it, context).map { it.id })
         }
 
-//        keyWords.filter { it.length >= MINIMUM_KEYWORD_LENGTH }.asSequence().forEach {
-//            searchKeyWords.addAll(getMatchingAll(it, context).map { it.id })
-//        }
-
         searchKeyWords.addAll(keyWords)
         LoggerUtils.debugLog("searchKeyWords: ${searchKeyWords}", this::class.java)
 
@@ -96,25 +93,25 @@ object ArticleSearchRepository {
             LoggerUtils.debugLog("keyWord: ${keyWordSet}",this::class.java)
             searchResultMap.keys.asSequence().forEach {
                 val articleId = it
-                LoggerUtils.debugLog("articleId:$articleId",this::class.java,context)
-                val articleSearchReasultEntry = articleSearchReasultEntries.find { it.articleId == articleId }
+                searchResultMap.get(articleId)?.let {
+                    LoggerUtils.debugLog("articleId:$articleId", this::class.java, context)
+                    val articleSearchReasultEntry = articleSearchReasultEntries.find { it.articleId == articleId }
 
-                if (articleSearchReasultEntry == null) {
-                    ArticleSearchReasultEntry.getInstance(articleId, searchResultMap.get(articleId)!!, keyWordSet)?.let {
-                        LoggerUtils.debugLog("articleSearchReasultEntry:$it",this::class.java,context)
-                        articleSearchReasultEntries.add(it)
+                    if (articleSearchReasultEntry == null && it.pageId!=null && it.publicationTs!=null) {
+                        ArticleSearchReasultEntry.getInstance(articleId, it.pageId!!,it.publicationTs!!, keyWordSet)?.let {
+                            LoggerUtils.debugLog("articleSearchReasultEntry:$it", this::class.java, context)
+                            articleSearchReasultEntries.add(it)
+                        }
+                    } else {
+                        keyWordSet.forEach { articleSearchReasultEntry!!.addMatchingKeyWord(it) }
                     }
-                } else {
-                    keyWordSet.forEach { articleSearchReasultEntry.addMatchingKeyWord(it) }
                 }
             }
         }
-        articleSearchReasultEntries.sortBy { it.getMatchingKeyWords().size }
-        articleSearchReasultEntries.reverse()
-        return articleSearchReasultEntries.toList()
+        return articleSearchReasultEntries.sortedByDescending { it.publicationTime }.sortedByDescending { it.getMatchingKeyWords().size }
     }
 
-    private fun getKeyWordSerachResultFromRemoteDb(keyWord: String): Map<String, String> {
+    private fun getKeyWordSerachResultFromRemoteDb(keyWord: String): Map<String, ArticleSearchResultDbEntry?> {
         return RealTimeDbArticleSearchService.getKeyWordSerachResult(keyWord)
     }
 

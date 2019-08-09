@@ -13,6 +13,7 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.article_search_service
 
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.ArticleSearchResultDbEntry
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBArticleSearchUtils
 
 object RealTimeDbArticleSearchService:ArticleSearchService {
@@ -20,7 +21,7 @@ object RealTimeDbArticleSearchService:ArticleSearchService {
         return RealtimeDBArticleSearchUtils.getSerachKeyWords()
     }
 
-    override fun getKeyWordSerachResult(keyWord: String): Map<String, String> {
+    override fun getKeyWordSerachResult(keyWord: String): Map<String, ArticleSearchResultDbEntry?> {
         return RealtimeDBArticleSearchUtils.getKeyWordSerachResult(keyWord)
     }
 }
