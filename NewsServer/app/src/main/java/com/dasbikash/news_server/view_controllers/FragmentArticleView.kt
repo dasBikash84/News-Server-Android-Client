@@ -21,6 +21,7 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -32,6 +33,7 @@ import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.utils.debugLog
+import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.FileDownloaderUtils
@@ -45,12 +47,13 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class FragmentArticleView : Fragment(),TextSizeChangeableArticleViewFragment {
+class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
 
     private lateinit var mLanguage: Language
     private lateinit var mNewspaper: Newspaper
     private lateinit var mPage: Page
     private lateinit var mArticle: Article
+    private lateinit var mMainScroller: NestedScrollView
 
     private lateinit var mDateString: String
     private var mArticleTextSize: Int? = null
@@ -61,6 +64,8 @@ class FragmentArticleView : Fragment(),TextSizeChangeableArticleViewFragment {
     private lateinit var mArticleImageHolder: RecyclerView
     private lateinit var mArticleImageListAdapter: ArticleImageListAdapter
     private lateinit var mWaitScreen: LinearLayoutCompat
+
+    private var mActionBarHeight = 0
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
@@ -79,8 +84,11 @@ class FragmentArticleView : Fragment(),TextSizeChangeableArticleViewFragment {
         super.onViewCreated(view, savedInstanceState)
         LoggerUtils.debugLog("onViewCreated", this::class.java)
         mArticle = arguments!!.getSerializable(ARG_ARTICLE) as Article
-        debugLog(mArticle.toString())
+
+        mActionBarHeight = DisplayUtils.dpToPx(40, context!!).toInt()
+
         findViewItems(view)
+        setListners()
     }
 
     private fun findViewItems(view: View) {
@@ -89,8 +97,24 @@ class FragmentArticleView : Fragment(),TextSizeChangeableArticleViewFragment {
         mArticleImageHolder = view.findViewById(R.id.article_image_holder)
         mArticleText = view.findViewById(R.id.article_text)
         mWaitScreen = view.findViewById(R.id.wait_screen_for_data_loading)
+        mMainScroller = view.findViewById(R.id.main_scroller)
 
-        mWaitScreen.setOnClickListener {  }
+        mWaitScreen.setOnClickListener { }
+    }
+
+    private fun setListners() {
+        mWaitScreen.setOnClickListener { }
+
+        mMainScroller.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
+
+            override fun onScrollChange(v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
+                if (scrollY == 0) {
+                    (activity!! as AppCompatActivity).supportActionBar!!.show()
+                } else if (scrollY > mActionBarHeight * 2) {
+                    (activity!! as AppCompatActivity).supportActionBar!!.hide()
+                }
+            }
+        })
     }
 
     override fun onResume() {
@@ -217,6 +241,7 @@ class FragmentArticleView : Fragment(),TextSizeChangeableArticleViewFragment {
                             override fun onComplete() {
                                 hideWaitScreen()
                             }
+
                             override fun onNext(result: Boolean) {
                                 if (result) {
                                     DisplayUtils.showShortSnack(view as CoordinatorLayout, "Article Saved.")
@@ -259,7 +284,7 @@ object ArticleImageDiffCallback : DiffUtil.ItemCallback<ArticleImage>() {
     }
 }
 
-class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner, val mArticleTextSize:Float, val enableImageDownload:Boolean=false) :
+class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner, val mArticleTextSize: Float, val enableImageDownload: Boolean = false) :
         ListAdapter<ArticleImage, ArticleImageHolder>(ArticleImageDiffCallback), DefaultLifecycleObserver {
 
     init {
@@ -272,12 +297,12 @@ class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner, val mArticleTextSi
         return ArticleImageHolder(
                 LayoutInflater.from(parent.context)
                         .inflate(R.layout.view_article_image, parent, false),
-                mDisposable,mArticleTextSize,enableImageDownload
+                mDisposable, mArticleTextSize, enableImageDownload
         )
     }
 
     override fun onBindViewHolder(holder: ArticleImageHolder, position: Int) {
-        holder.bind(getItem(position),position+1,itemCount)
+        holder.bind(getItem(position), position + 1, itemCount)
     }
 
     override fun onViewRecycled(holder: ArticleImageHolder) {
@@ -307,8 +332,8 @@ class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner, val mArticleTextSi
     }
 }
 
-class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDisposable, textFontSize:Float,
-                         val enableImageDownload:Boolean=false)
+class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDisposable, textFontSize: Float,
+                         val enableImageDownload: Boolean = false)
     : RecyclerView.ViewHolder(itemView) {
 
     val mArticleImage: AppCompatImageView
@@ -329,7 +354,7 @@ class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDispo
         imageLoadingDisposer?.dispose()
     }
 
-    fun bind(articleImage: ArticleImage,currentImagePosition:Int,totalImageCount:Int) {
+    fun bind(articleImage: ArticleImage, currentImagePosition: Int, totalImageCount: Int) {
         if (articleImage.link != null) {
             itemView.visibility = View.VISIBLE
 
@@ -364,7 +389,7 @@ class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDispo
         }
     }
 
-    private fun downloadImageAction(link:String) {
-        FileDownloaderUtils.downloadImageInExternalFilesDir(itemView.context,link)
+    private fun downloadImageAction(link: String) {
+        FileDownloaderUtils.downloadImageInExternalFilesDir(itemView.context, link)
     }
 }

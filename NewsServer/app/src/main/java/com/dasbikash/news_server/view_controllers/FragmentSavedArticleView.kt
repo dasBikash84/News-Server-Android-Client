@@ -18,6 +18,7 @@ import android.util.TypedValue
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
@@ -33,17 +34,19 @@ import io.reactivex.schedulers.Schedulers
 
 class FragmentSavedArticleView : Fragment(),TextSizeChangeableArticleViewFragment {
 
-//    private lateinit var mArticlePageDetails: AppCompatTextView
     private lateinit var mArticleTitle: AppCompatTextView
     private lateinit var mArticlePublicationText: AppCompatTextView
     private lateinit var mArticleText: AppCompatTextView
     private lateinit var mArticleImageHolder: RecyclerView
     private lateinit var mArticleImageListAdapter : ArticleImageListAdapter
+    private lateinit var mMainScroller: NestedScrollView
 
     private lateinit var mArticleDateString: String
     private lateinit var mSavedArticle: SavedArticle
     private lateinit var mArticleId: String
     private var mArticleTextSize: Int? = null
+
+    private var mActionBarHeight = 0
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
@@ -56,18 +59,29 @@ class FragmentSavedArticleView : Fragment(),TextSizeChangeableArticleViewFragmen
         super.onViewCreated(view, savedInstanceState)
         LoggerUtils.debugLog("onViewCreated", this::class.java)
         mArticleId = arguments!!.getString(ARG_ARTICLE_ID)!!
-        LoggerUtils.debugLog(mArticleId, this::class.java)
 
+        mActionBarHeight = DisplayUtils.dpToPx(40, context!!).toInt()
         findViewItems(view)
+
+        mMainScroller.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
+
+            override fun onScrollChange(v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
+                if (scrollY == 0) {
+                    (activity!! as AppCompatActivity).supportActionBar!!.show()
+                } else if (scrollY > mActionBarHeight * 2) {
+                    (activity!! as AppCompatActivity).supportActionBar!!.hide()
+                }
+            }
+        })
 
     }
 
     private fun findViewItems(view: View) {
-//        mArticlePageDetails = view.findViewById(R.id.article_page_details)
         mArticleTitle = view.findViewById(R.id.article_title)
         mArticlePublicationText = view.findViewById(R.id.article_publication_date_text)
         mArticleImageHolder = view.findViewById(R.id.article_image_holder)
         mArticleText = view.findViewById(R.id.article_text)
+        mMainScroller = view.findViewById(R.id.main_scroller)
     }
 
     override fun onResume() {
