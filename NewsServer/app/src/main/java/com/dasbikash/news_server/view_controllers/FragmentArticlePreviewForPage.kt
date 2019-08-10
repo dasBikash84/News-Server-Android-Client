@@ -17,6 +17,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.TypedValue
 import android.view.*
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
@@ -88,6 +89,8 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
     private lateinit var mArticlePreviewHolder: RecyclerView
     private lateinit var mArticlePreviewHolderAdapter: ArticlePreviewListAdapter
 
+    private var mActionBarHeight = 0
+
     private lateinit var mPageViewContainer: CoordinatorLayout
 
     private var mHasJumpedToLatestArticle = OnceSettableBoolean()
@@ -124,6 +127,8 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
         mPage = (arguments!!.getParcelable(ARG_FOR_PAGE)) as Page
         mPurposeString = arguments!!.getString(ARG_FOR_PURPOSE)!!
 
+        mActionBarHeight = DisplayUtils.dpToPx(40,context!!).toInt()
+
         findViewItems(view)
         setListners()
         init()
@@ -154,7 +159,6 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
     }
 
     private fun init() {
-
         mAppSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
         mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
@@ -163,9 +167,31 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
         mArticlePreviewHolderAdapter = ArticlePreviewListAdapter({ doOnArticleClick(it) }, { loadMoreArticles() }, { showLoadingIfRequired() }, ARTICLE_LOAD_CHUNK_SIZE)
         mArticlePreviewHolder.adapter = mArticlePreviewHolderAdapter
     }
+    private var mArticlePreviewHolderDySum = 0
 
     private fun setListners() {
+
         mCenterLoadingScreen.setOnClickListener {  }
+        mArticlePreviewHolder.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                mArticlePreviewHolderDySum += dy
+
+                if (recyclerView.scrollState != RecyclerView.SCROLL_STATE_IDLE) {
+                    if (dy < 0){
+                        if ( mArticlePreviewHolderDySum  == 0) {
+                            (activity!! as AppCompatActivity).supportActionBar!!.show()
+                        }
+                    }else{
+                        if (mArticlePreviewHolderDySum > mActionBarHeight) {
+                            (activity!! as AppCompatActivity).supportActionBar!!.hide()
+                        }
+                    }
+                }
+            }
+        })
     }
 
     private fun showLoadingIfRequired() {

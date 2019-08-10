@@ -16,6 +16,7 @@ package com.dasbikash.news_server.view_controllers
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +26,7 @@ import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.utils.OnceSettableBoolean
 import com.dasbikash.news_server.utils.debugLog
@@ -48,6 +50,8 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
     private lateinit var mArticlePreviewHolder: RecyclerView
     private lateinit var mArticlePreviewHolderAdapter: ArticlePreviewListAdapter
     private lateinit var mNewsCategory: NewsCategory
+
+    private var mActionBarHeight = 0
 
     private val mArticleList = mutableListOf<Article>()
     private val mArticleWithParentsList = mutableListOf<ArticleWithParents>()
@@ -73,9 +77,38 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
         init()
 
     }
+    private var mArticlePreviewHolderDySum = 0
+
+    private fun setListners() {
+
+        mCenterLoadingScreen.setOnClickListener {  }
+        mArticlePreviewHolder.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                mArticlePreviewHolderDySum += dy
+
+                if (recyclerView.scrollState != RecyclerView.SCROLL_STATE_IDLE) {
+                    if (dy < 0){
+                        if (mArticlePreviewHolderDySum  == 0) {
+                            (activity!! as AppCompatActivity).supportActionBar!!.show()
+                        }
+                    }else{
+                        if (mArticlePreviewHolderDySum  > mActionBarHeight) {
+                            (activity!! as AppCompatActivity).supportActionBar!!.hide()
+                        }
+                    }
+                }
+            }
+        })
+    }
 
     private fun init() {
         (activity!! as AppCompatActivity).supportActionBar!!.title = mNewsCategory.name
+
+        mActionBarHeight = DisplayUtils.dpToPx(40,context!!).toInt()
+
         mArticlePreviewHolderAdapter = ArticlePreviewListAdapter({ doOnArticleClick(it) }, { loadMoreArticles() },
                                                                     { showLoadingIfRequired() }, ARTICLE_LOAD_CHUNK_SIZE,
                                                     true)
@@ -179,10 +212,6 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
     private fun doOnArticleClick(article: Article) {
         debugLog(article.toString())
         startActivity(ActivityArticleView.getIntentForArticleView(context!!,article))
-    }
-
-    private fun setListners() {
-        mCenterLoadingScreen.setOnClickListener {  }
     }
 
     private fun findViewItems(view: View) {
