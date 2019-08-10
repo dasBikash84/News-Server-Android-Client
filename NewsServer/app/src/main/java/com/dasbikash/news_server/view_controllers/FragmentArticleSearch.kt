@@ -396,11 +396,6 @@ class FragmentArticleSearch : Fragment() {
         mBottomLoadingScreen.visibility = View.GONE
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        (activity as NavigationHost).showAppBar(false)
-    }
-
     companion object {
         private const val SEARCH_BOX_EMPTY_MESSAGE = "Please input keyword(s) & then press search."
         private const val EMPTY_SEARCH_RESULT_MESSAGE = "No matching article found."
