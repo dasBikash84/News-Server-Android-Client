@@ -77,7 +77,7 @@
                 android:id="@+id/jump_to_top"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:background="@color/ninty_five_transparent"
+                android:background="@android:color/transparent"
                 android:contentDescription="@string/jump_to_top"
                 app:srcCompat="@drawable/ic_hide_up"
                 android:visibility="gone"/>
