@@ -41,14 +41,19 @@ internal object RealTimeDbArticleDataUtils {
     }
 
     fun getArticlesBeforeLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
-        
+        LoggerUtils.debugLog("getArticlesBeforeLastArticle: lastArticle:${lastArticle}",this::class.java)
         val query = RealtimeDBUtils.mArticleDataRootReference
                                     .child(page.id)
                                     .orderByChild(DB_PUBLICATION_TIME_FIELD_NAME)
                                     .endAt(lastArticle.publicationTimeRTDB!!.toDouble(), DB_PUBLICATION_TIME_FIELD_NAME)
                                     .limitToLast(articleRequestSize+1)
         
-        return getArticlesForQuery(query, page)
+        val articles = getArticlesForQuery(query, page)
+        if (articles.isNotEmpty() && articles.size>1){
+            return articles.take(articles.size-1)
+        }else{
+            throw DataNotFoundException()
+        }
     }
 
     fun getArticlesAfterLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
@@ -159,11 +164,19 @@ internal object RealTimeDbArticleDataUtils {
                                 .endAt(lastArticle.publicationTimeRTDB!!.toDouble(), DB_PUBLICATION_TIME_FIELD_NAME)
                                 .limitToLast(articleRequestSize+1)
 
-        return getArticleInfoForQuery(query).asSequence()
-                .filter { it.articleId.isNotBlank() && it.pageId.isNotBlank() }
-                .map { findArticleById(it.articleId,it.pageId) }
-                .filter { it!=null }
-                .toList() as List<Article>
+        val articleInfoList = getArticleInfoForQuery(query)
+
+        if (articleInfoList.isNotEmpty() && articleInfoList.size>1){
+
+            return articleInfoList.take(articleInfoList.size-1).asSequence()
+                    .filter { it.articleId.isNotBlank() && it.pageId.isNotBlank() }
+                    .map { findArticleById(it.articleId,it.pageId) }
+                    .filter { it!=null }
+                    .toList() as List<Article>
+
+        }else{
+            throw DataNotFoundException()
+        }
     }
 
     private fun getArticleInfoForQuery(query: Query): List<ArticleInfo> {
