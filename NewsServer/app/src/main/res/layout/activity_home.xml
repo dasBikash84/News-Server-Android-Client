@@ -166,23 +166,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:background="@android:color/transparent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/app_bar_layout"
+                app:layout_constraintBottom_toTopOf="@id/bottomNavigationView">
+
+            </FrameLayout>
+
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:id="@+id/bottomNavigationView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="@color/white_smoke"
+                app:itemIconTint="@drawable/bottom_navigation_colors"
+                app:itemTextColor="@drawable/bottom_navigation_colors"
+                app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
+                app:menu="@menu/home_bottom_navigation_menu"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/app_bar_layout">
-
-                <com.google.android.material.bottomnavigation.BottomNavigationView
-                    android:id="@+id/bottomNavigationView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:background="@color/white_smoke"
-                    app:itemIconTint="@drawable/bottom_navigation_colors"
-                    app:itemTextColor="@drawable/bottom_navigation_colors"
-                    app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
-                    app:menu="@menu/home_bottom_navigation_menu" />
-
-            </FrameLayout>
+                app:layout_constraintTop_toBottomOf="@id/main_frame"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

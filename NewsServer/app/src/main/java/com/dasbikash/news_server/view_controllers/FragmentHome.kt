@@ -245,8 +245,6 @@ class FragmentHome : Fragment() {
 
     @SuppressLint("CheckResult")
     private fun init() {
-        (activity as NavigationHost)
-                .showBottomNavigationView(true)
         showPageSearchBox()
         hideNewsPaperMenu()
         mPageSearchResultHolder.adapter = mSearchResultListAdapter

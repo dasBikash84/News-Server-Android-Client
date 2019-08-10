@@ -16,8 +16,7 @@
     android:id="@+id/fav_frag_coor_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/snow_white2"
-    android:paddingBottom="?attr/actionBarSize">
+    android:background="@color/snow_white2">
 
     <LinearLayout
         android:id="@+id/no_fav_page_found_message_holder"

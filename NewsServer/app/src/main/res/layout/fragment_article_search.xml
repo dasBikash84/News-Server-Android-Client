@@ -17,7 +17,6 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    android:paddingBottom="?attr/actionBarSize"
     android:background="@color/snow_white2">
 
     <androidx.constraintlayout.widget.ConstraintLayout

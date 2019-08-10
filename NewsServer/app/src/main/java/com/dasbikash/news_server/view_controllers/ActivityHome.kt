@@ -107,8 +107,6 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
         initApp()
 
         if (supportFragmentManager.findFragmentById(R.id.main_frame) == null) {
-            mBottomNavigationView.visibility = View.INVISIBLE
-            showAppBar(false)//mAppBar.visibility = View.INVISIBLE
             loadInitFragment()
         }
         addBackPressAction()
@@ -185,44 +183,34 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
             when (menuItem.itemId) {
                 R.id.bottom_menu_item_home -> {
                     if (!(currentFragment is FragmentHome)) {
-                        showAppBar(false)//mAppBar.visibility = View.GONE
                         loadHomeNpFragment()
-                        mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
                 }
 
                 R.id.bottom_menu_item_news_categories -> {
                     if (!(currentFragment is FragmentNewsCategories)) {
-                        showAppBar(true)//mAppBar.visibility = View.VISIBLE
                         loadNewsCategoriesViewFragment()
-                        mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
                 }
 
                 R.id.bottom_menu_item_article_search -> {
                     if (!(currentFragment is FragmentArticleSearch)) {
-                        showAppBar(false)//mAppBar.visibility = View.VISIBLE
                         loadArticleSearchFragment()
-                        mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
                 }
 
                 R.id.bottom_menu_item_favourites -> {
                     if (!(currentFragment is FragmentFavourites)) {
-                        showAppBar(true)//mAppBar.visibility = View.VISIBLE
                         loadFavouritesFragment()
-                        mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
                 }
                 R.id.bottom_menu_item_saved_articles -> {
                     if (!(currentFragment is FragmentSavedArticles)) {
-                        showAppBar(true)//mAppBar.visibility = View.VISIBLE
                         loadSavedArticlesFragment()
-                        mBottomNavigationView.visibility = View.VISIBLE
                     }
                     true
                 }
@@ -295,32 +283,44 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
     }
 
     fun loadInitFragment() {
+        showAppBar(false)
         navigateTo(FragmentInit())
+        showBottomNavigationView(false)
     }
 
     override fun loadHomeNpFragment() {
+        showAppBar(false)
         navigateTo(FragmentHome())
+        showBottomNavigationView(true)
     }
 
     override fun loadNewsCategoriesViewFragment() {
+        showAppBar(true)
         navigateTo(FragmentNewsCategories())
+        showBottomNavigationView(true)
     }
 
     override fun loadFavouritesFragment() {
+        showAppBar(true)
         navigateTo(FragmentFavourites())
+        showBottomNavigationView(true)
     }
 
     override fun loadSavedArticlesFragment() {
+        showAppBar(true)
         navigateTo(FragmentSavedArticles())
+        showBottomNavigationView(true)
     }
 
     override fun loadMoreFragment() {
         navigateTo(FragmentMore())
+        showBottomNavigationView(true)
     }
 
     override fun loadArticleSearchFragment() {
+        showAppBar(false)
         navigateTo(FragmentArticleSearch())
-        mBottomNavigationView.visibility = View.VISIBLE
+        showBottomNavigationView(true)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
