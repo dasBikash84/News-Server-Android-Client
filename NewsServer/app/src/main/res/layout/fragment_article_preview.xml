@@ -75,12 +75,10 @@
 
             <ImageButton
                 android:id="@+id/jump_to_top"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:background="@color/ninty_five_transparent"
-                android:contentDescription="@string/search_article"
+                android:contentDescription="@string/jump_to_top"
                 app:srcCompat="@drawable/ic_hide_up"
                 android:visibility="gone"/>
         </LinearLayout>
