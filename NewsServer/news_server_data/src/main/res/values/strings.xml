@@ -16,4 +16,5 @@
 
     <string name="SP_FILE_KEY">com.dasbikash.news_server.SP_FILE_KEY</string>
     <string name="APP_SETTINGS_UPDATE_TIME_STAMP_SP_KEY">com.dasbikash.news_server.APP_SETTINGS_UPDATE_TIME_STAMP_SP_KEY</string>
+    <string name="default_notification_channel_id">com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.default_notification_channel_id</string>
 </resources>

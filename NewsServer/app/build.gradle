@@ -80,6 +80,9 @@ dependencies {
 
     implementation project(':news_server_data')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+
+    implementation 'com.google.firebase:firebase-messaging:19.0.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

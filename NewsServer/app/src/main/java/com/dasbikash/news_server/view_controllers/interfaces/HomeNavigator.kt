@@ -13,9 +13,11 @@
 
 package com.dasbikash.news_server.view_controllers.interfaces
 
+import com.dasbikash.news_server_data.models.room_entity.Article
+
 interface HomeNavigator {
 
-    fun loadHomeNpFragment()
+    fun loadHomeNpFragment(article: Article?=null)
     fun loadNewsCategoriesViewFragment()
     fun loadFavouritesFragment()
     fun loadSavedArticlesFragment()

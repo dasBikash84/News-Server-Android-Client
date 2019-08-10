@@ -29,13 +29,16 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.dasbikash.news_server.BuildConfig
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.fcm.NewsServerFirebaseMessagingService
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
+import com.dasbikash.news_server.utils.debugLog
 import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.exceptions.AuthServerException
 import com.dasbikash.news_server_data.exceptions.DataSourceNotFoundException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
+import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.LoggerUtils
@@ -52,6 +55,9 @@ class FragmentInit : Fragment() {
 
     private var mRetryDelayForRemoteDBError = 0L
     private var mRetryCountForError = 0L
+
+    private var mFcmPageId:String?=null
+    private var mFcmArticleId:String?=null
 
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
@@ -88,6 +94,12 @@ class FragmentInit : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         mProgressBar = view.findViewById(R.id.data_load_progress)
         mNoInternetMessage = view.findViewById(R.id.no_internet_message)
+
+        arguments?.let {
+            mFcmPageId = it.getString(ARG_PAGE_ID)
+            mFcmArticleId = it.getString(ARG_ARTICLE_ID)
+        }
+        debugLog("mFcmPageId: $mFcmPageId, mFcmArticleId: $mFcmArticleId")
     }
 
     override fun onResume() {
@@ -125,19 +137,37 @@ class FragmentInit : Fragment() {
                             }
 
                             override fun onComplete() {
-//                                PageRequestServerInitiator.initWork(context!!)
-                                ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
-                                        .getNewsPapersLiveData()
-                                        .observe(activity!!, object : Observer<List<Newspaper>> {
-                                            override fun onChanged(newspapers: List<Newspaper>?) {
-                                                /*if (com.dasbikash.news_server_data.BuildConfig.DEBUG) {
-                                                    (activity as HomeNavigator).loadArticleSearchFragment()
-                                                }else{
-                                                    (activity as HomeNavigator).loadEngNpFragment()
-                                                }*/
-                                                (activity as HomeNavigator).loadHomeNpFragment()
-                                            }
-                                        })
+                                if (mFcmPageId !=null && mFcmArticleId!=null){
+                                    mDisposable.add(
+                                            Observable.just(true)
+                                                    .subscribeOn(Schedulers.io())
+                                                    .map {
+                                                        RepositoryFactory.getNewsDataRepository(context!!)
+                                                            .findArticleByIdFromRemoteDb(mFcmArticleId!!,mFcmPageId!!)?.let {
+                                                                    debugLog("$it")
+                                                                    return@map it
+                                                                }
+                                                        debugLog("false")
+                                                        false
+                                                    }
+                                                    .observeOn(AndroidSchedulers.mainThread())
+                                                    .subscribeWith(object : DisposableObserver<Any>() {
+                                                        override fun onComplete() {}
+
+                                                        override fun onNext(data: Any) {
+                                                            debugLog("type of data is ${data::class.java.canonicalName}")
+                                                            debugLog("value of data is ${data.toString()}")
+                                                            when(data){
+                                                                is Article -> (activity as HomeNavigator).loadHomeNpFragment(data)
+                                                                else ->{(activity as HomeNavigator).loadHomeNpFragment()}
+                                                            }
+                                                        }
+
+                                                        override fun onError(e: Throwable) {(activity as HomeNavigator).loadHomeNpFragment()}
+                                                    }))
+                                }else {
+                                    (activity as HomeNavigator).loadHomeNpFragment()
+                                }
                             }
                         })
         )
@@ -181,25 +211,7 @@ class FragmentInit : Fragment() {
     }
 
     private fun testRoutine() {
-        /*val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
-        val newsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
-        val newsCategories = appSettingsRepository.getNewsCategories()
-        newsCategories.take(1).forEach {
-            debugLog(it.toString())
-            val latestArticles = newsDataRepository.getLatestArticlesByNewsCategory(it,context!!)
-            latestArticles.forEach {
-                debugLog(it.toString())
-            }
-            if (latestArticles.isNotEmpty()) {
-                debugLog(it.toString())
-                latestArticles.sortedBy { it.publicationTime!! }.first().apply {
-                    debugLog(this.toString())
-                    newsDataRepository.getArticlesByNewsCategoryBeforeLastArticle(it,this,context!!).forEach {
-                        debugLog(it.toString())
-                    }
-                }
-            }
-        }*/
+//        NewsServerFirebaseMessagingService().generateNewToken()
     }
 
     private fun doOnError(throwable: Throwable) {
@@ -287,6 +299,19 @@ class FragmentInit : Fragment() {
     }
 
     companion object {
+
+        private const val ARG_PAGE_ID = "com.dasbikash.news_server.view_controllers.FragmentInit.ARG_PAGE_ID"
+        private const val ARG_ARTICLE_ID = "com.dasbikash.news_server.view_controllers.FragmentInit.ARG_ARTICLE_ID"
+
+        fun getInstance(pageId: String, articleId: String): FragmentInit {
+            val args = Bundle()
+            args.putString(ARG_PAGE_ID, pageId)
+            args.putString(ARG_ARTICLE_ID, articleId)
+            val fragment = FragmentInit()
+            fragment.setArguments(args)
+            return fragment
+        }
+
         private const val INCREMENTAL_RETRY_DELAY_MS = 3000L
     }
 

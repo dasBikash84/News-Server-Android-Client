@@ -34,7 +34,6 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.utils.debugLog
-import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.view_helpers.PageDiffCallback
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
@@ -59,6 +58,19 @@ import io.reactivex.schedulers.Schedulers
 import java.util.*
 
 class FragmentHome : Fragment() {
+
+    companion object{
+
+        private const val ARG_ARTICLE = "com.dasbikash.news_server.view_controllers.FragmentHome.ARG_ARTICLE"
+
+        fun getInstance(article: Article): FragmentHome {
+            val args = Bundle()
+            args.putParcelable(ARG_ARTICLE, article)
+            val fragment = FragmentHome()
+            fragment.setArguments(args)
+            return fragment
+        }
+    }
 
     private val MINIMUM_CHAR_LENGTH_FOR_PAGE_SEARCH = 3
 
@@ -101,23 +113,6 @@ class FragmentHome : Fragment() {
         findViewComponents(view)
         setListnersForViewComponents()
         init()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        initMenuButtonOperator()
-        if (mNewsPaperMenuContainer.visibility == View.VISIBLE){
-            addBackPressTaskForForNpMenu()
-        }
-        if (mPageSearchResultContainer.visibility == View.VISIBLE){
-            addBackPressTaskForPageSrearchResults()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        removeBackPressTaskForNpMenu()
-        removeBackPressTaskForPageSrearchResults()
     }
 
     private fun findViewComponents(view: View) {
@@ -243,8 +238,42 @@ class FragmentHome : Fragment() {
         }
     }
 
-    @SuppressLint("CheckResult")
+    var mFcmArticle:Article?=null
+    var mFcmArticlehandled = false
+    var mInitDone = false
+
     private fun init() {
+        arguments?.let { mFcmArticle = it.getParcelable<Article>(ARG_ARTICLE)}
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (mFcmArticle!=null && !mFcmArticlehandled){
+            mFcmArticlehandled = true
+            startActivity(ActivityArticleView.getIntentForArticleView(context!!,mFcmArticle!!))
+        }else if(!mInitDone){
+            initView()
+            initMenuButtonOperator()
+        }else {
+            if (mNewsPaperMenuContainer.visibility == View.VISIBLE) {
+                addBackPressTaskForForNpMenu()
+            }
+            if (mPageSearchResultContainer.visibility == View.VISIBLE) {
+                addBackPressTaskForPageSrearchResults()
+            }
+            initMenuButtonOperator()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        removeBackPressTaskForNpMenu()
+        removeBackPressTaskForPageSrearchResults()
+    }
+
+    @SuppressLint("CheckResult")
+    private fun initView() {
+        mInitDone = true
         showPageSearchBox()
         hideNewsPaperMenu()
         mPageSearchResultHolder.adapter = mSearchResultListAdapter

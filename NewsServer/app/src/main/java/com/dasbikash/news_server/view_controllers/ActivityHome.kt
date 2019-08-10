@@ -37,6 +37,7 @@ import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
+import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.dasbikash.news_server_data.utills.LoggerUtils
@@ -62,6 +63,9 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
         private const val SIGNED_OUT_MESSAGE = "Signed out."
         private const val SIGN_OUT_ERROR_MSG = "Sign out Error!! Please retry."
         private const val EXIT_WAIT_WINDOW = 2000L
+
+        private const val EXTRA_FCM_PAGE_ID = "FCM_PAGE_ID"
+        private const val EXTRA_FCM_ARTICLE_ID = "FCM_ARTICLE_ID"
     }
 
     private lateinit var mToolbar: Toolbar
@@ -106,10 +110,17 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
         setUpBottomNavigationView()
         initApp()
 
-        if (supportFragmentManager.findFragmentById(R.id.main_frame) == null) {
+        addBackPressAction()
+
+        if (intent.hasExtra(EXTRA_FCM_PAGE_ID) &&
+                intent.hasExtra(EXTRA_FCM_ARTICLE_ID) &&
+                (intent.getStringExtra(EXTRA_FCM_PAGE_ID) !=null ) &&
+                (intent.getStringExtra(EXTRA_FCM_ARTICLE_ID) !=null )
+        ){
+            loadInitFragment(intent.getStringExtra(EXTRA_FCM_PAGE_ID),intent.getStringExtra(EXTRA_FCM_ARTICLE_ID))
+        }else {
             loadInitFragment()
         }
-        addBackPressAction()
     }
 
     private fun addBackPressAction() {
@@ -282,15 +293,25 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
         }
     }
 
+    fun loadInitFragment(pageId:String,articleId:String) {
+        showAppBar(false)
+        navigateTo(FragmentInit.getInstance(pageId,articleId))
+        showBottomNavigationView(false)
+    }
+
     fun loadInitFragment() {
         showAppBar(false)
         navigateTo(FragmentInit())
         showBottomNavigationView(false)
     }
 
-    override fun loadHomeNpFragment() {
+    override fun loadHomeNpFragment(article:Article?) {
         showAppBar(false)
-        navigateTo(FragmentHome())
+        if (article!=null){
+            navigateTo(FragmentHome.getInstance(article))
+        }else {
+            navigateTo(FragmentHome())
+        }
         showBottomNavigationView(true)
     }
 
