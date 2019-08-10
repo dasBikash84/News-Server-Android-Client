@@ -24,8 +24,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.utils.debugLog
+import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server_data.models.room_entity.NewsCategory
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import io.reactivex.Observable
@@ -37,6 +39,8 @@ class FragmentNewsCategories : Fragment() {
 
     lateinit var mNewscategoryListHolder: RecyclerView
     lateinit var mNewscategoryListAdapter: NewsCategoryListAdapter
+
+    private var mActionBarHeight = 0
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
@@ -80,11 +84,36 @@ class FragmentNewsCategories : Fragment() {
         mNewscategoryListHolder = view.findViewById(R.id.news_category_list_holder)
     }
 
-    private fun setListnersForViewComponents() {}
+    private var mArticlePreviewHolderDySum = 0
+
+    private fun setListnersForViewComponents() {
+
+        mNewscategoryListHolder.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                mArticlePreviewHolderDySum += dy
+
+                if (recyclerView.scrollState != RecyclerView.SCROLL_STATE_IDLE) {
+                    if (dy < 0){
+                        if (mArticlePreviewHolderDySum  == 0) {
+                            (activity!! as NavigationHost).showAppBar(true)
+                        }
+                    }else{
+                        if (mArticlePreviewHolderDySum  > mActionBarHeight) {
+                            (activity!! as NavigationHost).showAppBar(false)
+                        }
+                    }
+                }
+            }
+        })
+    }
 
     private fun initViewComponents() {
         mNewscategoryListAdapter = NewsCategoryListAdapter { doOnNewsCategoryNameClick(it) }
         mNewscategoryListHolder.adapter = mNewscategoryListAdapter
+        mActionBarHeight = DisplayUtils.dpToPx(40,context!!).toInt()
     }
 
     private fun doOnNewsCategoryNameClick(newsCategory: NewsCategory) {

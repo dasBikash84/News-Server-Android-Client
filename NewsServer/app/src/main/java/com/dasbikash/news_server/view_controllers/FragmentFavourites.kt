@@ -33,6 +33,7 @@ import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.utils.debugLog
+import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.view_controllers.view_helpers.PageDiffCallback
 import com.dasbikash.news_server.view_models.HomeViewModel
@@ -55,10 +56,11 @@ import io.reactivex.schedulers.Schedulers
 class FragmentFavourites : Fragment() {
 
     private lateinit var mCoordinatorLayout: CoordinatorLayout
-    private lateinit var mScroller: NestedScrollView
     private lateinit var mFavItemsHolder: RecyclerView
     private lateinit var mNoFavPageMsgHolder: LinearLayout
     private lateinit var mNoFavPageLogInButton: MaterialButton
+
+    private var mActionBarHeight = 0
 
     lateinit var mFavouritePagesListAdapter: FavouritePagesListAdapter
 
@@ -75,18 +77,17 @@ class FragmentFavourites : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mCoordinatorLayout = view.findViewById(R.id.fav_frag_coor_layout)
-        mScroller = view.findViewById(R.id.fav_frag_item_scroller)
-        mFavItemsHolder = view.findViewById(R.id.fav_frag_item_holder)
-        mNoFavPageMsgHolder = view.findViewById(R.id.no_fav_page_found_message_holder)
-        mNoFavPageLogInButton = view.findViewById(R.id.no_fav_page_found_log_in_button)
 
+        findViewComponents(view)
+        setListnersForViewComponents()
+        init()
+
+    }
+
+    private fun init() {
+        mActionBarHeight = DisplayUtils.dpToPx(40, context!!).toInt()
         mFavouritePagesListAdapter = FavouritePagesListAdapter()
-
         mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
-
-        mNoFavPageLogInButton.setOnClickListener { (activity!! as SignInHandler).launchSignInActivity({ postLogInAction() }) }
-
         mFavItemsHolder.adapter = mFavouritePagesListAdapter
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
         val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
@@ -102,7 +103,7 @@ class FragmentFavourites : Fragment() {
                     override fun onChanged(userPreferenceData: UserPreferenceData?) {
                         if (userPreferenceData == null) {
                             mNoFavPageMsgHolder.visibility = View.VISIBLE
-                            mScroller.visibility = View.GONE
+                            mFavItemsHolder.visibility = View.GONE
                         }
                         userPreferenceData.let {
                             val favouritePageIdList = it?.favouritePageIds?.toList() ?: emptyList()
@@ -113,7 +114,7 @@ class FragmentFavourites : Fragment() {
                                                 .map {
                                                     debugLog(it.toString())
                                                     it
-                                                }.filter { appSettingsRepository.findPageById(it) !=null }
+                                                }.filter { appSettingsRepository.findPageById(it) != null }
                                                 .map {
                                                     val page = appSettingsRepository.findPageById(it)!!
                                                     debugLog("$it : $page")
@@ -128,10 +129,10 @@ class FragmentFavourites : Fragment() {
                                         override fun onNext(pageList: List<Page>) {
                                             if (pageList.isEmpty()) {
                                                 mNoFavPageMsgHolder.visibility = View.VISIBLE
-                                                mScroller.visibility = View.GONE
+                                                mFavItemsHolder.visibility = View.GONE
                                             } else {
                                                 mNoFavPageMsgHolder.visibility = View.GONE
-                                                mScroller.visibility = View.VISIBLE
+                                                mFavItemsHolder.visibility = View.VISIBLE
                                             }
                                             pageList.asSequence().forEach { debugLog(it.toString()) }
                                             mFavouritePagesListAdapter.submitList(pageList)
@@ -142,12 +143,45 @@ class FragmentFavourites : Fragment() {
                         }
                     }
                 })
+    }
 
+    private fun findViewComponents(view: View) {
+        mCoordinatorLayout = view.findViewById(R.id.fav_frag_coor_layout)
+        mFavItemsHolder = view.findViewById(R.id.fav_frag_item_holder)
+        mNoFavPageMsgHolder = view.findViewById(R.id.no_fav_page_found_message_holder)
+        mNoFavPageLogInButton = view.findViewById(R.id.no_fav_page_found_log_in_button)
     }
 
     override fun onResume() {
         super.onResume()
         (activity as AppCompatActivity).supportActionBar?.title = TITLE_TEXT
+    }
+
+    private var mArticlePreviewHolderDySum = 0
+
+    private fun setListnersForViewComponents() {
+
+        mFavItemsHolder.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                debugLog("mArticlePreviewHolderDySum: $mArticlePreviewHolderDySum,dx :$dx, dy: $dy")
+                mArticlePreviewHolderDySum += dy
+
+                if (recyclerView.scrollState != RecyclerView.SCROLL_STATE_IDLE) {
+                    if (dy < 0){
+                        if (mArticlePreviewHolderDySum  == 0) {
+                            (activity!! as NavigationHost).showAppBar(true)
+                        }
+                    }else{
+                        if (mArticlePreviewHolderDySum  > mActionBarHeight) {
+                            (activity!! as NavigationHost).showAppBar(false)
+                        }
+                    }
+                }
+            }
+        })
+        mNoFavPageLogInButton.setOnClickListener { (activity!! as SignInHandler).launchSignInActivity({ postLogInAction() }) }
     }
 
     companion object{

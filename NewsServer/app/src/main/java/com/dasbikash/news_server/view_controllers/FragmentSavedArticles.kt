@@ -33,6 +33,8 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
+import com.dasbikash.news_server.utils.debugLog
+import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.models.room_entity.SavedArticle
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
@@ -51,8 +53,8 @@ class FragmentSavedArticles : Fragment() {
     private lateinit var mSavedArticlePreviewHolder: RecyclerView
     private lateinit var mListAdapter: SavedArticlePreviewListAdapter
     private lateinit var mNoSavedArticleMsgHolder: LinearLayout
-
     private lateinit var mNewsDataRepository: NewsDataRepository
+    private var mActionBarHeight = 0
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
@@ -64,14 +66,19 @@ class FragmentSavedArticles : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         LoggerUtils.debugLog("onViewCreated", this::class.java)
+
         mSavedArticlePreviewHolder = view.findViewById(R.id.saved_article_preview_holder)
         mNoSavedArticleMsgHolder = view.findViewById(R.id.no_saved_article_found_message_holder)
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
+
+        mActionBarHeight = DisplayUtils.dpToPx(40, context!!).toInt()
 
         mListAdapter = SavedArticlePreviewListAdapter { item -> doOnArticleClick(item) }
         mSavedArticlePreviewHolder.adapter = mListAdapter
         ItemTouchHelper(SavedArticleSwipeToDeleteCallback({ item -> savedArticleDeleteAction(item) }, mListAdapter))
                 .attachToRecyclerView(mSavedArticlePreviewHolder)
+
+        setListnersForViewComponents()
 
         ViewModelProviders.of(activity!!).get(HomeViewModel::class.java).getSavedArticlesLiveData()
                 .observe(this, object : androidx.lifecycle.Observer<List<SavedArticle>> {
@@ -87,6 +94,32 @@ class FragmentSavedArticles : Fragment() {
                         }
                     }
                 })
+    }
+
+    private var mArticlePreviewHolderDySum = 0
+
+    private fun setListnersForViewComponents() {
+
+        mSavedArticlePreviewHolder.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                debugLog("mArticlePreviewHolderDySum: $mArticlePreviewHolderDySum,dx :$dx, dy: $dy")
+                mArticlePreviewHolderDySum += dy
+
+                if (recyclerView.scrollState != RecyclerView.SCROLL_STATE_IDLE) {
+                    if (dy < 0){
+                        if (mArticlePreviewHolderDySum  == 0) {
+                            (activity!! as NavigationHost).showAppBar(true)
+                        }
+                    }else{
+                        if (mArticlePreviewHolderDySum  > mActionBarHeight) {
+                            (activity!! as NavigationHost).showAppBar(false)
+                        }
+                    }
+                }
+            }
+        })
     }
 
     override fun onResume() {
