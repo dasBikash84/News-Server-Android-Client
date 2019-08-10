@@ -97,7 +97,7 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
             loadMoreArticles()
         }
     }
-
+    private lateinit var lastArticle:Article
     private fun loadMoreArticles() {
         if (!mNewArticleLoadInProgress && !mEndReachedForArticles.get()) {
             mNewArticleLoadInProgress = true
@@ -107,22 +107,24 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
                             .subscribeOn(Schedulers.io())
                             .map {
                                 val newsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
-                                val articles = mutableListOf<Article>()
+                                var articles :List<Article>? = null
                                 try {
                                     if (mArticleList.isEmpty()) {
-                                        articles.addAll(newsDataRepository.getLatestArticlesByNewsCategory(it, context!!, mArticleRequestChunkSize))
+                                        articles =
+                                                newsDataRepository.getLatestArticlesByNewsCategory(it, context!!, ARTICLE_LOAD_CHUNK_SIZE).sortedByDescending { it.publicationTime!! }
                                     } else {
-                                        val lastArticle = mArticleList.sortedBy { it.publicationTime!! }.first()
-                                        articles.addAll(newsDataRepository
-                                                .getArticlesByNewsCategoryBeforeLastArticle(
-                                                        it, lastArticle, context!!, mArticleRequestChunkSize))
+//                                        val lastArticle = mArticleList.sortedBy { it.publicationTime!! }.first()
+                                        articles =
+                                                newsDataRepository.getArticlesByNewsCategoryBeforeLastArticle(
+                                                        it, lastArticle, context!!, ARTICLE_LOAD_CHUNK_SIZE).sortedByDescending { it.publicationTime!! }
                                     }
+                                    lastArticle = articles.sortedBy { it.publicationTime!! }.first()
                                 } catch (ex: Exception) {
                                     if (!amDisposed) {
                                         throw ex
                                     }
                                 }
-                                val filteredArticles = Article.removeDuplicates(articles).filter {
+                                val filteredArticles = Article.removeDuplicates(articles!!).filter {
                                                                     val article = it
                                                                     mArticleList.count { it.checkIfSameArticle(article) } == 0}.toList()
                                 Pair(filteredArticles,ArticleWithParents.getFromArticles(filteredArticles,context!!))
@@ -135,21 +137,21 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribeWith(object : DisposableObserver<Pair<List<Article>,List<ArticleWithParents>>>() {
                                 override fun onComplete() {
-                                    mNewArticleLoadInProgress = false
-                                    hideLoadingScreens()
                                 }
 
                                 override fun onNext(data: Pair<List<Article>,List<ArticleWithParents>>) {
                                     val newArticleList = data.first
 
                                     if (newArticleList.isNotEmpty()) {
-                                        mArticleRequestChunkSize = ARTICLE_LOAD_CHUNK_SIZE
+//                                        mArticleRequestChunkSize = ARTICLE_LOAD_CHUNK_SIZE
                                         mArticleList.addAll(newArticleList)
                                         mArticleWithParentsList.addAll(data.second)
                                         mArticlePreviewHolderAdapter.submitList(mArticleWithParentsList.toList())
+                                        mNewArticleLoadInProgress = false
+                                        hideLoadingScreens()
                                     } else {
                                         mNewArticleLoadInProgress = false
-                                        mArticleRequestChunkSize += ARTICLE_LOAD_CHUNK_SIZE
+//                                        mArticleRequestChunkSize += ARTICLE_LOAD_CHUNK_SIZE
                                         Handler(Looper.getMainLooper()).postAtTime({ loadMoreArticles() }, 1000L)
                                     }
                                 }

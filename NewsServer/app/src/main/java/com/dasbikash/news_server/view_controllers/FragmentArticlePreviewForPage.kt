@@ -365,7 +365,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
                                     if (it) {
                                         mNewsDataRepository.getLatestArticleByPage(mPage)
                                     }
-                                    mNewsDataRepository.downloadPreviousArticlesByPage(mPage, mArticleRequestChunkSize)
+                                    mNewsDataRepository.downloadPreviousArticlesByPage(mPage, ARTICLE_LOAD_CHUNK_SIZE)
                                 } catch (ex: Exception) {
                                     if (!amDisposed) {
                                         throw ex
@@ -415,21 +415,24 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
             val article = it
             mArticleList.count { it.checkIfSameArticle(article) } == 0
         })
-        return Pair(newArticles, ArticleWithParents.getFromArticles(newArticles, context!!))
+        return Pair(newArticles, ArticleWithParents.getFromArticles(newArticles.sortedByDescending { it.publicationTime!! }, context!!))
     }
 
     private fun displayNewArticles(data: Pair<List<Article>, List<ArticleWithParents>>) {
         val newArticleList = data.first
 
         if (newArticleList.isNotEmpty()) {
-            mArticleRequestChunkSize = ARTICLE_LOAD_CHUNK_SIZE
+//            mArticleRequestChunkSize = ARTICLE_LOAD_CHUNK_SIZE
             mArticleList.addAll(newArticleList)
             mArticleWithParentsList.addAll(data.second)
             mArticlePreviewHolderAdapter.submitList(mArticleWithParentsList.toList())
         } else {
             mArticleLoadRunning = false
-            mArticleRequestChunkSize += ARTICLE_LOAD_CHUNK_SIZE
-            Handler(Looper.getMainLooper()).postAtTime({ loadMoreArticles() }, 1000L)
+//            mArticleRequestChunkSize += ARTICLE_LOAD_CHUNK_SIZE
+            Handler(Looper.getMainLooper()).postAtTime({
+                showLoadingScreen()
+                loadMoreArticles()
+            }, 1000L)
         }
     }
 

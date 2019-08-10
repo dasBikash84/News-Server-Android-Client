@@ -95,20 +95,20 @@ internal object RealTimeDbArticleDataUtils {
                 }
             })
 
-        LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before wait",this::class.java)
+//        LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before wait",this::class.java)
         try {
             synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
         }catch (ex:InterruptedException){}
 
-        LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before throw it",this::class.java)
+//        LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before throw it",this::class.java)
         dataServerException?.let { throw it }
 
-        LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before throw DataNotFoundException()",this::class.java)
+//        LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before throw DataNotFoundException()",this::class.java)
         if (articles.size == 0 ){
             throw DataNotFoundException()
         }
 
-        LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before return",this::class.java)
+//        LoggerUtils.debugLog("getArticlesForQuery for: ${page.id} before return",this::class.java)
         return articles
     }
 
@@ -121,6 +121,7 @@ internal object RealTimeDbArticleDataUtils {
 
         query.addListenerForSingleValueEvent(object : ValueEventListener{
             override fun onCancelled(error: DatabaseError) {
+                LoggerUtils.debugLog("findArticleById for: ${articleId} onCancelled",this::class.java)
                 synchronized(lock) { lock.notify() }
             }
 
@@ -133,12 +134,12 @@ internal object RealTimeDbArticleDataUtils {
             }
         })
 
-        LoggerUtils.debugLog("findArticleById for: ${articleId} before wait",this::class.java)
+//        LoggerUtils.debugLog("findArticleById for: ${articleId} before wait",this::class.java)
 //        try {
             synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
 //        }catch (ex:InterruptedException){}
 
-        LoggerUtils.debugLog("findArticleById for: ${articleId} before return",this::class.java)
+//        LoggerUtils.debugLog("findArticleById for: ${articleId} before return",this::class.java)
         return article
     }
 
@@ -157,7 +158,7 @@ internal object RealTimeDbArticleDataUtils {
 
     fun getArticlesByNewsCategoryBeforeLastArticle(newsCategory: NewsCategory, lastArticle: Article, articleRequestSize: Int)
             : List<Article> {
-
+        LoggerUtils.debugLog("getArticlesByNewsCategoryBeforeLastArticle, lastArticle: ${lastArticle}",this::class.java)
         val query = RealtimeDBUtils.mArticleInfoForNewsCategoriesNode
                                 .child(newsCategory.id)
                                 .orderByChild(DB_PUBLICATION_TIME_FIELD_NAME)
@@ -205,20 +206,20 @@ internal object RealTimeDbArticleDataUtils {
             }
         })
 
-        LoggerUtils.debugLog("getArticleInfoForQuery before wait",this::class.java)
+//        LoggerUtils.debugLog("getArticleInfoForQuery before wait",this::class.java)
         try {
             synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
         }catch (ex:InterruptedException){}
 
-        LoggerUtils.debugLog("getArticleInfoForQuery before throw it",this::class.java)
+//        LoggerUtils.debugLog("getArticleInfoForQuery before throw it",this::class.java)
         dataServerException?.let { throw it }
 
-        LoggerUtils.debugLog("getArticleInfoForQuery before throw DataNotFoundException()",this::class.java)
+//        LoggerUtils.debugLog("getArticleInfoForQuery before throw DataNotFoundException()",this::class.java)
         if (articleInfoList.size == 0 ){
             throw DataNotFoundException()
         }
 
-        LoggerUtils.debugLog("getArticleInfoForQuery before return",this::class.java)
+//        LoggerUtils.debugLog("getArticleInfoForQuery before return",this::class.java)
         return articleInfoList
     }
 }
