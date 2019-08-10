@@ -20,6 +20,7 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.LinearLayoutCompat
@@ -51,6 +52,8 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
     private lateinit var mArticlePreviewHolderAdapter: ArticlePreviewListAdapter
     private lateinit var mNewsCategory: NewsCategory
 
+    private lateinit var mJumpToTopButton: ImageButton
+
     private var mActionBarHeight = 0
 
     private val mArticleList = mutableListOf<Article>()
@@ -59,8 +62,6 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
 
     private var mNewArticleLoadInProgress = false
     private var mEndReachedForArticles = OnceSettableBoolean()
-
-    var mArticleRequestChunkSize = ARTICLE_LOAD_CHUNK_SIZE
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         LoggerUtils.debugLog("onCreateView", this::class.java)
@@ -82,6 +83,14 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
     private fun setListners() {
 
         mCenterLoadingScreen.setOnClickListener {  }
+
+        mJumpToTopButton.setOnClickListener {
+            (activity!! as AppCompatActivity).supportActionBar!!.show()
+            mArticlePreviewHolderDySum = 0
+            mJumpToTopButton.visibility = View.GONE
+            mArticlePreviewHolder.scrollToPosition(0)
+        }
+
         mArticlePreviewHolder.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -99,6 +108,12 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
                             (activity!! as AppCompatActivity).supportActionBar!!.hide()
                         }
                     }
+                }
+
+                if (mArticlePreviewHolderDySum > (view!!.height + mActionBarHeight)) {
+                    mJumpToTopButton.visibility = View.VISIBLE
+                } else if (mArticlePreviewHolderDySum < view!!.height) {
+                    mJumpToTopButton.visibility = View.GONE
                 }
             }
         })
@@ -140,16 +155,16 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
                             .subscribeOn(Schedulers.io())
                             .map {
                                 val newsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
-                                var articles :List<Article>? = null
+                                val articles = mutableListOf<Article>()
                                 try {
                                     if (mArticleList.isEmpty()) {
-                                        articles =
-                                                newsDataRepository.getLatestArticlesByNewsCategory(it, context!!, ARTICLE_LOAD_CHUNK_SIZE).sortedByDescending { it.publicationTime!! }
+                                        articles.addAll(
+                                                newsDataRepository.getLatestArticlesByNewsCategory(it, context!!, ARTICLE_LOAD_CHUNK_SIZE)
+                                                        .sortedByDescending { it.publicationTime!! })
                                     } else {
-//                                        val lastArticle = mArticleList.sortedBy { it.publicationTime!! }.first()
-                                        articles =
-                                                newsDataRepository.getArticlesByNewsCategoryBeforeLastArticle(
-                                                        it, lastArticle, context!!, ARTICLE_LOAD_CHUNK_SIZE).sortedByDescending { it.publicationTime!! }
+                                        articles.addAll(
+                                                newsDataRepository.getArticlesByNewsCategoryBeforeLastArticle(it, lastArticle, context!!, ARTICLE_LOAD_CHUNK_SIZE)
+                                                        .sortedByDescending { it.publicationTime!! })
                                     }
                                     lastArticle = articles.sortedBy { it.publicationTime!! }.first()
                                 } catch (ex: Exception) {
@@ -218,6 +233,7 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
         mArticlePreviewHolder = view.findViewById(R.id.article_preview_holder)
         mCenterLoadingScreen = view.findViewById(R.id.center_loading_screen)
         mBottomLoadingScreen = view.findViewById(R.id.bottom_loading_screen)
+        mJumpToTopButton = view.findViewById(R.id.jump_to_top)
     }
 
 

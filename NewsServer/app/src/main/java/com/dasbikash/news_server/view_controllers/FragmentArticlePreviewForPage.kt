@@ -19,6 +19,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
 import android.view.*
+import android.widget.ImageButton
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.LinearLayoutCompat
@@ -89,6 +90,8 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
     private lateinit var mArticlePreviewHolder: RecyclerView
     private lateinit var mArticlePreviewHolderAdapter: ArticlePreviewListAdapter
 
+    private lateinit var mJumpToTopButton: ImageButton
+
     private var mActionBarHeight = 0
 
     private lateinit var mPageViewContainer: CoordinatorLayout
@@ -108,8 +111,6 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
     private val mInvHaveMoreArticle = OnceSettableBoolean()
     private var mArticleLoadRunning = false
 
-    var mArticleRequestChunkSize = ARTICLE_LOAD_CHUNK_SIZE
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         LoggerUtils.debugLog("onCreate", this::class.java)
@@ -127,7 +128,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
         mPage = (arguments!!.getParcelable(ARG_FOR_PAGE)) as Page
         mPurposeString = arguments!!.getString(ARG_FOR_PURPOSE)!!
 
-        mActionBarHeight = DisplayUtils.dpToPx(40,context!!).toInt()
+        mActionBarHeight = DisplayUtils.dpToPx(40, context!!).toInt()
 
         findViewItems(view)
         setListners()
@@ -156,9 +157,11 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
         mCenterLoadingScreen = view.findViewById(R.id.center_loading_screen)
         mPageViewContainer = view.findViewById(R.id.page_view_container)
         mBottomLoadingScreen = view.findViewById(R.id.bottom_loading_screen)
+        mJumpToTopButton = view.findViewById(R.id.jump_to_top)
     }
 
     private fun init() {
+        mJumpToTopButton.visibility = View.GONE
         mAppSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
         mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
@@ -167,11 +170,20 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
         mArticlePreviewHolderAdapter = ArticlePreviewListAdapter({ doOnArticleClick(it) }, { loadMoreArticles() }, { showLoadingIfRequired() }, ARTICLE_LOAD_CHUNK_SIZE)
         mArticlePreviewHolder.adapter = mArticlePreviewHolderAdapter
     }
+
     private var mArticlePreviewHolderDySum = 0
 
     private fun setListners() {
 
-        mCenterLoadingScreen.setOnClickListener {  }
+        mCenterLoadingScreen.setOnClickListener { }
+
+        mJumpToTopButton.setOnClickListener {
+            (activity!! as AppCompatActivity).supportActionBar!!.show()
+            mArticlePreviewHolderDySum = 0
+            mJumpToTopButton.visibility = View.GONE
+            mArticlePreviewHolder.scrollToPosition(0)
+        }
+
         mArticlePreviewHolder.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -180,14 +192,20 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
                 mArticlePreviewHolderDySum += dy
 
                 if (recyclerView.scrollState != RecyclerView.SCROLL_STATE_IDLE) {
-                    if (dy < 0){
-                        if ( mArticlePreviewHolderDySum  == 0) {
+                    if (dy < 0) {
+                        if (mArticlePreviewHolderDySum == 0) {
                             (activity!! as AppCompatActivity).supportActionBar!!.show()
                         }
-                    }else{
+                    } else {
                         if (mArticlePreviewHolderDySum > mActionBarHeight) {
                             (activity!! as AppCompatActivity).supportActionBar!!.hide()
                         }
+                    }
+
+                    if (mArticlePreviewHolderDySum > (view!!.height + mActionBarHeight)) {
+                        mJumpToTopButton.visibility = View.VISIBLE
+                    } else if (mArticlePreviewHolderDySum < view!!.height) {
+                        mJumpToTopButton.visibility = View.GONE
                     }
                 }
             }
@@ -201,9 +219,9 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
     }
 
     private fun showLoadingScreen() {
-        if (mArticleList.size > BOTTOM_LOADING_SCREEN_ENABLER_COUNT){
+        if (mArticleList.size > BOTTOM_LOADING_SCREEN_ENABLER_COUNT) {
             showBottomLoadingScreen()
-        }else{
+        } else {
             showCenterLoadingScreen()
         }
     }
@@ -366,7 +384,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
         if (!mArticleLoadRunning && !mInvHaveMoreArticle.get()) {
             mArticleLoadRunning = true
 
-            if (mArticleList.size <= BOTTOM_LOADING_SCREEN_ENABLER_COUNT){
+            if (mArticleList.size <= BOTTOM_LOADING_SCREEN_ENABLER_COUNT) {
                 showLoadingScreen()
             }
 
