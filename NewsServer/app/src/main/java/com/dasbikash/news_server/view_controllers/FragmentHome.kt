@@ -31,17 +31,20 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.utils.AppInfoUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
 import com.dasbikash.news_server.utils.debugLog
 import com.dasbikash.news_server.view_controllers.view_helpers.PageDiffCallback
 import com.dasbikash.news_server.view_models.HomeViewModel
+import com.dasbikash.news_server_data.data_sources.data_services.AppVersionDetails
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.repositories.AppVersionDetailsRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
@@ -251,18 +254,48 @@ class FragmentHome : Fragment() {
         if (mFcmArticle!=null && !mFcmArticlehandled){
             mFcmArticlehandled = true
             startActivity(ActivityArticleView.getIntentForArticleView(context!!,mFcmArticle!!))
-        }else if(!mInitDone){
-            initView()
-            initMenuButtonOperator()
         }else {
-            if (mNewsPaperMenuContainer.visibility == View.VISIBLE) {
-                addBackPressTaskForForNpMenu()
-            }
-            if (mPageSearchResultContainer.visibility == View.VISIBLE) {
-                addBackPressTaskForPageSrearchResults()
+            if(!mInitDone){
+                initView()
+            }else {
+                if (mNewsPaperMenuContainer.visibility == View.VISIBLE) {
+                    addBackPressTaskForForNpMenu()
+                }
+                if (mPageSearchResultContainer.visibility == View.VISIBLE) {
+                    addBackPressTaskForPageSrearchResults()
+                }
             }
             initMenuButtonOperator()
+            checkInNeedAppUpdate()
         }
+    }
+
+    private fun checkInNeedAppUpdate() {
+        mDisposable.add(
+                Observable.just(true)
+                        .subscribeOn(Schedulers.io())
+                        .map { AppVersionDetailsRepository.getLatestVersionDetails() }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<AppVersionDetails>(){
+                            override fun onComplete() {}
+
+                            override fun onNext(lastVersionDetails: AppVersionDetails) {
+                                debugLog(lastVersionDetails.toString())
+                                debugLog("Current version number: ${AppInfoUtils.getAppVersionNumber(context!!)}")
+                                lastVersionDetails.versionCode?.let {
+                                    if (it>AppInfoUtils.getAppVersionNumber(context!!)){
+                                        launchAppUpdateDialog()
+                                    }
+                                }
+                            }
+
+                            override fun onError(e: Throwable) {}
+                        })
+        )
+    }
+
+    private fun launchAppUpdateDialog() {
+        debugLog("News version found")
     }
 
     override fun onPause() {
