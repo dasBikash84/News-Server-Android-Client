@@ -32,7 +32,7 @@ object StringDiffCallback: DiffUtil.ItemCallback<String>(){
     }
 }
 
-class TextItemHolder(itemView: View, size:Float = 16.00f, unit:Int = TypedValue.COMPLEX_UNIT_SP,horPaddingDp:Int = 4) :
+class TextItemHolder(itemView: View, size:Float = 18.00f, unit:Int = TypedValue.COMPLEX_UNIT_SP,horPaddingDp:Int = 4) :
         RecyclerView.ViewHolder(itemView) {
     init {
         if (itemView is TextView){
