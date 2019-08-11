@@ -16,7 +16,7 @@ package com.dasbikash.news_server_data.data_sources.data_services.article_notifi
 import androidx.annotation.Keep
 import com.dasbikash.news_server_data.models.room_entity.Article
 
-interface ArticleNotificationGenerationService {
+internal interface ArticleNotificationGenerationService {
     fun addNotificationGenerationRequestForArticle(article: Article):Boolean
 }
 

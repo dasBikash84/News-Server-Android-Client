@@ -29,12 +29,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.utils.DialogUtils
-import com.dasbikash.news_server.utils.DisplayUtils
-import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
-import com.dasbikash.news_server.utils.debugLog
-import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
+import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server_data.models.room_entity.*
+import com.dasbikash.news_server_data.repositories.ArticleNotificationGenerationRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.FileDownloaderUtils
 import com.dasbikash.news_server_data.utills.ImageLoadingDisposer
@@ -68,6 +65,8 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
     private var mActionBarHeight = 0
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
+
+    private var mShowNotificationRequestMenuItem = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -121,6 +120,25 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
         super.onResume()
         hideWaitScreen()
         displayArticleData()
+        updateNotificationRequestMenuItem()
+    }
+
+    private fun updateNotificationRequestMenuItem() {
+        mDisposable.add(
+                Observable.just(true)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            RepositoryFactory.getUserSettingsRepository(context!!).checkIfLoogedAsAdmin()
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<Boolean>() {
+                            override fun onComplete() {}
+                            override fun onNext(data: Boolean) {
+                                mShowNotificationRequestMenuItem = data
+                                activity!!.invalidateOptionsMenu()
+                            }
+                            override fun onError(e: Throwable) {}
+                        }))
     }
 
     private fun showWaitScreen() {
@@ -188,6 +206,7 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_fragment_article_view, menu)
+        menu.findItem(R.id.add_notification_gen_request_menu_item).setVisible(mShowNotificationRequestMenuItem)
         mDisposable.add(
                 Observable.just(mArticle)
                         .subscribeOn(Schedulers.computation())
@@ -216,8 +235,31 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
                     DialogUtils.AlertDialogDetails(message = "Save Article?", doOnPositivePress = { saveArticleLocallyAction() }))
                     .show()
             return true
+        }else if (item.itemId == R.id.add_notification_gen_request_menu_item) {
+            addNotificationGenerationRequest()
         }
         return false
+    }
+
+    private fun addNotificationGenerationRequest() {
+        mDisposable.add(
+                Observable.just(mArticle)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            ArticleNotificationGenerationRepository.addNotificationGenerationRequestForArticle(mArticle)
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<Boolean>() {
+                            override fun onComplete() {}
+                            override fun onNext(data: Boolean) {
+                                if (data){
+                                    showShortSnack("Notification request added")
+                                }else{
+                                    showShortSnack("Notification request addition failure")
+                                }
+                            }
+                            override fun onError(e: Throwable) {}
+                        }))
     }
 
     private fun saveArticleLocallyAction() {

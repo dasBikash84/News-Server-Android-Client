@@ -90,4 +90,5 @@
     <string name="remind_me_later_text">Remind me later</string>
     <string name="never_ask_me_again_text">Never ask again</string>
     <string name="update_text">Launch update</string>
+    <string name="add_notification_gen_request_item_title">Add notification request</string>
 </resources>

@@ -13,11 +13,11 @@
 
 package com.dasbikash.news_server_data.repositories
 
-import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBArticleNotificationGenerationUtils
+import com.dasbikash.news_server_data.data_sources.data_services.article_notification_gen_service.RealtimeDBArticleNotificationGenerationService
 import com.dasbikash.news_server_data.models.room_entity.Article
 
-object ArticleNotificationGenerationService {
+object ArticleNotificationGenerationRepository {
     fun addNotificationGenerationRequestForArticle(article: Article):Boolean{
-        return RealtimeDBArticleNotificationGenerationUtils.addNotificationGenerationRequestForArticle(article)
+        return RealtimeDBArticleNotificationGenerationService.addNotificationGenerationRequestForArticle(article)
     }
 }

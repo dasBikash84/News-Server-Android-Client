@@ -25,4 +25,10 @@
         android:icon="@drawable/ic_save"
         android:title="@string/save_article_locally_menu_item_title"
         app:showAsAction="collapseActionView"/>
+    <item
+        android:id="@+id/add_notification_gen_request_menu_item"
+        android:icon="@drawable/ic_notification"
+        android:title="@string/add_notification_gen_request_item_title"
+        app:showAsAction="collapseActionView"
+        android:visible="false"/>
 </menu>
