@@ -14,15 +14,16 @@
 package com.dasbikash.news_server.view_controllers
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -31,10 +32,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
-import com.dasbikash.news_server.utils.AppInfoUtils
-import com.dasbikash.news_server.utils.DisplayUtils
-import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
-import com.dasbikash.news_server.utils.debugLog
+import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server.view_controllers.view_helpers.PageDiffCallback
 import com.dasbikash.news_server.view_models.HomeViewModel
 import com.dasbikash.news_server_data.data_sources.data_services.AppVersionDetails
@@ -49,6 +47,7 @@ import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
+import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import com.google.android.material.textfield.TextInputLayout
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
@@ -60,10 +59,14 @@ import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 import java.util.*
 
+
 class FragmentHome : Fragment() {
 
-    companion object{
-
+    companion object {
+        private val ONE_DAY_IN_MS = 24 * 60 * 60 * 1000
+        private val ONE_HOUR_IN_MS = 60 * 60 * 1000
+        private const val SP_KEY_NEXT_UPDATE_PROMPT_TIME = "com.dasbikash.news_server.view_controllers.FragmentHome.SP_KEY_NEXT_UPDATE_PROMPT_TIME"
+        private const val UPDATE_TO_NEW_VERSION_PROMPT = "Update available on app store."
         private const val ARG_ARTICLE = "com.dasbikash.news_server.view_controllers.FragmentHome.ARG_ARTICLE"
 
         fun getInstance(article: Article): FragmentHome {
@@ -241,23 +244,23 @@ class FragmentHome : Fragment() {
         }
     }
 
-    var mFcmArticle:Article?=null
+    var mFcmArticle: Article? = null
     var mFcmArticlehandled = false
     var mInitDone = false
 
     private fun init() {
-        arguments?.let { mFcmArticle = it.getParcelable<Article>(ARG_ARTICLE)}
+        arguments?.let { mFcmArticle = it.getParcelable<Article>(ARG_ARTICLE) }
     }
 
     override fun onResume() {
         super.onResume()
-        if (mFcmArticle!=null && !mFcmArticlehandled){
+        if (mFcmArticle != null && !mFcmArticlehandled) {
             mFcmArticlehandled = true
-            startActivity(ActivityArticleView.getIntentForArticleView(context!!,mFcmArticle!!))
-        }else {
-            if(!mInitDone){
+            startActivity(ActivityArticleView.getIntentForArticleView(context!!, mFcmArticle!!))
+        } else {
+            if (!mInitDone) {
                 initView()
-            }else {
+            } else {
                 if (mNewsPaperMenuContainer.visibility == View.VISIBLE) {
                     addBackPressTaskForForNpMenu()
                 }
@@ -271,31 +274,106 @@ class FragmentHome : Fragment() {
     }
 
     private fun checkInNeedAppUpdate() {
-        mDisposable.add(
-                Observable.just(true)
-                        .subscribeOn(Schedulers.io())
-                        .map { AppVersionDetailsRepository.getLatestVersionDetails() }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<AppVersionDetails>(){
-                            override fun onComplete() {}
+        val nextUpdatePromptTs = getNextUpdatePromptTs()
+        if (nextUpdatePromptTs != NEXT_UPDATE_PROMPT_TIME_OPTIONS.NEVER.timeStamp &&
+                System.currentTimeMillis() > nextUpdatePromptTs) {
+            mDisposable.add(
+                    Observable.just(true)
+                            .subscribeOn(Schedulers.io())
+                            .map { AppVersionDetailsRepository.getLatestVersionDetails() }
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeWith(object : DisposableObserver<AppVersionDetails>() {
+                                override fun onComplete() {}
 
-                            override fun onNext(lastVersionDetails: AppVersionDetails) {
-                                debugLog(lastVersionDetails.toString())
-                                debugLog("Current version number: ${AppInfoUtils.getAppVersionNumber(context!!)}")
-                                lastVersionDetails.versionCode?.let {
-                                    if (it>AppInfoUtils.getAppVersionNumber(context!!)){
-                                        launchAppUpdateDialog()
+                                override fun onNext(lastVersionDetails: AppVersionDetails) {
+                                    lastVersionDetails.versionCode?.let {
+                                        if (it > AppInfoUtils.getAppVersionNumber(context!!)) {
+                                            launchAppUpdateDialog()
+                                        } else {
+                                            saveNextUpdatePromptTs(NEXT_UPDATE_PROMPT_TIME_OPTIONS.REMIND_SIX_HOUR_LATER)
+                                        }
                                     }
                                 }
-                            }
 
-                            override fun onError(e: Throwable) {}
-                        })
-        )
+                                override fun onError(e: Throwable) {
+                                    saveNextUpdatePromptTs(NEXT_UPDATE_PROMPT_TIME_OPTIONS.REMIND_TOMORROW)
+                                }
+                            })
+            )
+        }
     }
 
     private fun launchAppUpdateDialog() {
-        debugLog("News version found")
+        val view = LayoutInflater.from(context!!).inflate(R.layout.view_version_update_promt_dialog, null)
+        val dialogBuilder =
+                DialogUtils.getAlertDialogBuilder(context!!, DialogUtils.AlertDialogDetails(
+                        title = UPDATE_TO_NEW_VERSION_PROMPT,
+                        isCancelable = false,
+                        doOnPositivePress = {
+                            if (view.findViewById<RadioButton>(R.id.remind_me_later_button).isChecked) {
+                                positivePressAction(VERSION_UPDATE_CANCEL_ACTION.REMIND_LATER)
+                            } else if (view.findViewById<RadioButton>(R.id.never_ask_me_again_button).isChecked) {
+                                positivePressAction(VERSION_UPDATE_CANCEL_ACTION.NEVER_ASK_AGAIN)
+                            } else if (view.findViewById<RadioButton>(R.id.update_button).isChecked) {
+                                positivePressAction(VERSION_UPDATE_CANCEL_ACTION.UPDATE)
+                            }
+                        },
+                        doOnNegetivePress = {
+                            positivePressAction(VERSION_UPDATE_CANCEL_ACTION.NONE)
+                        }
+                ))
+        dialogBuilder.setView(view)
+        dialogBuilder.create().show()
+    }
+
+    private enum class VERSION_UPDATE_CANCEL_ACTION {
+        NONE, REMIND_LATER, NEVER_ASK_AGAIN, UPDATE
+    }
+
+    private enum class NEXT_UPDATE_PROMPT_TIME_OPTIONS(val timeStamp: Long) {
+        NEVER(-1), REMIND_TOMORROW(System.currentTimeMillis() + ONE_DAY_IN_MS),
+        REMIND_SIX_HOUR_LATER(System.currentTimeMillis() + 6 * ONE_HOUR_IN_MS)
+    }
+
+    private fun getNextUpdatePromptTs(): Long {
+        val data = SharedPreferenceUtils.getData(context!!, SharedPreferenceUtils.DefaultValues.DEFAULT_LONG,
+                SP_KEY_NEXT_UPDATE_PROMPT_TIME) as Long
+        return data
+    }
+
+    private fun saveNextUpdatePromptTs(nextUpdatePromptTimeOptions: NEXT_UPDATE_PROMPT_TIME_OPTIONS) {
+        SharedPreferenceUtils.saveData(context!!, nextUpdatePromptTimeOptions.timeStamp, SP_KEY_NEXT_UPDATE_PROMPT_TIME)
+    }
+
+
+    private fun positivePressAction(action: VERSION_UPDATE_CANCEL_ACTION) {
+        when (action) {
+            VERSION_UPDATE_CANCEL_ACTION.UPDATE -> updateToNewVersion()
+            VERSION_UPDATE_CANCEL_ACTION.REMIND_LATER -> setRemindLater()
+            VERSION_UPDATE_CANCEL_ACTION.NEVER_ASK_AGAIN -> setNeverAskForUpdate()
+            else -> {
+                saveNextUpdatePromptTs(NEXT_UPDATE_PROMPT_TIME_OPTIONS.REMIND_SIX_HOUR_LATER)
+            }
+        }
+    }
+
+    private fun updateToNewVersion() {
+        saveNextUpdatePromptTs(NEXT_UPDATE_PROMPT_TIME_OPTIONS.REMIND_SIX_HOUR_LATER)
+        try {
+            val updateIntent = Intent(Intent.ACTION_VIEW, Uri.parse(OptionsIntentBuilderUtility.getRawAppLink(context!!)))
+            activity!!.startActivity(updateIntent);
+        } catch (e: Throwable) {
+            DisplayUtils.showShortToast(context!!, "No application can handle this request."
+                                        + " Please install a webbrowser.")
+        }
+    }
+
+    private fun setNeverAskForUpdate() {
+        saveNextUpdatePromptTs(NEXT_UPDATE_PROMPT_TIME_OPTIONS.NEVER)
+    }
+
+    private fun setRemindLater() {
+        saveNextUpdatePromptTs(NEXT_UPDATE_PROMPT_TIME_OPTIONS.REMIND_TOMORROW)
     }
 
     override fun onPause() {
@@ -340,14 +418,13 @@ class FragmentHome : Fragment() {
                     do {
                         try {
                             Thread.sleep(MENU_BUTTON_VISIBILITY_CHECK_INTERVAL)
-                        }catch (ex:InterruptedException){}
-                        debugLog("Wake up on $name")
+                        } catch (ex: InterruptedException) {
+                        }
                         emitter.onNext(determineMenuButtonOperationAction())
                     } while (!amDisposed)
                 }).subscribeOn(Schedulers.io())
                         .doOnDispose {
                             amDisposed = true
-                            debugLog("initMenuButtonOperator disposed.")
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<NP_MENU_BUTTON_OPERATION_ACTION>() {
@@ -518,7 +595,7 @@ class PageListAdapter(val lifeCycleOwner: LifecycleOwner,
 
 class LatestArticlePreviewHolder(itemView: View, lifeCycleOwner: LifecycleOwner,
                                  val homeViewModel: HomeViewModel)
-    : RecyclerView.ViewHolder(itemView),DefaultLifecycleObserver {
+    : RecyclerView.ViewHolder(itemView), DefaultLifecycleObserver {
 
     val pageTitle: TextView
     val articlePreviewImage: ImageView
@@ -546,9 +623,9 @@ class LatestArticlePreviewHolder(itemView: View, lifeCycleOwner: LifecycleOwner,
         articlePublicationTimePlaceHolder = itemView.findViewById(R.id.article_time_ph)
         articleTextPreviewPlaceHolder = itemView.findViewById(R.id.article_text_preview_ph)
 
-        articleTitlePlaceHolder.setOnClickListener {  }
-        articlePublicationTimePlaceHolder.setOnClickListener {  }
-        articleTextPreviewPlaceHolder.setOnClickListener {  }
+        articleTitlePlaceHolder.setOnClickListener { }
+        articlePublicationTimePlaceHolder.setOnClickListener { }
+        articleTextPreviewPlaceHolder.setOnClickListener { }
 
         lifeCycleOwner.lifecycle.addObserver(this)
         disableView()

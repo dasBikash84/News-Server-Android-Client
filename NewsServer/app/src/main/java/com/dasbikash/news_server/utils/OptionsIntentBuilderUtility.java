@@ -24,6 +24,10 @@ import com.dasbikash.news_server.R;
 @SuppressWarnings("ConstantConditions")
 public abstract class OptionsIntentBuilderUtility {
 
+    public static String getRawAppLink(Context context){
+        return  "https://play.google.com/store/apps/details?id="+context.getPackageName();
+    }
+
     private static String getAppLink(Context context){
         return  "<a href=\"https://play.google.com/store/apps/details?id="+
                 context.getPackageName()+

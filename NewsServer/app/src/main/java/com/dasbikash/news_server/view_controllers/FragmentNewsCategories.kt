@@ -70,9 +70,6 @@ class FragmentNewsCategories : Fragment() {
                     override fun onComplete() {}
 
                     override fun onNext(newsCategories: List<NewsCategory>) {
-                        newsCategories.forEach {
-                            debugLog(it.toString())
-                        }
                         mNewscategoryListAdapter.submitList(newsCategories.sortedBy { it.id })
                     }
 

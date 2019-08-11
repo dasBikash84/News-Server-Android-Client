@@ -87,4 +87,7 @@
     <string name="bmi_news_categories_title">Topics</string>
     <string name="bmi_article_search_title">Search Article</string>
     <string name="jump_to_top">Jump to top</string>
+    <string name="remind_me_later_text">Remind me later</string>
+    <string name="never_ask_me_again_text">Never ask again</string>
+    <string name="update_text">Launch update</string>
 </resources>
