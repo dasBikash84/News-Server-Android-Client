@@ -20,9 +20,9 @@ internal object RealtimeDBArticleNotificationGenerationUtils {
 
     private const val MAX_WAITING_MS_FOR_WRITE_COMPLETE = 30000L
 
-    fun addNotificationGenerationRequestForArticle(article: Article):Boolean{
+    fun addNotificationGenerationRequestForArticle(article: Article,authToken:String):Boolean{
         val fcmNotificationGenerationRequest =
-                FcmNotificationGenerationRequest(articleId = article.id,timeStamp = System.currentTimeMillis())
+                FcmNotificationGenerationRequest(articleId = article.id,authToken = authToken)
 
         val task = RealtimeDBUtils.mFcmNotificationGenReqRef.push().setValue(fcmNotificationGenerationRequest)
         val startTime = System.currentTimeMillis()

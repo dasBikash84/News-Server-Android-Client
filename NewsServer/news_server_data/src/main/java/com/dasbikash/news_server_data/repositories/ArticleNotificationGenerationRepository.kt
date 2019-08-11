@@ -17,7 +17,7 @@ import com.dasbikash.news_server_data.data_sources.data_services.article_notific
 import com.dasbikash.news_server_data.models.room_entity.Article
 
 object ArticleNotificationGenerationRepository {
-    fun addNotificationGenerationRequestForArticle(article: Article):Boolean{
-        return RealtimeDBArticleNotificationGenerationService.addNotificationGenerationRequestForArticle(article)
+    fun addNotificationGenerationRequestForArticle(article: Article,authToken:String):Boolean{
+        return RealtimeDBArticleNotificationGenerationService.addNotificationGenerationRequestForArticle(article,authToken)
     }
 }

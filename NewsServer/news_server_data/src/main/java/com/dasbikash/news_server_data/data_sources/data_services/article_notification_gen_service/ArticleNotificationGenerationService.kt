@@ -17,11 +17,11 @@ import androidx.annotation.Keep
 import com.dasbikash.news_server_data.models.room_entity.Article
 
 internal interface ArticleNotificationGenerationService {
-    fun addNotificationGenerationRequestForArticle(article: Article):Boolean
+    fun addNotificationGenerationRequestForArticle(article: Article,authToken:String):Boolean
 }
 
 @Keep
 data class FcmNotificationGenerationRequest(
         var articleId: String? = null,
-        var timeStamp: Long? = null
+        var authToken:String?=null
 )

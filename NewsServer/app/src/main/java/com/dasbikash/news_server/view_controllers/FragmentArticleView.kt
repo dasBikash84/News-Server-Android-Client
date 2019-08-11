@@ -16,6 +16,7 @@ package com.dasbikash.news_server.view_controllers
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.*
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
@@ -31,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server_data.models.room_entity.*
+import com.dasbikash.news_server_data.repositories.AdminTaskRepository
 import com.dasbikash.news_server_data.repositories.ArticleNotificationGenerationRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.FileDownloaderUtils
@@ -207,6 +209,7 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_fragment_article_view, menu)
         menu.findItem(R.id.add_notification_gen_request_menu_item).setVisible(mShowNotificationRequestMenuItem)
+        menu.findItem(R.id.add_token_generation_request_menu_item).setVisible(mShowNotificationRequestMenuItem)
         mDisposable.add(
                 Observable.just(mArticle)
                         .subscribeOn(Schedulers.computation())
@@ -236,17 +239,63 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
                     .show()
             return true
         }else if (item.itemId == R.id.add_notification_gen_request_menu_item) {
-            addNotificationGenerationRequest()
+            launchNotificationGenerationRequestDialog()
+        }else if (item.itemId == R.id.add_token_generation_request_menu_item) {
+            addTokenGenerationRequestAction()
         }
         return false
     }
 
-    private fun addNotificationGenerationRequest() {
+    private fun addTokenGenerationRequestAction() {
+
+        DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
+                TOKEN_GENERATION_REQ_PROMPT,
+                doOnPositivePress = { addTokenGenerationRequest() }
+        )).show()
+    }
+
+    private fun addTokenGenerationRequest() {
+        showWaitScreen()
+        mDisposable.add(
+                Observable.just(true)
+                        .subscribeOn(Schedulers.io())
+                        .map { AdminTaskRepository.addDataCoordinatorTokenGenerationRequest() }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<Boolean>() {
+                            override fun onComplete() {hideWaitScreen()}
+
+                            override fun onNext(result: Boolean) {
+                                if (result) {
+                                    DisplayUtils.showShortToast(context!!, TOKEN_GENERATION_SUCCESS_MESSAGE)
+                                } else {
+                                    DisplayUtils.showShortToast(context!!, TOKEN_GENERATION_FAILURE_MESSAGE)
+                                }
+                            }
+                            override fun onError(e: Throwable) {hideWaitScreen()}
+                        })
+        )
+    }
+
+    private fun launchNotificationGenerationRequestDialog() {
+        val editText = EditText(context!!)
+        val dialogBuilder =
+                DialogUtils.getAlertDialogBuilder(context!!, DialogUtils.AlertDialogDetails(
+                        message = NOTIFICATION_REQUEST_PROMPT,
+                        isCancelable = false,
+                        doOnPositivePress = {
+                            addNotificationGenerationRequest(editText.text.trim().toString())
+                        }
+                ))
+        dialogBuilder.setView(editText)
+        dialogBuilder.create().show()
+    }
+
+    private fun addNotificationGenerationRequest(authToken:String) {
         mDisposable.add(
                 Observable.just(mArticle)
                         .subscribeOn(Schedulers.io())
                         .map {
-                            ArticleNotificationGenerationRepository.addNotificationGenerationRequestForArticle(mArticle)
+                            ArticleNotificationGenerationRepository.addNotificationGenerationRequestForArticle(mArticle,authToken)
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<Boolean>() {
@@ -304,7 +353,11 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
 
     companion object {
 
-        val ARG_ARTICLE = "com.dasbikash.news_server.views.FragmentArticleView.ARG_ARTICLE"
+        private const val TOKEN_GENERATION_REQ_PROMPT = "Add token generation request?"
+        private const val TOKEN_GENERATION_SUCCESS_MESSAGE = "Token generation request added."
+        private const val TOKEN_GENERATION_FAILURE_MESSAGE = "Token generation request addition failure."
+        private const val NOTIFICATION_REQUEST_PROMPT = "Add notification generation request"
+        private const val ARG_ARTICLE = "com.dasbikash.news_server.views.FragmentArticleView.ARG_ARTICLE"
 
         fun getInstance(article: Article): FragmentArticleView {
             val args = Bundle()

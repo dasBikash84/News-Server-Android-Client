@@ -17,7 +17,7 @@ import com.dasbikash.news_server_data.data_sources.data_services.web_services.fi
 import com.dasbikash.news_server_data.models.room_entity.Article
 
 internal object RealtimeDBArticleNotificationGenerationService:ArticleNotificationGenerationService {
-    override fun addNotificationGenerationRequestForArticle(article: Article): Boolean {
-        return RealtimeDBArticleNotificationGenerationUtils.addNotificationGenerationRequestForArticle(article)
+    override fun addNotificationGenerationRequestForArticle(article: Article,authToken:String): Boolean {
+        return RealtimeDBArticleNotificationGenerationUtils.addNotificationGenerationRequestForArticle(article,authToken)
     }
 }

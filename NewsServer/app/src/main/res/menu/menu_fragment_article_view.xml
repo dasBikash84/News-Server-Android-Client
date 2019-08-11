@@ -31,4 +31,10 @@
         android:title="@string/add_notification_gen_request_item_title"
         app:showAsAction="collapseActionView"
         android:visible="false"/>
+    <item
+        android:id="@+id/add_token_generation_request_menu_item"
+        android:icon="@drawable/ic_add"
+        android:title="@string/add_token_generation_request_menu_item_title"
+        app:showAsAction="collapseActionView"
+        android:visible="false"/>
 </menu>
