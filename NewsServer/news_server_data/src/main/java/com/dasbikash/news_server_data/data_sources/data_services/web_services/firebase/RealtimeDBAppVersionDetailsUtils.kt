@@ -21,7 +21,7 @@ import com.google.firebase.database.ValueEventListener
 internal object RealtimeDBAppVersionDetailsUtils {
 
     private const val MAX_WAITING_MS_FOR_NET_RESPONSE = 30000L
-    private const val UPDATE_TIME_STAMP_FIELD_NAME = "updateTs"
+    private const val QUERY_FIELD_NAME = "versionCode"
 
     fun getLatestVersionDetails(): AppVersionDetails? {
 
@@ -29,7 +29,7 @@ internal object RealtimeDBAppVersionDetailsUtils {
         val lock = Object()
 
         RealtimeDBUtils.mAppVersionHistoryNode
-                .orderByChild(UPDATE_TIME_STAMP_FIELD_NAME)
+                .orderByChild(QUERY_FIELD_NAME)
                 .limitToLast(1)
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onCancelled(error: DatabaseError) {
