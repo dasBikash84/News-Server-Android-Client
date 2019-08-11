@@ -43,6 +43,8 @@ import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
+import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
+import com.google.firebase.messaging.FirebaseMessaging
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
@@ -56,8 +58,8 @@ class FragmentInit : Fragment() {
     private var mRetryDelayForRemoteDBError = 0L
     private var mRetryCountForError = 0L
 
-    private var mFcmPageId:String?=null
-    private var mFcmArticleId:String?=null
+    private var mFcmPageId: String? = null
+    private var mFcmArticleId: String? = null
 
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
@@ -137,13 +139,13 @@ class FragmentInit : Fragment() {
                             }
 
                             override fun onComplete() {
-                                if (mFcmPageId !=null && mFcmArticleId!=null){
+                                if (mFcmPageId != null && mFcmArticleId != null) {
                                     mDisposable.add(
                                             Observable.just(true)
                                                     .subscribeOn(Schedulers.io())
                                                     .map {
                                                         RepositoryFactory.getNewsDataRepository(context!!)
-                                                            .findArticleByIdFromRemoteDb(mFcmArticleId!!,mFcmPageId!!)?.let {
+                                                                .findArticleByIdFromRemoteDb(mFcmArticleId!!, mFcmPageId!!)?.let {
                                                                     debugLog("$it")
                                                                     return@map it
                                                                 }
@@ -157,15 +159,19 @@ class FragmentInit : Fragment() {
                                                         override fun onNext(data: Any) {
                                                             debugLog("type of data is ${data::class.java.canonicalName}")
                                                             debugLog("value of data is ${data.toString()}")
-                                                            when(data){
+                                                            when (data) {
                                                                 is Article -> (activity as HomeNavigator).loadHomeNpFragment(data)
-                                                                else ->{(activity as HomeNavigator).loadHomeNpFragment()}
+                                                                else -> {
+                                                                    (activity as HomeNavigator).loadHomeNpFragment()
+                                                                }
                                                             }
                                                         }
 
-                                                        override fun onError(e: Throwable) {(activity as HomeNavigator).loadHomeNpFragment()}
+                                                        override fun onError(e: Throwable) {
+                                                            (activity as HomeNavigator).loadHomeNpFragment()
+                                                        }
                                                     }))
-                                }else {
+                                } else {
                                     (activity as HomeNavigator).loadHomeNpFragment()
                                 }
                             }
@@ -200,6 +206,7 @@ class FragmentInit : Fragment() {
             RepositoryFactory
                     .getFreshNewsDataRepository(context!!)
                     .init(context!!)
+            NewsServerFirebaseMessagingService.init(context!!)
             emitter.onNext(DataLoadingStatus.NEWS_DATA_REPO_INITIATED)
 
             if (BuildConfig.DEBUG) {
@@ -211,7 +218,6 @@ class FragmentInit : Fragment() {
     }
 
     private fun testRoutine() {
-//        NewsServerFirebaseMessagingService().generateNewToken()
     }
 
     private fun doOnError(throwable: Throwable) {
