@@ -57,7 +57,7 @@ abstract class AppSettingsRepository {
     private fun isAppSettingsDataLoaded(): Boolean {
         ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
         return getLanguageCount() > 0 && getCountryCount() > 0 &&
-                getNewsPapers().isNotEmpty() && getPageCount() > 0
+                getNewsPapers().isNotEmpty() && getPageCount() > 0 && getNewsCategories().isNotEmpty()
     }
 
     private fun isAppSettingsUpdated(context: Context): Boolean {
@@ -83,18 +83,19 @@ abstract class AppSettingsRepository {
 
         nukeAppSettings()
 
-        addLanguages(ArrayList(appSettings.languages?.values))
-        addCountries(ArrayList(appSettings.countries?.values))
-        addNewsPapers(ArrayList(appSettings.newspapers?.values))
-        addPages(ArrayList(appSettings.pages?.values))
-        addNewsCategories(ArrayList(appSettings.news_categories?.values))
+        addLanguages(appSettings.languages!!.values.toList())
+        addCountries(appSettings.countries!!.values.toList())
+        addNewsPapers(appSettings.newspapers!!.values.toList())
+        addPages(appSettings.pages!!.values.toList())
+        addNewsCategories(appSettings.news_categories!!.values.toList())
 
 //        if (getPageGroupCount() == 0) {
 //            addPageGroups(ArrayList(appSettings.page_groups?.values ?: emptyList()))
 //        }
 
-        val settingUpdateTimes = ArrayList(appSettings.update_time?.values)
-        mAppSettingsDataService.saveLocalAppSettingsUpdateTime(context, settingUpdateTimes.max()!!)
+        val latestSettingUpdateTime = appSettings.update_time!!.values.sorted().last()
+        LoggerUtils.debugLog("latestSettingUpdateTime: $latestSettingUpdateTime",this::class.java)
+        mAppSettingsDataService.saveLocalAppSettingsUpdateTime(context, latestSettingUpdateTime)
     }
 
 
