@@ -27,13 +27,11 @@ import com.google.firebase.messaging.RemoteMessage
 
 open class NewsServerFirebaseMessagingService: FirebaseMessagingService() {
 
-    private val TAG = "NS>>FCM"
-
     override fun onNewToken(token: String?) {
         debugLog("Refreshed token: $token")
     }
 
-    fun generateNewToken(){
+    /*fun generateNewToken(){
 
         FirebaseInstanceId.getInstance().instanceId
                 .addOnCompleteListener(OnCompleteListener { task ->
@@ -48,7 +46,7 @@ open class NewsServerFirebaseMessagingService: FirebaseMessagingService() {
                     Log.d(TAG, token)
                 })
 
-    }
+    }*/
     override fun onMessageReceived(remoteMessage: RemoteMessage?) {
         debugLog("From: ${remoteMessage?.from}")
     }

@@ -78,9 +78,9 @@ class ActivityArticlePreview : ActivityWithBackPressQueueManager() {
             val page = intent!!.getParcelableExtra(EXTRA_FOR_PAGE) as Page
             val purposeString = intent!!.getStringExtra(EXTRA_FOR_PURPOSE)
 
-            if (purposeString.equals(EXTRA_VALUE_FOR_LATEST_ARTICLE_DISPLAY)) {
+            if (purposeString?.equals(EXTRA_VALUE_FOR_LATEST_ARTICLE_DISPLAY)  ?: false) {
                 navigateTo(FragmentArticlePreviewForPage.getInstanceForLatestArticleDisplay(page))
-            } else if (purposeString.equals(EXTRA_VALUE_FOR_PAGE_BROWSING)) {
+            } else if (purposeString?.equals(EXTRA_VALUE_FOR_PAGE_BROWSING)  ?: false) {
                 navigateTo(FragmentArticlePreviewForPage.getInstancePageBrowsing(page))
             } else {
                 throw IllegalArgumentException()

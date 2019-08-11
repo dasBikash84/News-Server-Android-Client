@@ -172,7 +172,7 @@ class FragmentArticlePreviewForNewsCategory : Fragment() {
                                         throw ex
                                     }
                                 }
-                                val filteredArticles = Article.removeDuplicates(articles!!).filter {
+                                val filteredArticles = Article.removeDuplicates(articles.toList()).filter {
                                                                     val article = it
                                                                     mArticleList.count { it.checkIfSameArticle(article) } == 0}.toList()
                                 Pair(filteredArticles,ArticleWithParents.getFromArticles(filteredArticles,context!!))

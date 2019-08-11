@@ -144,10 +144,8 @@ class FragmentHome : Fragment() {
                                 Observable.just(it.trim().toString())
                                         .subscribeOn(Schedulers.io())
                                         .map {
-                                            debugLog("Page Search string: $it")
                                             appSettingsRepository.findMatchingPages(it).filter {
                                                 @Suppress("SENSELESS_COMPARISON")
-                                                debugLog("Page: " + it.toString())
                                                 it != null
                                             }.toList()
                                         }
@@ -414,7 +412,6 @@ class FragmentHome : Fragment() {
         var amDisposed = false
         mDisposable.add(
                 Observable.create(fun(emitter: ObservableEmitter<NP_MENU_BUTTON_OPERATION_ACTION>) {
-                    val name = System.currentTimeMillis().toString()
                     do {
                         try {
                             Thread.sleep(MENU_BUTTON_VISIBILITY_CHECK_INTERVAL)
@@ -703,7 +700,7 @@ class LatestArticlePreviewHolder(itemView: View, lifeCycleOwner: LifecycleOwner,
                         if (articleData is Pair<*, *>) {
                             LoggerUtils.debugLog("art displayed for page: ${mPage.name} Np: ${mPage.newspaperId}", this::class.java)
                             val articlePubTimeText = (articleData as Pair<String?, Article>).first
-                            val article = (articleData as Pair<String?, Article>).second
+                            val article = articleData.second
 
                             articleTitle.text = article.title
                             articlePublicationTime.text = articlePubTimeText

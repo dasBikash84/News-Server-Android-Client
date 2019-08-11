@@ -125,7 +125,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         LoggerUtils.debugLog("onViewCreated", this::class.java)
-        mPage = (arguments!!.getParcelable(ARG_FOR_PAGE)) as Page
+        mPage = ((arguments!!.getParcelable(ARG_FOR_PAGE)) as Page?)!!
         mPurposeString = arguments!!.getString(ARG_FOR_PURPOSE)!!
 
         mActionBarHeight = DisplayUtils.dpToPx(40, context!!).toInt()
@@ -404,7 +404,6 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
                                 mNewsDataRepository.getArticleCountForPage(mPage) == 0
                             }
                             .map {
-                                val articles = mutableListOf<Article>()
                                 try {
                                     if (it) {
                                         mNewsDataRepository.getLatestArticleByPage(mPage)

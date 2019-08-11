@@ -26,6 +26,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
 
+@Suppress("UNCHECKED_CAST")
 internal object RealTimeDbArticleDataUtils {
 
     private const val DB_PUBLICATION_TIME_FIELD_NAME = "publicationTimeRTDB"
@@ -37,7 +38,7 @@ internal object RealTimeDbArticleDataUtils {
                             .orderByChild(DB_PUBLICATION_TIME_FIELD_NAME)
                             .limitToLast(articleRequestSize)
         
-        return getArticlesForQuery(query, page)
+        return getArticlesForQuery(query)
     }
 
     fun getArticlesBeforeLastArticle(page: Page, lastArticle: Article, articleRequestSize: Int): List<Article> {
@@ -48,7 +49,7 @@ internal object RealTimeDbArticleDataUtils {
                                     .endAt(lastArticle.publicationTimeRTDB!!.toDouble(), DB_PUBLICATION_TIME_FIELD_NAME)
                                     .limitToLast(articleRequestSize+1)
         
-        val articles = getArticlesForQuery(query, page)
+        val articles = getArticlesForQuery(query)
         if (articles.isNotEmpty() && articles.size>1){
             return articles.take(articles.size-1)
         }else{
@@ -66,10 +67,10 @@ internal object RealTimeDbArticleDataUtils {
         if (articleRequestSize != NewsDataService.DEFAULT_ARTICLE_REQUEST_SIZE){
             query = query.limitToFirst(articleRequestSize+1)
         }
-        return getArticlesForQuery(query, page)
+        return getArticlesForQuery(query)
     }
 
-    private fun getArticlesForQuery(query: Query,page: Page): List<Article> {
+    private fun getArticlesForQuery(query: Query): List<Article> {
 
         val lock = Object()
         val articles = mutableListOf<Article>()

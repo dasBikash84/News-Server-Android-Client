@@ -77,7 +77,7 @@ class ActivityArticleView : ActivityWithBackPressQueueManager() {
             mArticle = (intent!!.getSerializableExtra(EXTRA_FOR_ARTICLE)) as Article
             navigateTo(FragmentArticleView.getInstance(mArticle))
         } else if (intent.hasExtra(EXTRA_FOR_SAVED_ARTICLE_ID)) {
-            mSavedArticleId = intent!!.getStringExtra(EXTRA_FOR_SAVED_ARTICLE_ID)
+            mSavedArticleId = intent!!.getStringExtra(EXTRA_FOR_SAVED_ARTICLE_ID)!!
             navigateTo(FragmentSavedArticleView.getInstance(mSavedArticleId))
         } else {
             throw IllegalArgumentException()

@@ -29,7 +29,6 @@ object ImageUtils {
 
     fun urlToFile(link: String, fileName: String, context: Context): String? {
         try {
-            val url = URL(link)
             val bitmap = Picasso.get().load(link).get()
             val imageFile = File(context.filesDir.absolutePath + fileName + ".jpg")
             val os = FileOutputStream(imageFile);

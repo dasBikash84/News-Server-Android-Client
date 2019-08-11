@@ -69,13 +69,14 @@ object NetConnectivityUtility : BroadcastReceiver() {
             } else {
                 val network = connectivityManager.activeNetwork
                 val networkCapabilities = connectivityManager.getNetworkCapabilities(network)
-                if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI_AWARE)) {
+                if (networkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ?: false ||
+                        networkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI_AWARE) ?: false) {
                     mCurrentNetworkType = NetConnectivityUtility.NETWORK_TYPE.WIFI
-                } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                } else if (networkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)  ?: false) {
                     mCurrentNetworkType = NetConnectivityUtility.NETWORK_TYPE.MOBILE
-                } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH)) {
+                } else if (networkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH)  ?: false) {
                     mCurrentNetworkType = NetConnectivityUtility.NETWORK_TYPE.BLUETOOTH
-                } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                } else if (networkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)  ?: false) {
                     mCurrentNetworkType = NetConnectivityUtility.NETWORK_TYPE.ETHERNET
                 } else {
                     mCurrentNetworkType = NetConnectivityUtility.NETWORK_TYPE.OTHER

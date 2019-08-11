@@ -34,7 +34,7 @@ internal object SpringMVCNewsDataService : NewsDataService() {
     }
 
     override fun findArticleById(articleId: String, pageId: String): Article? {
-        return SpringMVCNewsDataUtils.findArticleById(articleId, pageId)
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getRawLatestArticlesByNewsCategory(newsCategory: NewsCategory, articleRequestSize: Int): List<Article> {

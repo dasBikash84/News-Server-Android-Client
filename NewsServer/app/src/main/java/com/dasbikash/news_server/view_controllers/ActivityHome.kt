@@ -117,7 +117,7 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
                 (intent.getStringExtra(EXTRA_FCM_PAGE_ID) !=null ) &&
                 (intent.getStringExtra(EXTRA_FCM_ARTICLE_ID) !=null )
         ){
-            loadInitFragment(intent.getStringExtra(EXTRA_FCM_PAGE_ID),intent.getStringExtra(EXTRA_FCM_ARTICLE_ID))
+            loadInitFragment(intent.getStringExtra(EXTRA_FCM_PAGE_ID)!!,intent.getStringExtra(EXTRA_FCM_ARTICLE_ID)!!)
         }else {
             loadInitFragment()
         }
