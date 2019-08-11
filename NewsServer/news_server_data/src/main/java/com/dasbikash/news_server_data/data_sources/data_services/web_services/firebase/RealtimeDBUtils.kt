@@ -32,6 +32,8 @@ internal object RealtimeDBUtils {
     private const val ARTICLE_INFO_FOR_NEWS_CSTEGORIES_NODE = "article_info_for_news_categories"
     private const val APP_VERSION_HISTORY_NODE = "version_history"
 
+    private const val FCM_NOTIFICATION_GEN_REQ_NODE = "fcm_notification_gen_request"
+
     val mFBDataBase: FirebaseDatabase
     private const val CACHE_SIZE_BYTES = 5*1024*1024L //5MB
 
@@ -53,5 +55,6 @@ internal object RealtimeDBUtils {
     val mSerachKeyWordsNode: DatabaseReference = mRootReference.child(SERACH_KEY_WORDS_NODE)
     val mArticleInfoForNewsCategoriesNode: DatabaseReference = mRootReference.child(ARTICLE_INFO_FOR_NEWS_CSTEGORIES_NODE)
     val mAppVersionHistoryNode: DatabaseReference = mRootReference.child(APP_VERSION_HISTORY_NODE)
+    val mFcmNotificationGenReqRef:DatabaseReference = mRootReference.child(FCM_NOTIFICATION_GEN_REQ_NODE)
 }
 
