@@ -385,6 +385,7 @@ class FragmentHome : Fragment() {
         mInitDone = true
         showPageSearchBox()
         hideNewsPaperMenu()
+        mNewsPaperMenuShowButtonContainer.visibility = View.GONE
         mPageSearchResultHolder.adapter = mSearchResultListAdapter
         mNewsPaperListAdapter = NewsPaperListAdapter { doOnNewsPaperNameClick(it) }
         mNewsPaperMenuHolder.adapter = mNewsPaperListAdapter

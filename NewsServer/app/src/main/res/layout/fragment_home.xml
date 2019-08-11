@@ -103,19 +103,20 @@
             android:id="@+id/show_np_name_menu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
+            android:background="@color/ninty_five_transparent"
             android:orientation="vertical"
-            android:padding="16dp"
+            android:padding="2dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone">
 
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_gravity="start"
-                android:background="@android:color/black"
+                android:background="@android:color/transparent"
                 android:contentDescription="@string/show_np_name_menu_desc"
-                app:srcCompat="@drawable/ic_menu" />
+                app:srcCompat="@drawable/ic_menu3" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
