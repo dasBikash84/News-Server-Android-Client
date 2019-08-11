@@ -14,6 +14,7 @@
 package com.dasbikash.news_server.view_controllers
 
 import android.os.Bundle
+import android.text.InputType
 import android.util.TypedValue
 import android.view.*
 import android.widget.EditText
@@ -276,12 +277,15 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
         )
     }
 
+
+
     private fun launchNotificationGenerationRequestDialog() {
         val editText = EditText(context!!)
+        editText.inputType = (InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD)
+        editText.hint = AUTH_TOKEN_HINT
         val dialogBuilder =
                 DialogUtils.getAlertDialogBuilder(context!!, DialogUtils.AlertDialogDetails(
                         message = NOTIFICATION_REQUEST_PROMPT,
-                        isCancelable = false,
                         doOnPositivePress = {
                             addNotificationGenerationRequest(editText.text.trim().toString())
                         }
@@ -289,6 +293,8 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
         dialogBuilder.setView(editText)
         dialogBuilder.create().show()
     }
+
+
 
     private fun addNotificationGenerationRequest(authToken:String) {
         mDisposable.add(
@@ -302,9 +308,9 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
                             override fun onComplete() {}
                             override fun onNext(data: Boolean) {
                                 if (data){
-                                    showShortSnack("Notification request added")
+                                    showShortSnack(NOTIFICATION_REQ_ADDED_MESSAGE)
                                 }else{
-                                    showShortSnack("Notification request addition failure")
+                                    showShortSnack(NOTIFICATION_REQ_ADD_FAILURE)
                                 }
                             }
                             override fun onError(e: Throwable) {}
@@ -357,6 +363,9 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
         private const val TOKEN_GENERATION_SUCCESS_MESSAGE = "Token generation request added."
         private const val TOKEN_GENERATION_FAILURE_MESSAGE = "Token generation request addition failure."
         private const val NOTIFICATION_REQUEST_PROMPT = "Add notification generation request"
+        private const val NOTIFICATION_REQ_ADDED_MESSAGE = "Notification request added"
+        private const val NOTIFICATION_REQ_ADD_FAILURE = "Notification request addition failure"
+        private const val AUTH_TOKEN_HINT = "Auth Token"
         private const val ARG_ARTICLE = "com.dasbikash.news_server.views.FragmentArticleView.ARG_ARTICLE"
 
         fun getInstance(article: Article): FragmentArticleView {
