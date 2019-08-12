@@ -105,6 +105,8 @@
             android:layout_height="wrap_content"
             android:background="@color/ninty_five_transparent"
             android:orientation="vertical"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
             android:padding="2dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
