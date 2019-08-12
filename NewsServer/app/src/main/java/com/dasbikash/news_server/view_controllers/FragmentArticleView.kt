@@ -65,7 +65,7 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
     private lateinit var mArticleImageListAdapter: ArticleImageListAdapter
     private lateinit var mWaitScreen: LinearLayoutCompat
 
-    private var mActionBarHeight = 0
+//    private var mActionBarHeight = 0
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
@@ -87,7 +87,7 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
         LoggerUtils.debugLog("onViewCreated", this::class.java)
         mArticle = arguments!!.getSerializable(ARG_ARTICLE) as Article
 
-        mActionBarHeight = DisplayUtils.dpToPx(40, context!!).toInt()
+//        mActionBarHeight = DisplayUtils.dpToPx(20, context!!).toInt()
 
         findViewItems(view)
         setListners()
@@ -107,16 +107,17 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
     private fun setListners() {
         mWaitScreen.setOnClickListener { }
 
-        mMainScroller.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
+        /*mMainScroller.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
 
             override fun onScrollChange(v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
+                debugLog("scrollX: $scrollX, scrollY: $scrollY, oldScrollX: $oldScrollX, oldScrollY: $oldScrollY")
                 if (scrollY == 0) {
                     (activity!! as AppCompatActivity).supportActionBar!!.show()
-                } else if (scrollY > mActionBarHeight * 2) {
+                } else if (scrollY > mActionBarHeight) {
                     (activity!! as AppCompatActivity).supportActionBar!!.hide()
                 }
             }
-        })
+        })*/
     }
 
     override fun onResume() {
@@ -199,7 +200,7 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
         if (mArticle.imageLinkList != null && mArticle.imageLinkList!!.size > 0) {
             mArticleImageListAdapter = ArticleImageListAdapter(this, DisplayUtils.DEFAULT_ARTICLE_TEXT_SIZE.toFloat(), true)
             mArticleImageHolder.adapter = mArticleImageListAdapter
-            mArticleImageListAdapter.submitList(mArticle.imageLinkList)
+            mArticleImageListAdapter.submitList(mArticle.imageLinkList!!.filter { it.link!=null })
             mArticleImageHolder.visibility = View.VISIBLE
         } else {
             mArticleImageHolder.visibility = View.GONE
@@ -459,13 +460,12 @@ class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDispo
     }
 
     fun bind(articleImage: ArticleImage, currentImagePosition: Int, totalImageCount: Int) {
-        if (articleImage.link != null) {
-            itemView.visibility = View.VISIBLE
 
             mCurrentImagePositionText.text = StringBuilder("${currentImagePosition}")
                     .append("/")
                     .append("${totalImageCount}")
                     .toString()
+
             mCurrentImagePositionText.bringToFront()
             imageLoadingDisposer = ImageLoadingDisposer(mArticleImage)
             compositeDisposable.add(imageLoadingDisposer!!)
@@ -490,7 +490,6 @@ class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDispo
             } else {
                 mImageCaption.visibility = View.GONE
             }
-        }
     }
 
     private fun downloadImageAction(link: String) {

@@ -46,7 +46,7 @@ class FragmentSavedArticleView : Fragment(),TextSizeChangeableArticleViewFragmen
     private lateinit var mArticleId: String
     private var mArticleTextSize: Int? = null
 
-    private var mActionBarHeight = 0
+//    private var mActionBarHeight = 0
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
@@ -60,10 +60,10 @@ class FragmentSavedArticleView : Fragment(),TextSizeChangeableArticleViewFragmen
         LoggerUtils.debugLog("onViewCreated", this::class.java)
         mArticleId = arguments!!.getString(ARG_ARTICLE_ID)!!
 
-        mActionBarHeight = DisplayUtils.dpToPx(40, context!!).toInt()
+//        mActionBarHeight = DisplayUtils.dpToPx(40, context!!).toInt()
         findViewItems(view)
 
-        mMainScroller.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
+        /*mMainScroller.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
 
             override fun onScrollChange(v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
                 if (scrollY == 0) {
@@ -72,7 +72,7 @@ class FragmentSavedArticleView : Fragment(),TextSizeChangeableArticleViewFragmen
                     (activity!! as AppCompatActivity).supportActionBar!!.hide()
                 }
             }
-        })
+        })*/
 
     }
 
