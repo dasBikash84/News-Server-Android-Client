@@ -13,26 +13,27 @@
 
 package com.dasbikash.news_server_data.models
 
+import androidx.annotation.Keep
 import com.google.firebase.Timestamp
 import com.google.firebase.database.ServerValue
-
+@Keep
 enum class ParserMode {
     RUNNING, GET_SYNCED,PARSE_THROUGH_CLIENT
 }
-
+@Keep
 enum class OffOnStatus {
     ON,OFF
 }
-
+@Keep
 enum class ArticleUploadTarget {
     REAL_TIME_DB,FIRE_STORE_DB,MONGO_REST_SERVICE
 }
-
+@Keep
 enum class TwoStateStatus {
     ON,OFF
 }
 
-
+@Keep
 class NewsPaperParserModeChangeRequest private constructor(
         val authToken: String,
         val targetNewspaperId: String,
@@ -52,7 +53,7 @@ class NewsPaperParserModeChangeRequest private constructor(
                 NewsPaperParserModeChangeRequest(authToken,targetNewspaperId,ParserMode.PARSE_THROUGH_CLIENT)
     }
 }
-
+@Keep
 class NewsPaperStatusChangeRequest private constructor(
         val authToken: String,
         val targetNewspaperId: String,
@@ -66,7 +67,7 @@ class NewsPaperStatusChangeRequest private constructor(
                 NewsPaperStatusChangeRequest(authToken,targetNewspaperId,OffOnStatus.OFF)
     }
 }
-
+@Keep
 class ArticleUploaderStatusChangeRequest private constructor(
     val authToken:String,
     val articleUploadTarget:ArticleUploadTarget,
@@ -81,4 +82,5 @@ class ArticleUploaderStatusChangeRequest private constructor(
     }
 }
 
-class TokenGenerationRequest(val timeStamp: Timestamp = Timestamp.now())
+@Keep
+class TokenGenerationRequest(val timeStampMs:Long = System.currentTimeMillis())
