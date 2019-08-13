@@ -17,21 +17,14 @@ import com.dasbikash.news_server_data.data_sources.AdminTaskDataService
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBAdminTaskUtils
 import com.dasbikash.news_server_data.models.ArticleUploaderStatusChangeRequest
 import com.dasbikash.news_server_data.models.NewsPaperParserModeChangeRequest
-import com.dasbikash.news_server_data.models.NewsPaperStatusChangeRequest
 
 internal object RealTimeDbAdminTaskDataService:AdminTaskDataService {
-
-    override fun addTokenGenerationRequest() =
-            RealtimeDBAdminTaskUtils.addTokenGenerationRequest()
 
     override fun addParserTokenGenerationRequest()=
             RealtimeDBAdminTaskUtils.addParserTokenGenerationRequest()
 
     override fun addDataCoordinatorTokenGenerationRequest()=
             RealtimeDBAdminTaskUtils.addDataCoordinatorTokenGenerationRequest()
-
-    override fun addNewsPaperStatusChangeRequest(newsPaperStatusChangeRequest: NewsPaperStatusChangeRequest) =
-            RealtimeDBAdminTaskUtils.addNewsPaperStatusChangeRequest(newsPaperStatusChangeRequest)
 
     override fun addNewsPaperParserModeChangeRequest(newsPaperParserModeChangeRequest: NewsPaperParserModeChangeRequest) =
             RealtimeDBAdminTaskUtils.addNewsPaperParserModeChangeRequest(newsPaperParserModeChangeRequest)

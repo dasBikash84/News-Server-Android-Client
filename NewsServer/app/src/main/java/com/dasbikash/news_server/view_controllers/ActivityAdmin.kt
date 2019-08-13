@@ -62,10 +62,6 @@ class ActivityAdmin : ActivityWithBackPressQueueManager(), NavigationHost {
         navigateTo(FragmentAdminTasks(), false)
     }
 
-    fun loadNPStatusChangeRequestFragment() {
-        navigateTo(FragmentNPStatusChangeRequest(), true)
-    }
-
     fun loadNPParserModeChangeRequestFragment() {
         navigateTo(FragmentNPParserModeChangeRequest(), true)
     }

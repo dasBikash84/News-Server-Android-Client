@@ -23,7 +23,6 @@ import com.google.android.material.button.MaterialButton
 
 class   FragmentAdminTasks : Fragment() {
 
-    private lateinit var mNewsPaperStatusChangeRequestButton:MaterialButton
     private lateinit var mNewsPaperParserModeChangeRequestButton:MaterialButton
     private lateinit var mArticleUploaderStatusChangeRequestButton:MaterialButton
 
@@ -33,13 +32,8 @@ class   FragmentAdminTasks : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mNewsPaperStatusChangeRequestButton = view.findViewById(R.id.np_status_change_request_button)
         mNewsPaperParserModeChangeRequestButton = view.findViewById(R.id.np_parser_mode_change_request_button)
         mArticleUploaderStatusChangeRequestButton = view.findViewById(R.id.article_uploader_status_change_request_button)
-
-        mNewsPaperStatusChangeRequestButton.setOnClickListener {
-            (activity!! as ActivityAdmin).loadNPStatusChangeRequestFragment()
-        }
 
         mNewsPaperParserModeChangeRequestButton.setOnClickListener {
             (activity!! as ActivityAdmin).loadNPParserModeChangeRequestFragment()

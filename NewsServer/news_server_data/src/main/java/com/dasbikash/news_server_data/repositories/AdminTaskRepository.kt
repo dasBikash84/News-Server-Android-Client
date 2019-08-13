@@ -16,21 +16,14 @@ package com.dasbikash.news_server_data.repositories
 import com.dasbikash.news_server_data.data_sources.data_services.admin_task_data_service_impls.RealTimeDbAdminTaskDataService
 import com.dasbikash.news_server_data.models.ArticleUploaderStatusChangeRequest
 import com.dasbikash.news_server_data.models.NewsPaperParserModeChangeRequest
-import com.dasbikash.news_server_data.models.NewsPaperStatusChangeRequest
 
 object AdminTaskRepository {
-
-    fun addTokenGenerationRequest() =
-            RealTimeDbAdminTaskDataService.addTokenGenerationRequest()
 
     fun addParserTokenGenerationRequest()=
             RealTimeDbAdminTaskDataService.addParserTokenGenerationRequest()
 
     fun addDataCoordinatorTokenGenerationRequest()=
             RealTimeDbAdminTaskDataService.addDataCoordinatorTokenGenerationRequest()
-
-    fun addNewsPaperStatusChangeRequest(newsPaperStatusChangeRequest: NewsPaperStatusChangeRequest) =
-            RealTimeDbAdminTaskDataService.addNewsPaperStatusChangeRequest(newsPaperStatusChangeRequest)
 
     fun addNewsPaperParserModeChangeRequest(newsPaperParserModeChangeRequest: NewsPaperParserModeChangeRequest) =
             RealTimeDbAdminTaskDataService.addNewsPaperParserModeChangeRequest(newsPaperParserModeChangeRequest)

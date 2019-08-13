@@ -15,13 +15,10 @@ package com.dasbikash.news_server_data.data_sources
 
 import com.dasbikash.news_server_data.models.ArticleUploaderStatusChangeRequest
 import com.dasbikash.news_server_data.models.NewsPaperParserModeChangeRequest
-import com.dasbikash.news_server_data.models.NewsPaperStatusChangeRequest
 
 internal interface AdminTaskDataService {
-    fun addTokenGenerationRequest():Boolean
     fun addParserTokenGenerationRequest():Boolean
     fun addDataCoordinatorTokenGenerationRequest():Boolean
-    fun addNewsPaperStatusChangeRequest(newsPaperStatusChangeRequest: NewsPaperStatusChangeRequest):Boolean
     fun addNewsPaperParserModeChangeRequest(newsPaperParserModeChangeRequest: NewsPaperParserModeChangeRequest):Boolean
     fun addArticleUploaderStatusChangeRequest(articleUploaderStatusChangeRequest: ArticleUploaderStatusChangeRequest):Boolean
 }

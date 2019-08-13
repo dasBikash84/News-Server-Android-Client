@@ -15,7 +15,6 @@ package com.dasbikash.news_server_data.data_sources.data_services.web_services.f
 
 import com.dasbikash.news_server_data.models.ArticleUploaderStatusChangeRequest
 import com.dasbikash.news_server_data.models.NewsPaperParserModeChangeRequest
-import com.dasbikash.news_server_data.models.NewsPaperStatusChangeRequest
 import com.dasbikash.news_server_data.models.TokenGenerationRequest
 import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.google.android.gms.tasks.OnCompleteListener
@@ -26,10 +25,8 @@ internal object RealtimeDBAdminTaskUtils {
     private const val MAX_WAITING_MS_FOR_NET_RESPONSE = 30000L
 
     enum class AdminTaskNode(val nodeName:String){
-        TOKEN_GENERATION_REQUEST_NODE("token_generation_request"),
         PARSER_TOKEN_GENERATION_REQUEST_NODE("parser_token_generation_request"),
         DATA_COORDINATOR_TOKEN_GENERATION_REQUEST_NODE("data_coordinator_token_generation_request"),
-        NP_STATUS_CHANGE_REQUEST_NODE ("np_status_change_request"),
         NP_PARSER_MODE_CHANGE_REQUEST_NODE ("np_parser_mode_change_request"),
         ARTICLE_UPLOADER_STATUS_CHANGE_REQUEST_NODE ("article_uploader_status_change_request")
     }
@@ -55,17 +52,11 @@ internal object RealtimeDBAdminTaskUtils {
         return returnValue
     }
 
-    fun addTokenGenerationRequest() =
-            addAdminTaskRequest(TokenGenerationRequest(), AdminTaskNode.TOKEN_GENERATION_REQUEST_NODE)
-
     fun addParserTokenGenerationRequest() =
             addAdminTaskRequest(TokenGenerationRequest(), AdminTaskNode.PARSER_TOKEN_GENERATION_REQUEST_NODE)
 
     fun addDataCoordinatorTokenGenerationRequest() =
             addAdminTaskRequest(TokenGenerationRequest(), AdminTaskNode.DATA_COORDINATOR_TOKEN_GENERATION_REQUEST_NODE)
-
-    fun addNewsPaperStatusChangeRequest(newsPaperStatusChangeRequest: NewsPaperStatusChangeRequest) =
-            addAdminTaskRequest(newsPaperStatusChangeRequest,AdminTaskNode.NP_STATUS_CHANGE_REQUEST_NODE)
 
     fun addNewsPaperParserModeChangeRequest(newsPaperParserModeChangeRequest: NewsPaperParserModeChangeRequest) =
             addAdminTaskRequest(newsPaperParserModeChangeRequest,AdminTaskNode.NP_PARSER_MODE_CHANGE_REQUEST_NODE)

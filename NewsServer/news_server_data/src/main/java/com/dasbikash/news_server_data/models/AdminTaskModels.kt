@@ -20,10 +20,7 @@ import com.google.firebase.database.ServerValue
 enum class ParserMode {
     OFF,RUNNING, GET_SYNCED,PARSE_THROUGH_CLIENT
 }
-@Keep
-enum class OffOnStatus {
-    ON,OFF
-}
+
 @Keep
 enum class ArticleUploadTarget {
     REAL_TIME_DB,FIRE_STORE_DB,MONGO_REST_SERVICE
@@ -57,20 +54,7 @@ class NewsPaperParserModeChangeRequest private constructor(
                 NewsPaperParserModeChangeRequest(authToken,targetNewspaperId,ParserMode.OFF)
     }
 }
-@Keep
-class NewsPaperStatusChangeRequest private constructor(
-        val authToken: String,
-        val targetNewspaperId: String,
-        val targetStatus: OffOnStatus
-){
-    companion object{
-        fun getInstanceForOnMode(authToken: String,targetNewspaperId: String) =
-                NewsPaperStatusChangeRequest(authToken,targetNewspaperId,OffOnStatus.ON)
 
-        fun getInstanceForOffMode(authToken: String,targetNewspaperId: String) =
-                NewsPaperStatusChangeRequest(authToken,targetNewspaperId,OffOnStatus.OFF)
-    }
-}
 @Keep
 class ArticleUploaderStatusChangeRequest private constructor(
     val authToken:String,
