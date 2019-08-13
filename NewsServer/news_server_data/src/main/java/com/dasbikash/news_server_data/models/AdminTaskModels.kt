@@ -18,7 +18,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.database.ServerValue
 @Keep
 enum class ParserMode {
-    RUNNING, GET_SYNCED,PARSE_THROUGH_CLIENT
+    OFF,RUNNING, GET_SYNCED,PARSE_THROUGH_CLIENT
 }
 @Keep
 enum class OffOnStatus {
@@ -51,6 +51,10 @@ class NewsPaperParserModeChangeRequest private constructor(
         fun getInstanceForParseThroughClientMode(
                 authToken: String,targetNewspaperId: String) =
                 NewsPaperParserModeChangeRequest(authToken,targetNewspaperId,ParserMode.PARSE_THROUGH_CLIENT)
+
+        fun getInstanceForOFFMode(
+                authToken: String,targetNewspaperId: String) =
+                NewsPaperParserModeChangeRequest(authToken,targetNewspaperId,ParserMode.OFF)
     }
 }
 @Keep

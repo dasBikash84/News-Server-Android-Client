@@ -31,6 +31,7 @@ import com.dasbikash.news_server_data.models.ParserMode
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.repositories.AdminTaskRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.utills.LoggerUtils
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableObserver
@@ -161,17 +162,15 @@ class   FragmentNPParserModeChangeRequest : Fragment(),TokenGenerationRequestAdd
                 Observable.just(true)
                         .subscribeOn(Schedulers.io())
                         .map {
-                            val newsPaperParserModeChangeRequest: NewsPaperParserModeChangeRequest
-                            if (mCurrentSelectedParserMode.equals(ParserMode.RUNNING.name)) {
-                                newsPaperParserModeChangeRequest =
-                                        NewsPaperParserModeChangeRequest.getInstanceForRunningMode(mAuthTokenEditText.text.trim().toString(), mNewsPaperIdEditText.text.trim().toString())
-                            } else if (mCurrentSelectedParserMode.equals(ParserMode.GET_SYNCED.name)) {
-                                newsPaperParserModeChangeRequest =
-                                        NewsPaperParserModeChangeRequest.getInstanceForGetSyncedMode(mAuthTokenEditText.text.trim().toString(), mNewsPaperIdEditText.text.trim().toString())
-                            }else{
-                                newsPaperParserModeChangeRequest =
-                                        NewsPaperParserModeChangeRequest.getInstanceForParseThroughClientMode(mAuthTokenEditText.text.trim().toString(), mNewsPaperIdEditText.text.trim().toString())
-                            }
+                            val authToken = mAuthTokenEditText.text.trim().toString()
+                            val newspaperId = mNewsPaperIdEditText.text.trim().toString()
+                            val newsPaperParserModeChangeRequest =
+                                    when(mCurrentSelectedParserMode){
+                                        ParserMode.RUNNING.name -> NewsPaperParserModeChangeRequest.getInstanceForRunningMode(authToken,newspaperId)
+                                        ParserMode.GET_SYNCED.name -> NewsPaperParserModeChangeRequest.getInstanceForGetSyncedMode(authToken,newspaperId)
+                                        ParserMode.PARSE_THROUGH_CLIENT.name -> NewsPaperParserModeChangeRequest.getInstanceForParseThroughClientMode(authToken,newspaperId)
+                                        else -> NewsPaperParserModeChangeRequest.getInstanceForOFFMode(authToken,newspaperId)
+                                    }
                             AdminTaskRepository.addNewsPaperParserModeChangeRequest(newsPaperParserModeChangeRequest)
                         }
                         .observeOn(AndroidSchedulers.mainThread())
