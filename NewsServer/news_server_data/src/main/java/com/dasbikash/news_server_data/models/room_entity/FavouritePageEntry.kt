@@ -19,11 +19,7 @@ import androidx.room.PrimaryKey
 import com.google.firebase.database.Exclude
 
 
-@Entity(
-        foreignKeys = [
-            ForeignKey(entity = Page::class, parentColumns = ["id"], childColumns = ["pageId"])
-        ]
-)
+@Entity
 data class FavouritePageEntry(
         @PrimaryKey
         @Exclude

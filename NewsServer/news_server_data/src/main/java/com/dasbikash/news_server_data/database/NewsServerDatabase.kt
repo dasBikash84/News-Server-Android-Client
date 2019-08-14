@@ -64,7 +64,7 @@ internal abstract class NewsServerDatabase internal constructor(): RoomDatabase(
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("DROP TABLE `PageGroup`")
-                database.execSQL("CREATE TABLE `FavouritePageEntry` (`pageId` TEXT NOT NULL, `subscribed` INTEGER DEFAULT 0, foreign key(`pageId`) references Page(id), PRIMARY KEY(`pageId`))")
+                database.execSQL("CREATE TABLE `FavouritePageEntry` (`pageId` TEXT NOT NULL, `subscribed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`pageId`))")
             }
         }
 
