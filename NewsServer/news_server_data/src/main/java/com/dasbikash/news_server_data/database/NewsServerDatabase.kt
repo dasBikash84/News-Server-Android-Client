@@ -28,7 +28,8 @@ import com.dasbikash.news_server_data.database.room_converters.StringListConvert
 import com.dasbikash.news_server_data.models.room_entity.*
 
 @Database(entities = [Country::class, Language::class, Newspaper::class, Page::class, Article::class, UserPreferenceData::class,
-                        ArticleVisitHistory::class,SavedArticle::class,ArticleSearchKeyWord::class,NewsCategory::class],
+                        ArticleVisitHistory::class,SavedArticle::class,ArticleSearchKeyWord::class,NewsCategory::class,
+                        FavouritePageEntry::class],
         version = 3, exportSchema = false)
 @TypeConverters(DateConverter::class, IntListConverter::class, StringListConverter::class, ArticleImageConverter::class)
 internal abstract class NewsServerDatabase internal constructor(): RoomDatabase() {
@@ -41,6 +42,7 @@ internal abstract class NewsServerDatabase internal constructor(): RoomDatabase(
     abstract val savedArticleDao: SavedArticleDao
     abstract val articleSearchKeyWordDao: ArticleSearchKeyWordDao
     abstract val newsCategoryDao: NewsCategoryDao
+    abstract val favouritePageEntryDao: FavouritePageEntryDao
 
 
     abstract val userPreferenceDataDao: UserPreferenceDataDao
@@ -62,6 +64,7 @@ internal abstract class NewsServerDatabase internal constructor(): RoomDatabase(
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("DROP TABLE `PageGroup`")
+                database.execSQL("CREATE TABLE `FavouritePageEntry` (`pageId` TEXT NOT NULL, `subscribed` INTEGER DEFAULT 0, foreign key(`pageId`) references Page(id), PRIMARY KEY(`pageId`))")
             }
         }
 
@@ -86,7 +89,7 @@ internal abstract class NewsServerDatabase internal constructor(): RoomDatabase(
         newsPaperDao.nukeTable()
         countryDao.nukeTable()
         languageDao.nukeTable()
-        newsCategoryDao.nukeTable()
+        favouritePageEntryDao.nukeTable()
     }
 
 }
