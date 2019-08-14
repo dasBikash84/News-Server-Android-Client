@@ -89,7 +89,7 @@ internal abstract class NewsServerDatabase internal constructor(): RoomDatabase(
         newsPaperDao.nukeTable()
         countryDao.nukeTable()
         languageDao.nukeTable()
-        favouritePageEntryDao.nukeTable()
+        newsCategoryDao.nukeTable()
     }
 
 }
