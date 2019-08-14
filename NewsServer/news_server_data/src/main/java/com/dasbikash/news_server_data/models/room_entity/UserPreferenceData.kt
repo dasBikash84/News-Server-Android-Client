@@ -17,7 +17,6 @@ import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.google.firebase.database.Exclude
-import com.google.firebase.database.PropertyName
 
 @Entity
 data class UserPreferenceData(
@@ -26,8 +25,6 @@ data class UserPreferenceData(
         var id:String="",
         @Exclude
         var favouritePageIds: MutableList<String> = mutableListOf(),
-        @Ignore
-        var pageGroups:MutableMap<String,PageGroup> = mutableMapOf(),
         @Ignore
         var favPageIdMap:MutableMap<String,Boolean> = mutableMapOf()
 

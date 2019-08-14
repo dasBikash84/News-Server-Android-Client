@@ -15,7 +15,6 @@ package com.dasbikash.news_server_data.data_sources
 
 import android.content.Intent
 import com.dasbikash.news_server_data.models.room_entity.Page
-import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 
 internal interface UserSettingsDataService {
@@ -24,13 +23,9 @@ internal interface UserSettingsDataService {
     fun signOutUser()
     fun getCurrentUserName(): String?
     fun checkIfLoogedAsAdmin(): Boolean
-    fun getDefaultPageGroupSettings(): Map<String, PageGroup>
     fun getLastUserSettingsUpdateTime(): Long
     fun getUserPreferenceData(): UserPreferenceData
     fun uploadUserPreferenceData(userPreferenceData: UserPreferenceData)
     fun addPageToFavList(page: Page,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null)
     fun removePageFromFavList(page: Page,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null)
-    fun addPageGroup(pageGroup: PageGroup,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null)
-    fun deletePageGroup(pageGroup: PageGroup,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null)
-//    fun getCurrentUser():FirebaseUser?
 }

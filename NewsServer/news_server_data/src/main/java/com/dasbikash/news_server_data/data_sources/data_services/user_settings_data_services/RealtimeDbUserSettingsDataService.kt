@@ -13,19 +13,14 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.user_settings_data_services
 
-import android.content.Context
 import android.content.Intent
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
-import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBAppSettingsUtils
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBUserSettingsUtils
 import com.dasbikash.news_server_data.models.room_entity.Page
-import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
-
-//internal enum class LogInStatus{NULL,}
 
 internal object RealtimeDbUserSettingsDataService : UserSettingsDataService {
 
@@ -78,11 +73,6 @@ internal object RealtimeDbUserSettingsDataService : UserSettingsDataService {
                 .build()
     }
 
-    override fun getDefaultPageGroupSettings(): Map<String, PageGroup> {
-        return RealtimeDBAppSettingsUtils.getServerAppSettingsData().page_groups?.toMap()
-                ?: emptyMap()
-    }
-
     override fun checkIfLoogedAsAdmin(): Boolean {
         return RealtimeDBUserSettingsUtils.checkIfLoogedAsAdmin()
     }
@@ -94,15 +84,4 @@ internal object RealtimeDbUserSettingsDataService : UserSettingsDataService {
     override fun removePageFromFavList(page: Page, doOnSuccess: (() -> Unit)?, doOnFailure: (() -> Unit)?) {
         return RealtimeDBUserSettingsUtils.removePageFromFavList(page,doOnSuccess, doOnFailure)
     }
-
-    override fun addPageGroup(pageGroup: PageGroup, doOnSuccess: (() -> Unit)?, doOnFailure: (() -> Unit)?) {
-        return RealtimeDBUserSettingsUtils.addPageGroup(pageGroup,doOnSuccess, doOnFailure)
-    }
-
-    override fun deletePageGroup(pageGroup: PageGroup, doOnSuccess: (() -> Unit)?, doOnFailure: (() -> Unit)?) {
-        return RealtimeDBUserSettingsUtils.deletePageGroup(pageGroup,doOnSuccess, doOnFailure)
-    }
-    //    override fun getCurrentUser(): FirebaseUser? {
-//        return FirebaseAuth.getInstance().currentUser
-//    }
 }

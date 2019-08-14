@@ -34,7 +34,6 @@ abstract class AppSettingsRepository {
     abstract protected fun addNewsPapers(newspapers: List<Newspaper>)
     abstract protected fun addPages(pages: List<Page>)
     abstract protected fun addNewsCategories(newsCategories: List<NewsCategory>)
-    abstract protected fun addPageGroups(pageGroups: List<PageGroup>)
 
     abstract protected fun getCountryCount(): Int
     abstract protected fun getLanguageCount(): Int
@@ -88,10 +87,6 @@ abstract class AppSettingsRepository {
         addNewsPapers(appSettings.newspapers!!.values.toList())
         addPages(appSettings.pages!!.values.toList())
         addNewsCategories(appSettings.news_categories!!.values.toList())
-
-//        if (getPageGroupCount() == 0) {
-//            addPageGroups(ArrayList(appSettings.page_groups?.values ?: emptyList()))
-//        }
 
         val latestSettingUpdateTime = appSettings.update_time!!.values.sorted().last()
         LoggerUtils.debugLog("latestSettingUpdateTime: $latestSettingUpdateTime",this::class.java)

@@ -26,8 +26,6 @@ import java.util.*
 
 internal interface SpringMVCWebService {
 
-    //    @GET(TOP_LEVEL_PAGE_ARTICLE_URL)
-//    fun getLatestArticleByTopLevelPageId(@Path("topLevelPageId") topLevelPageId: String): Call<Article>
     @GET(LANGUAGES_PATH)
     fun getLanguages(): Call<Languages>
 
@@ -39,9 +37,6 @@ internal interface SpringMVCWebService {
 
     @GET(PAGES_PATH)
     fun getPages(): Call<Pages>
-
-    @GET(PAGE_GROUPS_PATH)
-    fun getPageGroups(): Call<PageGroups>
 
     @GET(SETTINGS_UPDATE_LOG_PATH)
     fun getSettingsUpdateLogs(@Query("page-size") pageSize:Int = 1):Call<SettingsUpdateLogs>
@@ -84,7 +79,6 @@ internal interface SpringMVCWebService {
     @Keep class Countries(val countries: List<Country>)
     @Keep class Newspapers(val newspapers: List<Newspaper>)
     @Keep class Pages(val pages: List<Page>)
-    @Keep class PageGroups(val pageGroupMap: Map<String, PageGroup>)
     @Keep class SettingsUpdateLog(val updateTime:Date)
     @Keep class SettingsUpdateLogs(val settingsUpdateLogs:List<SettingsUpdateLog>)
 }

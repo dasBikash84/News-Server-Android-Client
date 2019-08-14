@@ -64,10 +64,6 @@ internal class AppSettingsRepositoryRoomImpl internal constructor(context: Conte
         mDatabase.newsCategoryDao.addNewsCategories(newsCategories)
     }
 
-    override fun addPageGroups(pageGroups:List<PageGroup>) {
-        mDatabase.pageGroupDao.addPageGroups(pageGroups)
-    }
-
     override fun getNewsPapersLiveData():LiveData<List<Newspaper>>{
         return mDatabase.newsPaperDao.findAllLiveData()
     }

@@ -13,7 +13,6 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.spring_mvc
 
-import android.util.Log
 import com.dasbikash.news_server_data.data_sources.NewsDataService
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
@@ -92,62 +91,10 @@ internal object SpringMVCAppSettingsUtils {
         val languages: HashMap<String, Language> = getLanguages()
         val newspapers: HashMap<String, Newspaper> = getNewspapers()
         val pages: HashMap<String, Page> = getPages()
-        val pageGroups: HashMap<String, PageGroup> = getPageGroups()
         val updateTime = mutableMapOf<String, Long>()
         updateTime.put("key1", getServerAppSettingsUpdateTime())
         return DefaultAppSettings(
-                countries, languages, newspapers, pages, pageGroups, HashMap<String,NewsCategory>(),HashMap(updateTime))
-    }
-
-    private fun getPageGroups(): HashMap<String, PageGroup> {
-
-        val lock = Object()
-
-        var pageGroups: HashMap<String, PageGroup>? = null
-
-        var dataServerException: DataServerException? = null
-
-        LoggerUtils.debugLog( "getPageGroups",this::class.java)
-
-        springMVCWebService
-                .getPageGroups()
-                .enqueue(object : Callback<SpringMVCWebService.PageGroups?> {
-                    override fun onFailure(call: Call<SpringMVCWebService.PageGroups?>, throwable: Throwable) {
-                        LoggerUtils.debugLog( "getPageGroups onFailure",this::class.java)
-                        dataServerException = DataServerNotAvailableExcepption(throwable)
-                        synchronized(lock) { lock.notify() }
-                    }
-
-                    override fun onResponse(call: Call<SpringMVCWebService.PageGroups?>,
-                                            response: Response<SpringMVCWebService.PageGroups?>) {
-                        LoggerUtils.debugLog( "getPageGroups onResponse",this::class.java)
-                        if (response.isSuccessful) {
-
-                            LoggerUtils.debugLog( "getPageGroups onResponse isSuccessful",this::class.java)
-                            response.body()?.let {
-                                pageGroups = HashMap(it.pageGroupMap)
-                            }
-                        } else {
-
-                            LoggerUtils.debugLog( "getPageGroups onResponse not Successful",this::class.java)
-                            dataServerException = DataNotFoundException()
-
-                        }
-                        synchronized(lock) { lock.notify() }
-                    }
-                })
-
-
-        LoggerUtils.debugLog( "getPageGroups before wait",this::class.java)
-        try {
-            synchronized(lock) { lock.wait(NewsDataService.WAITING_MS_FOR_NET_RESPONSE) }
-        }catch (ex:InterruptedException){}
-
-        LoggerUtils.debugLog( "getPageGroups before throw it",this::class.java)
-        dataServerException?.let { throw it }
-
-        LoggerUtils.debugLog( "getPageGroups before return",this::class.java)
-        return pageGroups!!
+                countries, languages, newspapers, pages, HashMap<String,NewsCategory>(),HashMap(updateTime))
     }
 
     private fun getPages(): HashMap<String, Page> {

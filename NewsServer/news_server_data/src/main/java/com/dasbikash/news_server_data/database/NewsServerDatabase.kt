@@ -27,9 +27,9 @@ import com.dasbikash.news_server_data.database.room_converters.IntListConverter
 import com.dasbikash.news_server_data.database.room_converters.StringListConverter
 import com.dasbikash.news_server_data.models.room_entity.*
 
-@Database(entities = [Country::class, Language::class, Newspaper::class, Page::class, PageGroup::class, Article::class, UserPreferenceData::class,
+@Database(entities = [Country::class, Language::class, Newspaper::class, Page::class, Article::class, UserPreferenceData::class,
                         ArticleVisitHistory::class,SavedArticle::class,ArticleSearchKeyWord::class,NewsCategory::class],
-        version = 2, exportSchema = false)
+        version = 3, exportSchema = false)
 @TypeConverters(DateConverter::class, IntListConverter::class, StringListConverter::class, ArticleImageConverter::class)
 internal abstract class NewsServerDatabase internal constructor(): RoomDatabase() {
 
@@ -37,7 +37,6 @@ internal abstract class NewsServerDatabase internal constructor(): RoomDatabase(
     abstract val languageDao: LanguageDao
     abstract val newsPaperDao: NewsPaperDao
     abstract val pageDao: PageDao
-    abstract val pageGroupDao: PageGroupDao
     abstract val articleDao: ArticleDao
     abstract val savedArticleDao: SavedArticleDao
     abstract val articleSearchKeyWordDao: ArticleSearchKeyWordDao
@@ -60,13 +59,19 @@ internal abstract class NewsServerDatabase internal constructor(): RoomDatabase(
             }
         }
 
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("DROP TABLE `PageGroup`")
+            }
+        }
+
         internal fun getDatabase(context: Context): NewsServerDatabase {
             if (!::INSTANCE.isInitialized) {
                 synchronized(NewsServerDatabase::class.java) {
                     if (!::INSTANCE.isInitialized) {
                         INSTANCE = Room.databaseBuilder(context.applicationContext,
                                                     NewsServerDatabase::class.java, DATABASE_NAME)
-                                                    .addMigrations(MIGRATION_1_2)
+                                                    .addMigrations(MIGRATION_1_2,MIGRATION_2_3)
                                                     .build()
                     }
                 }

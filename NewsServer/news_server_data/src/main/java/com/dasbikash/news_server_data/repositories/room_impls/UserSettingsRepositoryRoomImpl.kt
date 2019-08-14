@@ -16,7 +16,6 @@ package com.dasbikash.news_server_data.repositories.room_impls
 import android.content.Context
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.database.NewsServerDatabase
-import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import com.dasbikash.news_server_data.utills.LoggerUtils
@@ -33,25 +32,12 @@ internal class UserSettingsRepositoryRoomImpl internal constructor(context: Cont
             userPreferenceData = UserPreferenceData(id=UUID.randomUUID().toString())
             mDatabase.userPreferenceDataDao.add(userPreferenceData)
         }
-        mDatabase.pageGroupDao.findAllStatic()
-                .asSequence()
-                .forEach { userPreferenceData.pageGroups.put(it.name, it) }
         LoggerUtils.debugLog("getUserPreferenceDataFromLocalDB: ${userPreferenceData}",this::class.java)
         return userPreferenceData
     }
 
     override fun saveUserPreferenceDataToLocalDb(userPreferenceData: UserPreferenceData) {
         mDatabase.userPreferenceDataDao.save(userPreferenceData)
-    }
-
-    override fun addPageGroupsToLocalDb(pageGroups: List<PageGroup>) {
-        LoggerUtils.debugLog("addPageGroupsToLocalDb: ${pageGroups.map { it.id }.toList()}",this::class.java)
-        mDatabase.pageGroupDao.addPageGroups(pageGroups)
-    }
-
-    override fun deletePageGroupFromLocalDb(pageGroup:PageGroup) {
-        LoggerUtils.debugLog("deletePageGroupFromLocalDb: ${pageGroup.id}",this::class.java)
-        mDatabase.pageGroupDao.delete(pageGroup)
     }
 
     override fun getLocalPreferenceData(): List<UserPreferenceData> {
@@ -66,30 +52,11 @@ internal class UserSettingsRepositoryRoomImpl internal constructor(context: Cont
         mDatabase.userPreferenceDataDao.add(userPreferenceData)
     }
 
-    override fun nukePageGroupTable() {
-        mDatabase.pageGroupDao.nukeTable()
-    }
-    override fun findPageGroupByName(pageGroupName: String): PageGroup? {
-        return mDatabase.pageGroupDao.findById(pageGroupName)
-    }
-
     override fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?> {
         return mDatabase.userPreferenceDataDao.findUserPreferenceDataLiveData()
     }
 
-    override fun getPageGroupListLive(): LiveData<List<PageGroup>> {
-        return mDatabase.pageGroupDao.findAllLive()
-    }
-
-    override fun resetUserSettings(defaultPageGroups: Map<String, PageGroup>) {
+    override fun resetUserSettings() {
         mDatabase.userPreferenceDataDao.nukeTable()
-        mDatabase.pageGroupDao.nukeTable()
-        if (defaultPageGroups.isNotEmpty()){
-            mDatabase.pageGroupDao.addPageGroups(defaultPageGroups.values.toList())
-        }
-    }
-
-    override fun getPageGroupListCount(): Int {
-        return mDatabase.pageGroupDao.findAllStatic().size
     }
 }

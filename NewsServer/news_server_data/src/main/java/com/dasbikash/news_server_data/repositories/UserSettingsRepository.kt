@@ -13,7 +13,6 @@
 
 package com.dasbikash.news_server_data.repositories
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -23,7 +22,6 @@ import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.exceptions.AuthServerException
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
 import com.dasbikash.news_server_data.models.room_entity.Page
-import com.dasbikash.news_server_data.models.room_entity.PageGroup
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
 import com.dasbikash.news_server_data.repositories.room_impls.UserSettingsRepositoryRoomImpl
@@ -32,7 +30,6 @@ import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import com.firebase.ui.auth.IdpResponse
 import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.util.*
 
@@ -44,18 +41,12 @@ abstract class UserSettingsRepository {
     private val mUserSettingsDataService: UserSettingsDataService = DataServiceImplProvider.getUserSettingsDataServiceImpl()
 
     abstract protected fun nukeUserPreferenceDataTable()
-    abstract protected fun nukePageGroupTable()
     abstract protected fun addUserPreferenceDataToLocalDB(userPreferenceData: UserPreferenceData)
 
     abstract protected fun getUserPreferenceDataFromLocalDB(): UserPreferenceData
     abstract protected fun saveUserPreferenceDataToLocalDb(userPreferenceData: UserPreferenceData)
-    abstract protected fun addPageGroupsToLocalDb(pageGroups: List<PageGroup>)
-    abstract protected fun deletePageGroupFromLocalDb(pageGroup: PageGroup)
     abstract protected fun getLocalPreferenceData(): List<UserPreferenceData>
-    abstract fun findPageGroupByName(pageGroupName: String): PageGroup?
     abstract fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?>
-    abstract fun getPageGroupListLive(): LiveData<List<PageGroup>>
-    abstract fun getPageGroupListCount(): Int
 
     private fun doPostLogInProcessing(userLogInResponse: UserLogInResponse, context: Context) {
 
@@ -106,10 +97,6 @@ abstract class UserSettingsRepository {
     fun initUserSettings(context: Context) {
         if (checkIfLoggedIn()) {
             updateUserSettingsIfModified(context)
-        } else {
-            if (getPageGroupListCount() == 0) {
-                resetUserSettings(context)
-            }
         }
     }
 
@@ -143,9 +130,6 @@ abstract class UserSettingsRepository {
         return mUserSettingsDataService.getCurrentUserName()
     }
 
-//    fun getCurrentUser(): FirebaseUser? {
-//        return mUserSettingsDataService.getCurrentUser()
-//    }
 
     fun addPageToFavList(page: Page, context: Context): Boolean {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
@@ -187,58 +171,6 @@ abstract class UserSettingsRepository {
         return true
     }
 
-    fun addPageGroup(pageGroup: PageGroup, context: Context): Boolean {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        LoggerUtils.debugLog("addPageGroup: ${pageGroup.name}", this::class.java)
-
-        mUserSettingsDataService.addPageGroup(pageGroup,doOnSuccess ={executeBackGroundTask {
-                                                                saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)}},
-                                                        doOnFailure = {executeBackGroundTask {
-                                                            deletePageGroupFromLocalDb(pageGroup)
-                                                        }}
-                                                )
-        addPageGroupsToLocalDb(listOf<PageGroup>(pageGroup))
-        return true
-    }
-
-    fun deletePageGroup(pageGroup: PageGroup, context: Context): Boolean {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        LoggerUtils.debugLog("deletePageGroup: ${pageGroup.name}", this::class.java)
-
-        mUserSettingsDataService.deletePageGroup(pageGroup,doOnSuccess ={executeBackGroundTask {
-                                                                saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)}},
-                                                            doOnFailure = {executeBackGroundTask {
-                                                                addPageGroupsToLocalDb(listOf<PageGroup>(pageGroup))
-                                                            }}
-                                                )
-        deletePageGroupFromLocalDb(pageGroup)
-        return true
-    }
-
-    fun savePageGroup(oldPageGroup: PageGroup, pageGroup: PageGroup, context: Context): Boolean {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        LoggerUtils.debugLog("savePageGroup: ${pageGroup.name}", this::class.java)
-
-        mUserSettingsDataService.deletePageGroup(oldPageGroup,doOnSuccess =
-                                                        {executeBackGroundTask {
-                                                            mUserSettingsDataService.addPageGroup(pageGroup,doOnSuccess =
-                                                                    {executeBackGroundTask {
-                                                                        saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)}},
-                                                                    doOnFailure = {executeBackGroundTask {
-                                                                        addPageGroupsToLocalDb(listOf<PageGroup>(oldPageGroup))
-                                                                        deletePageGroupFromLocalDb(pageGroup)
-                                                                    }})
-                                                        }},
-                                                        doOnFailure = {executeBackGroundTask {
-                                                            addPageGroupsToLocalDb(listOf<PageGroup>(oldPageGroup))
-                                                            deletePageGroupFromLocalDb(pageGroup)
-                                                        }}
-                                                )
-        deletePageGroupFromLocalDb(oldPageGroup)
-        addPageGroupsToLocalDb(listOf<PageGroup>(pageGroup))
-        return true
-    }
-
     private fun executeBackGroundTask(task:()->Unit){
         LoggerUtils.debugLog("executeBackGroundTask", this::class.java)
         Observable.just(task)
@@ -259,8 +191,6 @@ abstract class UserSettingsRepository {
             userPreferenceData.id = UUID.randomUUID().toString()
             nukeUserPreferenceDataTable()
             addUserPreferenceDataToLocalDB(userPreferenceData)
-            nukePageGroupTable()
-            addPageGroupsToLocalDb(userPreferenceData.pageGroups.values.toList())
             saveLastUserSettingsUpdateTime(serverLastUserSettingsUpdateTime, context)
         }
     }
@@ -284,15 +214,10 @@ abstract class UserSettingsRepository {
 
     fun resetUserSettings(context: Context) {
         saveLastUserSettingsUpdateTime(0L, context)
-        resetUserSettings(getDefaultPageGroupSettings())
+        resetUserSettings()
     }
 
-    abstract protected fun resetUserSettings(defaultPageGroups: Map<String, PageGroup>)
-
-    private fun getDefaultPageGroupSettings(): Map<String, PageGroup> {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        return mUserSettingsDataService.getDefaultPageGroupSettings()
-    }
+    abstract protected fun resetUserSettings()
 
     companion object {
         @Volatile

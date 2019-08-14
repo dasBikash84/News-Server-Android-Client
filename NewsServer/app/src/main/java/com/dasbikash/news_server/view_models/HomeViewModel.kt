@@ -64,10 +64,6 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
         return mUserSettingsRepository.getUserPreferenceLiveData()
     }
 
-    fun getPageGroupsLiveData(): LiveData<List<PageGroup>> {
-        return mUserSettingsRepository.getPageGroupListLive()
-    }
-
     fun getSavedArticlesLiveData(): LiveData<List<SavedArticle>> {
         return mNewsDataRepository.getAllSavedArticle()
     }
