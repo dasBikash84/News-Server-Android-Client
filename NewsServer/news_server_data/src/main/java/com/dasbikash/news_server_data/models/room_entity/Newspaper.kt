@@ -37,8 +37,9 @@ data class Newspaper(
     @com.google.firebase.database.Exclude
     @Ignore
     private var position:Int?=null
-    fun getPosition():Int{
-        return id.subSequence(NP_ID_PREAMBLE.length,id.length).toString().toIntOrNull()!!
+    @Ignore
+    fun getNumberPartOfId():Int{
+        return id.substringAfterLast('_').toInt()
     }
     companion object{
         private const val NP_ID_PREAMBLE = "NP_ID_"

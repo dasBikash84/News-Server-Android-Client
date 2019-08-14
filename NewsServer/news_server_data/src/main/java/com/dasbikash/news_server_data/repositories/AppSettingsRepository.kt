@@ -41,9 +41,7 @@ abstract class AppSettingsRepository {
 
     abstract fun getNewsPapers(): List<Newspaper>
     abstract fun getNewsPapersLiveData(): LiveData<List<Newspaper>>
-    abstract fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page>
     abstract fun getPagesForNewspaper(newspaper: Newspaper): List<Page>
-    abstract fun getChildPagesForTopLevelPage(topLevelPage: Page): List<Page>
     abstract fun findMatchingPages(it: String): List<Page>
     abstract fun getNewsCategories(): List<NewsCategory>
 

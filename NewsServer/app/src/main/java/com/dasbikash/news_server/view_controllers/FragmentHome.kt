@@ -14,7 +14,6 @@
 package com.dasbikash.news_server.view_controllers
 
 import android.annotation.SuppressLint
-import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -400,7 +399,7 @@ class FragmentHome : Fragment() {
                 .subscribe {
                     val paperList = it
                     if (paperList.isNotEmpty()) {
-                        mNewsPaperListAdapter.submitList(paperList.sortedBy { it.getPosition() }.reversed().sortedBy { it.languageId }.reversed())
+                        mNewsPaperListAdapter.submitList(paperList.sortedBy { it.getNumberPartOfId() }.reversed().sortedBy { it.languageId }.reversed())
                         showNewsPaperMenu()
                     } else {
                         activity!!.finish()
@@ -478,7 +477,7 @@ class FragmentHome : Fragment() {
                             override fun onNext(pageList: List<Page>) {
                                 mArticlePreviewHolderDySum = 0
                                 showPageSearchBox()
-                                mPageArticlePreviewHolderAdapter.submitList(pageList.sortedBy { it.id })
+                                mPageArticlePreviewHolderAdapter.submitList(pageList.sortedBy { it.getNumberPartOfId() })
                             }
 
                             override fun onError(e: Throwable) {
@@ -758,9 +757,8 @@ class SearchResultEntryViewHolder(itemView: View) : PageViewHolder(itemView) {
         bottomBar.visibility = View.GONE
     }
 
-    override fun bind(page: Page, parentPage: Page?, newspaper: Newspaper) {
+    override fun bind(page: Page, newspaper: Newspaper) {
         val pageLabelBuilder = StringBuilder(page.name!!).append(" | ")
-        parentPage?.let { pageLabelBuilder.append(it.name).append(" | ") }
         pageLabelBuilder.append(newspaper.name)
         textView.setText(pageLabelBuilder.toString())
 
@@ -772,7 +770,7 @@ class SearchResultEntryViewHolder(itemView: View) : PageViewHolder(itemView) {
 }
 
 abstract class PageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    abstract fun bind(page: Page, parentPage: Page?, newspaper: Newspaper)
+    abstract fun bind(page: Page, newspaper: Newspaper)
 }
 
 abstract class PageListAdapter2<VH : PageViewHolder>() : ListAdapter<Page, VH>(PageDiffCallback) {
@@ -785,15 +783,14 @@ abstract class PageListAdapter2<VH : PageViewHolder>() : ListAdapter<Page, VH>(P
                         .subscribeOn(Schedulers.io())
                         .map {
                             val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(holder.itemView.context)
-                            val parentPage = appSettingsRepository.findPageById(it.parentPageId!!)
                             val newspaper = appSettingsRepository.getNewspaperByPage(it)
-                            Triple(it, parentPage, newspaper)
+                            Pair(it, newspaper)
                         }
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<Triple<Page, Page?, Newspaper>>() {
+                        .subscribeWith(object : DisposableObserver<Pair<Page, Newspaper>>() {
                             override fun onComplete() {}
-                            override fun onNext(triple: Triple<Page, Page?, Newspaper>) {
-                                holder.bind(triple.first, triple.second, triple.third)
+                            override fun onNext(dataPair: Pair<Page, Newspaper>) {
+                                holder.bind(dataPair.first, dataPair.second)
                             }
 
                             override fun onError(e: Throwable) {

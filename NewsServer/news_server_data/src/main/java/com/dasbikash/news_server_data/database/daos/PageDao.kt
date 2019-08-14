@@ -29,14 +29,8 @@ internal interface PageDao {
     @Query("DELETE FROM Page")
     fun nukeTable()
 
-    @Query("SELECT * FROM Page WHERE topLevelPage AND newspaperId=:newspaperId")
-    fun getTopPagesByNewsPaperId(newspaperId: String):List<Page>
-
     @Query("SELECT * FROM Page WHERE id = :pageId")
     fun findById(pageId:String):Page?
-
-    @Query("SELECT * FROM Page WHERE parentPageId= :parentPageId")
-    fun getChildPagesByTopLevelPageId(parentPageId: String):List<Page>
 
     @Query("SELECT * FROM Page WHERE name LIKE :nameContent")
     fun findByNameContent(nameContent: String): List<Page>

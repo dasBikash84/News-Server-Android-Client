@@ -68,16 +68,8 @@ internal class AppSettingsRepositoryRoomImpl internal constructor(context: Conte
         return mDatabase.newsPaperDao.findAllLiveData()
     }
 
-    override fun getTopPagesForNewspaper(newspaper: Newspaper): List<Page> {
-        return mDatabase.pageDao.getTopPagesByNewsPaperId(newspaper.id)
-    }
-
     override fun getPagesForNewspaper(newspaper: Newspaper): List<Page> {
         return mDatabase.pageDao.getPagesByNewsPaperId(newspaper.id)
-    }
-
-    override fun getChildPagesForTopLevelPage(topLevelPage: Page):List<Page>{
-        return mDatabase.pageDao.getChildPagesByTopLevelPageId(topLevelPage.id)
     }
 
     override fun getLanguageByPage(page: Page): Language {

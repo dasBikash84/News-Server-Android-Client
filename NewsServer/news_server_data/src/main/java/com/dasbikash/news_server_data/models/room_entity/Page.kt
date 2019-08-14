@@ -44,12 +44,18 @@ data class Page(
     @Ignore
     var active:Boolean = true
 
+    @Ignore
+    fun getNumberPartOfId():Int{
+        return id.substringAfterLast('_').toInt()
+    }
+
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     constructor(parcel: Parcel) : this(
+            parcel.readString()!!,
             parcel.readString(),
             parcel.readString(),
             parcel.readString(),
-            parcel.readString()
+            parcel.readString()!!
             ) {
         topLevelPage = parcel.readByte() != 0.toByte()
         hasChild = parcel.readByte() != 0.toByte()
@@ -57,7 +63,6 @@ data class Page(
     }
 
     companion object {
-        const val TOP_LEVEL_PAGE_PARENT_ID = "PAGE_ID_0"
 
         @JvmField
         @Ignore
@@ -80,6 +85,7 @@ data class Page(
         parcel.writeString(newspaperId)
         parcel.writeString(parentPageId)
         parcel.writeString(name)
+        parcel.writeString(articleFetchStatus)
         parcel.writeByte(if (topLevelPage) 1 else 0)
         parcel.writeByte(if (hasChild) 1 else 0)
         parcel.writeByte(if (hasData) 1 else 0)

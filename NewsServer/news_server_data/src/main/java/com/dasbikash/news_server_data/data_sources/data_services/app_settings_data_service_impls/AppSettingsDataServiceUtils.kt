@@ -26,57 +26,11 @@ internal object AppSettingsDataServiceUtils {
     fun processDefaultAppSettingsData(defaultAppSettings: DefaultAppSettings):
             DefaultAppSettings {
 
-        defaultAppSettings.newspapers?.let {
-
-            val filteredNewspaperMap = HashMap<String, Newspaper>()
-            val filteredPageMap = HashMap<String, Page>()
-
-
-            it.values
-                    .filter { it.active }
-                    .forEach {
-                        filteredNewspaperMap.put(it.id, it)
-                    }
-            defaultAppSettings.newspapers = filteredNewspaperMap
-
-            defaultAppSettings.pages?.let {
-
-                val allPages = it.values
-
-                val inactiveTopPageIds =
-                        allPages
-                                .asSequence()
-                                .filter { it.parentPageId == Page.TOP_LEVEL_PAGE_PARENT_ID && !it.active }
-                                .map { it.id }
-                                .toCollection(mutableListOf<String>())
-
-                LoggerUtils.debugLog("inactiveTopPageIds: ${inactiveTopPageIds.size}",this::class.java)
-                allPages
-                        .asSequence()
-                        .filter {
-                            it.active &&
-                            !inactiveTopPageIds.contains(it.parentPageId) &&
-                            filteredNewspaperMap.values.map { it.id }.contains(it.newspaperId)
-                        }
-                        .forEach { filteredPageMap.put(it.id, it) }
-
-                filteredPageMap
-                        .values
-                        .filter {
-                            it.parentPageId == Page.TOP_LEVEL_PAGE_PARENT_ID
-                        }
-                        .forEach {
-                            val topPage = it
-                            if (filteredPageMap.values.count {it.parentPageId == topPage.id} > 0){
-                                topPage.hasChild = true
-                            }
-                        }
-
-                defaultAppSettings.pages = filteredPageMap
-                LoggerUtils.debugLog("filteredPageMap: ${filteredPageMap.size}",this::class.java)
-
-            }
+        defaultAppSettings.apply {
+            newspapers = HashMap(newspapers!!.filter { it.value.active })
+            pages = HashMap(pages!!.filter { newspapers!!.keys.contains(it.value.newspaperId!!) && it.value.topLevelPage && it.value.active })
         }
+
         return defaultAppSettings
     }
 
