@@ -23,7 +23,6 @@ import com.dasbikash.news_server_data.exceptions.AuthServerException
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
 import com.dasbikash.news_server_data.models.room_entity.FavouritePageEntry
 import com.dasbikash.news_server_data.models.room_entity.Page
-import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
 import com.dasbikash.news_server_data.repositories.room_impls.UserSettingsRepositoryRoomImpl
 import com.dasbikash.news_server_data.utills.ExceptionUtils
@@ -46,8 +45,8 @@ abstract class UserSettingsRepository {
     abstract protected fun getUserPreferenceDataFromLocalDB(): List<FavouritePageEntry>
     abstract protected fun addToFavouritePageEntry(page: Page):Boolean
     abstract protected fun removeFromFavouritePageEntry(page: Page):Boolean
-    abstract fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?>
     abstract fun getFavouritePageEntries(): List<FavouritePageEntry>
+    abstract fun getFavouritePageEntryLiveData(): LiveData<List<FavouritePageEntry>>
 
     private fun doPostLogInProcessing(userLogInResponse: UserLogInResponse, context: Context) {
 

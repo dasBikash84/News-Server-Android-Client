@@ -38,6 +38,7 @@ internal object RealtimeDBUserSettingsUtils {
 
     private const val MAX_WAITING_MS_FOR_NET_RESPONSE = 30000L
     private const val FAV_PAGE_ID_MAP_NODE = "favPageIdMap"
+    private const val PAGE_GROUPS_NODE = "pageGroups"
     private const val FAV_PAGE_ENTRY_MAP_NODE = "favPageEntryMap"
     private const val UPDATE_LOG_NODE = "updateLog"
 
@@ -116,6 +117,7 @@ internal object RealtimeDBUserSettingsUtils {
                                     }
                                     userSettingsData.favPageEntryMap = newFavPageEntryMap.toMap()
                                     getUserSettingsNodes(user).favPageIdMapRef.setValue(null)
+                                    getUserSettingsNodes(user).pageGroupMapRef.setValue(null)
                                     getUserSettingsNodes(user).favPageEntryMap.setValue(userSettingsData.favPageEntryMap)
                                 }
                                 data = userSettingsData.favPageEntryMap.values.toList()
@@ -141,6 +143,7 @@ internal object RealtimeDBUserSettingsUtils {
     private fun getUserSettingsNodes(user: FirebaseUser) = object {
         val rootUserSettingsNode = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid)
         val favPageIdMapRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(FAV_PAGE_ID_MAP_NODE)
+        val pageGroupMapRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(PAGE_GROUPS_NODE)
         val favPageEntryMap = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(FAV_PAGE_ENTRY_MAP_NODE)
         val updateLogRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(UPDATE_LOG_NODE)
     }

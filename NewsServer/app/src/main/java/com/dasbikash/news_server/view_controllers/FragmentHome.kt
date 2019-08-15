@@ -33,7 +33,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server.view_controllers.view_helpers.PageDiffCallback
-import com.dasbikash.news_server.view_models.HomeViewModel
+import com.dasbikash.news_server.view_models.NSViewModel
 import com.dasbikash.news_server_data.data_sources.data_services.AppVersionDetails
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.DataServerException
@@ -388,7 +388,7 @@ class FragmentHome : Fragment() {
         mPageSearchResultHolder.adapter = mSearchResultListAdapter
         mNewsPaperListAdapter = NewsPaperListAdapter { doOnNewsPaperNameClick(it) }
         mNewsPaperMenuHolder.adapter = mNewsPaperListAdapter
-        mPageArticlePreviewHolderAdapter = PageListAdapter(this, ViewModelProviders.of(activity!!).get(HomeViewModel::class.java))
+        mPageArticlePreviewHolderAdapter = PageListAdapter(this, ViewModelProviders.of(activity!!).get(NSViewModel::class.java))
         mPageArticlePreviewHolder.adapter = mPageArticlePreviewHolderAdapter
         mPageSearchResultContainer.visibility = View.GONE
 
@@ -576,13 +576,13 @@ class NewsPaperNameHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 }
 
 class PageListAdapter(val lifeCycleOwner: LifecycleOwner,
-                      val homeViewModel: HomeViewModel) :
+                      val NSViewModel: NSViewModel) :
         ListAdapter<Page, LatestArticlePreviewHolder>(PageDiffCallback), DefaultLifecycleObserver {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LatestArticlePreviewHolder {
         return LatestArticlePreviewHolder(
                 LayoutInflater.from(parent.context)
-                        .inflate(R.layout.view_article_preview, parent, false), lifeCycleOwner, homeViewModel)
+                        .inflate(R.layout.view_article_preview, parent, false), lifeCycleOwner, NSViewModel)
     }
 
     override fun onBindViewHolder(holder: LatestArticlePreviewHolder, position: Int) {
@@ -591,7 +591,7 @@ class PageListAdapter(val lifeCycleOwner: LifecycleOwner,
 }
 
 class LatestArticlePreviewHolder(itemView: View, lifeCycleOwner: LifecycleOwner,
-                                 val homeViewModel: HomeViewModel)
+                                 val NSViewModel: NSViewModel)
     : RecyclerView.ViewHolder(itemView), DefaultLifecycleObserver {
 
     val pageTitle: TextView
@@ -679,7 +679,7 @@ class LatestArticlePreviewHolder(itemView: View, lifeCycleOwner: LifecycleOwner,
         }
         val uuid = UUID.randomUUID()
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(itemView.context)
-        mdisposable = homeViewModel.getLatestArticleProvider(Pair(uuid, mPage))
+        mdisposable = NSViewModel.getLatestArticleProvider(Pair(uuid, mPage))
                 .filter { it.first == uuid }
                 .map {
                     it.second?.let {

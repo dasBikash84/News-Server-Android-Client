@@ -16,34 +16,30 @@ package com.dasbikash.news_server.view_models
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import com.dasbikash.news_server_data.exceptions.DataNotFoundException
-import com.dasbikash.news_server_data.exceptions.DataServerException
-import com.dasbikash.news_server_data.models.room_entity.*
+import com.dasbikash.news_server_data.models.room_entity.Article
+import com.dasbikash.news_server_data.models.room_entity.FavouritePageEntry
+import com.dasbikash.news_server_data.models.room_entity.Page
+import com.dasbikash.news_server_data.models.room_entity.SavedArticle
 import com.dasbikash.news_server_data.repositories.AppSettingsRepository
 import com.dasbikash.news_server_data.repositories.NewsDataRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
 
-class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mApplication) {
+class NSViewModel(private val mApplication: Application) : AndroidViewModel(mApplication) {
 
     private val mAppSettingsRepository: AppSettingsRepository
     private val mUserSettingsRepository: UserSettingsRepository
     private val mNewsDataRepository: NewsDataRepository
 
-    private val disposable: CompositeDisposable = CompositeDisposable();
-
     private val MAX_PARALLEL_ARTICLE_REQUEST = 10
     private var currentArticleRequestCount = AtomicInteger(0)
-
     private val MIN_ARTICLE_REFRESH_INTERVAL = 60 * 1000L
-
 
     init {
         mAppSettingsRepository = RepositoryFactory.getAppSettingsRepository(mApplication)
@@ -51,17 +47,8 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
         mNewsDataRepository = RepositoryFactory.getNewsDataRepository(mApplication)
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        disposable.clear()
-    }
-
-    fun getNewsPapersLiveData(): LiveData<List<Newspaper>> {
-        return mAppSettingsRepository.getNewsPapersLiveData()
-    }
-
-    fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?> {
-        return mUserSettingsRepository.getUserPreferenceLiveData()
+    fun getUserPreferenceLiveData(): LiveData<List<FavouritePageEntry>> {
+        return mUserSettingsRepository.getFavouritePageEntryLiveData()
     }
 
     fun getSavedArticlesLiveData(): LiveData<List<SavedArticle>> {
@@ -119,6 +106,4 @@ class HomeViewModel(private val mApplication: Application) : AndroidViewModel(mA
                     amDisposed = true
                 }
     }
-
-
 }

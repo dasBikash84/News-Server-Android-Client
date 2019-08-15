@@ -18,7 +18,6 @@ import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.database.NewsServerDatabase
 import com.dasbikash.news_server_data.models.room_entity.FavouritePageEntry
 import com.dasbikash.news_server_data.models.room_entity.Page
-import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 
 internal class UserSettingsRepositoryRoomImpl internal constructor(context: Context) :
@@ -53,12 +52,12 @@ internal class UserSettingsRepositoryRoomImpl internal constructor(context: Cont
         }
     }
 
-    override fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?> {
-        return mDatabase.userPreferenceDataDao.findUserPreferenceDataLiveData()
-    }
-
     override fun getFavouritePageEntries(): List<FavouritePageEntry> {
         return mDatabase.favouritePageEntryDao.findAll()
+    }
+
+    override fun getFavouritePageEntryLiveData(): LiveData<List<FavouritePageEntry>> {
+        return mDatabase.favouritePageEntryDao.findAllLiveData()
     }
 
     override fun resetUserSettings() {

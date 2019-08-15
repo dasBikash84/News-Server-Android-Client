@@ -21,7 +21,6 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -36,11 +35,11 @@ import com.dasbikash.news_server.utils.debugLog
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.view_controllers.view_helpers.PageDiffCallback
-import com.dasbikash.news_server.view_models.HomeViewModel
+import com.dasbikash.news_server.view_models.NSViewModel
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
+import com.dasbikash.news_server_data.models.room_entity.FavouritePageEntry
 import com.dasbikash.news_server_data.models.room_entity.Newspaper
 import com.dasbikash.news_server_data.models.room_entity.Page
-import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
@@ -66,8 +65,6 @@ class FragmentFavourites : Fragment() {
 
     private val disposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
-    private lateinit var mHomeViewModel: HomeViewModel
-
     private val postLogInAction = { mNoFavPageLogInButton.visibility = View.GONE }
 
 
@@ -87,7 +84,6 @@ class FragmentFavourites : Fragment() {
     private fun init() {
         mActionBarHeight = DisplayUtils.dpToPx(40, context!!).toInt()
         mFavouritePagesListAdapter = FavouritePagesListAdapter()
-        mHomeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
         mFavItemsHolder.adapter = mFavouritePagesListAdapter
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
         val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
@@ -98,25 +94,26 @@ class FragmentFavourites : Fragment() {
             postLogInAction()
         }
 
-        mHomeViewModel.getUserPreferenceLiveData()
-                .observe(activity!!, object : Observer<UserPreferenceData?> {
-                    override fun onChanged(userPreferenceData: UserPreferenceData?) {
-                        if (userPreferenceData == null) {
+        ViewModelProviders.of(activity!!).get(NSViewModel::class.java)
+                .getUserPreferenceLiveData()
+                .observe(activity!!, object : Observer<List<FavouritePageEntry>> {
+                    override fun onChanged(userPreferenceData: List<FavouritePageEntry>) {
+                        if (userPreferenceData.isEmpty()) {
                             mNoFavPageMsgHolder.visibility = View.VISIBLE
                             mFavItemsHolder.visibility = View.GONE
                         }
                         userPreferenceData.let {
-                            val favouritePageIdList = it?.favouritePageIds?.toList() ?: emptyList()
-                            disposable.add(Observable.just(favouritePageIdList)
+//                            val favouritePageIdList = it?.favouritePageIds?.toList() ?: emptyList()
+                            disposable.add(Observable.just(it)
                                     .subscribeOn(Schedulers.io())
                                     .map {
                                         it.asSequence()
                                                 .map {
                                                     debugLog(it.toString())
                                                     it
-                                                }.filter { appSettingsRepository.findPageById(it) != null }
+                                                }.filter { appSettingsRepository.findPageById(it.pageId) != null }
                                                 .map {
-                                                    val page = appSettingsRepository.findPageById(it)!!
+                                                    val page = appSettingsRepository.findPageById(it.pageId)!!
                                                     debugLog("$it : $page")
                                                     page
                                                 }

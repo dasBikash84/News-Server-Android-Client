@@ -17,7 +17,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.TypedValue
 import android.view.*
 import android.widget.ImageButton
 import android.widget.ProgressBar
@@ -31,7 +30,7 @@ import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.view_controllers.view_helpers.ArticlePreviewListAdapter
-import com.dasbikash.news_server.view_models.PageViewViewModel
+import com.dasbikash.news_server.view_models.NSViewModel
 import com.dasbikash.news_server_data.exceptions.DataNotFoundException
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.*
@@ -134,20 +133,11 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
         setListners()
         init()
 
-        ViewModelProviders.of(activity!!).get(PageViewViewModel::class.java)
+        ViewModelProviders.of(activity!!).get(NSViewModel::class.java)
                 .getUserPreferenceLiveData()
-                .observe(this, object : androidx.lifecycle.Observer<UserPreferenceData?> {
-                    override fun onChanged(userPreferenceData: UserPreferenceData?) {
-                        userPreferenceData?.let {
-                            it.favouritePageIds.asSequence().forEach {
-                                if (it.equals(mPage.id)) {
-                                    mIsPageOnFavList = true
-                                    return@let
-                                }
-                            }
-                            mIsPageOnFavList = false
-                        }
-                        activity!!.invalidateOptionsMenu()
+                .observe(this, object : androidx.lifecycle.Observer<List<FavouritePageEntry>> {
+                    override fun onChanged(userPreferenceData: List<FavouritePageEntry>) {
+                        mIsPageOnFavList = (userPreferenceData.count { it.pageId==mPage.id } > 0)
                     }
                 })
     }
