@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.fcm.NewsServerFirebaseMessagingService
 import com.dasbikash.news_server.utils.DialogUtils
 import com.dasbikash.news_server.utils.DisplayUtils
 import com.dasbikash.news_server.utils.LifeCycleAwareCompositeDisposable
@@ -199,11 +200,18 @@ class FavouritePagesListAdapter() :
     }
 
     override fun onBindViewHolder(holder: FavouritePagePreviewHolder, position: Int) {
+        val page = getItem(position)
         holder.itemView.setOnClickListener {
             it.context.startActivity(
-                    ActivityArticlePreview.getIntentForPageBrowsing(it.context, getItem(position)))
+                    ActivityArticlePreview.getIntentForPageBrowsing(it.context, page))
         }
         holder.bind(getItem(position))
+    }
+
+    override fun onCurrentListChanged(previousList: MutableList<Page>, currentList: MutableList<Page>) {
+        super.onCurrentListChanged(previousList, currentList)
+        debugLog("previousList.size: ${previousList.size}")
+        debugLog("currentList.size: ${currentList.size}")
     }
 }
 
@@ -273,7 +281,16 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
             workInProcessWindowOperator.loadWorkInProcessWindow()
             Observable.just(page)
                     .subscribeOn(Schedulers.io())
-                    .map { userSettingsRepository.removeFromFavouritePageEntryList(page, viewHolder.itemView.context) }
+                    .map {
+                        val favouritePageEntry = userSettingsRepository.getFavouritePageEntries().find { it.pageId==page.id }!!
+                        if (!favouritePageEntry.subscribed){
+                            return@map userSettingsRepository.removeFromFavouritePageEntryList(page, viewHolder.itemView.context)
+                        }else {
+                            return@map userSettingsRepository.removeFromFavouritePageEntryList(page, viewHolder.itemView.context, doOnSuccess = {
+                                NewsServerFirebaseMessagingService.unSubscribeFromTopic(page.id)
+                            })
+                        }
+                    }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(object : io.reactivex.Observer<Boolean> {
                         override fun onComplete() {
