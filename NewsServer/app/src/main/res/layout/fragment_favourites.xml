@@ -19,15 +19,14 @@
     android:background="@color/snow_white2">
 
     <LinearLayout
-        android:id="@+id/no_fav_page_found_message_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone">
+        android:orientation="vertical">
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/no_fav_page_found_message_button"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

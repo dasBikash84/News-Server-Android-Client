@@ -138,6 +138,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
                 .observe(this, object : androidx.lifecycle.Observer<List<FavouritePageEntry>> {
                     override fun onChanged(userPreferenceData: List<FavouritePageEntry>) {
                         mIsPageOnFavList = (userPreferenceData.count { it.pageId==mPage.id } > 0)
+                        activity!!.invalidateOptionsMenu()
                     }
                 })
     }

@@ -91,7 +91,7 @@ internal object RealtimeDBUserSettingsUtils {
             throw WrongCredentialException()
         }
 
-        var data: List<FavouritePageEntry>? = null
+        var data: List<FavouritePageEntry> = emptyList()
         val lock = Object()
 
         var userSettingsException: SettingsServerException? = null
@@ -121,11 +121,11 @@ internal object RealtimeDBUserSettingsUtils {
                                     getUserSettingsNodes(user).favPageEntryMap.setValue(userSettingsData.favPageEntryMap)
                                 }
                                 data = userSettingsData.favPageEntryMap.values.toList()
-                                synchronized(lock) { lock.notify() }
                             } catch (ex: Exception) {
                                 userSettingsException = UserSettingsNotFoundException(ex)
                             }
                         }
+                        synchronized(lock) { lock.notify() }
                     }
                 })
         LoggerUtils.debugLog("before synchronized(lock)", this@RealtimeDBUserSettingsUtils::class.java)
@@ -134,10 +134,7 @@ internal object RealtimeDBUserSettingsUtils {
         }catch (ex:InterruptedException){}
         LoggerUtils.debugLog("after synchronized(lock)", this@RealtimeDBUserSettingsUtils::class.java)
         userSettingsException?.let { throw userSettingsException as SettingsServerException }
-        if (data == null) {
-            throw SettingsServerUnavailable()
-        }
-        return data!!
+        return data
     }
 
     private fun getUserSettingsNodes(user: FirebaseUser) = object {

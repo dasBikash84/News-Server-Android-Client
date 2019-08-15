@@ -56,7 +56,7 @@ class FragmentFavourites : Fragment() {
 
     private lateinit var mCoordinatorLayout: CoordinatorLayout
     private lateinit var mFavItemsHolder: RecyclerView
-    private lateinit var mNoFavPageMsgHolder: LinearLayout
+    private lateinit var mNoFavPageMsg: MaterialButton
     private lateinit var mNoFavPageLogInButton: MaterialButton
 
     private var mActionBarHeight = 0
@@ -99,7 +99,7 @@ class FragmentFavourites : Fragment() {
                 .observe(activity!!, object : Observer<List<FavouritePageEntry>> {
                     override fun onChanged(userPreferenceData: List<FavouritePageEntry>) {
                         if (userPreferenceData.isEmpty()) {
-                            mNoFavPageMsgHolder.visibility = View.VISIBLE
+                            mNoFavPageMsg.visibility = View.VISIBLE
                             mFavItemsHolder.visibility = View.GONE
                         }
                         userPreferenceData.let {
@@ -125,11 +125,11 @@ class FragmentFavourites : Fragment() {
                                         override fun onComplete() {}
                                         override fun onNext(pageList: List<Page>) {
                                             if (pageList.isEmpty()) {
-                                                mNoFavPageMsgHolder.visibility = View.VISIBLE
                                                 mFavItemsHolder.visibility = View.GONE
+                                                mNoFavPageMsg.visibility = View.VISIBLE
                                             } else {
-                                                mNoFavPageMsgHolder.visibility = View.GONE
                                                 mFavItemsHolder.visibility = View.VISIBLE
+                                                mNoFavPageMsg.visibility = View.GONE
                                             }
                                             pageList.asSequence().forEach { debugLog(it.toString()) }
                                             mFavouritePagesListAdapter.submitList(pageList)
@@ -145,13 +145,18 @@ class FragmentFavourites : Fragment() {
     private fun findViewComponents(view: View) {
         mCoordinatorLayout = view.findViewById(R.id.fav_frag_coor_layout)
         mFavItemsHolder = view.findViewById(R.id.fav_frag_item_holder)
-        mNoFavPageMsgHolder = view.findViewById(R.id.no_fav_page_found_message_holder)
+        mNoFavPageMsg = view.findViewById(R.id.no_fav_page_found_message_button)
         mNoFavPageLogInButton = view.findViewById(R.id.no_fav_page_found_log_in_button)
     }
 
     override fun onResume() {
         super.onResume()
         (activity as AppCompatActivity).supportActionBar?.title = TITLE_TEXT
+        if (RepositoryFactory.getUserSettingsRepository(context!!).checkIfLoggedIn()){
+            mNoFavPageLogInButton.visibility = View.GONE
+        }else{
+            mNoFavPageLogInButton.visibility = View.VISIBLE
+        }
     }
 
     private var mArticlePreviewHolderDySum = 0
