@@ -27,6 +27,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.fcm.NewsServerFirebaseMessagingService
 import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server.view_controllers.interfaces.WorkInProcessWindowOperator
 import com.dasbikash.news_server.view_controllers.view_helpers.ArticlePreviewListAdapter
@@ -53,11 +54,15 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
     companion object {
         private val BOTTOM_LOADING_SCREEN_ENABLER_COUNT = 3
         private const val ARTICLE_LOAD_CHUNK_SIZE = 10
-        const val LOG_IN_REQ_CODE = 7777
-        const val ARG_FOR_PAGE = "com.dasbikash.news_server.views.FragmentArticlePreviewForPage.ARG_FOR_PAGE"
-        const val ARG_FOR_PURPOSE = "com.dasbikash.news_server.views.FragmentArticlePreviewForPage.ARG_FOR_PURPOSE"
-        const val ARG_VALUE_FOR_LATEST_ARTICLE_DISPLAY = "com.dasbikash.news_server.views.FragmentArticlePreviewForPage.LATEST_ARTICLE_DISPLAY"
-        const val ARG_VALUE_FOR_PAGE_BROWSING = "com.dasbikash.news_server.views.FragmentArticlePreviewForPage.PAGE_BROWSING"
+        private const val LOG_IN_REQ_CODE = 7777
+        private const val SUBSCRIBTION_PROMPT = "Subscribe for notification on new news for this page?"
+        private const val UN_SUBSCRIBTION_PROMPT = "Un-Subscribe from notifications?"
+        private const val SUBSCRIBED_MESSAGE = "Subscribed for notifications."
+        private const val UN_SUBSCRIBED_MESSAGE = "Un-Subscribed from notifications."
+        private const val ARG_FOR_PAGE = "com.dasbikash.news_server.views.FragmentArticlePreviewForPage.ARG_FOR_PAGE"
+        private const val ARG_FOR_PURPOSE = "com.dasbikash.news_server.views.FragmentArticlePreviewForPage.ARG_FOR_PURPOSE"
+        private const val ARG_VALUE_FOR_LATEST_ARTICLE_DISPLAY = "com.dasbikash.news_server.views.FragmentArticlePreviewForPage.LATEST_ARTICLE_DISPLAY"
+        private const val ARG_VALUE_FOR_PAGE_BROWSING = "com.dasbikash.news_server.views.FragmentArticlePreviewForPage.PAGE_BROWSING"
 
         fun getInstanceForLatestArticleDisplay(page: Page): FragmentArticlePreviewForPage {
             val args = Bundle()
@@ -83,6 +88,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
     private lateinit var mPage: Page
     private lateinit var mLanguage: Language
     private lateinit var mNewspaper: Newspaper
+    private var mFavouritePageEntry:FavouritePageEntry?=null
 
     private lateinit var mCenterLoadingScreen: LinearLayoutCompat
     private lateinit var mBottomLoadingScreen: ProgressBar
@@ -97,7 +103,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
 
     private var mHasJumpedToLatestArticle = OnceSettableBoolean()
 
-    private var mIsPageOnFavList = false
+//    private var mIsPageOnFavList = false
 
     private lateinit var mAppSettingsRepository: AppSettingsRepository
     private lateinit var mUserSettingsRepository: UserSettingsRepository
@@ -137,7 +143,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
                 .getUserPreferenceLiveData()
                 .observe(this, object : androidx.lifecycle.Observer<List<FavouritePageEntry>> {
                     override fun onChanged(userPreferenceData: List<FavouritePageEntry>) {
-                        mIsPageOnFavList = (userPreferenceData.count { it.pageId==mPage.id } > 0)
+                        mFavouritePageEntry = userPreferenceData.find { it.pageId == mPage.id }
                         activity!!.invalidateOptionsMenu()
                     }
                 })
@@ -306,8 +312,17 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_article_previre_for_page, menu)
 
-        menu.findItem(R.id.add_to_favourites_menu_item).setVisible(!mIsPageOnFavList)
-        menu.findItem(R.id.remove_from_favourites_menu_item).setVisible(mIsPageOnFavList)
+        if (mFavouritePageEntry !=null){
+            menu.findItem(R.id.add_to_favourites_menu_item).setVisible(false)
+            menu.findItem(R.id.remove_from_favourites_menu_item).setVisible(true)
+            menu.findItem(R.id.subscribe_menu_item).setVisible(!mFavouritePageEntry!!.subscribed)
+            menu.findItem(R.id.unsubscribe_menu_item).setVisible(mFavouritePageEntry!!.subscribed)
+        }else{
+            menu.findItem(R.id.add_to_favourites_menu_item).setVisible(true)
+            menu.findItem(R.id.remove_from_favourites_menu_item).setVisible(false)
+            menu.findItem(R.id.subscribe_menu_item).setVisible(false)
+            menu.findItem(R.id.unsubscribe_menu_item).setVisible(false)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -321,10 +336,75 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
                     removePageFromFavListAction()
                     true
                 }
+                R.id.subscribe_menu_item -> {
+                    subscribeMenuAction()
+                    true
+                }
+                R.id.unsubscribe_menu_item -> {
+                    unSubscribeMenuAction()
+                    true
+                }
                 else -> super.onOptionsItemSelected(item)
             }
         }
         return false
+    }
+
+    private fun unSubscribeMenuAction() {
+        DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
+                message = UN_SUBSCRIBTION_PROMPT,doOnPositivePress = {subscribtionAction(SUBSCRIBTION_ACTION.UNSUBSCRIBE)}
+        )).show()
+    }
+
+    private fun subscribeMenuAction() {
+        DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
+                message = SUBSCRIBTION_PROMPT,doOnPositivePress = {subscribtionAction(SUBSCRIBTION_ACTION.SUBSCRIBE)}
+        )).show()
+    }
+
+    private enum class SUBSCRIBTION_ACTION{
+        SUBSCRIBE,UNSUBSCRIBE
+    }
+
+    private fun subscribtionAction(subscribtionAction:SUBSCRIBTION_ACTION) {
+        mFavouritePageEntry?.let {
+            showLoadingScreen()
+            mDisposable.add(
+                    Observable.just(it)
+                    .subscribeOn(Schedulers.io())
+                    .map {
+                        val pageId = it.pageId
+                        if (subscribtionAction == SUBSCRIBTION_ACTION.UNSUBSCRIBE) {
+                            mUserSettingsRepository.unSubscribeFromFavouritePageEntry(
+                                    it, context!!, doOnSuccess = { NewsServerFirebaseMessagingService.unSubscribeFromTopic(pageId) }
+                            )
+                        }else{
+                            mUserSettingsRepository.subscribeToFavouritePageEntry(
+                                    it, context!!, doOnSuccess = { NewsServerFirebaseMessagingService.subscribeToTopic(pageId) }
+                            )
+                        }
+                    }
+                    .doOnDispose { hideLoadingScreens() }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(object : DisposableObserver<Boolean>() {
+                        override fun onComplete() {
+                            hideLoadingScreens()
+                        }
+
+                        override fun onNext(result: Boolean) {
+                            if (result){
+                                when(subscribtionAction){
+                                    SUBSCRIBTION_ACTION.SUBSCRIBE ->showShortSnack(SUBSCRIBED_MESSAGE)
+                                    SUBSCRIBTION_ACTION.UNSUBSCRIBE ->showShortSnack(UN_SUBSCRIBED_MESSAGE)
+                                }
+                            }
+                        }
+                        override fun onError(e: Throwable) {
+                            hideLoadingScreens()
+                        }
+
+                    }))
+        }
     }
 
     private fun removePageFromFavListAction() =
@@ -489,8 +569,20 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
                             .subscribeOn(Schedulers.io())
                             .map {
                                 when (action) {
-                                    PAGE_FAV_STATUS_CHANGE_ACTION.ADD -> return@map mUserSettingsRepository.addPageToFavList(mPage, context!!)
-                                    PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE -> return@map mUserSettingsRepository.removePageFromFavList(mPage, context!!)
+                                    PAGE_FAV_STATUS_CHANGE_ACTION.ADD -> {
+                                        return@map mUserSettingsRepository.addToFavouritePageEntryList(mPage, context!!)
+                                    }
+                                    PAGE_FAV_STATUS_CHANGE_ACTION.REMOVE ->  {
+                                        if (mFavouritePageEntry==null || !mFavouritePageEntry!!.subscribed){
+                                            return@map mUserSettingsRepository.removeFromFavouritePageEntryList(mPage, context!!)
+                                        }else {
+                                            val pageId = mFavouritePageEntry!!.pageId
+
+                                            return@map mUserSettingsRepository.removeFromFavouritePageEntryList(mPage, context!!, doOnSuccess = {
+                                                NewsServerFirebaseMessagingService.unSubscribeFromTopic(pageId)
+                                            })
+                                        }
+                                    }
                                 }
                             }
                             .observeOn(AndroidSchedulers.mainThread())

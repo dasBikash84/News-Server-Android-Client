@@ -17,7 +17,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -274,7 +273,7 @@ class FavPageSwipeToDeleteCallback(val favouritePagesListAdapter: FavouritePages
             workInProcessWindowOperator.loadWorkInProcessWindow()
             Observable.just(page)
                     .subscribeOn(Schedulers.io())
-                    .map { userSettingsRepository.removePageFromFavList(page, viewHolder.itemView.context) }
+                    .map { userSettingsRepository.removeFromFavouritePageEntryList(page, viewHolder.itemView.context) }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(object : io.reactivex.Observer<Boolean> {
                         override fun onComplete() {

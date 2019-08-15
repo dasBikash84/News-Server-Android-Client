@@ -27,4 +27,5 @@ internal interface UserSettingsDataService {
     fun getUserPreferenceData(): List<FavouritePageEntry>
     fun addPageToFavList(page: Page,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null)
     fun removePageFromFavList(page: Page,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null)
+    fun updateFavouritePageEntry(favouritePageEntry: FavouritePageEntry, doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null)
 }

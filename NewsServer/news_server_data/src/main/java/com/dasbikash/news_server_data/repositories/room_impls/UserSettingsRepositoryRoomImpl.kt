@@ -25,10 +25,6 @@ internal class UserSettingsRepositoryRoomImpl internal constructor(context: Cont
 
     private val mDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
 
-    override fun getUserPreferenceDataFromLocalDB(): List<FavouritePageEntry> {
-        return mDatabase.favouritePageEntryDao.findAll()
-    }
-
     override fun addToFavouritePageEntry(page: Page): Boolean {
         mDatabase.favouritePageEntryDao.add(FavouritePageEntry(pageId = page.id))
         return true
@@ -37,6 +33,14 @@ internal class UserSettingsRepositoryRoomImpl internal constructor(context: Cont
     override fun removeFromFavouritePageEntry(page: Page): Boolean {
         mDatabase.favouritePageEntryDao.findByPageId(page.id)?.let {
             mDatabase.favouritePageEntryDao.delete(it)
+            return true
+        }
+        return false
+    }
+
+    override fun updateFavouritePageEntry(favouritePageEntry: FavouritePageEntry): Boolean {
+        mDatabase.favouritePageEntryDao.findByPageId(favouritePageEntry.pageId)?.let {
+            mDatabase.favouritePageEntryDao.update(favouritePageEntry)
             return true
         }
         return false
@@ -62,5 +66,9 @@ internal class UserSettingsRepositoryRoomImpl internal constructor(context: Cont
 
     override fun resetUserSettings() {
         mDatabase.favouritePageEntryDao.nukeTable()
+    }
+
+    override fun findFavouritePageEntryById(pageId: String): FavouritePageEntry? {
+        return mDatabase.favouritePageEntryDao.findByPageId(pageId)
     }
 }

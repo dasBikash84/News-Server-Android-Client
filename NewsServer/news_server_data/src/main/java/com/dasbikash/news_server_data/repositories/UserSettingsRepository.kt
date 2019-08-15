@@ -42,9 +42,9 @@ abstract class UserSettingsRepository {
     abstract protected fun nukeUserPreferenceData()
     abstract protected fun addUserPreferenceDataToLocalDB(favouritePageEntries: List<FavouritePageEntry>)
 
-    abstract protected fun getUserPreferenceDataFromLocalDB(): List<FavouritePageEntry>
     abstract protected fun addToFavouritePageEntry(page: Page):Boolean
     abstract protected fun removeFromFavouritePageEntry(page: Page):Boolean
+    abstract protected fun updateFavouritePageEntry(favouritePageEntry: FavouritePageEntry):Boolean
     abstract fun getFavouritePageEntries(): List<FavouritePageEntry>
     abstract fun getFavouritePageEntryLiveData(): LiveData<List<FavouritePageEntry>>
 
@@ -114,41 +114,101 @@ abstract class UserSettingsRepository {
     }
 
 
-    fun addPageToFavList(page: Page, context: Context): Boolean {
+    fun addToFavouritePageEntryList(page: Page, context: Context,
+                                    doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null)
+            : Boolean {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        LoggerUtils.debugLog("addPageToFavList: ${page.name}", this::class.java)
+        LoggerUtils.debugLog("addToFavouritePageEntryList: ${page.name}", this::class.java)
 
-        val userPreferenceData = getUserPreferenceDataFromLocalDB()
-        if (userPreferenceData.count { it.pageId==page.id } != 0) {
+        val favouritePageEntry = findFavouritePageEntryById(page.id)
+        if (favouritePageEntry != null){
             return true
         }
 
         mUserSettingsDataService.addPageToFavList(page,doOnSuccess ={executeBackGroundTask {
-                                                        saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)}},
+                                                        saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
+                                                        doOnSuccess?.let { it() }
+                                                    }},
                                                     doOnFailure = {executeBackGroundTask {
                                                         removeFromFavouritePageEntry(page)
+                                                        doOnFailure?.let { it() }
                                                     }}
                                                 )
         addToFavouritePageEntry(page)
         return true
     }
 
-    fun removePageFromFavList(page: Page, context: Context): Boolean {
+    fun removeFromFavouritePageEntryList(page: Page, context: Context,
+                                         doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null)
+            : Boolean {
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        LoggerUtils.debugLog("removePageFromFavList: ${page.name}", this::class.java)
+        LoggerUtils.debugLog("removeFromFavouritePageEntryList: ${page.name}", this::class.java)
 
-        val userPreferenceData = getUserPreferenceDataFromLocalDB()
-        if (userPreferenceData.count { it.pageId==page.id } == 0) {
+        val favouritePageEntry = findFavouritePageEntryById(page.id)
+        if (favouritePageEntry == null){
             return true
         }
 
         mUserSettingsDataService.removePageFromFavList(page,doOnSuccess ={executeBackGroundTask {
-                                                                saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)}},
+                                                                saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
+                                                                doOnSuccess?.let { it() }
+                                                            }},
                                                             doOnFailure = {executeBackGroundTask {
                                                                 addToFavouritePageEntry(page)
+                                                                doOnFailure?.let { it() }
                                                             }}
                                                         )
         removeFromFavouritePageEntry(page)
+        return true
+    }
+
+    abstract protected fun findFavouritePageEntryById(pageId: String): FavouritePageEntry?
+
+    fun subscribeToFavouritePageEntry(favouritePageEntry: FavouritePageEntry, context: Context,
+                                      doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null)
+            : Boolean {
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        LoggerUtils.debugLog("subscribeToFavouritePageEntry: ${favouritePageEntry.pageId}", this::class.java)
+
+        if (favouritePageEntry.subscribed) {
+            return true
+        }
+        favouritePageEntry.subscribed=true
+        mUserSettingsDataService.updateFavouritePageEntry(favouritePageEntry,doOnSuccess ={executeBackGroundTask {
+                                                                saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
+                                                                doOnSuccess?.let { it() }
+                                                            }},
+                                                            doOnFailure = {executeBackGroundTask {
+                                                                favouritePageEntry.subscribed=false
+                                                                updateFavouritePageEntry(favouritePageEntry)
+                                                                doOnFailure?.let { it() }
+                                                            }}
+                                                        )
+        updateFavouritePageEntry(favouritePageEntry)
+        return true
+    }
+
+    fun unSubscribeFromFavouritePageEntry(favouritePageEntry: FavouritePageEntry, context: Context,
+                                          doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null)
+            : Boolean {
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        LoggerUtils.debugLog("unSubscribeFromFavouritePageEntry: ${favouritePageEntry.pageId}", this::class.java)
+
+        if (!favouritePageEntry.subscribed) {
+            return true
+        }
+        favouritePageEntry.subscribed=false
+        mUserSettingsDataService.updateFavouritePageEntry(favouritePageEntry,doOnSuccess ={executeBackGroundTask {
+                                                                saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
+                                                                doOnSuccess?.let { it() }
+                                                            }},
+                                                            doOnFailure = {executeBackGroundTask {
+                                                                favouritePageEntry.subscribed=true
+                                                                updateFavouritePageEntry(favouritePageEntry)
+                                                                doOnFailure?.let { it() }
+                                                            }}
+                                                        )
+        updateFavouritePageEntry(favouritePageEntry)
         return true
     }
 

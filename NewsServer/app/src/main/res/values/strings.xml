@@ -91,4 +91,6 @@
     <string name="never_ask_me_again_text">Never ask again</string>
     <string name="update_text">Launch update</string>
     <string name="add_notification_gen_request_item_title">Add notification request</string>
+    <string name="subscribe_menu_item_title">Subscribe for notification</string>
+    <string name="unsubscribe_menu_item_title">Unsubscribe from notification</string>
 </resources>

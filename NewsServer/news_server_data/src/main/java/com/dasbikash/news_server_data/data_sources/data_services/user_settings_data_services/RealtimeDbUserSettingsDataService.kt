@@ -80,4 +80,8 @@ internal object RealtimeDbUserSettingsDataService : UserSettingsDataService {
     override fun removePageFromFavList(page: Page, doOnSuccess: (() -> Unit)?, doOnFailure: (() -> Unit)?) {
         return RealtimeDBUserSettingsUtils.removePageFromFavList(page,doOnSuccess, doOnFailure)
     }
+
+    override fun updateFavouritePageEntry(favouritePageEntry: FavouritePageEntry, doOnSuccess: (() -> Unit)?, doOnFailure: (() -> Unit)?) {
+        return RealtimeDBUserSettingsUtils.updateFavouritePageEntry(favouritePageEntry, doOnSuccess, doOnFailure)
+    }
 }

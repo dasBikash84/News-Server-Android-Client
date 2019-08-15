@@ -24,10 +24,17 @@
         android:icon="@drawable/ic_nonfav"
         android:title="@string/add_to_favourites_menu_item_title"
         app:showAsAction="ifRoom|collapseActionView"/>
-    <!--<item
-        android:id="@+id/change_text_font_menu_item"
-        android:icon="@drawable/ic_font_size"
-        android:title="@string/change_text_font_menu_item_title"
-        app:showAsAction="collapseActionView"/>-->
+    <item
+        android:id="@+id/subscribe_menu_item"
+        android:icon="@drawable/ic_subscribe"
+        android:title="@string/subscribe_menu_item_title"
+        app:showAsAction="ifRoom|collapseActionView"
+        android:visible="false"/>
+    <item
+        android:id="@+id/unsubscribe_menu_item"
+        android:icon="@drawable/ic_subscribed"
+        android:title="@string/unsubscribe_menu_item_title"
+        app:showAsAction="ifRoom|collapseActionView"
+        android:visible="false"/>
 
 </menu>

@@ -182,6 +182,23 @@ internal object RealtimeDBUserSettingsUtils {
     fun addPageToFavList(page: Page, doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null) = updateFavPageEntryMap(page, true, doOnSuccess, doOnFailure)
     fun removePageFromFavList(page: Page, doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null) = updateFavPageEntryMap(page, false, doOnSuccess, doOnFailure)
 
+    fun updateFavouritePageEntry(favouritePageEntry: FavouritePageEntry, doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null){
+        getUserSettingsNodes(getLoggedInFirebaseUser()).favPageEntryMap
+                .child(favouritePageEntry.pageId)
+                .setValue(favouritePageEntry)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        executeBackGroundTask {
+                            addSettingsUpdateTime()
+                            doOnSuccess?.let { it() }
+                        }
+                    } else {
+                        doOnFailure?.let { it() }
+                    }
+                }
+
+    }
+
     private fun addSettingsUpdateTime() {
         val user = getLoggedInFirebaseUser()
         val userSettingsNodes = getUserSettingsNodes(user)
