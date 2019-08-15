@@ -83,11 +83,12 @@ abstract class UserSettingsRepository {
         }
     }
 
-    fun processSignInRequestResult(data: Pair<Int, Intent?>, context: Context): Pair<SignInResult, Throwable?> {
+    fun processSignInRequestResult(data: Pair<Int, Intent?>, context: Context,doOnPostProcess:(()->Unit)?=null): Pair<SignInResult, Throwable?> {
         val response = IdpResponse.fromResultIntent(data.second)
         if (data.first == Activity.RESULT_OK) {
             try {
                 doPostLogInProcessing(UserLogInResponse(response), context)
+                doOnPostProcess?.let { it() }
                 return Pair(SignInResult.SUCCESS, null)
             } catch (ex: Exception) {
                 mUserSettingsDataService.getLogInStatus()

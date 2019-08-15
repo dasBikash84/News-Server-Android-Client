@@ -47,9 +47,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
 import io.reactivex.Observable
-import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.exceptions.CompositeException
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
@@ -544,43 +542,12 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == LOG_IN_REQ_CODE) {
-            loadWorkInProcessWindow()
-            Observable.just(Pair(resultCode, data))
-                    .subscribeOn(Schedulers.io())
-                    .map { mUserSettingsRepository.processSignInRequestResult(it, this) }
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(object : Observer<Pair<UserSettingsRepository.SignInResult, Throwable?>> {
-                        override fun onComplete() {
-                            actionAfterSuccessfulLogIn = null
-                        }
-
-                        override fun onSubscribe(d: Disposable) {
-                        }
-
-                        override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult, Throwable?>) {
-                            when (processingResult.first) {
-                                UserSettingsRepository.SignInResult.SUCCESS -> {
-                                    LoggerUtils.debugLog("User settings data saved.", this::class.java)
-                                    DisplayUtils.showLogInWelcomeSnack(mCoordinatorLayout, this@ActivityHome)
-                                    actionAfterSuccessfulLogIn?.let {
-                                        it()
-                                    }
-                                }
-                                UserSettingsRepository.SignInResult.USER_ABORT -> LoggerUtils.debugLog("Log in canceled by user",
-                                        this@ActivityHome::class.java)
-                                UserSettingsRepository.SignInResult.SERVER_ERROR -> LoggerUtils.debugLog("Log in error. Details:${processingResult.second}",
-                                        this@ActivityHome::class.java)
-                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> LoggerUtils.debugLog("Error while saving User settings data. Details:${processingResult.second}",
-                                        this@ActivityHome::class.java)
-                            }
-                            removeWorkInProcessWindow()
-                        }
-
-                        override fun onError(e: Throwable) {
-                            actionAfterSuccessfulLogIn = null
-                            LoggerUtils.debugLog("Error while User settings data saving. Error: ${e}", this::class.java)
-                            removeWorkInProcessWindow()
-                        }
+            LogInPostProcessUtils.doLogInPostProcess(
+                    mDisposable,this,resultCode,data,{loadWorkInProcessWindow()},
+                    {removeWorkInProcessWindow()},
+                    {
+                        actionAfterSuccessfulLogIn?.let { it() }
+                        actionAfterSuccessfulLogIn = null
                     })
         }
     }

@@ -43,9 +43,7 @@ import com.dasbikash.news_server_data.utills.ExceptionUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
 import io.reactivex.Observable
-import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
@@ -417,35 +415,12 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == LOG_IN_REQ_CODE) {
-            loadWorkInProcessWindow()
-            Observable.just(Pair(resultCode, data))
-                    .subscribeOn(Schedulers.io())
-                    .map { mUserSettingsRepository.processSignInRequestResult(it, context!!) }
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(object : Observer<Pair<UserSettingsRepository.SignInResult, Throwable?>> {
-                        override fun onComplete() {
-                            actionAfterSuccessfulLogIn = null
-                            removeWorkInProcessWindow()
-                        }
-
-                        override fun onSubscribe(d: Disposable) {}
-                        override fun onNext(processingResult: Pair<UserSettingsRepository.SignInResult, Throwable?>) {
-                            when (processingResult.first) {
-                                UserSettingsRepository.SignInResult.SUCCESS -> {
-                                    DisplayUtils.showLogInWelcomeSnack(mPageViewContainer, context!!)
-                                    actionAfterSuccessfulLogIn?.let { it() }
-                                }
-                                UserSettingsRepository.SignInResult.USER_ABORT -> DisplayUtils.showShortSnack(mPageViewContainer, "Log in aborted")
-                                UserSettingsRepository.SignInResult.SERVER_ERROR -> DisplayUtils.showShortSnack(mPageViewContainer, "Log in error.")//* Details:${processingResult.second}*/")
-                                UserSettingsRepository.SignInResult.SETTINGS_UPLOAD_ERROR -> DisplayUtils.showShortSnack(mPageViewContainer, "Log in error.")//"Error while User settings data saving. Details:${processingResult.second}")
-                            }
-                        }
-
-                        override fun onError(e: Throwable) {
-                            actionAfterSuccessfulLogIn = null
-                            DisplayUtils.showShortSnack(mPageViewContainer, "Log in error.")
-                            removeWorkInProcessWindow()
-                        }
+            LogInPostProcessUtils.doLogInPostProcess(
+                    mDisposable,context!!,resultCode,data,{loadWorkInProcessWindow()},
+                    {removeWorkInProcessWindow()},
+                    {
+                        actionAfterSuccessfulLogIn?.let { it() }
+                        actionAfterSuccessfulLogIn = null
                     })
         }
     }
@@ -634,7 +609,7 @@ class FragmentArticlePreviewForPage : Fragment(), SignInHandler, WorkInProcessWi
                             message = dialogMessage,
                             positiveButtonText = SIGN_IN_PROMPT,
                             doOnPositivePress = {
-                                launchSignInActivity()
+                                launchSignInActivity({positiveAction()})
                             }
                     )
             ).show()
