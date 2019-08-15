@@ -14,18 +14,15 @@
 package com.dasbikash.news_server.fcm
 
 import android.content.Context
-import android.util.Log
 import com.dasbikash.news_server.utils.debugLog
+import com.dasbikash.news_server_data.repositories.RepositoryFactory
 import com.dasbikash.news_server_data.utills.ExceptionUtils
-import com.dasbikash.news_server_data.utills.LoggerUtils
-import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.iid.FirebaseInstanceId
+import com.google.android.gms.tasks.Task
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
-open class NewsServerFirebaseMessagingService: FirebaseMessagingService() {
+open class NewsServerFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String?) {
         debugLog("Refreshed token: $token")
@@ -51,34 +48,39 @@ open class NewsServerFirebaseMessagingService: FirebaseMessagingService() {
         debugLog("From: ${remoteMessage?.from}")
     }
 
-    companion object{
-        private const val NOTIFICATION_TOPIC_NAME = "article_broadcast"
-        private const val SP_KEY = "com.dasbikash.news_server.fcm.NewsServerFirebaseMessagingService.BRODCAST_TOPIC_FCM_KEY"
-        fun init(context: Context){
+    companion object {
+        private const val BROADCAST_NOTIFICATION_TOPIC_NAME = "article_broadcast"
+
+        fun init(context: Context) {
             ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-            val curValue = getSpFlag(context)
-            if (!curValue){
-                val lock = Object()
-                FirebaseMessaging.getInstance().subscribeToTopic(NOTIFICATION_TOPIC_NAME)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                setSpFlag(context)
-                                debugLog("subscribeToTopic $NOTIFICATION_TOPIC_NAME")
-                            }
-                            synchronized(lock){lock.notify()}
-                        }
-                try {
-                    synchronized(lock){lock.wait(30000L)}
-                }catch (ex:InterruptedException){}
-            }else{
-                debugLog("Already subscribeToTopic $NOTIFICATION_TOPIC_NAME")
-            }
+            subscribeToTopic(BROADCAST_NOTIFICATION_TOPIC_NAME)
+            subscribeToUserTopics(context)
         }
-        private fun setSpFlag(context: Context){
-            SharedPreferenceUtils.saveData(context,true, SP_KEY)
+
+        fun subscribeToTopic(topicName: String): Task<Void> {
+            debugLog("subscribeToTopic: $topicName")
+            return FirebaseMessaging.getInstance().subscribeToTopic(topicName)
         }
-        private fun getSpFlag(context: Context):Boolean{
-            return SharedPreferenceUtils.getData(context,SharedPreferenceUtils.DefaultValues.DEFAULT_BOOLEAN, SP_KEY) as Boolean
+
+        fun unSubscribeFromTopic(topicName: String): Task<Void> {
+            debugLog("unSubscribeFromTopic: $topicName")
+            return FirebaseMessaging.getInstance().unsubscribeFromTopic(topicName)
+        }
+
+        fun subscribeToUserTopics(context: Context) {
+            ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+            RepositoryFactory.getUserSettingsRepository(context).getFavouritePageEntries()
+                    .filter { it.subscribed }.asSequence().forEach {
+                        subscribeToTopic(it.pageId)
+                    }
+        }
+
+        fun unSubscribeFromUserTopics(context: Context) {
+            ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+            RepositoryFactory.getUserSettingsRepository(context).getFavouritePageEntries()
+                    .filter { it.subscribed }.asSequence().forEach {
+                        unSubscribeFromTopic(it.pageId)
+                    }
         }
     }
 

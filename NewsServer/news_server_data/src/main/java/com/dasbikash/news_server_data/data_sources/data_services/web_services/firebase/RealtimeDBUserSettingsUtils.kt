@@ -13,14 +13,15 @@
 
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
+import androidx.annotation.Keep
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
 import com.dasbikash.news_server_data.exceptions.SettingsServerUnavailable
 import com.dasbikash.news_server_data.exceptions.UserSettingsNotFoundException
 import com.dasbikash.news_server_data.exceptions.WrongCredentialException
 import com.dasbikash.news_server_data.models.UserSettingsUpdateDetails
 import com.dasbikash.news_server_data.models.UserSettingsUpdateTime
+import com.dasbikash.news_server_data.models.room_entity.FavouritePageEntry
 import com.dasbikash.news_server_data.models.room_entity.Page
-import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
@@ -37,7 +38,7 @@ internal object RealtimeDBUserSettingsUtils {
 
     private const val MAX_WAITING_MS_FOR_NET_RESPONSE = 30000L
     private const val FAV_PAGE_ID_MAP_NODE = "favPageIdMap"
-    private const val PAGE_GROUP_LIST_NODE = "pageGroups"
+    private const val FAV_PAGE_ENTRY_MAP_NODE = "favPageEntryMap"
     private const val UPDATE_LOG_NODE = "updateLog"
 
     fun getCurrentUserName(): String? {
@@ -72,12 +73,6 @@ internal object RealtimeDBUserSettingsUtils {
         signInAnonymously()
     }
 
-    private fun signOutFreshUser() {
-        LoggerUtils.debugLog("signOutFreshUser()", this::class.java)
-        FirebaseAuth.getInstance().currentUser?.delete()
-        signInAnonymously()
-    }
-
     fun completeSignOut() {
         LoggerUtils.debugLog("completeSignOut()", this::class.java)
         FirebaseAuth.getInstance().currentUser?.let {
@@ -88,14 +83,14 @@ internal object RealtimeDBUserSettingsUtils {
         FirebaseAuth.getInstance().signOut()
     }
 
-    fun getUserPreferenceData(): UserPreferenceData {
+    fun getUserPreferenceData(): List<FavouritePageEntry> {
         LoggerUtils.debugLog("getUserPreferenceData()", this@RealtimeDBUserSettingsUtils::class.java)
         val user = FirebaseAuth.getInstance().currentUser
         if (user == null || user.isAnonymous) {
             throw WrongCredentialException()
         }
 
-        var data: UserPreferenceData? = null
+        var data: List<FavouritePageEntry>? = null
         val lock = Object()
 
         var userSettingsException: SettingsServerException? = null
@@ -113,14 +108,17 @@ internal object RealtimeDBUserSettingsUtils {
                         LoggerUtils.debugLog("onDataChange", this@RealtimeDBUserSettingsUtils::class.java)
                         if (dataSnapshot.exists()) {
                             try {
-                                data = dataSnapshot.getValue(UserPreferenceData::class.java)!!
-                                LoggerUtils.debugLog(data!!.toString(), this@RealtimeDBUserSettingsUtils::class.java)
-                                data!!.favouritePageIds.clear()
-                                data!!.favPageIdMap.filter {
-                                    it.value
-                                }.keys.asSequence().forEach { data!!.favouritePageIds.add(it) }
-                                LoggerUtils.debugLog(data!!.toString(), this@RealtimeDBUserSettingsUtils::class.java)
-//                                data!!.favouritePageIds.addAll(data!!.favPageIdMap.keys)
+                                val userSettingsData = dataSnapshot.getValue(UserSettingsData::class.java)!!
+                                if (userSettingsData.favPageIdMap.isNotEmpty()){
+                                    val newFavPageEntryMap = mutableMapOf<String,FavouritePageEntry>()
+                                    userSettingsData.favPageIdMap.filter { it.value }.forEach{
+                                        newFavPageEntryMap.put(it.key, FavouritePageEntry(pageId = it.key,subscribed = false))
+                                    }
+                                    userSettingsData.favPageEntryMap = newFavPageEntryMap.toMap()
+                                    getUserSettingsNodes(user).favPageIdMapRef.setValue(null)
+                                    getUserSettingsNodes(user).favPageEntryMap.setValue(userSettingsData.favPageEntryMap)
+                                }
+                                data = userSettingsData.favPageEntryMap.values.toList()
                                 synchronized(lock) { lock.notify() }
                             } catch (ex: Exception) {
                                 userSettingsException = UserSettingsNotFoundException(ex)
@@ -143,22 +141,8 @@ internal object RealtimeDBUserSettingsUtils {
     private fun getUserSettingsNodes(user: FirebaseUser) = object {
         val rootUserSettingsNode = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid)
         val favPageIdMapRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(FAV_PAGE_ID_MAP_NODE)
+        val favPageEntryMap = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(FAV_PAGE_ENTRY_MAP_NODE)
         val updateLogRef = RealtimeDBUtils.mUserSettingsRootReference.child(user.uid).child(UPDATE_LOG_NODE)
-    }
-
-    fun uploadUserPreferenceData(userPreferenceData: UserPreferenceData) {
-
-        val user = getLoggedInFirebaseUser()
-        val userSettingsNodes = getUserSettingsNodes(user)
-
-        userSettingsNodes.favPageIdMapRef
-                .setValue(getFavPageIdMapForRemoteDb(userPreferenceData.favouritePageIds))
-    }
-
-    private fun getFavPageIdMapForRemoteDb(favouritePageIds: List<String>): Map<String, Boolean> {
-        val favPageIdMapForRemoteDb = mutableMapOf<String, Boolean>()
-        favouritePageIds.asSequence().forEach { favPageIdMapForRemoteDb.put(it, true) }
-        return favPageIdMapForRemoteDb.toMap()
     }
 
     private fun getLoggedInFirebaseUser(): FirebaseUser {
@@ -170,13 +154,17 @@ internal object RealtimeDBUserSettingsUtils {
         return user
     }
 
-    private fun getFavPageRef(page: Page) =
-            RealtimeDBUtils.mUserSettingsRootReference.child(getLoggedInFirebaseUser().uid).child(FAV_PAGE_ID_MAP_NODE).child(page.id)
-
-    private fun changePageStateOnFavList(page: Page, status: Boolean
-                                         , doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null) {
-        val favPageRef = getFavPageRef(page)
-        favPageRef.setValue(status)
+    private fun updateFavPageEntryMap(page: Page, status: Boolean
+                                      , doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null) {
+        val payload:Any?
+        if (status){
+            payload = FavouritePageEntry(pageId = page.id)
+        }else{
+            payload=null
+        }
+        getUserSettingsNodes(getLoggedInFirebaseUser()).favPageEntryMap
+                .child(page.id)
+                .setValue(payload)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         executeBackGroundTask {
@@ -187,10 +175,12 @@ internal object RealtimeDBUserSettingsUtils {
                         doOnFailure?.let { it() }
                     }
                 }
+
+
     }
 
-    fun addPageToFavList(page: Page, doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null) = changePageStateOnFavList(page, true, doOnSuccess, doOnFailure)
-    fun removePageFromFavList(page: Page, doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null) = changePageStateOnFavList(page, false, doOnSuccess, doOnFailure)
+    fun addPageToFavList(page: Page, doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null) = updateFavPageEntryMap(page, true, doOnSuccess, doOnFailure)
+    fun removePageFromFavList(page: Page, doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null) = updateFavPageEntryMap(page, false, doOnSuccess, doOnFailure)
 
     private fun addSettingsUpdateTime() {
         val user = getLoggedInFirebaseUser()
@@ -322,3 +312,9 @@ internal object RealtimeDBUserSettingsUtils {
         settingsServerException?.let { throw it }
     }
 }
+
+@Keep
+data class UserSettingsData(
+        var favPageIdMap:Map<String,Boolean> = emptyMap(),
+        var favPageEntryMap:Map<String,FavouritePageEntry> = emptyMap()
+)

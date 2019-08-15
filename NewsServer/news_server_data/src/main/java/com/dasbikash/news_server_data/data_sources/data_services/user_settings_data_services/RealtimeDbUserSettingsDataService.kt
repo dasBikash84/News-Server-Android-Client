@@ -16,6 +16,7 @@ package com.dasbikash.news_server_data.data_sources.data_services.user_settings_
 import android.content.Intent
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBUserSettingsUtils
+import com.dasbikash.news_server_data.models.room_entity.FavouritePageEntry
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.utills.LoggerUtils
@@ -57,12 +58,8 @@ internal object RealtimeDbUserSettingsDataService : UserSettingsDataService {
         return RealtimeDBUserSettingsUtils.getLastUserSettingsUpdateTime()
     }
 
-    override fun getUserPreferenceData(): UserPreferenceData {
+    override fun getUserPreferenceData(): List<FavouritePageEntry> {
         return RealtimeDBUserSettingsUtils.getUserPreferenceData()
-    }
-
-    override fun uploadUserPreferenceData(userPreferenceData: UserPreferenceData) {
-        return RealtimeDBUserSettingsUtils.uploadUserPreferenceData(userPreferenceData)
     }
 
     override fun getLogInIntent(): Intent? {

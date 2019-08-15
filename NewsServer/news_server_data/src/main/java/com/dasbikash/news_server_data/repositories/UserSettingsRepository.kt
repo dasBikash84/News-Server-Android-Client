@@ -21,6 +21,7 @@ import com.dasbikash.news_server_data.data_sources.DataServiceImplProvider
 import com.dasbikash.news_server_data.data_sources.UserSettingsDataService
 import com.dasbikash.news_server_data.exceptions.AuthServerException
 import com.dasbikash.news_server_data.exceptions.SettingsServerException
+import com.dasbikash.news_server_data.models.room_entity.FavouritePageEntry
 import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.repositories.repo_helpers.DbImplementation
@@ -31,7 +32,6 @@ import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
 import com.firebase.ui.auth.IdpResponse
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import java.util.*
 
 abstract class UserSettingsRepository {
 
@@ -40,13 +40,14 @@ abstract class UserSettingsRepository {
 
     private val mUserSettingsDataService: UserSettingsDataService = DataServiceImplProvider.getUserSettingsDataServiceImpl()
 
-    abstract protected fun nukeUserPreferenceDataTable()
-    abstract protected fun addUserPreferenceDataToLocalDB(userPreferenceData: UserPreferenceData)
+    abstract protected fun nukeUserPreferenceData()
+    abstract protected fun addUserPreferenceDataToLocalDB(favouritePageEntries: List<FavouritePageEntry>)
 
-    abstract protected fun getUserPreferenceDataFromLocalDB(): UserPreferenceData
-    abstract protected fun saveUserPreferenceDataToLocalDb(userPreferenceData: UserPreferenceData)
-    abstract protected fun getLocalPreferenceData(): List<UserPreferenceData>
+    abstract protected fun getUserPreferenceDataFromLocalDB(): List<FavouritePageEntry>
+    abstract protected fun addToFavouritePageEntry(page: Page):Boolean
+    abstract protected fun removeFromFavouritePageEntry(page: Page):Boolean
     abstract fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?>
+    abstract fun getFavouritePageEntries(): List<FavouritePageEntry>
 
     private fun doPostLogInProcessing(userLogInResponse: UserLogInResponse, context: Context) {
 
@@ -55,20 +56,7 @@ abstract class UserSettingsRepository {
         if (idpResponse == null || idpResponse.error != null) {
             throw AuthServerException()
         }
-
-        if (idpResponse.isNewUser) {
-            LoggerUtils.debugLog("New user", this::class.java)
-            return uploadUserPreferenceData(context, getUserPreferenceDataFromLocalDB())
-        } else {
-            return updateUserSettingsIfModified(context)
-        }
-    }
-
-    private fun uploadUserPreferenceData(context: Context, userPreferenceData: UserPreferenceData) {
-        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
-        LoggerUtils.debugLog("uploadUserPreferenceData", this::class.java)
-        mUserSettingsDataService.uploadUserPreferenceData(userPreferenceData)
-        saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)
+        return updateUserSettings(context)
     }
 
     private fun saveLastUserSettingsUpdateTime(updateTs: Long, context: Context) {
@@ -84,13 +72,9 @@ abstract class UserSettingsRepository {
     }
 
     @Suppress("SENSELESS_COMPARISON")
-    private fun getServerUserPreferenceData(): UserPreferenceData {
-
-        val userPreferenceData = mUserSettingsDataService.getUserPreferenceData()
-        //Remove if any null entry found
-        userPreferenceData.favouritePageIds = userPreferenceData.favouritePageIds.filter { it != null }.toMutableList()
-
-        return userPreferenceData
+    private fun getServerUserPreferenceData(context: Context): List<FavouritePageEntry>{
+        val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context)
+        return mUserSettingsDataService.getUserPreferenceData().filter {appSettingsRepository.findPageById(it.pageId) !=null}.toList()
     }
 
 
@@ -136,18 +120,17 @@ abstract class UserSettingsRepository {
         LoggerUtils.debugLog("addPageToFavList: ${page.name}", this::class.java)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
-        if (userPreferenceData.favouritePageIds.contains(page.id)) {
+        if (userPreferenceData.count { it.pageId==page.id } != 0) {
             return true
         }
-        userPreferenceData.favouritePageIds.add(page.id)
+
         mUserSettingsDataService.addPageToFavList(page,doOnSuccess ={executeBackGroundTask {
                                                         saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)}},
                                                     doOnFailure = {executeBackGroundTask {
-                                                        userPreferenceData.favouritePageIds.remove(page.id)
-                                                        saveUserPreferenceDataToLocalDb(userPreferenceData)
+                                                        removeFromFavouritePageEntry(page)
                                                     }}
                                                 )
-        saveUserPreferenceDataToLocalDb(userPreferenceData)
+        addToFavouritePageEntry(page)
         return true
     }
 
@@ -156,18 +139,17 @@ abstract class UserSettingsRepository {
         LoggerUtils.debugLog("removePageFromFavList: ${page.name}", this::class.java)
 
         val userPreferenceData = getUserPreferenceDataFromLocalDB()
-        if (!userPreferenceData.favouritePageIds.contains(page.id)) {
+        if (userPreferenceData.count { it.pageId==page.id } == 0) {
             return true
         }
-        userPreferenceData.favouritePageIds.remove(page.id)
+
         mUserSettingsDataService.removePageFromFavList(page,doOnSuccess ={executeBackGroundTask {
                                                                 saveLastUserSettingsUpdateTime(mUserSettingsDataService.getLastUserSettingsUpdateTime(), context)}},
                                                             doOnFailure = {executeBackGroundTask {
-                                                                userPreferenceData.favouritePageIds.add(page.id)
-                                                                saveUserPreferenceDataToLocalDb(userPreferenceData)
+                                                                addToFavouritePageEntry(page)
                                                             }}
                                                         )
-        saveUserPreferenceDataToLocalDb(userPreferenceData)
+        removeFromFavouritePageEntry(page)
         return true
     }
 
@@ -187,12 +169,18 @@ abstract class UserSettingsRepository {
 
         val serverLastUserSettingsUpdateTime = mUserSettingsDataService.getLastUserSettingsUpdateTime()
         if (serverLastUserSettingsUpdateTime > getLastUserSettingsUpdateTime(context)) {
-            val userPreferenceData = getServerUserPreferenceData()
-            userPreferenceData.id = UUID.randomUUID().toString()
-            nukeUserPreferenceDataTable()
-            addUserPreferenceDataToLocalDB(userPreferenceData)
-            saveLastUserSettingsUpdateTime(serverLastUserSettingsUpdateTime, context)
+            updateUserSettings(context)
         }
+    }
+
+    private fun updateUserSettings(context: Context) {
+        ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
+        LoggerUtils.debugLog("updateUserSettings", this::class.java)
+
+        nukeUserPreferenceData()
+        addUserPreferenceDataToLocalDB(getServerUserPreferenceData(context))
+        val serverLastUserSettingsUpdateTime = mUserSettingsDataService.getLastUserSettingsUpdateTime()
+        saveLastUserSettingsUpdateTime(serverLastUserSettingsUpdateTime, context)
     }
 
     fun checkIfLoggedIn(): Boolean {
@@ -203,7 +191,9 @@ abstract class UserSettingsRepository {
         return mUserSettingsDataService.checkIfLoogedAsAdmin()
     }
 
-    fun signOutUser(context: Context) {
+    fun signOutUser(context: Context,doBeforeSignOut:(()->Unit)?=null) {
+        ExceptionUtils.checkRequestValidityBeforeDatabaseAccess()
+        doBeforeSignOut?.let { it() }
         mUserSettingsDataService.signOutUser()
         resetUserSettings(context)
     }
@@ -213,8 +203,8 @@ abstract class UserSettingsRepository {
     }
 
     fun resetUserSettings(context: Context) {
-        saveLastUserSettingsUpdateTime(0L, context)
         resetUserSettings()
+        saveLastUserSettingsUpdateTime(0L, context)
     }
 
     abstract protected fun resetUserSettings()

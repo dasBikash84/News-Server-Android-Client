@@ -27,6 +27,12 @@ internal interface FavouritePageEntryDao {
     fun add(favouritePageEntry: FavouritePageEntry)
 
     @Query("SELECT * from FavouritePageEntry")
+    fun findAll(): List<FavouritePageEntry>
+
+    @Query("SELECT * from FavouritePageEntry WHERE pageId=:pageId")
+    fun findByPageId(pageId:String): FavouritePageEntry?
+
+    @Query("SELECT * from FavouritePageEntry")
     fun findAllLiveData(): LiveData<List<FavouritePageEntry>>
 
     @Query("DELETE FROM FavouritePageEntry")

@@ -20,12 +20,14 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.RealtimeDBUserSettingsUtils
 import com.dasbikash.news_server_data.database.daos.*
 import com.dasbikash.news_server_data.database.room_converters.ArticleImageConverter
 import com.dasbikash.news_server_data.database.room_converters.DateConverter
 import com.dasbikash.news_server_data.database.room_converters.IntListConverter
 import com.dasbikash.news_server_data.database.room_converters.StringListConverter
 import com.dasbikash.news_server_data.models.room_entity.*
+import com.dasbikash.news_server_data.repositories.UserSettingsRepository
 
 @Database(entities = [Country::class, Language::class, Newspaper::class, Page::class, Article::class, UserPreferenceData::class,
                         ArticleVisitHistory::class,SavedArticle::class,ArticleSearchKeyWord::class,NewsCategory::class,
@@ -65,6 +67,7 @@ internal abstract class NewsServerDatabase internal constructor(): RoomDatabase(
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("DROP TABLE `PageGroup`")
                 database.execSQL("CREATE TABLE `FavouritePageEntry` (`pageId` TEXT NOT NULL, `subscribed` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`pageId`))")
+                RealtimeDBUserSettingsUtils.signOutUser()
             }
         }
 

@@ -32,6 +32,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.BuildConfig
 import com.dasbikash.news_server.R
+import com.dasbikash.news_server.fcm.NewsServerFirebaseMessagingService
 import com.dasbikash.news_server.utils.*
 import com.dasbikash.news_server.view_controllers.interfaces.HomeNavigator
 import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
@@ -497,7 +498,7 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
                 Observable.just(true)
                         .subscribeOn(Schedulers.io())
                         .map {
-                            mUserSettingsRepository.signOutUser(this)
+                            mUserSettingsRepository.signOutUser(this,{NewsServerFirebaseMessagingService.unSubscribeFromUserTopics(this)})
                         }
                         .onErrorReturn {
                             if (!amDisposed) {

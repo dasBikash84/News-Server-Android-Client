@@ -14,8 +14,8 @@
 package com.dasbikash.news_server_data.data_sources
 
 import android.content.Intent
+import com.dasbikash.news_server_data.models.room_entity.FavouritePageEntry
 import com.dasbikash.news_server_data.models.room_entity.Page
-import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 
 internal interface UserSettingsDataService {
     fun getLogInStatus(): Boolean
@@ -24,8 +24,7 @@ internal interface UserSettingsDataService {
     fun getCurrentUserName(): String?
     fun checkIfLoogedAsAdmin(): Boolean
     fun getLastUserSettingsUpdateTime(): Long
-    fun getUserPreferenceData(): UserPreferenceData
-    fun uploadUserPreferenceData(userPreferenceData: UserPreferenceData)
+    fun getUserPreferenceData(): List<FavouritePageEntry>
     fun addPageToFavList(page: Page,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null)
     fun removePageFromFavList(page: Page,doOnSuccess:(()->Unit)?=null,doOnFailure:(()->Unit)?=null)
 }

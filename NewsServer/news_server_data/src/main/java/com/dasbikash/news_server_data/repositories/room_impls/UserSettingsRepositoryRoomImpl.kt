@@ -16,47 +16,52 @@ package com.dasbikash.news_server_data.repositories.room_impls
 import android.content.Context
 import androidx.lifecycle.LiveData
 import com.dasbikash.news_server_data.database.NewsServerDatabase
+import com.dasbikash.news_server_data.models.room_entity.FavouritePageEntry
+import com.dasbikash.news_server_data.models.room_entity.Page
 import com.dasbikash.news_server_data.models.room_entity.UserPreferenceData
 import com.dasbikash.news_server_data.repositories.UserSettingsRepository
-import com.dasbikash.news_server_data.utills.LoggerUtils
-import java.util.*
 
 internal class UserSettingsRepositoryRoomImpl internal constructor(context: Context) :
         UserSettingsRepository() {
 
     private val mDatabase: NewsServerDatabase = NewsServerDatabase.getDatabase(context)
 
-    override fun getUserPreferenceDataFromLocalDB(): UserPreferenceData {
-        var userPreferenceData:UserPreferenceData? = mDatabase.userPreferenceDataDao.findUserPreferenceStaticData()
-        if(userPreferenceData == null) {
-            userPreferenceData = UserPreferenceData(id=UUID.randomUUID().toString())
-            mDatabase.userPreferenceDataDao.add(userPreferenceData)
+    override fun getUserPreferenceDataFromLocalDB(): List<FavouritePageEntry> {
+        return mDatabase.favouritePageEntryDao.findAll()
+    }
+
+    override fun addToFavouritePageEntry(page: Page): Boolean {
+        mDatabase.favouritePageEntryDao.add(FavouritePageEntry(pageId = page.id))
+        return true
+    }
+
+    override fun removeFromFavouritePageEntry(page: Page): Boolean {
+        mDatabase.favouritePageEntryDao.findByPageId(page.id)?.let {
+            mDatabase.favouritePageEntryDao.delete(it)
+            return true
         }
-        LoggerUtils.debugLog("getUserPreferenceDataFromLocalDB: ${userPreferenceData}",this::class.java)
-        return userPreferenceData
+        return false
     }
 
-    override fun saveUserPreferenceDataToLocalDb(userPreferenceData: UserPreferenceData) {
-        mDatabase.userPreferenceDataDao.save(userPreferenceData)
+    override fun nukeUserPreferenceData() {
+        mDatabase.favouritePageEntryDao.nukeTable()
     }
 
-    override fun getLocalPreferenceData(): List<UserPreferenceData> {
-        return mDatabase.userPreferenceDataDao.findAll()
-    }
-
-    override fun nukeUserPreferenceDataTable() {
-        mDatabase.userPreferenceDataDao.nukeTable()
-    }
-
-    override fun addUserPreferenceDataToLocalDB(userPreferenceData:UserPreferenceData) {
-        mDatabase.userPreferenceDataDao.add(userPreferenceData)
+    override fun addUserPreferenceDataToLocalDB(favouritePageEntries: List<FavouritePageEntry>) {
+        if (favouritePageEntries.isNotEmpty()){
+            mDatabase.favouritePageEntryDao.addAll(favouritePageEntries)
+        }
     }
 
     override fun getUserPreferenceLiveData(): LiveData<UserPreferenceData?> {
         return mDatabase.userPreferenceDataDao.findUserPreferenceDataLiveData()
     }
 
+    override fun getFavouritePageEntries(): List<FavouritePageEntry> {
+        return mDatabase.favouritePageEntryDao.findAll()
+    }
+
     override fun resetUserSettings() {
-        mDatabase.userPreferenceDataDao.nukeTable()
+        mDatabase.favouritePageEntryDao.nukeTable()
     }
 }
