@@ -39,7 +39,6 @@ internal class PageRequestServerWorker(appContext: Context, workerParams: Worker
     override fun doWork(): Result {
 
         LoggerUtils.debugLog("doWork entry", this::class.java)
-        LoggerUtils.fileLog("doWork entry", this::class.java, mContext)
 
         var nextRequestTs = System.currentTimeMillis()
 
@@ -47,9 +46,8 @@ internal class PageRequestServerWorker(appContext: Context, workerParams: Worker
 
         val servedDocumentIdList = mutableListOf<String>()
         LoggerUtils.debugLog("Featched page downLoad request chunk size: ${pageDownLoadRequestMap.size}", this::class.java)
-        LoggerUtils.fileLog("Featched page downLoad request chunk size: ${pageDownLoadRequestMap.size}", this::class.java, mContext)
 
-        LoggerUtils.fileLog("NetworkStatus: ${NetConnectivityUtility.refreshNetworkStatus(mContext).name}", this::class.java, mContext)
+        LoggerUtils.debugLog("NetworkStatus: ${NetConnectivityUtility.refreshNetworkStatus(mContext).name}", this::class.java, mContext)
 
         pageDownLoadRequestMap.keys.shuffled().take(PageRequestServerUtils.getRequestSservingChunkSizeLimit()).asSequence()
                 .forEach {
@@ -62,7 +60,6 @@ internal class PageRequestServerWorker(appContext: Context, workerParams: Worker
                                     !NP_IDS_RESTRICTED_ON_WIFI.contains(pageDownLoadRequest.newsPaperId!!))) {
 
                         LoggerUtils.debugLog(pageDownLoadRequest.toString(), this::class.java)
-//                        LoggerUtils.fileLog(pageDownLoadRequest.toString(), this::class.java, mContext)
 
                         if (pageDownLoadRequest.link != null && PageRequestServerUtils.checkIfPageDownLoadRequestExists(it)) {
                             if (nextRequestTs > System.currentTimeMillis()) {
@@ -75,7 +72,6 @@ internal class PageRequestServerWorker(appContext: Context, workerParams: Worker
                                                 Pair(pageDownLoadRequest.requestId!!, PageDownLoadRequestResponse(
                                                         link = pageDownLoadRequest.link!!, pageContent = pageContent)))) {
                                     LoggerUtils.debugLog("servedDocumentId: ${it}", this::class.java)
-//                                    LoggerUtils.fileLog("servedDocumentId: ${it}", this::class.java, mContext)
                                     servedDocumentIdList.add(it)
 //                                    PageRequestServerUtils.incrementTodaysServingCountForNp(pageDownLoadRequest.newsPaperId!!)
                                 }
@@ -84,24 +80,18 @@ internal class PageRequestServerWorker(appContext: Context, workerParams: Worker
                     } else {
                         if (NetConnectivityUtility.isConnected) {
                             LoggerUtils.debugLog("NetConnectivityUtility.isConnected", this::class.java)
-                            LoggerUtils.fileLog("NetConnectivityUtility.isConnected", this::class.java, mContext)
                         }
                         if (NetConnectivityUtility.isOnMobileDataNetwork) {
                             LoggerUtils.debugLog("NetConnectivityUtility.isOnMobileDataNetwork", this::class.java)
-                            LoggerUtils.fileLog("NetConnectivityUtility.isOnMobileDataNetwork", this::class.java, mContext)
                         }
                         if (!NP_IDS_RESTRICTED_ON_WIFI.contains(pageDownLoadRequest.newsPaperId!!)) {
                             LoggerUtils.debugLog("!NP_IDS_RESTRICTED_ON_WIFI.contains(pageDownLoadRequest.newsPaperId", this::class.java)
-                            LoggerUtils.fileLog("!NP_IDS_RESTRICTED_ON_WIFI.contains(pageDownLoadRequest.newsPaperId", this::class.java, mContext)
                         }
                         LoggerUtils.debugLog("Skipped restricted NP(${NP_IDS_RESTRICTED_ON_WIFI}) on Wify.", this::class.java)
-                        LoggerUtils.fileLog("Skipped restricted NP(${NP_IDS_RESTRICTED_ON_WIFI}) on Wify.", this::class.java, mContext)
                     }
                 }
         PageRequestServerUtils.logPageDownLoadRequestWorkerTask(servedDocumentIdList)
-        LoggerUtils.fileLog("servedDocumentIdList.size: ${servedDocumentIdList.size}", this::class.java)
         LoggerUtils.debugLog("doWork exiting", this::class.java)
-        LoggerUtils.fileLog("doWork exiting", this::class.java, mContext)
         return Result.success()
     }
 }

@@ -31,14 +31,4 @@
         android:icon="@drawable/ic_account_circle_black_24dp"
         android:title="@string/log_in_app_menu_item_title"
         app:showAsAction="ifRoom"/>
-    <item
-        android:id="@+id/display_log_app_menu_item"
-        android:icon="@drawable/ic_dl_log"
-        android:title="@string/display_log_app_menu_item_title"
-        app:showAsAction="collapseActionView"/>
-    <item
-        android:id="@+id/export_log_app_menu_item"
-        android:icon="@drawable/ic_dl_log"
-        android:title="@string/export_log_app_menu_item_title"
-        app:showAsAction="collapseActionView"/>
 </menu>

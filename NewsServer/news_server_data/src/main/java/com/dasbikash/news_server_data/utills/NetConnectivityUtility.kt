@@ -87,7 +87,7 @@ object NetConnectivityUtility : BroadcastReceiver() {
         } else {
             mCurrentNetworkType = NetConnectivityUtility.NETWORK_TYPE.DC
         }
-        LoggerUtils.fileLog("Current Network Type: ${mCurrentNetworkType.name}", this::class.java, context)
+        LoggerUtils.debugLog("Current Network Type: ${mCurrentNetworkType.name}", this::class.java, context)
     }
 
     private val NETWORK_AVAILABLE_BROADCAST = "NetConnectivityUtility.net_available"

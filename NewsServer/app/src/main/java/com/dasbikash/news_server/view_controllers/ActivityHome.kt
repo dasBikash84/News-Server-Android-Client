@@ -81,7 +81,7 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
     private lateinit var mLogInBottomBar: View
     private lateinit var mAdminPanelHolder: LinearLayout
     private lateinit var mAdminPanelButton: MaterialButton
-    //    private lateinit var mUserSettingEditButton:MaterialButton
+
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
     private val LOG_IN_REQ_CODE = 7777
@@ -147,10 +147,6 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
             hideLogInMenuHolder()
         }
         mUserDetailsTextView.setOnClickListener({})
-//        mUserSettingEditButton.setOnClickListener {
-//            launchUserSettingEditDialog()
-//            mLogInMenuHolder.visibility = View.GONE
-//        }
 
         mLogInMenuHolder.setOnClickListener {
             hideLogInMenuHolder()
@@ -178,7 +174,6 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
 
         mAdminPanelHolder = findViewById(R.id.admin_panel_holder)
         mAdminPanelButton = findViewById(R.id.admin_panel_button)
-//        mUserSettingEditButton = findViewById(R.id.customize_button)
     }
 
     private fun initApp() {
@@ -357,57 +352,13 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
                     logInAppMenuItemClickAction()
                     return true
                 }
-                R.id.display_log_app_menu_item -> {
-                    displayLogAppMenuItemClickAction()
-                    return true
-                }
-                R.id.export_log_app_menu_item -> {
-                    doOnPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, { exportLogAppMenuItemClickAction() })
-                    return true
-                }
             }
         }
         return false
     }
 
-    private fun displayLogAppMenuItemClickAction() {
-        LoggerUtils.displayLogFileData(this)
-    }
-
-    private fun exportLogAppMenuItemClickAction() {
-        if (LoggerUtils.getLogFile() != null) {
-            this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)?.let {
-                val logFilePathBuilder = StringBuilder(it.absolutePath)
-                LoggerUtils.getLogFile()!!.apply {
-                    logFilePathBuilder
-                            .append("/logs/")
-                            .append(DateUtils.getFullDateStringForDb(Date()))
-                            .append("_")
-                            .append(this.name)
-                }
-                LoggerUtils.getLogFile()!!.copyTo(File(logFilePathBuilder.toString()), true)
-                DisplayUtils.showLongToast(this, "Log file exported to: ${logFilePathBuilder.toString()}")
-            }
-        }
-    }
-
-    private fun doOnPermission(permission: String, task: () -> Unit) {
-        if (checkPermission(permission)) {
-            task()
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 101)
-            }
-        }
-    }
-
-    private fun checkPermission(permission: String) =
-            ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_layout_basic, menu)
-        menu.findItem(R.id.display_log_app_menu_item).setVisible(BuildConfig.DEBUG)
-        menu.findItem(R.id.export_log_app_menu_item).setVisible(BuildConfig.DEBUG)
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -415,10 +366,6 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
         DialogUtils.createAlertDialog(this, DialogUtils.AlertDialogDetails(
                 title = SIGN_OUT_PROMPT, doOnPositivePress = { signOutAction() }
         )).show()
-    }
-
-    private fun launchUserSettingEditDialog() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     private var backPressActionTagForLogInMenuHolder: String? = null

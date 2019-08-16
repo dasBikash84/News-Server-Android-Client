@@ -24,8 +24,6 @@ import java.util.*
 object LoggerUtils {
     private const val TAG = "NS>>"
     private const val MAX_TAG_LENGTH = 23
-    private const val LOG_FILE_NAME = "/ns_log.txt"
-    private lateinit var mLogFile: File
 
     fun printStackTrace(ex: Throwable) {
         if (BuildConfig.DEBUG) {
@@ -40,46 +38,7 @@ object LoggerUtils {
                 classNameEndIndex = MAX_TAG_LENGTH - TAG.length
             }
             Log.d(TAG + type.simpleName.substring(0, classNameEndIndex), message)
-            context?.let {
-                if (!::mLogFile.isInitialized) {
-                    mLogFile = File(context.filesDir.absolutePath + LOG_FILE_NAME)
-                }
-            }
         }
     }
 
-    fun <T> fileLog(message: String, type: Class<T>, context: Context? = null) {
-        if (BuildConfig.DEBUG) {
-            if (!::mLogFile.isInitialized) {
-                context?.let {
-                    mLogFile = File(context.filesDir.absolutePath + LOG_FILE_NAME)
-                }
-            }
-            if (::mLogFile.isInitialized) {
-                debugLog(message, type,context)
-                mLogFile.appendText("${Date()} | ${type.canonicalName} >> ${message}\n")
-            }
-        }
-    }
-
-    fun displayLogFileData(context: Context) {
-        if (BuildConfig.DEBUG) {
-            if (!::mLogFile.isInitialized) {
-                mLogFile = File(context.filesDir.absolutePath + LOG_FILE_NAME)
-            }
-            mLogFile.useLines {
-                it.forEach {
-                    Log.d(TAG, it)
-                    SystemClock.sleep(100L)
-                }
-            }
-        }
-    }
-
-    fun getLogFile():File?{
-        if (::mLogFile.isInitialized) {
-            return mLogFile
-        }
-        return null
-    }
 }
