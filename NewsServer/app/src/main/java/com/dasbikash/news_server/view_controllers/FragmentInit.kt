@@ -55,6 +55,8 @@ class FragmentInit : Fragment() {
     private var mFcmPageId: String? = null
     private var mFcmArticleId: String? = null
 
+    private var mDisposableDisposed = false
+
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
@@ -103,13 +105,13 @@ class FragmentInit : Fragment() {
         initSettingsDataLoading(0L)
     }
 
+
     private fun initSettingsDataLoading(initDelay: Long) {
 
         mNoInternetMessage.visibility = View.INVISIBLE
 
         mProgressBar.visibility = View.VISIBLE
         mProgressBar.isIndeterminate = true
-
         mDisposable.add(
                 getDataLoadingStatusObservable(initDelay)
                         .subscribeOn(Schedulers.io())
@@ -173,40 +175,47 @@ class FragmentInit : Fragment() {
     }
 
     private fun getDataLoadingStatusObservable(initDelay: Long): Observable<DataLoadingStatus> {
+        mDisposableDisposed=false
         return Observable.create { emitter ->
-            SystemClock.sleep(initDelay)
+            try {
+                SystemClock.sleep(initDelay)
 
-            //wait for network connection initialization
-            emitter.onNext(DataLoadingStatus.WAITING_FOR_NETWORK_INIT)
-            while (!NetConnectivityUtility.isInitialize);
+                //wait for network connection initialization
+                emitter.onNext(DataLoadingStatus.WAITING_FOR_NETWORK_INIT)
+                while (!NetConnectivityUtility.isInitialize);
 
-            //Initialization started
-            emitter.onNext(DataLoadingStatus.STARTING_INITIALIZATION)
+                //Initialization started
+                emitter.onNext(DataLoadingStatus.STARTING_INITIALIZATION)
 
-            RepositoryFactory.initDataSourceImplementation()
+                RepositoryFactory.initDataSourceImplementation()
 
-            RepositoryFactory
-                    .getFreshAppSettingsRepository(context!!)
-                    .initAppSettings(context!!)
-            emitter.onNext(DataLoadingStatus.APP_SETTINGS_DATA_LOADED)
+                RepositoryFactory
+                        .getFreshAppSettingsRepository(context!!)
+                        .initAppSettings(context!!)
+                emitter.onNext(DataLoadingStatus.APP_SETTINGS_DATA_LOADED)
 
-            RepositoryFactory
-                    .getUserSettingsRepository(context!!)
-                    .initUserSettings(context!!)
+                RepositoryFactory
+                        .getUserSettingsRepository(context!!)
+                        .initUserSettings(context!!)
 
-            emitter.onNext(DataLoadingStatus.USER_SETTINGS_DATA_LOADED)
+                emitter.onNext(DataLoadingStatus.USER_SETTINGS_DATA_LOADED)
 
-            RepositoryFactory
-                    .getFreshNewsDataRepository(context!!)
-                    .init(context!!)
-            NewsServerFirebaseMessagingService.init(context!!)
-            emitter.onNext(DataLoadingStatus.NEWS_DATA_REPO_INITIATED)
+                RepositoryFactory
+                        .getFreshNewsDataRepository(context!!)
+                        .init(context!!)
+                NewsServerFirebaseMessagingService.init(context!!)
+                emitter.onNext(DataLoadingStatus.NEWS_DATA_REPO_INITIATED)
 
-            if (BuildConfig.DEBUG) {
-                testRoutine()
+                if (BuildConfig.DEBUG) {
+                    testRoutine()
+                }
+
+                emitter.onComplete()
+            }catch (ex:Throwable){
+                if (!mDisposableDisposed){
+                    throw ex
+                }
             }
-
-            emitter.onComplete()
         }
     }
 
@@ -228,7 +237,6 @@ class FragmentInit : Fragment() {
             }
             is AuthServerException -> {
                 val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
-                var amDisposed = false
                 mDisposable.add(
                         Observable.just(true)
                                 .subscribeOn(Schedulers.io())
@@ -236,14 +244,6 @@ class FragmentInit : Fragment() {
                                     if (userSettingsRepository.checkIfLoggedIn()) {
                                         userSettingsRepository.signOutUser(context!!)
                                     }
-                                }
-                                .onErrorReturn {
-                                    if (!amDisposed) {
-                                        throw it
-                                    }
-                                }
-                                .doOnDispose {
-                                    amDisposed = true
                                 }
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribeWith(object : DisposableObserver<Unit>() {
@@ -284,6 +284,7 @@ class FragmentInit : Fragment() {
 
     override fun onPause() {
         super.onPause()
+        mDisposableDisposed = true
         unregisterBrodcastReceivers()
     }
 
