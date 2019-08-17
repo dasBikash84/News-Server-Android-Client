@@ -16,7 +16,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/change_text_font_menu_item"
-        android:icon="@drawable/ic_edit"
+        android:icon="@drawable/ic_font_size"
         android:title="@string/change_text_font_menu_item_title"
         app:showAsAction="collapseActionView"/>
 </menu>
