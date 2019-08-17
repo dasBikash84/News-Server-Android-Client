@@ -103,11 +103,11 @@
             android:id="@+id/show_np_name_menu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/ninty_five_transparent"
+            android:background="@android:color/transparent"
             android:orientation="vertical"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
-            android:padding="2dp"
+            android:padding="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:visibility="gone">
@@ -118,7 +118,7 @@
                 android:layout_gravity="start"
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/show_np_name_menu_desc"
-                app:srcCompat="@drawable/ic_menu3" />
+                app:srcCompat="@drawable/ic_paper_menu" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
