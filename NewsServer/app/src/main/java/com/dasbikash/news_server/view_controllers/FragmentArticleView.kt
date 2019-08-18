@@ -13,11 +13,12 @@
 
 package com.dasbikash.news_server.view_controllers
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
 import android.util.TypedValue
 import android.view.*
-import android.widget.EditText
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
@@ -32,22 +33,23 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.*
+import com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase.ArticleCommentLocal
+import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.room_entity.*
 import com.dasbikash.news_server_data.repositories.AdminTaskRepository
+import com.dasbikash.news_server_data.repositories.ArticleCommentRepository
 import com.dasbikash.news_server_data.repositories.ArticleNotificationGenerationRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
-import com.dasbikash.news_server_data.utills.FileDownloaderUtils
-import com.dasbikash.news_server_data.utills.ImageLoadingDisposer
-import com.dasbikash.news_server_data.utills.ImageUtils
-import com.dasbikash.news_server_data.utills.LoggerUtils
+import com.dasbikash.news_server_data.utills.*
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.exceptions.CompositeException
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
 
-class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
+class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment,SignInHandler {
 
     private lateinit var mLanguage: Language
     private lateinit var mNewspaper: Newspaper
@@ -65,32 +67,68 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
     private lateinit var mArticleImageListAdapter: ArticleImageListAdapter
     private lateinit var mWaitScreen: LinearLayoutCompat
 
-//    private var mActionBarHeight = 0
+    private lateinit var mCommentsBlock:LinearLayout
+    private lateinit var mCommentsHolder: RecyclerView
+    private lateinit var mCommentsEditText: EditText
+    private lateinit var mCommentsSubmitButton: Button
+    private lateinit var mAnonymousCheckBox: CheckBox
+
+    private lateinit var mArticleCommentLocalListAdapter:ArticleCommentLocalListAdapter
+    private lateinit var mArticleCommentList:List<ArticleCommentLocal>
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
 
     private var mShowNotificationRequestMenuItem = false
 
+
+    var actionAfterSuccessfulLogIn: (() -> Unit)? = null
+
+    override fun launchSignInActivity(doOnSignIn: () -> Unit) {
+        val intent = RepositoryFactory.getUserSettingsRepository(context!!).getLogInIntent()
+        intent?.let {
+            startActivityForResult(intent, LOG_IN_REQ_CODE)
+        }
+        actionAfterSuccessfulLogIn = doOnSignIn
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == LOG_IN_REQ_CODE) {
+            LogInPostProcessUtils.doLogInPostProcess(
+                    mDisposable,context!!,resultCode,data,{showWaitScreen()},
+                    {hideWaitScreen()},
+                    {
+                        actionAfterSuccessfulLogIn?.let { it() }
+                        actionAfterSuccessfulLogIn = null
+                    })
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        LoggerUtils.debugLog("onCreate", this::class.java)
         setHasOptionsMenu(true)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        LoggerUtils.debugLog("onCreateView", this::class.java)
         return inflater.inflate(R.layout.fragment_article_view, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        LoggerUtils.debugLog("onViewCreated", this::class.java)
         mArticle = arguments!!.getSerializable(ARG_ARTICLE) as Article
-
-//        mActionBarHeight = DisplayUtils.dpToPx(20, context!!).toInt()
 
         findViewItems(view)
         setListners()
+        initViewItems()
+    }
+
+    private fun initViewItems() {
+        mArticleCommentLocalListAdapter = ArticleCommentLocalListAdapter(
+                                                RepositoryFactory.getUserSettingsRepository(context!!).getCurrentUserId(),
+                                                {commentEditAction(it)},{commentDeleteAction(it)})
+        mCommentsHolder.adapter=mArticleCommentLocalListAdapter
+        mCommentsBlock.visibility = View.VISIBLE
     }
 
     private fun findViewItems(view: View) {
@@ -101,23 +139,189 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
         mWaitScreen = view.findViewById(R.id.wait_screen_for_data_loading)
         mMainScroller = view.findViewById(R.id.main_scroller)
 
-        mWaitScreen.setOnClickListener { }
+        mCommentsBlock = view.findViewById(R.id.comments_block)
+        mCommentsHolder = view.findViewById(R.id.comments_holder)
+        mCommentsEditText = view.findViewById(R.id.new_comment_edit_text)
+        mCommentsSubmitButton = view.findViewById(R.id.submit_comment_button)
+        mAnonymousCheckBox = view.findViewById(R.id.anonymous_check_box)
     }
 
     private fun setListners() {
         mWaitScreen.setOnClickListener { }
+        mCommentsSubmitButton.setOnClickListener { newCommentPostAction() }
+    }
 
-        /*mMainScroller.setOnScrollChangeListener(object : NestedScrollView.OnScrollChangeListener {
+    private fun newCommentPostAction() {
+        mCommentsEditText.text.trim().toString().apply {
+            if (isBlank()){
+                DisplayUtils.showShortToast(context!!, BLANK_COMMENT_MSG)
+            }else{
+                val userSettingsRepository = RepositoryFactory.getUserSettingsRepository(context!!)
+                if (userSettingsRepository.checkIfLoggedIn()) {
+                    DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
+                            title = POST_COMMENT_PROMPT,doOnPositivePress = {addNewComment(this)}
+                    )).show()
+                }else{
 
-            override fun onScrollChange(v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
-                debugLog("scrollX: $scrollX, scrollY: $scrollY, oldScrollX: $oldScrollX, oldScrollY: $oldScrollY")
-                if (scrollY == 0) {
-                    (activity!! as AppCompatActivity).supportActionBar!!.show()
-                } else if (scrollY > mActionBarHeight) {
-                    (activity!! as AppCompatActivity).supportActionBar!!.hide()
+                    DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
+                            title = SIGN_IN_PROMPT,doOnPositivePress = {launchSignInActivity{addNewComment(this)}}
+                    )).show()
                 }
             }
-        })*/
+        }
+    }
+
+    private fun addNewComment(commentText:String){
+        showWaitScreen()
+        mDisposable.add(
+                Observable.just(true)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            ArticleCommentRepository.addNewComment(commentText, mArticle,mAnonymousCheckBox.isChecked)?.let {
+                                return@map it
+                            }
+                            throw IllegalStateException()
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<ArticleCommentLocal?>() {
+                            override fun onComplete() {
+                                hideWaitScreen()
+                            }
+
+                            override fun onNext(data: ArticleCommentLocal) {
+                                mCommentsEditText.setText("")
+                                refreshComments()
+                            }
+
+                            override fun onError(e: Throwable) {
+                                if (e is CompositeException) {
+                                    e.exceptions.asSequence().forEach {
+                                        LoggerUtils.printStackTrace(it)
+                                        LoggerUtils.debugLog("Error class: ${it::class.java.canonicalName}", this@FragmentArticleView::class.java)
+                                        LoggerUtils.debugLog("Trace: ${it.stackTrace.asList()}", this@FragmentArticleView::class.java)
+                                    }
+                                    if (e.exceptions.filter { it is NoInternertConnectionException }.count() > 0) {
+                                        NetConnectivityUtility.showNoInternetToastAnyWay(this@FragmentArticleView.context!!)
+                                    } else if (e.exceptions.filter { it is IllegalStateException }.count() > 0) {
+                                        DisplayUtils.showShortToast(context!!, COMMENT_ADDITION_FAILURE_MSG)
+                                    }
+                                } else if (e is NoInternertConnectionException) {
+                                    NetConnectivityUtility.showNoInternetToastAnyWay(this@FragmentArticleView.context!!)
+                                } else if (e is IllegalStateException) {
+                                    DisplayUtils.showShortToast(context!!, COMMENT_ADDITION_FAILURE_MSG)
+                                }
+                                hideWaitScreen()
+                            }
+                        }))
+    }
+
+    private fun commentDeleteAction(articleCommentLocal: ArticleCommentLocal) {
+        DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
+                title = DELETE_COMMENT_PROMPT,doOnPositivePress = {deleteComment(articleCommentLocal)}
+        )).show()
+    }
+
+    private fun deleteComment(articleCommentLocal: ArticleCommentLocal) {
+        showWaitScreen()
+        mDisposable.add(
+                Observable.just(articleCommentLocal)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            ArticleCommentRepository.deleteComment(it,mArticle)
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<Boolean>() {
+                            override fun onComplete() {
+                                hideWaitScreen()
+                            }
+
+                            override fun onNext(data: Boolean) {
+                                if (data) {
+                                    refreshComments()
+                                }
+                            }
+
+                            override fun onError(e: Throwable) {
+                                if (e is CompositeException) {
+                                    e.exceptions.asSequence().forEach {
+                                        LoggerUtils.printStackTrace(it)
+                                        LoggerUtils.debugLog("Error class: ${it::class.java.canonicalName}", this@FragmentArticleView::class.java)
+                                        LoggerUtils.debugLog("Trace: ${it.stackTrace.asList()}", this@FragmentArticleView::class.java)
+                                    }
+                                    if (e.exceptions.filter { it is NoInternertConnectionException }.count() > 0) {
+                                        NetConnectivityUtility.showNoInternetToastAnyWay(this@FragmentArticleView.context!!)
+                                    } else if (e.exceptions.filter { it is IllegalStateException }.count() > 0) {
+                                        DisplayUtils.showShortToast(context!!, COMMENT_DELETION_FAILURE_MSG)
+                                    }
+                                } else if (e is NoInternertConnectionException) {
+                                    NetConnectivityUtility.showNoInternetToastAnyWay(this@FragmentArticleView.context!!)
+                                } else if (e is IllegalStateException) {
+                                    DisplayUtils.showShortToast(context!!, COMMENT_DELETION_FAILURE_MSG)
+                                }
+                                hideWaitScreen()
+                            }
+                        }))
+    }
+
+    private fun editComment(newText:String, articleCommentLocal: ArticleCommentLocal) {
+        showWaitScreen()
+        mDisposable.add(
+                Observable.just(articleCommentLocal)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            ArticleCommentRepository.editComment(newText,it,mArticle)
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<Boolean>() {
+                            override fun onComplete() {
+                                hideWaitScreen()
+                            }
+
+                            override fun onNext(data: Boolean) {
+                                if (data) {
+                                    refreshComments()
+                                }
+                            }
+
+                            override fun onError(e: Throwable) {
+                                if (e is CompositeException) {
+                                    e.exceptions.asSequence().forEach {
+                                        LoggerUtils.printStackTrace(it)
+                                        LoggerUtils.debugLog("Error class: ${it::class.java.canonicalName}", this@FragmentArticleView::class.java)
+                                        LoggerUtils.debugLog("Trace: ${it.stackTrace.asList()}", this@FragmentArticleView::class.java)
+                                    }
+                                    if (e.exceptions.filter { it is NoInternertConnectionException }.count() > 0) {
+                                        NetConnectivityUtility.showNoInternetToastAnyWay(this@FragmentArticleView.context!!)
+                                    } else if (e.exceptions.filter { it is IllegalStateException }.count() > 0) {
+                                        DisplayUtils.showShortToast(context!!, COMMENT_EDIT_FAILURE_MESSAGE)
+                                    }
+                                } else if (e is NoInternertConnectionException) {
+                                    NetConnectivityUtility.showNoInternetToastAnyWay(this@FragmentArticleView.context!!)
+                                } else if (e is IllegalStateException) {
+                                    DisplayUtils.showShortToast(context!!, COMMENT_EDIT_FAILURE_MESSAGE)
+                                }
+                                hideWaitScreen()
+                            }
+                        }))
+    }
+
+    private fun commentEditAction(articleCommentLocal: ArticleCommentLocal) {
+
+        val editText = EditText(context!!)
+        editText.setText(articleCommentLocal.commentText)
+        val dialogBuilder =
+                DialogUtils.getAlertDialogBuilder(context!!, DialogUtils.AlertDialogDetails(
+                        message = EDIT_COMMENT_PROMPT,
+                        doOnPositivePress = {
+                            if (editText.text.toString().trim().isNotBlank()) {
+                                editComment(editText.text.toString(), articleCommentLocal)
+                            }else{
+                                DisplayUtils.showShortToast(context!!,BLANK_COMMENT_MSG)
+                            }
+                        }
+                ))
+        dialogBuilder.setView(editText)
+        dialogBuilder.create().show()
     }
 
     override fun onResume() {
@@ -125,6 +329,32 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
         hideWaitScreen()
         displayArticleData()
         updateNotificationRequestMenuItem()
+        displayArticleComments()
+    }
+
+    private fun displayArticleComments() {
+        if (!::mArticleCommentList.isInitialized) {
+            refreshComments()
+        }
+    }
+
+    private fun refreshComments() {
+        mDisposable.add(
+                Observable.just(true)
+                        .subscribeOn(Schedulers.io())
+                        .map {
+                            ArticleCommentRepository.getCommentsForArticle(mArticle)
+                        }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(object : DisposableObserver<List<ArticleCommentLocal>>() {
+                            override fun onComplete() {}
+                            override fun onNext(data: List<ArticleCommentLocal>) {
+                                mArticleCommentList = data
+                                mArticleCommentLocalListAdapter.submitList(mArticleCommentList)
+                            }
+
+                            override fun onError(e: Throwable) {}
+                        }))
     }
 
     private fun updateNotificationRequestMenuItem() {
@@ -237,7 +467,7 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
         // as you specify a parent activity in AndroidManifest.xml.
         if (item.itemId == R.id.save_article_locally_menu_item) {
             DialogUtils.createAlertDialog(context!!,
-                    DialogUtils.AlertDialogDetails(message = "Save Article?", doOnPositivePress = { saveArticleLocallyAction() }))
+                    DialogUtils.AlertDialogDetails(message = SAVE_ARTICLE_PROMPT, doOnPositivePress = { saveArticleLocallyAction() }))
                     .show()
             return true
         }else if (item.itemId == R.id.add_notification_gen_request_menu_item) {
@@ -278,8 +508,6 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
         )
     }
 
-
-
     private fun launchNotificationGenerationRequestDialog() {
         val editText = EditText(context!!)
         editText.inputType = (InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD)
@@ -294,8 +522,6 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
         dialogBuilder.setView(editText)
         dialogBuilder.create().show()
     }
-
-
 
     private fun addNotificationGenerationRequest(authToken:String) {
         mDisposable.add(
@@ -327,7 +553,6 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
                             val newsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
 
                             if (!newsDataRepository.checkIfAlreadySaved(it)) {
-                                LoggerUtils.debugLog("Going to save article", this@FragmentArticleView::class.java)
                                 val savedArticleImage = newsDataRepository.saveArticleToLocalDisk(it, context!!)
                                 LoggerUtils.debugLog(savedArticleImage.toString(), this@FragmentArticleView::class.java)
                                 return@map true
@@ -342,7 +567,7 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
 
                             override fun onNext(result: Boolean) {
                                 if (result) {
-                                    DisplayUtils.showShortSnack(view as CoordinatorLayout, "Article Saved.")
+                                    DisplayUtils.showShortSnack(view as CoordinatorLayout, ARTICLE_SAVED_MSG)
                                     activity!!.invalidateOptionsMenu()
                                 }
                             }
@@ -368,6 +593,17 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment {
         private const val NOTIFICATION_REQ_ADD_FAILURE = "Notification request addition failure"
         private const val AUTH_TOKEN_HINT = "Auth Token"
         private const val ARG_ARTICLE = "com.dasbikash.news_server.views.FragmentArticleView.ARG_ARTICLE"
+        private const val ARTICLE_SAVED_MSG = "Article Saved."
+        private const val BLANK_COMMENT_MSG = "Blank Comment!!"
+        private const val SAVE_ARTICLE_PROMPT="Save Article?"
+        private const val EDIT_COMMENT_PROMPT = "Edit comment and hit ok to save."
+        private const val COMMENT_EDIT_FAILURE_MESSAGE = "Comment Edit failure."
+        private const val COMMENT_DELETION_FAILURE_MSG = "Comment deletion failure."
+        private const val DELETE_COMMENT_PROMPT = "Delete Comment?"
+        private const val COMMENT_ADDITION_FAILURE_MSG = "Comment addition failure."
+        private const val POST_COMMENT_PROMPT = "Post Comment?"
+        private const val SIGN_IN_PROMPT = "Sign in and continue."
+        private const val LOG_IN_REQ_CODE = 5456
 
         fun getInstance(article: Article): FragmentArticleView {
             val args = Bundle()
@@ -494,5 +730,75 @@ class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDispo
 
     private fun downloadImageAction(link: String) {
         FileDownloaderUtils.downloadImageInExternalFilesDir(itemView.context, link)
+    }
+}
+
+object ArticleCommentLocalDiffCallback : DiffUtil.ItemCallback<ArticleCommentLocal>() {
+    override fun areItemsTheSame(oldItem: ArticleCommentLocal, newItem: ArticleCommentLocal): Boolean {
+        return oldItem.commentId == newItem.commentId
+    }
+
+    override fun areContentsTheSame(oldItem: ArticleCommentLocal, newItem: ArticleCommentLocal): Boolean {
+        return oldItem == newItem
+    }
+}
+
+class ArticleCommentLocalListAdapter(val currentUserId:String,val commentEditAction:(ArticleCommentLocal)->Unit,
+                                     val commentDeleteAction:(ArticleCommentLocal)->Unit) :
+        ListAdapter<ArticleCommentLocal, ArticleCommentLocalViewHolder>(ArticleCommentLocalDiffCallback) {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleCommentLocalViewHolder {
+        return ArticleCommentLocalViewHolder(
+                LayoutInflater.from(parent.context)
+                        .inflate(R.layout.view_comment_display, parent, false),currentUserId)
+    }
+
+    override fun onBindViewHolder(holder: ArticleCommentLocalViewHolder, position: Int) {
+        val articleCommentLocal = getItem(position)
+        holder.editButton.setOnClickListener { commentEditAction(articleCommentLocal) }
+        holder.deleteButton.setOnClickListener { commentDeleteAction(articleCommentLocal) }
+        holder.bind(articleCommentLocal)
+    }
+}
+
+class ArticleCommentLocalViewHolder(itemView: View,val currentUserId:String):
+        RecyclerView.ViewHolder(itemView) {
+
+    val userImage:ImageView
+    val displayName:AppCompatTextView
+    val commentText:AppCompatTextView
+    val commentDate:AppCompatTextView
+    val editBlock:ViewGroup
+    val editButton:ImageButton
+    val deleteButton:ImageButton
+
+    init {
+        userImage = itemView.findViewById(R.id.user_image)
+        displayName = itemView.findViewById(R.id.display_name)
+        commentText = itemView.findViewById(R.id.comment_text)
+        commentDate = itemView.findViewById(R.id.comment_date)
+        editBlock = itemView.findViewById(R.id.comment_edit_view_holder)
+        editButton = itemView.findViewById(R.id.edit_comment)
+        deleteButton = itemView.findViewById(R.id.delete_comment)
+    }
+
+    fun bind(articleCommentLocal: ArticleCommentLocal){
+        if (articleCommentLocal.userId == currentUserId){
+            editBlock.visibility = View.VISIBLE
+        }else{
+            editBlock.visibility = View.GONE
+        }
+        if (articleCommentLocal.dislayName!=null){
+            displayName.text = articleCommentLocal.dislayName!!
+        }else{
+            displayName.text = ANONYMOUS_USER_DISPLAY_NAME
+        }
+        commentText.text = articleCommentLocal.commentText
+        commentDate.text = DisplayUtils.getFormatedShortDateString(itemView.context!!,articleCommentLocal.commentTime)
+        ImageUtils.customLoader(userImage,articleCommentLocal.imageUrl,R.drawable.account_circle_black_48,
+                                    R.drawable.account_circle_black_48)
+    }
+    companion object{
+        private const val ANONYMOUS_USER_DISPLAY_NAME = "Anonymous"
     }
 }

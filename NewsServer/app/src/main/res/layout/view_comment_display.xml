@@ -17,17 +17,33 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="2dp">
+    android:layout_margin="2dp"
+    android:layout_marginBottom="8dp">
 
     <ImageView
         android:id="@+id/user_image"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:layout_margin="2dp"
         android:contentDescription="@string/user_image"
         android:src="@drawable/account_circle_black_48"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/display_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:gravity="start|center_vertical"
+        android:textAlignment="gravity"
+        android:textSize="18sp"
+        android:textColor="@color/article_title_color"
+        android:textStyle="bold"
+        android:maxLines="1"
+        app:layout_constraintStart_toEndOf="@id/user_image"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Comment Comment Comment Comment Comment Comment Comment Comment Comment Comment " />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/comment_text"
@@ -38,11 +54,25 @@
         android:minHeight="40dp"
         android:padding="4dp"
         android:textAlignment="gravity"
-        android:textSize="16sp"
+        android:textSize="17sp"
+        android:textColor="@android:color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/user_image"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/display_name"
         tools:text="Comment Comment Comment Comment Comment Comment Comment Comment Comment Comment " />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/comment_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp"
+        android:gravity="start|center_vertical"
+        android:padding="4dp"
+        android:textAlignment="gravity"
+        android:textSize="15sp"
+        app:layout_constraintStart_toEndOf="@id/user_image"
+        app:layout_constraintTop_toBottomOf="@id/comment_text"
+        tools:text="Comment Comment " />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/comment_edit_view_holder"
@@ -52,20 +82,22 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/comment_text">
+        app:layout_constraintTop_toBottomOf="@id/comment_date">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/edit_comment"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:layout_margin="4dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_marginStart="40dp"
             android:contentDescription="@string/edit_comment"
-            app:layout_constraintEnd_toStartOf="@id/delete_comment"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_edit" />
+            app:srcCompat="@drawable/ic_edit"
+            android:background="@android:color/transparent"/>
 
-        <ImageView
+        <ImageButton
             android:id="@+id/delete_comment"
             android:layout_width="32dp"
             android:layout_height="32dp"
@@ -74,8 +106,9 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="4dp"
             android:contentDescription="@string/delete_comment"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/edit_comment"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_delete" />
+            app:srcCompat="@drawable/ic_delete"
+            android:background="@android:color/transparent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

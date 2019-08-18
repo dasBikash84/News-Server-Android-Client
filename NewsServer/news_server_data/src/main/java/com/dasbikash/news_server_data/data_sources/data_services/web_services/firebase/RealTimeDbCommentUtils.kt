@@ -14,10 +14,135 @@
 package com.dasbikash.news_server_data.data_sources.data_services.web_services.firebase
 
 import androidx.annotation.Keep
+import com.dasbikash.news_server_data.models.room_entity.Article
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.Exclude
+import com.google.firebase.database.*
 import java.util.*
 
+internal object RealTimeDbArticleCommentUtils {
+
+    private const val WAITING_MS_FOR_NET_RESPONSE = 10000L
+
+    fun getCommentsForArticle(article: Article): List<ArticleCommentLocal> {
+
+        val lock = Object()
+        val articleComments = mutableListOf<ArticleCommentLocal>()
+
+        RealtimeDBUtils.mArticleCommentsRef.child(article.id)
+                .addListenerForSingleValueEvent(object : ValueEventListener{
+                    override fun onCancelled(p0: DatabaseError) {
+                        synchronized(lock) { lock.notify()}
+                    }
+
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()){
+                            if (snapshot.hasChildren()){
+                                snapshot.children.asSequence().forEach {
+                                    val userId = it.key!!
+                                    if (it.hasChildren()) {
+                                        it.children.asSequence().forEach {
+                                            val commentId = it.key!!
+                                            val articleCommentServer = it.getValue(ArticleCommentServer::class.java)
+
+                                            val articleCommentLocal = articleCommentServer?.getArticleCommentLocal(commentId,userId)
+                                            articleCommentLocal?.let {
+                                                articleComments.add(it)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        synchronized(lock) { lock.notify()}
+                    }
+                })
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:Exception){}
+
+        return articleComments.toList()
+    }
+
+    fun addNewComment(commentText: String,article: Article,postAnonymous:Boolean=false): ArticleCommentLocal? {
+        FirebaseAuth.getInstance().currentUser?.let {
+            if (!it.isAnonymous){
+                val lock = Object()
+                var articleCommentLocal:ArticleCommentLocal? = null
+                val articleCommentServer = ArticleCommentServer.getInstance(commentText,it)
+                if (postAnonymous){
+                    articleCommentServer.makeAnonymous()
+                }
+                RealtimeDBUtils.mArticleCommentsRef
+                        .child(article.id)
+                        .child(it.uid)
+                        .push()
+                        .setValue(articleCommentServer,object : DatabaseReference.CompletionListener{
+                            override fun onComplete(error: DatabaseError?, databaseReference: DatabaseReference) {
+                                if (error == null){
+                                    articleCommentLocal = articleCommentServer.getArticleCommentLocal(databaseReference.key!!,it.uid)
+                                }
+                                synchronized(lock) { lock.notify()}
+                            }
+                        })
+                try {
+                    synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+                }catch (ex:Exception){}
+
+                return articleCommentLocal
+            }
+        }
+        return null
+    }
+
+    fun deleteComment(articleCommentLocal: ArticleCommentLocal,article: Article): Boolean {
+
+        val lock = Object()
+        var result = false
+
+        RealtimeDBUtils.mArticleCommentsRef
+                .child(article.id)
+                .child(articleCommentLocal.userId)
+                .child(articleCommentLocal.commentId)
+                .setValue(null,object : DatabaseReference.CompletionListener{
+                    override fun onComplete(error: DatabaseError?, databaseReference: DatabaseReference) {
+                        if (error == null){
+                            result = true
+                        }
+                        synchronized(lock) { lock.notify()}
+                    }
+                })
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:Exception){}
+
+        return result
+    }
+
+    fun editComment(newText: String, articleCommentLocal: ArticleCommentLocal, article: Article): Boolean {
+
+        val lock = Object()
+        var result = false
+
+        RealtimeDBUtils.mArticleCommentsRef
+                .child(article.id)
+                .child(articleCommentLocal.userId)
+                .child(articleCommentLocal.commentId)
+                .setValue(articleCommentLocal.copy(commentText = newText.trim(),commentTime = Date()).getArticleCommentServer(),object : DatabaseReference.CompletionListener{
+                    override fun onComplete(error: DatabaseError?, databaseReference: DatabaseReference) {
+                        if (error == null){
+                            result = true
+                        }
+                        synchronized(lock) { lock.notify()}
+                    }
+                })
+        try {
+            synchronized(lock) { lock.wait(WAITING_MS_FOR_NET_RESPONSE) }
+        }catch (ex:Exception){}
+
+        return result
+    }
+}
 
 @Keep
 data class ArticleCommentServer(
@@ -28,14 +153,23 @@ data class ArticleCommentServer(
 ) {
     @Exclude
     fun getArticleCommentLocal(commentId: String,uid: String): ArticleCommentLocal? {
-        if (commentText != null && commentText.isNullOrBlank() &&
+        if (commentText != null && commentText!!.isNotBlank() &&
                 timeStamp != null && timeStamp!! > 0) {
             val commentDate = Calendar.getInstance()
             commentDate.timeInMillis = timeStamp!!
             return ArticleCommentLocal(commentId,commentText!!,commentDate.time,uid,
                                         dislayName, imageUrl)
         }
+
         return null
+    }
+    fun makeAnonymous(){
+        dislayName = "Anonymous"
+        imageUrl = null
+    }
+    companion object {
+        fun getInstance(commentText: String, firebaseUser: FirebaseUser) =
+                ArticleCommentServer(commentText, Date().time, firebaseUser.displayName, firebaseUser.photoUrl?.toString())
     }
 }
 
@@ -48,16 +182,7 @@ data class ArticleCommentLocal(
         val dislayName: String? = null,
         val imageUrl: String? = null
 ){
-    companion object{
-
-        fun getgetArticleCommentServer(commentText: String,firebaseUser: FirebaseUser): ArticleCommentServer? {
-            if (!firebaseUser.isAnonymous && commentText.isNotBlank()) {
-                ArticleCommentLocal("",commentText, Date(), firebaseUser.uid,
-                                    firebaseUser.displayName, firebaseUser.photoUrl?.path).apply {
-                    return ArticleCommentServer(commentText,commentTime.time,dislayName,imageUrl)
-                }
-            }
-            return null
-        }
-    }
+   fun getArticleCommentServer() =
+           ArticleCommentServer(commentText = commentText,timeStamp = commentTime.time,
+                                dislayName = dislayName,imageUrl = imageUrl)
 }

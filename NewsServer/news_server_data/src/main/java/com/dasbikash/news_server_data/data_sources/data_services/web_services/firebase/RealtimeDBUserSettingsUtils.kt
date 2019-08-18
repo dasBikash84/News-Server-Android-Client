@@ -328,6 +328,10 @@ internal object RealtimeDBUserSettingsUtils {
 
         settingsServerException?.let { throw it }
     }
+
+    fun getCurrentUserId(): String {
+        return FirebaseAuth.getInstance().currentUser!!.uid
+    }
 }
 
 @Keep

@@ -31,6 +31,7 @@ internal object RealtimeDBUtils {
     private const val SERACH_KEY_WORDS_NODE = "serach_key_words"
     private const val ARTICLE_INFO_FOR_NEWS_CSTEGORIES_NODE = "article_info_for_news_categories"
     private const val APP_VERSION_HISTORY_NODE = "version_history"
+    private const val ARTICLE_COMMENTS_NODE = "article_comments"
 
     private const val FCM_NOTIFICATION_GEN_REQ_NODE = "fcm_notification_gen_request"
 
@@ -56,5 +57,6 @@ internal object RealtimeDBUtils {
     val mArticleInfoForNewsCategoriesNode: DatabaseReference = mRootReference.child(ARTICLE_INFO_FOR_NEWS_CSTEGORIES_NODE)
     val mAppVersionHistoryNode: DatabaseReference = mRootReference.child(APP_VERSION_HISTORY_NODE)
     val mFcmNotificationGenReqRef:DatabaseReference = mRootReference.child(FCM_NOTIFICATION_GEN_REQ_NODE)
+    val mArticleCommentsRef:DatabaseReference = mRootReference.child(ARTICLE_COMMENTS_NODE)
 }
 

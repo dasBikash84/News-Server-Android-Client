@@ -137,10 +137,18 @@ object DisplayUtils {
         return getArticlePublicationDateStringFromPublicationTime(article.publicationTime, language, context, getFullDate)
     }
 
+    fun getFormatedLongDateString(context: Context, date: Date):String{
+        val simpleDateFormat = SimpleDateFormat(context.getResources().getString(R.string.display_date_format_long))
+        return simpleDateFormat.format(date.time)
+    }
+
+    fun getFormatedShortDateString(context: Context, date: Date):String{
+        val simpleDateFormat = SimpleDateFormat(context.getResources().getString(R.string.display_date_format_short))
+        return simpleDateFormat.format(date.time)
+    }
+
     private fun getArticlePublicationDateStringFromPublicationTime(publicationTime: Date?, language: Language,
                                                                    context: Context, getFullDate: Boolean): String? {
-
-        val simpleDateFormat = SimpleDateFormat(context.getResources().getString(R.string.display_date_format_long))
 
         var diffTs = System.currentTimeMillis()
         var publicationTimeString: String? = null
@@ -163,11 +171,11 @@ object DisplayUtils {
                 } else if (diffTs < TWO_DAYS_IN_MS) {
                     publicationTimeString = YESTERDAY_TIME_STRING
                 } else {
-                    publicationTimeString = simpleDateFormat.format(publicationTime.time)
+                    publicationTimeString = getFormatedLongDateString(context,publicationTime)
                 }
             }
         } else {
-            publicationTime?.let { publicationTimeString = simpleDateFormat.format(publicationTime.time) }
+            publicationTime?.let { publicationTimeString = getFormatedLongDateString(context,publicationTime) }
         }
 
         if (!language.name!!.contains("English") && !language.name!!.contains("english")) {

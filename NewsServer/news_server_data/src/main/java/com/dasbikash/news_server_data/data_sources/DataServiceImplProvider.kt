@@ -16,6 +16,7 @@ package com.dasbikash.news_server_data.data_sources
 import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls.CloudFireStoreAppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls.RealTimeDbAppSettingsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.app_settings_data_service_impls.SpringMVCAppSettingsDataService
+import com.dasbikash.news_server_data.data_sources.data_services.article_comment_service.RealTimeDbArticleCommentService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.CloudFireStoreNewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.RealTimeDbNewsDataService
 import com.dasbikash.news_server_data.data_sources.data_services.news_data_services.SpringMVCNewsDataService
@@ -114,6 +115,10 @@ internal object DataServiceImplProvider {
         }else {
             return false
         }
+    }
+
+    fun getArticleCommentServiceImpl(): ArticleCommentService {
+        return RealTimeDbArticleCommentService()
     }
 
 }

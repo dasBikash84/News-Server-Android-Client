@@ -95,7 +95,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:layout_marginBottom="80dp"
+                android:visibility="visible">
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="match_parent"
@@ -109,7 +110,7 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/comments_holder"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
@@ -129,18 +130,23 @@
                         android:layout_height="wrap_content" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <CheckBox
+                    android:id="@+id/anonymous_check_box"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="17sp"
+                    android:text="@string/post_as_anonymous"
+                    android:layout_margin="0dp"/>
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/submit_comment_button"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
+                    android:layout_marginTop="0dp"
                     android:layout_marginEnd="32dp"
                     android:gravity="center"
-                    android:paddingStart="4dp"
-                    android:paddingTop="4dp"
-                    android:paddingEnd="4dp"
-                    android:paddingBottom="4dp"
                     android:text="@string/post_comment"
                     android:textAllCaps="false"
                     android:textColor="@android:color/holo_purple"

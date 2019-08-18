@@ -24,6 +24,10 @@ import com.google.firebase.auth.FirebaseAuth
 
 internal object RealtimeDbUserSettingsDataService : UserSettingsDataService {
 
+    override fun getCurrentUserId(): String {
+        return RealtimeDBUserSettingsUtils.getCurrentUserId()
+    }
+
     override fun getCurrentUserName(): String? {
         return RealtimeDBUserSettingsUtils.getCurrentUserName()
     }

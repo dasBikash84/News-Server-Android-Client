@@ -17,6 +17,7 @@
     <string name="host_for_ip">https://api.ipify.org/?format=json</string>
     <string name="app_name">News Server</string>
     <string name="display_date_format_long">EEE, d MMM yyyy, HH:mm</string>
+    <string name="display_date_format_short">d MMM yyyy, HH:mm</string>
     <string name="developer_email_address">bikash.news.server@gmail.com</string>
     <string name="nav_drawer_open">nav_drawer_open</string>
     <string name="nav_drawer_close">nav_drawer_close</string>
@@ -99,4 +100,5 @@
     <string name="user_image">User image</string>
     <string name="delete_comment">Delete comment</string>
     <string name="edit_comment">Edit comment</string>
+    <string name="post_as_anonymous">Post anonymous.</string>
 </resources>

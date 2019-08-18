@@ -16,12 +16,14 @@ package com.dasbikash.news_server_data.data_sources
 import android.content.Intent
 import com.dasbikash.news_server_data.models.room_entity.FavouritePageEntry
 import com.dasbikash.news_server_data.models.room_entity.Page
+import com.google.firebase.auth.FirebaseUser
 
 internal interface UserSettingsDataService {
     fun getLogInStatus(): Boolean
     fun getLogInIntent(): Intent?
     fun signOutUser()
     fun getCurrentUserName(): String?
+    fun getCurrentUserId(): String
     fun checkIfLoogedAsAdmin(): Boolean
     fun getLastUserSettingsUpdateTime(): Long
     fun getUserPreferenceData(): List<FavouritePageEntry>

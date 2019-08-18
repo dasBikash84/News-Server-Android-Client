@@ -114,6 +114,10 @@ abstract class UserSettingsRepository {
         return mUserSettingsDataService.getCurrentUserName()
     }
 
+    fun getCurrentUserId(): String {
+        return mUserSettingsDataService.getCurrentUserId()
+    }
+
 
     fun addToFavouritePageEntryList(page: Page, context: Context,
                                     doOnSuccess: (() -> Unit)? = null, doOnFailure: (() -> Unit)? = null)
