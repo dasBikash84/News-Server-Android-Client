@@ -85,7 +85,6 @@ class FragmentHome : Fragment() {
     private lateinit var mPageSearchResultContainer: ViewGroup
 
     private lateinit var mNewsPaperMenuHolder: RecyclerView
-    private lateinit var mNewsPaperMenuContainer: ViewGroup
     private lateinit var mNewsPaperMenuShowButtonContainer: ViewGroup
     private lateinit var mNewsPaperListAdapter: NewsPaperListAdapter
     private lateinit var mNewsPaperScrollerContainer: ViewGroup
@@ -126,7 +125,7 @@ class FragmentHome : Fragment() {
         mPageSearchResultHolder = view.findViewById(R.id.page_search_result_holder)
         mPageSearchResultContainer = view.findViewById(R.id.page_search_result_container)
         mNewsPaperMenuHolder = view.findViewById(R.id.np_name_holder)
-        mNewsPaperMenuContainer = view.findViewById(R.id.np_name_scroller)
+//        mNewsPaperMenuContainer = view.findViewById(R.id.np_name_scroller)
         mNewsPaperMenuShowButtonContainer = view.findViewById(R.id.show_np_name_menu)
         mNewsPaperScrollerContainer = view.findViewById(R.id.np_name_scroller_container)
         mPageArticlePreviewHolder = view.findViewById(R.id.page_article_preview_holder)
@@ -192,7 +191,7 @@ class FragmentHome : Fragment() {
                 debugLog("mArticlePreviewHolderDySum: $mArticlePreviewHolderDySum, dy:$dy")
 
                 if (recyclerView.scrollState != 0) {
-                    if (mNewsPaperMenuContainer.visibility == View.VISIBLE) {
+                    if (mNewsPaperMenuHolder.visibility == View.VISIBLE) {
                         hideNewsPaperMenu()
                     }
                     mNewsPaperMenuShowButtonContainer.visibility = View.GONE
@@ -258,7 +257,7 @@ class FragmentHome : Fragment() {
             if (!mInitDone) {
                 initView()
             } else {
-                if (mNewsPaperMenuContainer.visibility == View.VISIBLE) {
+                if (mNewsPaperMenuHolder.visibility == View.VISIBLE) {
                     addBackPressTaskForForNpMenu()
                 }
                 if (mPageSearchResultContainer.visibility == View.VISIBLE) {
@@ -386,7 +385,7 @@ class FragmentHome : Fragment() {
         hideNewsPaperMenu()
         mNewsPaperMenuShowButtonContainer.visibility = View.GONE
         mPageSearchResultHolder.adapter = mSearchResultListAdapter
-        mNewsPaperListAdapter = NewsPaperListAdapter { doOnNewsPaperNameClick(it) }
+        mNewsPaperListAdapter = NewsPaperListAdapter ({ doOnNewsPaperNameClick(it) },{mNewsPaperMenuHolder.scrollToPosition(it)})
         mNewsPaperMenuHolder.adapter = mNewsPaperListAdapter
         mPageArticlePreviewHolderAdapter = PageListAdapter(this, ViewModelProviders.of(activity!!).get(NSViewModel::class.java))
         mPageArticlePreviewHolder.adapter = mPageArticlePreviewHolderAdapter
@@ -399,7 +398,7 @@ class FragmentHome : Fragment() {
                 .subscribe {
                     val paperList = it
                     if (paperList.isNotEmpty()) {
-                        mNewsPaperListAdapter.submitList(paperList.sortedBy { it.getNumberPartOfId() }.reversed().sortedBy { it.languageId }.reversed())
+                        mNewsPaperListAdapter.submitList(paperList.sortedBy { it.getNumberPartOfId() }.sortedBy { it.languageId })
                         showNewsPaperMenu()
                     } else {
                         activity!!.finish()
@@ -439,14 +438,14 @@ class FragmentHome : Fragment() {
     }
 
     private fun hideNewsPaperMenu() {
-        mNewsPaperMenuContainer.visibility = View.GONE
+        mNewsPaperMenuHolder.visibility = View.GONE
         mNewsPaperMenuShowButtonContainer.visibility = View.VISIBLE
         removeBackPressTaskForNpMenu()
     }
 
     private fun showNewsPaperMenu() {
 
-        mNewsPaperMenuContainer.visibility = View.VISIBLE
+        mNewsPaperMenuHolder.visibility = View.VISIBLE
         mNewsPaperMenuShowButtonContainer.visibility = View.GONE
         mNewsPaperScrollerContainer.bringToFront()
 
@@ -455,7 +454,7 @@ class FragmentHome : Fragment() {
     }
 
     private fun determineMenuButtonOperationAction(): NP_MENU_BUTTON_OPERATION_ACTION {
-        if (mNewsPaperMenuContainer.visibility == View.GONE &&
+        if (mNewsPaperMenuHolder.visibility == View.GONE &&
                 mNewsPaperMenuShowButtonContainer.visibility == View.GONE) {
             if (System.currentTimeMillis() - mLastArticlePreviewScrollTime > MENU_BUTTON_HIDE_TIME_MS) {
                 return NP_MENU_BUTTON_OPERATION_ACTION.SHOW
@@ -510,10 +509,16 @@ object NewsPaperDiffCallback : DiffUtil.ItemCallback<Newspaper>() {
     }
 }
 
-class NewsPaperListAdapter(val doOnItemClick: (Newspaper) -> Unit) : ListAdapter<Newspaper, NewsPaperNameHolder>(NewsPaperDiffCallback) {
+class NewsPaperListAdapter(val doOnItemClick: (Newspaper) -> Unit,val doOnDefaultItemSelection: (Int) -> Unit) : ListAdapter<Newspaper, NewsPaperNameHolder>(NewsPaperDiffCallback) {
 
     private val viewHolderList = mutableListOf<NewsPaperNameHolder>()
     private var currentPosition: Int? = null
+    private var currentStartingPosition=0
+
+    override fun onCurrentListChanged(previousList: MutableList<Newspaper>, currentList: MutableList<Newspaper>) {
+        super.onCurrentListChanged(previousList, currentList)
+        currentStartingPosition = Random(System.currentTimeMillis()).nextInt(currentList.size)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsPaperNameHolder {
         val newsPaperNameHolder = NewsPaperNameHolder(
@@ -529,9 +534,10 @@ class NewsPaperListAdapter(val doOnItemClick: (Newspaper) -> Unit) : ListAdapter
     }
 
     override fun onBindViewHolder(holder: NewsPaperNameHolder, position: Int) {
-        if (position == 0 && currentPosition == null) {
+        if (position == currentStartingPosition && currentPosition == null) {
             currentPosition = position
             doOnItemClick(getItem(position))
+            doOnDefaultItemSelection(position)
         }
         holder.bind(getItem(position), position, currentPosition)
     }

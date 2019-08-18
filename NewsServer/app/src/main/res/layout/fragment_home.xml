@@ -76,28 +76,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/page_search_text_box_layout">
 
-        <androidx.core.widget.NestedScrollView
-            android:id="@+id/np_name_scroller"
-            android:layout_width="240dp"
-            android:layout_height="0dp"
-            android:background="@android:color/transparent"
-            android:overScrollMode="never"
-            android:scrollbars="none"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/np_name_holder"
-                android:layout_width="match_parent"
+                android:layout_width="240dp"
                 android:layout_height="wrap_content"
                 android:background="#E6FFFFFF"
                 android:orientation="vertical"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-        </androidx.core.widget.NestedScrollView>
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:id="@+id/show_np_name_menu"

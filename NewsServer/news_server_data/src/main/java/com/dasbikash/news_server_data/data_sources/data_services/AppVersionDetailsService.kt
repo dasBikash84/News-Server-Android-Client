@@ -21,8 +21,5 @@ internal interface AppVersionDetailsService {
 
 @Keep
 data class AppVersionDetails(
-        var description: String? = null,
-        var updateTs: Long? = null,
-        var versionCode: Int? = null,
-        var versionName: String? = null
+        var versionCode: Int? = null
 )
