@@ -349,7 +349,7 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment,Si
                         .subscribeWith(object : DisposableObserver<List<ArticleCommentLocal>>() {
                             override fun onComplete() {}
                             override fun onNext(data: List<ArticleCommentLocal>) {
-                                mArticleCommentList = data
+                                mArticleCommentList = data.sortedByDescending { it.commentTime }
                                 mArticleCommentLocalListAdapter.submitList(mArticleCommentList)
                             }
 
