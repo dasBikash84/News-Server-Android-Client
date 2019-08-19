@@ -16,6 +16,7 @@ package com.dasbikash.news_server.view_controllers
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.Window
 import androidx.annotation.Keep
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
@@ -63,6 +64,7 @@ class ActivityArticlePreview : ActivityWithBackPressQueueManager() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY)
         setContentView(R.layout.activity_article_preview)
 
         mAppBar = findViewById(R.id.app_bar_layout)

@@ -17,6 +17,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.Window
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.dasbikash.news_server.R
@@ -40,6 +41,7 @@ class ActivityAdmin : ActivityWithBackPressQueueManager(), NavigationHost {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY)
         setContentView(R.layout.activity_admin)
 
         mAppBar = findViewById(R.id.app_bar_layout)

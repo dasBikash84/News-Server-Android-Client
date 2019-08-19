@@ -23,6 +23,7 @@ import android.os.SystemClock
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.Window
 import android.widget.LinearLayout
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
@@ -100,11 +101,12 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         LoggerUtils.debugLog("Start", this::class.java, this)
+        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY)
         setContentView(R.layout.activity_home)
-        mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
 
         findViewItems()
         setSupportActionBar(mToolbar)
+
         setViewItemOnClickListners()
         setUpBottomNavigationView()
         initApp()
@@ -177,6 +179,7 @@ class ActivityHome : ActivityWithBackPressQueueManager(),
     }
 
     private fun initApp() {
+        mUserSettingsRepository = RepositoryFactory.getUserSettingsRepository(this)
         NetConnectivityUtility.initialize(applicationContext)
     }
 
