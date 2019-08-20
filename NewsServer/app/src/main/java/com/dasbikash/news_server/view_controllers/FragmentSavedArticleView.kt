@@ -153,7 +153,7 @@ class FragmentSavedArticleView : Fragment(),TextSizeChangeableArticleViewFragmen
     private fun setTextSize() {
         val fontSize = DisplayUtils.getArticleTextSize(context!!).toFloat()
         mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
-        mArticlePublicationText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
+        mArticlePublicationText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize-3)
         mArticleTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize+1)
     }
 

@@ -442,7 +442,7 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment,Si
     private fun setTextSize() {
         val fontSize = DisplayUtils.getArticleTextSize(context!!).toFloat()
         mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
-        mArticlePublicationText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
+        mArticlePublicationText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize-3)
         mArticleTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize+1)
     }
 
@@ -828,7 +828,7 @@ class ArticleCommentLocalViewHolder(itemView: View,val currentUserId:String):
 
         val textFontSize = DisplayUtils.getArticleTextSize(itemView.context).toFloat()
         commentText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize)
-        commentDate.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize)
+        commentDate.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize-3)
         displayName.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize+1)
     }
     companion object{
