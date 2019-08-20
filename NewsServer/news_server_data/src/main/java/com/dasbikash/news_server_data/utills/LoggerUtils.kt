@@ -14,12 +14,8 @@
 package com.dasbikash.news_server_data.utills
 
 import android.content.Context
-import android.os.Environment
-import android.os.SystemClock
 import android.util.Log
 import com.dasbikash.news_server_data.BuildConfig
-import java.io.File
-import java.util.*
 
 object LoggerUtils {
     private const val TAG = "NS>>"

@@ -28,7 +28,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dasbikash.news_server.R
 import com.dasbikash.news_server.utils.*
-import com.dasbikash.news_server.view_controllers.interfaces.NavigationHost
 import com.dasbikash.news_server.view_controllers.view_helpers.TextListAdapter
 import com.dasbikash.news_server_data.exceptions.NoInternertConnectionException
 import com.dasbikash.news_server_data.models.ArticleSearchReasultEntry
@@ -52,7 +51,6 @@ class FragmentArticleSearch : Fragment() {
     private lateinit var mSearchKeywordEditText: EditText
     private lateinit var mSearchKeywordHintsHolder: RecyclerView
     private lateinit var mSearchButton: ImageButton
-    //    private lateinit var mClearButton: Button
     private lateinit var mSearchResultsHolder: RecyclerView
     private lateinit var mSearchResultsHolderAdapter: ArticleSearchResultListAdapter
 
@@ -88,7 +86,6 @@ class FragmentArticleSearch : Fragment() {
     }
 
     private fun doOnSearchResultClick(article: Article) {
-        debugLog(article.toString())
         startActivity(ActivityArticleView.getIntentForArticleView(context!!,article))
     }
 
@@ -98,7 +95,6 @@ class FragmentArticleSearch : Fragment() {
         mSearchKeywordEditText = view!!.findViewById(R.id.search_key_input_box_edit_text)
         mSearchKeywordHintsHolder = view!!.findViewById(R.id.search_keyword_hints_holder)
         mSearchButton = view!!.findViewById(R.id.search_button)
-//        mClearButton = view!!.findViewById(R.id.clear_button)
         mSearchResultsHolder = view!!.findViewById(R.id.search_results_holder)
     }
 
@@ -175,7 +171,6 @@ class FragmentArticleSearch : Fragment() {
     private var mArticleSearchTaskDisposable: Disposable? = null
 
     private fun startSearch() {
-        debugLog("Starting article search")
         mCurrentSearchResultList.clear()
         mCurrentArticleSearchReasultEntries.clear()
         mSearchResultsHolderAdapter.submitList(emptyList())
@@ -192,17 +187,14 @@ class FragmentArticleSearch : Fragment() {
                             override fun onComplete() {}
 
                             override fun onNext(articleSearchResultEntries: List<ArticleSearchReasultEntry>) {
+                                removeBackPressTask()
                                 if (articleSearchResultEntries.isNotEmpty()) {
-                                    articleSearchResultEntries.asSequence().forEach {
-                                        debugLog(it.toString())
-                                    }
                                     mCurrentArticleSearchReasultEntries.addAll(articleSearchResultEntries)
                                     displayArticleSearchResult()
                                 } else {
                                     showShortSnack(EMPTY_SEARCH_RESULT_MESSAGE)
                                     hideWaitScreen()
                                 }
-                                removeBackPressTask()
                             }
 
                             override fun onError(e: Throwable) {
@@ -233,19 +225,11 @@ class FragmentArticleSearch : Fragment() {
     private val mCurrentSearchResultList = mutableListOf<ArticleSearchResult>()
 
     private fun displayArticleSearchResult() {
-        debugLog("displayArticleSearchResult")
         loadMoreSearchResult()
-//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     private val SEARCH_RESULT_DOWNLOAD_CHUNK_SIZE = 5
     private var mSearchResultProcessingOnGoing = false
-
-    fun showWaitScreenIfApplicable() {
-        if (mSearchResultProcessingOnGoing) {
-            showWaitScreen()
-        }
-    }
 
     private fun loadMoreSearchResult(): Boolean {
         if (mSearchResultProcessingOnGoing) {
@@ -268,7 +252,6 @@ class FragmentArticleSearch : Fragment() {
         val newsDataRepository = RepositoryFactory.getNewsDataRepository(context!!)
         val appSettingsRepository = RepositoryFactory.getAppSettingsRepository(context!!)
         var amDisposed = false
-//        mDisposable.add(
         mArticleSearchTaskDisposable =
                 Observable.just(articleSearchReasultEntriesForProcessing)
                         .subscribeOn(Schedulers.io())
@@ -305,11 +288,6 @@ class FragmentArticleSearch : Fragment() {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<List<ArticleSearchResult>>() {
                             override fun onComplete() {
-                                articleSearchReasultEntriesForProcessing
-                                        .forEach { mCurrentArticleSearchReasultEntries.remove(it) }
-                                mSearchResultProcessingOnGoing = false
-                                hideWaitScreen()
-                                removeBackPressTask()
                             }
 
                             override fun onNext(articleSearchResults: List<ArticleSearchResult>) {
@@ -325,6 +303,13 @@ class FragmentArticleSearch : Fragment() {
                                             it
                                         }
                                         .forEach { mCurrentSearchResultList.add(it) }
+
+                                articleSearchReasultEntriesForProcessing
+                                        .forEach { mCurrentArticleSearchReasultEntries.remove(it) }
+                                mSearchResultProcessingOnGoing = false
+                                hideWaitScreen()
+                                removeBackPressTask()
+
                                 if (newsArticleCount > 0) {
                                     mCurrentSearchResultList.map { it.article }.forEach { debugLog(it.toString()) }
                                     mSearchResultsHolderAdapter.submitList(mCurrentSearchResultList.toList())
@@ -351,7 +336,6 @@ class FragmentArticleSearch : Fragment() {
                                 removeBackPressTask()
                             }
                         })
-//        )
         addBackPressTask()
         mDisposable.add(mArticleSearchTaskDisposable)
         return true
