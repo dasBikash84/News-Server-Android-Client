@@ -14,6 +14,8 @@
 package com.dasbikash.news_server.view_controllers
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.TypedValue
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
@@ -117,7 +119,7 @@ class FragmentSavedArticleView : Fragment(),TextSizeChangeableArticleViewFragmen
                                 mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, mArticleTextSize!!.toFloat())
                                 mArticlePublicationText.text = mArticleDateString
                                 DisplayUtils.displayHtmlText(mArticleText, mSavedArticle.articleText!!)
-                                mArticleImageListAdapter = ArticleImageListAdapter(this@FragmentSavedArticleView,DisplayUtils.DEFAULT_ARTICLE_TEXT_SIZE.toFloat())
+                                mArticleImageListAdapter = ArticleImageListAdapter(this@FragmentSavedArticleView)
                                 mArticleImageHolder.adapter = mArticleImageListAdapter
                                 mSavedArticle.imageLinkList?.let {
                                     mArticleImageListAdapter.submitList(it.asSequence().filter { !it.link.isNullOrEmpty() }.map {
@@ -132,8 +134,32 @@ class FragmentSavedArticleView : Fragment(),TextSizeChangeableArticleViewFragmen
         )
     }
 
+    fun refreshArticleImageDisplay(){
+        if (mSavedArticle.imageLinkList != null && mSavedArticle.imageLinkList!!.size > 0) {
+            mArticleImageListAdapter.submitList(emptyList())
+            Handler(Looper.getMainLooper()).postDelayed(
+                    {
+                        mSavedArticle.imageLinkList?.let {
+                            mArticleImageListAdapter.submitList(it.asSequence().filter { !it.link.isNullOrEmpty() }.map {
+                                LoggerUtils.debugLog(it.link.toString(), this@FragmentSavedArticleView::class.java)
+                                it
+                            }.toList())
+                        }
+                    }, 50L)
+        }
+    }
+
+
+    private fun setTextSize() {
+        val fontSize = DisplayUtils.getArticleTextSize(context!!).toFloat()
+        mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
+        mArticlePublicationText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
+        mArticleTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize+1)
+    }
+
     override fun setArticleTextSpSizeTo(fontSize: Int) {
-        mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize.toFloat())
+        setTextSize()
+        refreshArticleImageDisplay()
     }
 
     companion object {

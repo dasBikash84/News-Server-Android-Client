@@ -15,6 +15,8 @@ package com.dasbikash.news_server.view_controllers
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.InputType
 import android.util.TypedValue
 import android.view.*
@@ -58,7 +60,7 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment,Si
     private lateinit var mMainScroller: NestedScrollView
 
     private lateinit var mDateString: String
-    private var mArticleTextSize: Int? = null
+//    private var mArticleTextSize: Int? = null
 
     private lateinit var mArticleTitle: AppCompatTextView
     private lateinit var mArticlePublicationText: AppCompatTextView
@@ -401,7 +403,7 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment,Si
                                             ?.filter {
                                                 it.link?.isNotBlank() ?: false
                                             }?.toList()
-                            mArticleTextSize = DisplayUtils.getArticleTextSize(context!!)
+//                            mArticleTextSize = DisplayUtils.getArticleTextSize(context!!)
                             mDateString = DisplayUtils
                                     .getArticlePublicationDateString(mArticle, mLanguage, context!!, true)!!
                         }
@@ -421,20 +423,27 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment,Si
 
     private fun displayArticle() {
 
-        mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, mArticleTextSize!!.toFloat())
+        setTextSize()
 
         mArticleTitle.text = mArticle.title
         mArticlePublicationText.text = mDateString
         DisplayUtils.displayHtmlText(mArticleText, mArticle.articleText!!)
 
         if (mArticle.imageLinkList != null && mArticle.imageLinkList!!.size > 0) {
-            mArticleImageListAdapter = ArticleImageListAdapter(this, DisplayUtils.DEFAULT_ARTICLE_TEXT_SIZE.toFloat(), true)
+            mArticleImageListAdapter = ArticleImageListAdapter(this, /*DisplayUtils.DEFAULT_ARTICLE_TEXT_SIZE.toFloat(),*/ true)
             mArticleImageHolder.adapter = mArticleImageListAdapter
             mArticleImageListAdapter.submitList(mArticle.imageLinkList!!.filter { it.link!=null })
             mArticleImageHolder.visibility = View.VISIBLE
         } else {
             mArticleImageHolder.visibility = View.GONE
         }
+    }
+
+    private fun setTextSize() {
+        val fontSize = DisplayUtils.getArticleTextSize(context!!).toFloat()
+        mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
+        mArticlePublicationText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
+        mArticleTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize+1)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -579,8 +588,26 @@ class FragmentArticleView : Fragment(), TextSizeChangeableArticleViewFragment,Si
         )
     }
 
+    fun refreshCommentsTextSize(){
+        if (mArticleCommentList.isNotEmpty()) {
+            mArticleCommentLocalListAdapter.submitList(emptyList())
+            Handler(Looper.getMainLooper()).postDelayed(
+                    { mArticleCommentLocalListAdapter.submitList(mArticleCommentList) }, 50L)
+        }
+    }
+
+    fun refreshArticleImageDisplay(){
+        if (mArticle.imageLinkList != null && mArticle.imageLinkList!!.size > 0) {
+            mArticleImageListAdapter.submitList(emptyList())
+            Handler(Looper.getMainLooper()).postDelayed(
+                    { mArticleImageListAdapter.submitList(mArticle.imageLinkList!!.filter { it.link != null }) }, 50L)
+        }
+    }
+
     override fun setArticleTextSpSizeTo(fontSize: Int) {
-        mArticleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize.toFloat())
+        setTextSize()
+        refreshArticleImageDisplay()
+        refreshCommentsTextSize()
     }
 
     companion object {
@@ -625,7 +652,7 @@ object ArticleImageDiffCallback : DiffUtil.ItemCallback<ArticleImage>() {
     }
 }
 
-class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner, val mArticleTextSize: Float, val enableImageDownload: Boolean = false) :
+class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner, /*val mArticleTextSize: Float,*/ val enableImageDownload: Boolean = false) :
         ListAdapter<ArticleImage, ArticleImageHolder>(ArticleImageDiffCallback), DefaultLifecycleObserver {
 
     init {
@@ -638,7 +665,7 @@ class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner, val mArticleTextSi
         return ArticleImageHolder(
                 LayoutInflater.from(parent.context)
                         .inflate(R.layout.view_article_image, parent, false),
-                mDisposable, mArticleTextSize, enableImageDownload
+                mDisposable, /*mArticleTextSize,*/ enableImageDownload
         )
     }
 
@@ -673,7 +700,7 @@ class ArticleImageListAdapter(lifecycleOwner: LifecycleOwner, val mArticleTextSi
     }
 }
 
-class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDisposable, textFontSize: Float,
+class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDisposable, /*textFontSize: Float,*/
                          val enableImageDownload: Boolean = false)
     : RecyclerView.ViewHolder(itemView) {
 
@@ -686,9 +713,6 @@ class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDispo
         mArticleImage = itemView.findViewById(R.id.article_image)
         mImageCaption = itemView.findViewById(R.id.article_image_caption)
         mCurrentImagePositionText = itemView.findViewById(R.id.current_image_position)
-
-        mImageCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize)
-        mCurrentImagePositionText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize)
     }
 
     fun disposeImageLoader() {
@@ -726,6 +750,10 @@ class ArticleImageHolder(itemView: View, val compositeDisposable: CompositeDispo
             } else {
                 mImageCaption.visibility = View.GONE
             }
+
+        val textFontSize = DisplayUtils.getArticleTextSize(itemView.context).toFloat()
+        mImageCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize)
+        mCurrentImagePositionText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize)
     }
 
     private fun downloadImageAction(link: String) {
@@ -797,6 +825,11 @@ class ArticleCommentLocalViewHolder(itemView: View,val currentUserId:String):
         commentDate.text = DisplayUtils.getFormatedShortDateString(itemView.context!!,articleCommentLocal.commentTime)
         ImageUtils.customLoader(userImage,articleCommentLocal.imageUrl,R.drawable.account_circle_black_48,
                                     R.drawable.account_circle_black_48)
+
+        val textFontSize = DisplayUtils.getArticleTextSize(itemView.context).toFloat()
+        commentText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize)
+        commentDate.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize)
+        displayName.setTextSize(TypedValue.COMPLEX_UNIT_SP, textFontSize+1)
     }
     companion object{
         private const val ANONYMOUS_USER_DISPLAY_NAME = "Anonymous"

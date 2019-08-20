@@ -33,9 +33,9 @@ object DisplayUtils {
 
     private val ARTCILE_TEXT_SIZE_SP_KEY =
             "com.dasbikash.news_server.utils.DisplayUtils.ARTCILE_TEXT_SIZE_SP_KEY"
-    val MIN_ARTICLE_TEXT_SIZE = 10
-    val MAX_ARTICLE_TEXT_SIZE = 26
-    val DEFAULT_ARTICLE_TEXT_SIZE = 16
+    val MIN_ARTICLE_TEXT_SIZE = 12
+    val MAX_ARTICLE_TEXT_SIZE = 22
+    val DEFAULT_ARTICLE_TEXT_SIZE = 17
     val ARTICLE_TEXT_SIZE_CHANGE_STEP = 1
 
     private val TWO_DAYS_IN_MS = (2 * 24 * 60 * 60 * 1000).toLong()
