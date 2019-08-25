@@ -31,12 +31,12 @@
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/normal_title_text_view"
             android:layout_width="match_parent"
-            android:layout_height="32dp"
+            android:layout_height="40dp"
             android:background="@color/white_smoke"
             android:gravity="start|center_vertical"
             android:textAlignment="gravity"
             android:textColor="@android:color/black"
-            android:textSize="18sp"
+            android:textSize="22sp"
             android:textStyle="normal"
             tools:text="Newspaper Title"/>
     </com.google.android.material.card.MaterialCardView>
@@ -44,12 +44,12 @@
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/bold_title_text_view"
         android:layout_width="match_parent"
-        android:layout_height="32dp"
+        android:layout_height="40dp"
         android:background="@android:color/transparent"
         android:gravity="start|center_vertical"
         android:textAlignment="gravity"
         android:textColor="@color/article_title_color"
-        android:textSize="18sp"
+        android:textSize="22sp"
         android:textStyle="bold"
         tools:text="Newspaper Title"/>
 

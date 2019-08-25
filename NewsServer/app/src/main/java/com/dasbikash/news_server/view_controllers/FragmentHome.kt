@@ -385,7 +385,7 @@ class FragmentHome : Fragment() {
         hideNewsPaperMenu()
         mNewsPaperMenuShowButtonContainer.visibility = View.GONE
         mPageSearchResultHolder.adapter = mSearchResultListAdapter
-        mNewsPaperListAdapter = NewsPaperListAdapter ({ doOnNewsPaperNameClick(it) },{mNewsPaperMenuHolder.scrollToPosition(it)})
+        mNewsPaperListAdapter = NewsPaperListAdapter ({hideNewsPaperMenu()},{ doOnNewsPaperNameClick(it) },{mNewsPaperMenuHolder.scrollToPosition(it)})
         mNewsPaperMenuHolder.adapter = mNewsPaperListAdapter
         mPageArticlePreviewHolderAdapter = PageListAdapter(this, ViewModelProviders.of(activity!!).get(NSViewModel::class.java))
         mPageArticlePreviewHolder.adapter = mPageArticlePreviewHolderAdapter
@@ -509,16 +509,11 @@ object NewsPaperDiffCallback : DiffUtil.ItemCallback<Newspaper>() {
     }
 }
 
-class NewsPaperListAdapter(val doOnItemClick: (Newspaper) -> Unit,val doOnDefaultItemSelection: (Int) -> Unit) : ListAdapter<Newspaper, NewsPaperNameHolder>(NewsPaperDiffCallback) {
+class NewsPaperListAdapter(val doOnUserClick: () -> Unit,val doOnItemClick: (Newspaper) -> Unit,val doOnDefaultItemSelection: (Int) -> Unit) : ListAdapter<Newspaper, NewsPaperNameHolder>(NewsPaperDiffCallback) {
 
     private val viewHolderList = mutableListOf<NewsPaperNameHolder>()
     private var currentPosition: Int? = null
     private var currentStartingPosition=0
-
-    override fun onCurrentListChanged(previousList: MutableList<Newspaper>, currentList: MutableList<Newspaper>) {
-        super.onCurrentListChanged(previousList, currentList)
-        currentStartingPosition = Random(System.currentTimeMillis()).nextInt(currentList.size)
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsPaperNameHolder {
         val newsPaperNameHolder = NewsPaperNameHolder(
@@ -526,6 +521,7 @@ class NewsPaperListAdapter(val doOnItemClick: (Newspaper) -> Unit,val doOnDefaul
         newsPaperNameHolder.itemView.setOnClickListener {
             currentPosition = newsPaperNameHolder.position
             doOnItemClick(newsPaperNameHolder.getNewsPaper())
+            doOnUserClick()
             viewHolderList.filter { it != newsPaperNameHolder }.forEach { it.highlightText(false) }
             newsPaperNameHolder.highlightText(true)
         }
