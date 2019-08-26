@@ -23,7 +23,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="280dp"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/ghost_white">
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/page_title"
@@ -32,8 +33,10 @@
             android:gravity="center"
             android:maxLines="2"
             android:textColor="@android:color/white"
-            android:background="@color/colorPrimaryLight"
+            android:background="@color/titleScrollerBG"
             android:textSize="20sp"
+            android:paddingBottom="2dp"
+            android:paddingTop="2dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Page Title"
@@ -44,8 +47,8 @@
             android:layout_width="160dp"
             android:layout_height="90dp"
             android:background="@android:color/white"
-            android:padding="2dp"
             android:gravity="center"
+            android:padding="1dp"
             android:src="@drawable/pc_bg"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/page_title" />
@@ -54,7 +57,6 @@
             android:id="@+id/article_time"
             android:layout_width="120dp"
             android:layout_height="90dp"
-            android:background="@color/snow_white"
             android:gravity="center"
             android:textColor="@android:color/black"
             android:textSize="14sp"
@@ -81,13 +83,13 @@
             android:id="@+id/article_title"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="@color/snow_white"
             android:gravity="center"
             android:maxLines="2"
             android:textColor="@android:color/black"
             android:textSize="16sp"
             android:visibility="gone"
-            android:padding ="2dp"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/article_preview_image"

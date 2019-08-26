@@ -16,26 +16,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/page_search_text_box_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
-        android:hint="@string/page_search_text_box_hint"
-        android:paddingTop="0dp"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/page_search_box_edit_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxLength="@integer/page_search_max_char" />
-    </com.google.android.material.textfield.TextInputLayout>
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/page_search_result_container"
         android:layout_width="match_parent"
@@ -67,15 +47,42 @@
         </androidx.core.widget.NestedScrollView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/np_name_holder"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/np_name_holder_scroller"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#E6FFFFFF"
-        android:orientation="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/page_search_text_box_layout" />
+        app:layout_constraintTop_toBottomOf="@+id/page_search_text_box_layout">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/np_name_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#E6FFFFFF"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/page_search_text_box_layout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:hint="@string/page_search_text_box_hint"
+        android:paddingTop="0dp"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/page_search_box_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="@integer/page_search_max_char" />
+    </com.google.android.material.textfield.TextInputLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

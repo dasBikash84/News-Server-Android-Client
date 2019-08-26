@@ -17,11 +17,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingStart="4dp"
-    android:paddingEnd="4dp"
+    android:paddingStart="6dp"
+    android:paddingEnd="6dp"
     android:paddingTop="2dp"
     android:paddingBottom="2dp"
-    android:background="@color/snow_white3">
+    android:background="@color/snow_white2">
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
