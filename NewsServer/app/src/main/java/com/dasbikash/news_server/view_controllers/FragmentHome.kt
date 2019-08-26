@@ -84,27 +84,16 @@ class FragmentHome : Fragment() {
     private lateinit var mPageSearchResultContainer: ViewGroup
 
     private lateinit var mNewsPaperMenuHolder: RecyclerView
-//    private lateinit var mNewsPaperMenuShowButtonContainer: ViewGroup
     private lateinit var mNewsPaperListAdapter: NewsPaperListAdapter
-//    private lateinit var mNewsPaperScrollerContainer: ViewGroup
-
-    var backPressTaskTagForNpMenu: String? = null
 
 
     private val mDisposable = LifeCycleAwareCompositeDisposable.getInstance(this)
-
-//    private lateinit var mPageArticlePreviewHolder: RecyclerView
-//    private lateinit var mPageArticlePreviewHolderAdapter: PageListAdapter
 
     private var mArticlePreviewHolderDySum = 0
 
     private var mSearchResultListAdapter = SearchResultListAdapter()
 
     private var backPressTaskTagForPageSearchResults: String? = null
-    private val MENU_BUTTON_VISIBILITY_CHECK_INTERVAL = 500L
-    private val MENU_BUTTON_HIDE_TIME_MS = 1000L
-
-    private var mLastArticlePreviewScrollTime: Long = System.currentTimeMillis()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_home, container, false)
@@ -124,10 +113,6 @@ class FragmentHome : Fragment() {
         mPageSearchResultHolder = view.findViewById(R.id.page_search_result_holder)
         mPageSearchResultContainer = view.findViewById(R.id.page_search_result_container)
         mNewsPaperMenuHolder = view.findViewById(R.id.np_name_holder)
-//        mNewsPaperMenuContainer = view.findViewById(R.id.np_name_scroller)
-//        mNewsPaperMenuShowButtonContainer = view.findViewById(R.id.show_np_name_menu)
-//        mNewsPaperScrollerContainer = view.findViewById(R.id.np_name_scroller_container)
-//        mPageArticlePreviewHolder = view.findViewById(R.id.page_article_preview_holder)
     }
 
     private fun setListnersForViewComponents() {
@@ -181,8 +166,6 @@ class FragmentHome : Fragment() {
             removeBackPressTaskForPageSrearchResults()
         }
 
-//        mNewsPaperMenuShowButtonContainer.setOnClickListener { showNewsPaperMenu() }
-
         mNewsPaperMenuHolder.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -220,20 +203,6 @@ class FragmentHome : Fragment() {
         }
     }
 
-    /*fun addBackPressTaskForForNpMenu() {
-        backPressTaskTagForNpMenu =
-                (activity!! as BackPressQueueManager).addToBackPressTaskQueue {
-                    hideNewsPaperMenu()
-                    backPressTaskTagForNpMenu = null
-                }
-    }
-
-    fun removeBackPressTaskForNpMenu() {
-        if (backPressTaskTagForNpMenu != null) {
-            (activity!! as BackPressQueueManager).removeTaskFromQueue(backPressTaskTagForNpMenu!!)
-        }
-    }*/
-
     var mFcmArticle: Article? = null
     var mFcmArticlehandled = false
     var mInitDone = false
@@ -251,14 +220,10 @@ class FragmentHome : Fragment() {
             if (!mInitDone) {
                 initView()
             } else {
-                /*if (mNewsPaperMenuHolder.visibility == View.VISIBLE) {
-                    addBackPressTaskForForNpMenu()
-                }*/
                 if (mPageSearchResultContainer.visibility == View.VISIBLE) {
                     addBackPressTaskForPageSrearchResults()
                 }
             }
-//            initMenuButtonOperator()
             checkIfNeedAppUpdate()
         }
     }
@@ -368,7 +333,6 @@ class FragmentHome : Fragment() {
 
     override fun onPause() {
         super.onPause()
-//        removeBackPressTaskForNpMenu()
         removeBackPressTaskForPageSrearchResults()
     }
 
@@ -377,13 +341,9 @@ class FragmentHome : Fragment() {
         mInitDone = true
         showPageSearchBox()
         mPageSearchResultContainer.visibility = View.GONE
-//        hideNewsPaperMenu()
-//        mNewsPaperMenuShowButtonContainer.visibility = View.GONE
         mPageSearchResultHolder.adapter = mSearchResultListAdapter
-        mNewsPaperListAdapter = NewsPaperListAdapter (this, ViewModelProviders.of(activity!!).get(NSViewModel::class.java)/*{hideNewsPaperMenu()},{ doOnNewsPaperNameClick(it) },{mNewsPaperMenuHolder.scrollToPosition(it)}*/)
+        mNewsPaperListAdapter = NewsPaperListAdapter (this, ViewModelProviders.of(activity!!).get(NSViewModel::class.java))
         mNewsPaperMenuHolder.adapter = mNewsPaperListAdapter
-//        mPageArticlePreviewHolderAdapter = PageListAdapter(this, ViewModelProviders.of(activity!!).get(NSViewModel::class.java))
-//        mPageArticlePreviewHolder.adapter = mPageArticlePreviewHolderAdapter
 
         Observable.just(true)
                 .subscribeOn(Schedulers.io())
@@ -393,91 +353,11 @@ class FragmentHome : Fragment() {
                     val paperList = it
                     if (paperList.isNotEmpty()) {
                         mNewsPaperListAdapter.submitList(paperList.sortedBy { it.getNumberPartOfId() }.sortedBy { it.languageId })
-//                        showNewsPaperMenu()
                     } else {
                         activity!!.finish()
                     }
                 }
     }
-
-
-    /*private fun initMenuButtonOperator() {
-        var amDisposed = false
-        mDisposable.add(
-                Observable.create(fun(emitter: ObservableEmitter<NP_MENU_BUTTON_OPERATION_ACTION>) {
-                    do {
-                        try {
-                            Thread.sleep(MENU_BUTTON_VISIBILITY_CHECK_INTERVAL)
-                        } catch (ex: InterruptedException) {
-                        }
-                        emitter.onNext(determineMenuButtonOperationAction())
-                    } while (!amDisposed)
-                }).subscribeOn(Schedulers.io())
-                        .doOnDispose {
-                            amDisposed = true
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<NP_MENU_BUTTON_OPERATION_ACTION>() {
-                            override fun onComplete() {}
-                            override fun onNext(action: NP_MENU_BUTTON_OPERATION_ACTION) {
-                                if (action == NP_MENU_BUTTON_OPERATION_ACTION.SHOW) {
-                                    mNewsPaperMenuShowButtonContainer.visibility = View.VISIBLE
-                                }
-                            }
-
-                            override fun onError(e: Throwable) {
-                                LoggerUtils.printStackTrace(e)
-                            }
-                        }))
-    }*/
-
-    /*private fun hideNewsPaperMenu() {
-        mNewsPaperMenuHolder.visibility = View.GONE
-        mNewsPaperMenuShowButtonContainer.visibility = View.VISIBLE
-        removeBackPressTaskForNpMenu()
-    }
-
-    private fun showNewsPaperMenu() {
-
-        mNewsPaperMenuHolder.visibility = View.VISIBLE
-        mNewsPaperMenuShowButtonContainer.visibility = View.GONE
-        mNewsPaperScrollerContainer.bringToFront()
-
-        removeBackPressTaskForNpMenu()
-        addBackPressTaskForForNpMenu()
-    }*/
-
-    /*private fun determineMenuButtonOperationAction(): NP_MENU_BUTTON_OPERATION_ACTION {
-        if (mNewsPaperMenuHolder.visibility == View.GONE &&
-                mNewsPaperMenuShowButtonContainer.visibility == View.GONE) {
-            if (System.currentTimeMillis() - mLastArticlePreviewScrollTime > MENU_BUTTON_HIDE_TIME_MS) {
-                return NP_MENU_BUTTON_OPERATION_ACTION.SHOW
-            }
-        }
-        return NP_MENU_BUTTON_OPERATION_ACTION.NONE
-    }*/
-
-    /*fun doOnNewsPaperNameClick(newspaper: Newspaper) {
-        mDisposable.add(
-                Observable.just(newspaper)
-                        .subscribeOn(Schedulers.io())
-                        .map {
-                            RepositoryFactory.getAppSettingsRepository(context!!).getPagesForNewspaper(it)
-                        }
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(object : DisposableObserver<List<Page>>() {
-                            override fun onComplete() {}
-                            override fun onNext(pageList: List<Page>) {
-                                mArticlePreviewHolderDySum = 0
-                                showPageSearchBox()
-                                mPageArticlePreviewHolderAdapter.submitList(pageList.sortedBy { it.getNumberPartOfId() })
-                            }
-
-                            override fun onError(e: Throwable) {
-                                mPageArticlePreviewHolderAdapter.submitList(emptyList())
-                            }
-                        }))
-    }*/
 
     private fun showPageSearchBox() {
         mPageSearchTextBoxContainer.visibility = View.VISIBLE
@@ -487,10 +367,6 @@ class FragmentHome : Fragment() {
         mPageSearchTextBoxContainer.visibility = View.GONE
         mPageSearchTextBox.setText("")
     }
-
-    /*private enum class NP_MENU_BUTTON_OPERATION_ACTION {
-        NONE, SHOW
-    }*/
 }
 
 object NewsPaperDiffCallback : DiffUtil.ItemCallback<Newspaper>() {
@@ -503,25 +379,12 @@ object NewsPaperDiffCallback : DiffUtil.ItemCallback<Newspaper>() {
     }
 }
 
-class NewsPaperListAdapter(val lifeCycleOwner: LifecycleOwner,
-                           val viewModel: NSViewModel/*val doOnUserClick: () -> Unit,val doOnItemClick: (Newspaper) -> Unit,val doOnDefaultItemSelection: (Int) -> Unit*/)
+class NewsPaperListAdapter(val lifeCycleOwner: LifecycleOwner,val viewModel: NSViewModel)
     : ListAdapter<Newspaper, NewsPaperNameHolder>(NewsPaperDiffCallback) {
-
-//    private val viewHolderList = mutableListOf<NewsPaperNameHolder>()
-//    private var currentPosition: Int? = null
-//    private var currentStartingPosition=0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsPaperNameHolder {
         val newsPaperNameHolder = NewsPaperNameHolder(lifeCycleOwner,viewModel,
                 LayoutInflater.from(parent.context).inflate(R.layout.view_article_preview_for_newspaper, parent, false))
-        /*newsPaperNameHolder.itemView.setOnClickListener {
-            currentPosition = newsPaperNameHolder.position
-            doOnItemClick(newsPaperNameHolder.getNewsPaper())
-            doOnUserClick()
-            viewHolderList.filter { it != newsPaperNameHolder }.forEach { it.highlightText(false) }
-            newsPaperNameHolder.highlightText(true)
-        }
-        viewHolderList.add(newsPaperNameHolder)*/
         return newsPaperNameHolder
     }
 
@@ -539,15 +402,12 @@ class NewsPaperNameHolder(lifeCycleOwner: LifecycleOwner,viewModel: NSViewModel,
     private val mPageListAdapter: PageListAdapter
     private var mPageListAdapterInitiated = false
     private var mDisposable:Disposable?=null
-//    private val mBoldTextView: TextView
-//    var position: Int? = null
 
     init {
         mTitleTextView = itemView.findViewById(R.id.np_title_textview)
         mPageArticlePreviewHolder = itemView.findViewById(R.id.page_article_preview_holder)
         mPageListAdapter = PageListAdapter(lifeCycleOwner,viewModel)
         mPageArticlePreviewHolder.adapter = mPageListAdapter
-//        mBoldTextView = itemView.findViewById(R.id.bold_title_text_view)
     }
 
     private fun resetView(){
@@ -559,34 +419,23 @@ class NewsPaperNameHolder(lifeCycleOwner: LifecycleOwner,viewModel: NSViewModel,
     fun bind(newspaper: Newspaper) {
         resetView()
         mNewspaper = newspaper
-//        this.position = position
 
         mTitleTextView.setText(mNewspaper.name)
         mTitleTextView.setOnClickListener { titleClickListner() }
-//        mBoldTextView.setText(mNewspaper.name)
-//        if (position == currentPosition) {
-//            highlightText(true)
-//        } else {
-//            highlightText(false)
-//        }
     }
 
     private fun titleClickListner() {
-        LoggerUtils.debugLog("Click on: ${mNewspaper.name}",this::class.java)
         if (mPageArticlePreviewHolder.visibility == View.VISIBLE){
-            LoggerUtils.debugLog("mPageArticlePreviewHolder.visibility = View.GONE",this::class.java)
             mPageArticlePreviewHolder.visibility = View.GONE
         }else{
             if (!mPageListAdapterInitiated){
                 initPreviewHolder()
             }
-            LoggerUtils.debugLog("mPageArticlePreviewHolder.visibility = View.VISIBLE",this::class.java)
             mPageArticlePreviewHolder.visibility = View.VISIBLE
         }
     }
 
     private fun initPreviewHolder() {
-        LoggerUtils.debugLog("initPreviewHolder()",this::class.java)
         mDisposable?.dispose()
         mDisposable = Observable.just(mNewspaper)
                                 .subscribeOn(Schedulers.io())
@@ -596,44 +445,23 @@ class NewsPaperNameHolder(lifeCycleOwner: LifecycleOwner,viewModel: NSViewModel,
                                     override fun onComplete() {}
                                     override fun onNext(pageList: List<Page>) {
                                         mPageListAdapter.submitList(pageList.sortedBy { it.getNumberPartOfId() })
-                                        pageList.map { it.name }.forEach { LoggerUtils.debugLog("Page: $it",this::class.java) }
                                         mPageListAdapterInitiated = true
                                     }
                                     override fun onError(e: Throwable) {}
                                 })
     }
-
-    /*fun highlightText(highlight: Boolean) {
-        if (highlight) {
-            mBoldTextView.visibility = View.VISIBLE
-            mTitleTextView.visibility = View.GONE
-        } else {
-            mBoldTextView.visibility = View.GONE
-            mTitleTextView.visibility = View.VISIBLE
-        }
-    }*/
-
-//    fun getNewsPaper() = mNewspaper
 }
 
 class PageListAdapter(val lifeCycleOwner: LifecycleOwner,
                       val NSViewModel: NSViewModel) :
         ListAdapter<Page, LatestArticlePreviewHolder>(PageDiffCallback), DefaultLifecycleObserver {
 
-    override fun onCurrentListChanged(previousList: MutableList<Page>, currentList: MutableList<Page>) {
-        super.onCurrentListChanged(previousList, currentList)
-        LoggerUtils.debugLog("previousList: ${previousList.map { it.name }}",this::class.java)
-        LoggerUtils.debugLog("currentList: ${currentList.map { it.name }}",this::class.java)
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LatestArticlePreviewHolder {
-        return LatestArticlePreviewHolder(
-                LayoutInflater.from(parent.context)
-                        .inflate(R.layout.view_article_preview_home, parent, false), lifeCycleOwner, NSViewModel)
+        return LatestArticlePreviewHolder(LayoutInflater.from(parent.context).inflate(R.layout.view_article_preview_home, parent, false),
+                                            lifeCycleOwner, NSViewModel)
     }
 
     override fun onBindViewHolder(holder: LatestArticlePreviewHolder, position: Int) {
-        LoggerUtils.debugLog("holder.bind(getItem(position)) for: ${getItem(position).name}",this::class.java)
         holder.bind(getItem(position))
     }
 }
@@ -646,11 +474,9 @@ class LatestArticlePreviewHolder(itemView: View, lifeCycleOwner: LifecycleOwner,
     val articlePreviewImage: ImageView
     val articleTitle: TextView
     val articlePublicationTime: TextView
-//    val articleTextPreview: TextView
 
     val articleTitlePlaceHolder: TextView
     val articlePublicationTimePlaceHolder: TextView
-//    val articleTextPreviewPlaceHolder: TextView
 
     lateinit var mdisposable: Disposable
     lateinit var mPage: Page
@@ -662,15 +488,12 @@ class LatestArticlePreviewHolder(itemView: View, lifeCycleOwner: LifecycleOwner,
 
         articleTitle = itemView.findViewById(R.id.article_title)
         articlePublicationTime = itemView.findViewById(R.id.article_time)
-//        articleTextPreview = itemView.findViewById(R.id.article_text_preview)
 
         articleTitlePlaceHolder = itemView.findViewById(R.id.article_title_ph)
         articlePublicationTimePlaceHolder = itemView.findViewById(R.id.article_time_ph)
-//        articleTextPreviewPlaceHolder = itemView.findViewById(R.id.article_text_preview_ph)
 
         articleTitlePlaceHolder.setOnClickListener { }
         articlePublicationTimePlaceHolder.setOnClickListener { }
-//        articleTextPreviewPlaceHolder.setOnClickListener { }
 
         lifeCycleOwner.lifecycle.addObserver(this)
         disableView()
@@ -692,11 +515,9 @@ class LatestArticlePreviewHolder(itemView: View, lifeCycleOwner: LifecycleOwner,
         pageTitle.visibility = View.GONE
         articleTitle.visibility = View.GONE
         articlePublicationTime.visibility = View.GONE
-//        articleTextPreview.visibility = View.GONE
 
         articleTitlePlaceHolder.visibility = View.VISIBLE
         articlePublicationTimePlaceHolder.visibility = View.VISIBLE
-//        articleTextPreviewPlaceHolder.visibility = View.VISIBLE
         ImageUtils.customLoader(imageView = articlePreviewImage,
                 defaultImageResourceId = R.drawable.pc_bg,
                 placeHolderImageResourceId = R.drawable.pc_bg)
@@ -706,11 +527,9 @@ class LatestArticlePreviewHolder(itemView: View, lifeCycleOwner: LifecycleOwner,
 
         articleTitlePlaceHolder.visibility = View.GONE
         articlePublicationTimePlaceHolder.visibility = View.GONE
-//        articleTextPreviewPlaceHolder.visibility = View.GONE
 
         articleTitle.visibility = View.VISIBLE
         articlePublicationTime.visibility = View.VISIBLE
-//        articleTextPreview.visibility = View.VISIBLE
     }
 
     private fun resetView() {
@@ -720,7 +539,6 @@ class LatestArticlePreviewHolder(itemView: View, lifeCycleOwner: LifecycleOwner,
     }
 
     fun bind(page: Page) {
-        LoggerUtils.debugLog("bind for: ${page.name}",this::class.java)
         mPage = page
         resetView()
         if (::mdisposable.isInitialized) {
@@ -740,21 +558,17 @@ class LatestArticlePreviewHolder(itemView: View, lifeCycleOwner: LifecycleOwner,
                 }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableObserver<Any>() {
-                    override fun onComplete() {
-                        LoggerUtils.debugLog("onComplete for page ${mPage.name} Np: ${mPage.newspaperId} L2", this::class.java)
-                    }
+                    override fun onComplete() {}
 
                     @Suppress("UNCHECKED_CAST")
                     override fun onNext(articleData: Any) {
                         if (articleData is Pair<*, *>) {
-                            LoggerUtils.debugLog("art displayed for page: ${mPage.name} Np: ${mPage.newspaperId}", this::class.java)
                             val articlePubTimeText = (articleData as Pair<String?, Article>).first
                             val article = articleData.second
 
                             articleTitle.text = article.title
                             articlePublicationTime.text = articlePubTimeText
-//                            DisplayUtils.displayHtmlText(articleTextPreview, article.articleText
-//                                    ?: "")
+
                             enableView()
 
                             ImageUtils.customLoader(articlePreviewImage, article.previewImageLink,
