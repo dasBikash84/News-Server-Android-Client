@@ -95,6 +95,16 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
         </androidx.core.widget.NestedScrollView>
 
+        <CheckBox
+            android:id="@+id/search_both_languages_check_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search_both_bangla_and_english_news_papers"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/search_keyword_hint_scroller"
+            android:visibility="visible"
+            android:checked="false"/>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/search_results_holder"
             android:layout_width="match_parent"
@@ -104,7 +114,7 @@
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/search_keyword_hint_scroller"
+            app:layout_constraintTop_toBottomOf="@id/search_both_languages_check_box"
             android:paddingBottom="?attr/actionBarSize"/>
 
         <androidx.core.widget.ContentLoadingProgressBar

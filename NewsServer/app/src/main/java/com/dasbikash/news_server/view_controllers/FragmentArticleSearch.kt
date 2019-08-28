@@ -34,6 +34,7 @@ import com.dasbikash.news_server_data.models.ArticleSearchReasultEntry
 import com.dasbikash.news_server_data.models.room_entity.Article
 import com.dasbikash.news_server_data.repositories.ArticleSearchRepository
 import com.dasbikash.news_server_data.repositories.RepositoryFactory
+import com.dasbikash.news_server_data.translator.TranslatorUtils
 import com.dasbikash.news_server_data.utills.ImageUtils
 import com.dasbikash.news_server_data.utills.LoggerUtils
 import com.dasbikash.news_server_data.utills.NetConnectivityUtility
@@ -53,6 +54,7 @@ class FragmentArticleSearch : Fragment() {
     private lateinit var mSearchButton: ImageButton
     private lateinit var mSearchResultsHolder: RecyclerView
     private lateinit var mSearchResultsHolderAdapter: ArticleSearchResultListAdapter
+    private lateinit var mSearchBothLanguagesCheckBox: CheckBox
 
     private var backPressTaskTag: String? = null
 
@@ -80,9 +82,16 @@ class FragmentArticleSearch : Fragment() {
         mSearchKeywordHintsHolder.adapter = mKeyWordHintListAdapter
         mSearchResultsHolder.adapter = mSearchResultsHolderAdapter
 
-        mDisposable.add(RxJavaUtils.launchBackGroundTask (task = {
+        mDisposable.add(RxJavaUtils.launchBackGroundTask(task = {
             ArticleSearchRepository.updateSerachKeyWordsIfRequired(context!!)
         }))
+
+        if (!TranslatorUtils.checkIfBanglaModuleAvailble(context!!) &&
+                !NetConnectivityUtility.isOnMobileDataNetwork) {
+            mSearchBothLanguagesCheckBox.visibility = View.VISIBLE
+        } else {
+            mSearchBothLanguagesCheckBox.visibility = View.GONE
+        }
     }
 
     private fun doOnSearchResultClick(article: Article) {
@@ -96,6 +105,7 @@ class FragmentArticleSearch : Fragment() {
         mSearchKeywordHintsHolder = view!!.findViewById(R.id.search_keyword_hints_holder)
         mSearchButton = view!!.findViewById(R.id.search_button)
         mSearchResultsHolder = view!!.findViewById(R.id.search_results_holder)
+        mSearchBothLanguagesCheckBox = view!!.findViewById(R.id.search_both_languages_check_box)
     }
 
     private fun initViewListners() {
@@ -161,7 +171,16 @@ class FragmentArticleSearch : Fragment() {
 
     private fun searchButtonClickAction() {
         if (mSearchKeywordEditText.text.trim().length > 0) {
-            startSearch()
+            if (TranslatorUtils.checkIfBanglaModuleAvailble(context!!)){
+                startSearch(true)
+            }else if (mSearchBothLanguagesCheckBox.isChecked) {
+                DialogUtils.createAlertDialog(context!!, DialogUtils.AlertDialogDetails(
+                        message = TRANSLATOR_PACKAGE_DOWNLOAD_PROMPT,
+                        doOnPositivePress = { startSearch(true) }
+                )).show()
+            }else{
+                startSearch(false)
+            }
         } else {
             showShortSnack(SEARCH_BOX_EMPTY_MESSAGE)
             clearSearchEditText()
@@ -170,7 +189,7 @@ class FragmentArticleSearch : Fragment() {
 
     private var mArticleSearchTaskDisposable: Disposable? = null
 
-    private fun startSearch() {
+    private fun startSearch(searchPapersOfBothLanguages:Boolean = false) {
         mCurrentSearchResultList.clear()
         mCurrentArticleSearchReasultEntries.clear()
         mSearchResultsHolderAdapter.submitList(emptyList())
@@ -180,7 +199,16 @@ class FragmentArticleSearch : Fragment() {
                 Observable.just(mSearchKeywordEditText.text.trim().split(Regex(PATTERN_FOR_KEYWORD_SPLIT)))
                         .subscribeOn(Schedulers.io())
                         .map {
-                            ArticleSearchRepository.getArticleSearchResultForKeyWords(context!!, it)
+                            val searchKeyWords = it.toMutableList()
+                            if (searchPapersOfBothLanguages) {
+                                it.asSequence().map {
+                                    LoggerUtils.debugLog("Word to translate: $it")
+                                    val translatedWord = TranslatorUtils.translateWord(it,context!!)
+                                    LoggerUtils.debugLog("translatedWord: $translatedWord")
+                                    translatedWord
+                                }.filter { it.isNotBlank() }.forEach { searchKeyWords.add(it) }
+                            }
+                            ArticleSearchRepository.getArticleSearchResultForKeyWords(context!!, searchKeyWords.toList())
                         }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(object : DisposableObserver<List<ArticleSearchReasultEntry>>() {
@@ -384,6 +412,8 @@ class FragmentArticleSearch : Fragment() {
         private const val SEARCH_BOX_EMPTY_MESSAGE = "Please input keyword(s) & then press search."
         private const val EMPTY_SEARCH_RESULT_MESSAGE = "No matching article found."
         private const val PATTERN_FOR_KEYWORD_SPLIT = "[\\s+,;-]+"
+        private const val TRANSLATOR_PACKAGE_DOWNLOAD_PROMPT =
+                "For searching papers of both languages, one time download of 'Bangla <=> English' translator package(~30MB) is required.\n\nDownload package and proceed search?"
     }
 }
 

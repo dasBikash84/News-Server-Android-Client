@@ -101,4 +101,5 @@
     <string name="delete_comment">Delete comment</string>
     <string name="edit_comment">Edit comment</string>
     <string name="post_as_anonymous">Post anonymous.</string>
+    <string name="search_both_bangla_and_english_news_papers">Search both Bangla and English news papers.</string>
 </resources>

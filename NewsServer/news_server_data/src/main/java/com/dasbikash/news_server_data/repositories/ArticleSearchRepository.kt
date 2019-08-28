@@ -35,7 +35,7 @@ object ArticleSearchRepository {
         val newsServerDatabase = NewsServerDatabase.getDatabase(context)
         val articleSearchKeyWord = newsServerDatabase.articleSearchKeyWordDao.getFirst()
         if (articleSearchKeyWord == null ||
-                (System.currentTimeMillis() - articleSearchKeyWord.created) > ONE_DAY_IN_MS) {
+                (System.currentTimeMillis() - articleSearchKeyWord.created) > ONE_WEEK_IN_MS) {
             val searchKeyWords = getSerachKeyWordsFromRemoteDb()
             if (searchKeyWords.isNotEmpty()) {
                 newsServerDatabase.articleSearchKeyWordDao.nukeTable()

@@ -13,9 +13,21 @@
 
 package com.dasbikash.news_server_data.translator
 
+import android.content.Context
+import com.dasbikash.news_server_data.exceptions.TranslatorException
+import com.dasbikash.news_server_data.utills.ExceptionUtils
+import com.dasbikash.news_server_data.utills.LoggerUtils
+import com.dasbikash.news_server_data.utills.SharedPreferenceUtils
+import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions
+import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions
+
 object TranslatorUtils {
-    /*private val WAITING_MS_FOR_NET_RESPONSE: Long = 60000L
-    private val mEnglishToBanglaTranslator:FirebaseTranslator
+    private val SP_KEY_BANGLA_MODULE_AVAILABLE = "com.dasbikash.news_server_data.translator.SP_KEY_BANGLA_MODULE_AVAILABLE"
+    private val WAITING_MS_FOR_NET_RESPONSE: Long = 60000L
+    private val mEnglishToBanglaTranslator: FirebaseTranslator
     private val mBanglaToEnglishTranslator:FirebaseTranslator
     private val mModelDownloadConditions = FirebaseModelDownloadConditions.Builder().build()
     init {
@@ -32,7 +44,15 @@ object TranslatorUtils {
         mBanglaToEnglishTranslator = FirebaseNaturalLanguage.getInstance().getTranslator(banglaToEnglishTranslatorOptions)
     }
 
-    private fun translateText(text:String,translator: FirebaseTranslator):String {
+    fun checkIfBanglaModuleAvailble(context: Context):Boolean {
+        return SharedPreferenceUtils.getData(context,SharedPreferenceUtils.DefaultValues.DEFAULT_BOOLEAN, SP_KEY_BANGLA_MODULE_AVAILABLE) as Boolean
+    }
+
+    private fun setBanglaModuleAvailableFlag(context: Context){
+        SharedPreferenceUtils.saveData(context,true, SP_KEY_BANGLA_MODULE_AVAILABLE)
+    }
+
+    private fun translateText(text:String,translator: FirebaseTranslator,context: Context):String {
 
         ExceptionUtils.checkRequestValidityBeforeNetworkAccess()
 
@@ -44,6 +64,9 @@ object TranslatorUtils {
         translator.downloadModelIfNeeded(mModelDownloadConditions)
                 .addOnSuccessListener {
                     LoggerUtils.debugLog("downloadModelIfNeeded >> addOnSuccessListener", this::class.java)
+                    if (!checkIfBanglaModuleAvailble(context)){
+                        setBanglaModuleAvailableFlag(context)
+                    }
                     translator.translate(text)
                             .addOnSuccessListener { translatedText ->
                                 resultText = translatedText
@@ -66,15 +89,21 @@ object TranslatorUtils {
         translatorException?.let { throw it }
 
         if (resultText == null) {
-            throw TranslatorException()
+            resultText=""//throw TranslatorException()
         }
 
         return resultText!!
     }
 
-    fun translateToBangla(text:String)=
-            translateText(text, mEnglishToBanglaTranslator)
+    private fun translateToBangla(text:String,context: Context)= translateText(text, mEnglishToBanglaTranslator,context)
 
-    fun translateToEnglish(text:String)=
-            translateText(text, mBanglaToEnglishTranslator)*/
+    private fun translateToEnglish(text:String,context: Context)= translateText(text, mBanglaToEnglishTranslator,context)
+
+    private fun checkIfEnglishWord(word:String) = word.matches(Regex("[a-zA-Z]+"))
+
+    fun translateWord(word: String,context: Context):String{
+        if (word.matches(Regex(".+\\s.+"))){return word}
+        if (checkIfEnglishWord(word)){return translateToBangla(word,context)}
+        else{return translateToEnglish(word,context)}
+    }
 }
