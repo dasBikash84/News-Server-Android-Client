@@ -24,7 +24,7 @@ import com.google.firebase.messaging.RemoteMessage
 
 open class NewsServerFirebaseMessagingService : FirebaseMessagingService() {
 
-    override fun onNewToken(token: String?) {
+    override fun onNewToken(token: String) {
         debugLog("Refreshed token: $token")
     }
 
@@ -44,8 +44,8 @@ open class NewsServerFirebaseMessagingService : FirebaseMessagingService() {
                 })
 
     }*/
-    override fun onMessageReceived(remoteMessage: RemoteMessage?) {
-        debugLog("From: ${remoteMessage?.from}")
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        debugLog("From: ${remoteMessage.from}")
     }
 
     companion object {
